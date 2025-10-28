@@ -1,0 +1,106 @@
+package com.pe.inventoryapp.backend.user.service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.pe.inventoryapp.backend.common.exception.FieldValidation;
+import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
+import com.pe.inventoryapp.backend.user.model.dto.UserResponse;
+import com.pe.inventoryapp.backend.user.model.entity.Role;
+import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
+import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
+import com.pe.inventoryapp.backend.user.repository.RoleRepository;
+import com.pe.inventoryapp.backend.user.repository.UserRepository;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+  @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
+  private RoleRepository roleRepository;
+
+  @Autowired
+  private PasswordEncoderConfig passwordEncoderConfig;
+
+  @Transactional
+  @Override
+  public String register(RegisterRequest registerRequest) {
+    Optional<Role> rol = roleRepository.findByName("ROLE_USER");
+
+    if (!rol.isPresent()) {
+      throw new IllegalStateException("El rol 'usuario' no existe en el sistema");
+    }
+
+    List<Role> roles = new ArrayList<>();
+
+    if (rol.isPresent()) {
+      roles.add(rol.orElseThrow());
+    }
+
+    User user = new User();
+    user.setFirstname(registerRequest.getFirstname());
+    user.setLastname(registerRequest.getLastname());
+    user.setEmail(registerRequest.getEmail());
+    user.setPassword(passwordEncoderConfig.passwordEncoder().encode(registerRequest.getPassword()));
+    user.setDni(registerRequest.getDni());
+
+    if (user.isOperator()) {
+      Optional<Role> optionalAdmin = roleRepository.findByName("ROLE_OPERATOR");
+      if (optionalAdmin.isPresent()) {
+        roles.add(optionalAdmin.orElseThrow());
+      }
+    }
+
+    if (user.isAdmin()) {
+      Optional<Role> optionalManager = roleRepository.findByName("ROLE_ADMIN");
+      if (optionalManager.isPresent()) {
+        roles.add(optionalManager.orElseThrow());
+      }
+    }
+
+    user.setRoles(roles);
+
+    userRepository.save(user);
+
+    return "Usuario registrado";
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<UserResponse> findById(Long id) {
+    return userRepository.findById(id).map(user -> UserMapper.builder().setUser(user).buildUserResponse());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<UserResponse> findByEmail(String email) {
+    return userRepository.findByEmail(email).map(user -> UserMapper.builder().setUser(user).buildUserResponse());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Boolean getUserByEmail(String email) {
+    return userRepository.findByEmail(email).isPresent();
+  }
+
+  @Override
+  public void remove(Long id) {
+    userRepository.deleteById(id);
+  }
+
+  @Override
+  public void verifyUser(String name) {
+    if (userRepository.findByEmail(name).isPresent()) {
+      throw new FieldValidation("name", "El usuario con correo '" + name + "' ya existe");
+    }
+  }
+
+}
