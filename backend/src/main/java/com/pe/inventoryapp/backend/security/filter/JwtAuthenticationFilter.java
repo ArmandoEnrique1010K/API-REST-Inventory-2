@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,9 +19,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pe.inventoryapp.backend.common.dto.ErrorResponse;
+import com.pe.inventoryapp.backend.auth.models.response.LoginErrorResponse;
+import com.pe.inventoryapp.backend.auth.models.response.LoginSuccessfulResponse;
 import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.model.response.LoginResponse;
 
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
@@ -28,12 +30,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+  Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
   private final AuthenticationManager authenticationManager;
 
   public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
     this.authenticationManager = authenticationManager;
-    setFilterProcessesUrl("/api/login");
+    setFilterProcessesUrl("/api/auth/login");
   }
 
   @Override
@@ -85,12 +88,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
 
-    LoginResponse responseDto = new LoginResponse();
-    responseDto.setType("success");
-    responseDto.setToken(token);
-    responseDto.setMessage(String.format("Has iniciado sesión con exito"));
+    LoginSuccessfulResponse loginSuccessfulResponse = new LoginSuccessfulResponse();
+    loginSuccessfulResponse.setType("success");
+    loginSuccessfulResponse.setToken(token);
+    loginSuccessfulResponse.setMessage(String.format("Has iniciado sesión con exito"));
 
-    response.getWriter().write(new ObjectMapper().writeValueAsString(responseDto));
+    response.getWriter().write(new ObjectMapper().writeValueAsString(loginSuccessfulResponse));
     response.setStatus(200);
     response.setContentType("application/json");
 
@@ -100,13 +103,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       AuthenticationException failed) throws IOException, ServletException {
 
-    ErrorResponse errorLoginResponseDto = new ErrorResponse();
-    errorLoginResponseDto.setType("error");
-    errorLoginResponseDto.setMessage("Error en la autenticacion username o password incorrecto!");
+    // validationService.validateFieldsAndThrow(result);
+    // userService.verifyUser(registerRequest.getEmail());
 
-    // body.put("error", failed.getMessage());
+    LoginErrorResponse loginErrorResponse = new LoginErrorResponse();
+    loginErrorResponse.setType("error");
+    loginErrorResponse.setMessage("Error en la autenticacion username o password incorrecto!");
 
-    response.getWriter().write(new ObjectMapper().writeValueAsString(errorLoginResponseDto));
+    response.getWriter().write(new ObjectMapper().writeValueAsString(loginErrorResponse));
     response.setStatus(401);
     response.setContentType("application/json");
   }

@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.user.model.response;
+package com.pe.inventoryapp.backend.auth.models.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 
-public class LoginResponse {
+public class LoginSuccessfulResponse {
   private String type;
   private String token;
   private String message;

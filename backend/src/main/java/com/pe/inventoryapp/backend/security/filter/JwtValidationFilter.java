@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pe.inventoryapp.backend.common.dto.ErrorResponse;
+import com.pe.inventoryapp.backend.auth.models.response.LoginErrorResponse;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -57,7 +57,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
       Object authorityClaims = claims.get("authority");
 
       if (authorityClaims == null) {
-        ErrorResponse errorResponseDto = new ErrorResponse();
+        LoginErrorResponse errorResponseDto = new LoginErrorResponse();
         errorResponseDto.setType("error");
         errorResponseDto.setMessage("Token no válido o expirado");
 
@@ -80,7 +80,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
       chain.doFilter(request, response);
     } catch (JwtException e) {
 
-      ErrorResponse errorResponseDto = new ErrorResponse();
+      LoginErrorResponse errorResponseDto = new LoginErrorResponse();
       errorResponseDto.setType("error");
       errorResponseDto.setMessage("El token JWT no es valido");
 

@@ -1,7 +1,7 @@
 package com.pe.inventoryapp.backend.common.service;
 
-import com.pe.inventoryapp.backend.common.dto.SuccessfulResponse;
+import com.pe.inventoryapp.backend.common.response.Response;
 
 public interface ResponseService {
-  SuccessfulResponse writeAResponse(String type, String message);
+  Response writeAResponse(String type, String message);
 }

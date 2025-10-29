@@ -1,15 +1,15 @@
-package com.pe.inventoryapp.backend.common.dto;
+package com.pe.inventoryapp.backend.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@Builder
 @Data
+@Builder
 @NoArgsConstructor
-public class SuccessfulResponse {
+@AllArgsConstructor
+public class Response {
   private String type;
   private String message;
 }

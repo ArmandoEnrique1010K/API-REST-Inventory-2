@@ -34,8 +34,11 @@ public class SecurityConfig {
             // .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
             // .requestMatchers(HttpMethod.POST, "/api/").permitAll()
             // .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+            // .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
             .anyRequest().permitAll())
+        // .addFilterBefore(new LoginValidationFilter(),
+        // UsernamePasswordAuthenticationFilter.class)
+
         .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))
         .addFilter(new JwtValidationFilter(authenticationConfiguration.getAuthenticationManager()))
         .build();

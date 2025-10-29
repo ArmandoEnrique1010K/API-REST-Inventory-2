@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.user.model.dto;
+package com.pe.inventoryapp.backend.user.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,13 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class UserResponse {
+public class ListUsersResponse {
   private Long id;
   private String firstname;
   private String lastname;
-  private String email;
+  private String dni;
 
   private boolean isManager;
   private boolean isAdmin;
-
 }

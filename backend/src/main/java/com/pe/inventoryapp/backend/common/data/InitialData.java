@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.common.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class InitialData {
-  // AL EJECUTAR LA APLICACIÓN, INTRODUCE LOS ROLES EN LA TABLA
 
   @Autowired
   private RoleRepository roleRepository;
@@ -48,7 +46,6 @@ public class InitialData {
       return roleRepository.save(newRole);
     });
 
-    // Crear usuario administrador si no existe
     if (userRepository.findByEmail("correo@example.com").isEmpty()) {
       List<Role> roles = List.of(roleUser, roleAdmin);
 

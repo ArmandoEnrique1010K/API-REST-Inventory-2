@@ -1,18 +1,15 @@
-package com.pe.inventoryapp.backend.common.dto;
-
-import java.util.Map;
+package com.pe.inventoryapp.backend.auth.models.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@Builder
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
-public class ErrorResponse {
+public class LoginErrorResponse {
   private String type;
   private String message;
-  private Map<String, String> errors;
 }

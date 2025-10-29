@@ -1,16 +1,15 @@
 package com.pe.inventoryapp.backend.common.service;
 
 import org.springframework.stereotype.Service;
-
-import com.pe.inventoryapp.backend.common.dto.SuccessfulResponse;
+import com.pe.inventoryapp.backend.common.response.Response;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
 
   @Override
-  public SuccessfulResponse writeAResponse(String type, String message) {
+  public Response writeAResponse(String type, String message) {
 
-    SuccessfulResponse response = new SuccessfulResponse();
+    Response response = new Response();
     response.setType(type);
     response.setMessage(message);
 

@@ -1,18 +1,18 @@
 package com.pe.inventoryapp.backend.user.service;
 
+import java.util.List;
 import java.util.Optional;
 
-import com.pe.inventoryapp.backend.user.model.dto.UserResponse;
-import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
+import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 
 public interface UserService {
-  String register(RegisterRequest registerRequest);
 
-  Optional<UserResponse> findById(Long id);
+  List<ListUsersResponse> findAll();
 
-  Optional<UserResponse> findByEmail(String email);
+  Optional<DetailUserResponse> findById(Long id);
 
-  Boolean getUserByEmail(String email);
+  // Boolean getUserByEmail(String email);
 
   void remove(Long id);
 
