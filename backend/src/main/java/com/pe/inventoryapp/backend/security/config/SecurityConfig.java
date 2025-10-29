@@ -44,6 +44,7 @@ public class SecurityConfig {
             .requestMatchers("/api/auth/login").permitAll()
             .requestMatchers("/api/users").hasAuthority("ROLE_ADMIN")
             .requestMatchers("/api/users/profile").hasAuthority("ROLE_USER")
+            .requestMatchers("/api/users/update-password").hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
             .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ROLE_ADMIN")
             .anyRequest().authenticated())
         .addFilter(new JwtAuthenticationFilter(

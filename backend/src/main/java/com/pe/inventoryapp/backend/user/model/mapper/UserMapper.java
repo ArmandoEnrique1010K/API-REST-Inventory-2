@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.user.model.mapper;
 import java.util.List;
 
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 
@@ -79,6 +80,18 @@ public class UserMapper {
         user.getDni(),
         roles);
 
+  }
+
+  public ProfileRequest buildProfileRequest() {
+    if (user == null) {
+      throw new RuntimeException("Debe pasar la entidad User");
+    }
+
+    return new ProfileRequest(
+        user.getFirstname(),
+        user.getLastname(),
+        user.getEmail(),
+        user.getDni());
   }
 
 }
