@@ -15,6 +15,8 @@ import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -36,11 +38,6 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void remove(Long id) {
-    userRepository.deleteById(id);
-  }
-
-  @Override
   public void verifyUser(String name) {
     if (userRepository.findByEmail(name).isPresent()) {
       throw new FieldValidation("name", "El usuario con correo '" + name + "' ya existe");
@@ -52,4 +49,17 @@ public class UserServiceImpl implements UserService {
     return userRepository.findByEmail(email).map(user -> UserMapper.builder().setUser(user).buildDetailUserResponse());
   }
 
+  @Override
+  public String remove(Long id) {
+    if (id == 1) {
+      return "No se puede eliminar el usuario principal del sistema";
+    }
+
+    if (!userRepository.existsById(id)) {
+      return "Usuario no encontrado con ID: " + id;
+    }
+
+    userRepository.deleteById(id);
+    return "Usuario eliminado";
+  }
 }

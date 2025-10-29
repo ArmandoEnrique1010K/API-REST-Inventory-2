@@ -15,7 +15,7 @@ public interface UserService {
   Optional<DetailUserResponse> findByEmail(String email);
   // Boolean getUserByEmail(String email);
 
-  void remove(Long id);
+  String remove(Long id);
 
   void verifyUser(String name);
 

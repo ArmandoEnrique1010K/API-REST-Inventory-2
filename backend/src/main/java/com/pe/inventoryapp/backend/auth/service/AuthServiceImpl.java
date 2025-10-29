@@ -1,8 +1,12 @@
 package com.pe.inventoryapp.backend.auth.service;
 
+import static com.pe.inventoryapp.backend.security.config.TokenJwtConfig.SECRET_KEY;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +20,9 @@ import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -84,6 +91,21 @@ public class AuthServiceImpl implements AuthService {
     return userRepository.findByEmail(email)
         .map(User::getId)
         .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+  }
+
+  @Override
+  public Long extracIdFromClaims(String header) {
+    String token = header.replace("Bearer ", "");
+
+    Claims claims = Jwts.parser()
+        .verifyWith((SecretKey) SECRET_KEY)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
+
+    Long id = claims.get("id", Long.class);
+
+    return id;
   }
 
 }

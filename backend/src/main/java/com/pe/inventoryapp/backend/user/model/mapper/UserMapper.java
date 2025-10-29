@@ -29,16 +29,29 @@ public class UserMapper {
     }
 
     // Verifica si el usuario tiene los roles de MANAGER o ADMIN
-    boolean isManager = user.getRoles().stream().anyMatch(r -> "ROLE_MANAGER".equals(r.getName()));
-    boolean isAdmin = user.getRoles().stream().anyMatch(r -> "ROLE_ADMIN".equals(r.getName()));
+    // boolean isManager = user.getRoles().stream().anyMatch(r ->
+    // "ROLE_MANAGER".equals(r.getName()));
+    // boolean isAdmin = user.getRoles().stream().anyMatch(r ->
+    // "ROLE_ADMIN".equals(r.getName()));
+
+    List<String> roles = user.getRoles().stream()
+        .map(role -> {
+          return switch (role.getName()) {
+            case "ROLE_USER" -> "Usuario";
+            case "ROLE_OPERATOR" -> "Operador";
+            case "ROLE_ADMIN" -> "Administrador";
+            default -> "Desconocido";
+          };
+        })
+        .toList();
+
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new ListUsersResponse(
         user.getId(),
         user.getFirstname(),
         user.getLastname(),
         user.getEmail(),
-        isManager,
-        isAdmin);
+        roles);
   }
 
   public DetailUserResponse buildDetailUserResponse() {
@@ -47,14 +60,15 @@ public class UserMapper {
       throw new RuntimeException("Debe pasar la entidad User");
     }
 
-    // Verifica si el usuario tiene los roles de MANAGER o ADMIN
-    // boolean isManager = user.getRoles().stream().anyMatch(r ->
-    // "ROLE_MANAGER".equals(r.getName()));
-    // boolean isAdmin = user.getRoles().stream().anyMatch(r ->
-    // "ROLE_ADMIN".equals(r.getName()));
-
     List<String> roles = user.getRoles().stream()
-        .map(role -> role.getName())
+        .map(role -> {
+          return switch (role.getName()) {
+            case "ROLE_USER" -> "Usuario";
+            case "ROLE_OPERATOR" -> "Operador";
+            case "ROLE_ADMIN" -> "Administrador";
+            default -> "Desconocido";
+          };
+        })
         .toList();
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados

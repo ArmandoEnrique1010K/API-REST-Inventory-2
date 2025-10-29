@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.user.model.response;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +16,8 @@ public class ListUsersResponse {
   private String firstname;
   private String lastname;
   private String dni;
+  private List<String> roles;
 
-  private boolean isManager;
-  private boolean isAdmin;
+  // private boolean isManager;
+  // private boolean isAdmin;
 }

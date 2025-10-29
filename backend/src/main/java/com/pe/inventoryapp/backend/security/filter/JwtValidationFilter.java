@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
@@ -60,22 +62,19 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
       // 2. Extraer username (subject)
       String username = claims.getSubject();
-      Long userId = claims.get("id", Long.class);
-
+      // Long userId = claims.get("id", Long.class);
       // 3. Extraer roles (múltiples)
-      List<String> roles = claims.get("authorities", List.class);
-      System.out.println("ID extraído del token: " + userId);
 
-      if (roles == null || roles.isEmpty()) {
-        // LoginErrorResponse errorResponseDto = new LoginErrorResponse();
-        // errorResponseDto.setType("error");
-        // errorResponseDto.setMessage("El token no contiene roles válidos");
+      // List<String> roles = claims.get("authorities", List.class);
 
-        // response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        // response.getWriter().write(new
-        // ObjectMapper().writeValueAsString(errorResponseDto));
-        // return;
+      List<?> rolesObj = claims.get("authorities", List.class);
+      List<String> roles = rolesObj == null ? List.of()
+          : rolesObj.stream()
+              .filter(Objects::nonNull)
+              .map(Object::toString)
+              .collect(Collectors.toList());
 
+      if (roles.isEmpty()) {
         throw new JwtException("El token no contiene roles válidos");
       }
 
@@ -86,14 +85,14 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
       // 5. Crear el objeto de autenticación y establecerlo en el contexto de
       // seguridad
-      UserPrincipal principal = new UserPrincipal(userId, username);
-
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal, null,
-          authorities);
+      // UserPrincipal principal = new UserPrincipal(userId, username);
 
       // UsernamePasswordAuthenticationToken authentication = new
-      // UsernamePasswordAuthenticationToken(username, null,
+      // UsernamePasswordAuthenticationToken(principal, null,
       // authorities);
+
+      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null,
+          authorities);
 
       SecurityContextHolder.getContext().setAuthentication(authentication);
 

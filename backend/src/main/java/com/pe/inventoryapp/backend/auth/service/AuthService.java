@@ -8,4 +8,6 @@ public interface AuthService {
   Long findIdByEmail(String email);
 
   void verifyUserEmailExists(String email);
+
+  Long extracIdFromClaims(String header);
 }
