@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +18,7 @@ import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
 @Service
-public class RegisterServiceImpl implements RegisterService {
+public class AuthServiceImpl implements AuthService {
 
   @Autowired
   private UserRepository userRepository;
@@ -77,6 +77,13 @@ public class RegisterServiceImpl implements RegisterService {
     if (userRepository.findByEmail(email).isPresent()) {
       throw new FieldValidation("email", "Ese usuario ya existe, pruebe con otro email");
     }
+  }
+
+  @Override
+  public Long findIdByEmail(String email) {
+    return userRepository.findByEmail(email)
+        .map(User::getId)
+        .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
   }
 
 }

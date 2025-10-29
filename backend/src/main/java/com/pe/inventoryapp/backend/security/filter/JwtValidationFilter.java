@@ -5,6 +5,8 @@ import static com.pe.inventoryapp.backend.security.config.TokenJwtConfig.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+
 import javax.crypto.SecretKey;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +18,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pe.inventoryapp.backend.auth.models.UserPrincipal;
 import com.pe.inventoryapp.backend.auth.models.response.LoginErrorResponse;
 
 import io.jsonwebtoken.Claims;
@@ -44,49 +47,70 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
       return;
     }
 
-    String token = header.replace(PREFIX_TOKEN, "");
+    String token = header.replace(PREFIX_TOKEN, "").trim();
 
     try {
 
+      // 1. Parsear y validar el token
       Claims claims = Jwts.parser()
           .verifyWith((SecretKey) SECRET_KEY)
           .build()
           .parseSignedClaims(token)
           .getPayload();
 
-      Object authorityClaims = claims.get("authority");
+      // 2. Extraer username (subject)
+      String username = claims.getSubject();
+      Long userId = claims.get("id", Long.class);
 
-      if (authorityClaims == null) {
-        LoginErrorResponse errorResponseDto = new LoginErrorResponse();
-        errorResponseDto.setType("error");
-        errorResponseDto.setMessage("Token no válido o expirado");
+      // 3. Extraer roles (múltiples)
+      List<String> roles = claims.get("authorities", List.class);
+      System.out.println("ID extraído del token: " + userId);
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponseDto));
-        return;
+      if (roles == null || roles.isEmpty()) {
+        // LoginErrorResponse errorResponseDto = new LoginErrorResponse();
+        // errorResponseDto.setType("error");
+        // errorResponseDto.setMessage("El token no contiene roles válidos");
+
+        // response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        // response.getWriter().write(new
+        // ObjectMapper().writeValueAsString(errorResponseDto));
+        // return;
+
+        throw new JwtException("El token no contiene roles válidos");
       }
 
-      String username = claims.getSubject();
+      // 4. Convertir roles a GrantedAuthority
+      Collection<? extends GrantedAuthority> authorities = roles.stream()
+          .map(SimpleGrantedAuthority::new)
+          .toList();
 
-      String authority = authorityClaims.toString();
+      // 5. Crear el objeto de autenticación y establecerlo en el contexto de
+      // seguridad
+      UserPrincipal principal = new UserPrincipal(userId, username);
 
-      Collection<? extends GrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority(authority));
-
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null,
+      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(principal, null,
           authorities);
+
+      // UsernamePasswordAuthenticationToken authentication = new
+      // UsernamePasswordAuthenticationToken(username, null,
+      // authorities);
 
       SecurityContextHolder.getContext().setAuthentication(authentication);
 
+      // 6. Continuar con el siguiente filtro
       chain.doFilter(request, response);
-    } catch (JwtException e) {
 
-      LoginErrorResponse errorResponseDto = new LoginErrorResponse();
-      errorResponseDto.setType("error");
-      errorResponseDto.setMessage("El token JWT no es valido");
+    } catch (
 
-      response.getWriter().write(new ObjectMapper().writeValueAsString(errorResponseDto));
-      response.setStatus(401);
+    JwtException e) {
+
+      LoginErrorResponse loginErrorResponse = new LoginErrorResponse();
+      loginErrorResponse.setType("error");
+      loginErrorResponse.setMessage("El token JWT no es valido (error de token)");
+
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response.setContentType("application/json");
+      response.getWriter().write(new ObjectMapper().writeValueAsString(loginErrorResponse));
     }
 
   }

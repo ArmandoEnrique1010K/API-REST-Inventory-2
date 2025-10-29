@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.pe.inventoryapp.backend.auth.models.request.RegisterRequest;
-import com.pe.inventoryapp.backend.auth.service.RegisterService;
+import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.response.Response;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -20,10 +20,10 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
-public class RegisterController {
+public class AuthController {
 
   @Autowired
-  private RegisterService registerService;
+  private AuthService registerService;
 
   @Autowired
   private ValidationService validationService;

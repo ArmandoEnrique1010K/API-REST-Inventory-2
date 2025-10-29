@@ -12,6 +12,7 @@ public interface UserService {
 
   Optional<DetailUserResponse> findById(Long id);
 
+  Optional<DetailUserResponse> findByEmail(String email);
   // Boolean getUserByEmail(String email);
 
   void remove(Long id);

@@ -9,19 +9,23 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.auth.models.response.LoginErrorResponse;
 import com.pe.inventoryapp.backend.auth.models.response.LoginSuccessfulResponse;
+import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.service.UserService;
 
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
@@ -33,9 +37,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
   private final AuthenticationManager authenticationManager;
+  private final AuthService authService;
 
-  public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+  public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthService authService) {
     this.authenticationManager = authenticationManager;
+    this.authService = authService;
     setFilterProcessesUrl("/api/auth/login");
   }
 
@@ -70,16 +76,28 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
         .getUsername();
 
-    String role = authResult.getAuthorities().stream()
-        .findAny()
-        .map(GrantedAuthority::getAuthority)
-        .orElse(null);
+    // String role = authResult.getAuthorities().stream()
+    // .findAny()
+    // .map(GrantedAuthority::getAuthority)
+    // .orElse(null);
+
+    // String role = authResult.getAuthorities().toString();
+
+    // OBTENER EL ID DEL USUARIO
+    Long id_user = authService.findIdByEmail(username);
 
     Map<String, Object> claims = new HashMap<>();
-    claims.put("authority", role);
+    claims.put("authorities", authResult.getAuthorities().stream()
+        .map(GrantedAuthority::getAuthority)
+        .toList());
+
+    // claims.put("email", username);
+    claims.put("id", id_user);
 
     String token = Jwts.builder()
-        .subject(username)
+        .subject(
+            id_user.toString())
+        // .subject(username)
         .claims(claims)
         .issuedAt(new Date())
         .expiration(new Date(System.currentTimeMillis() + 3600000))

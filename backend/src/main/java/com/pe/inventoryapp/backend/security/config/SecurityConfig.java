@@ -3,13 +3,13 @@ package com.pe.inventoryapp.backend.security.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.security.filter.JwtAuthenticationFilter;
 import com.pe.inventoryapp.backend.security.filter.JwtValidationFilter;
 
@@ -19,29 +19,36 @@ public class SecurityConfig {
   @Autowired
   private AuthenticationConfiguration authenticationConfiguration;
 
+  @Autowired
+  private AuthService authService;
+
   @Bean
   AuthenticationManager authenticationManager() throws Exception {
     return authenticationConfiguration.getAuthenticationManager();
   }
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+  public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
+      throws Exception {
 
-    return httpSecurity
+    // JwtAuthenticationFilter jwtAuthenticationFilter = new
+    // JwtAuthenticationFilter(authenticationManager);
+    // JwtValidationFilter jwtValidationFilter = new
+    // JwtValidationFilter(authenticationManager);
+
+    return http
         .csrf(csrf -> csrf.disable())
         .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            // .requestMatchers(HttpMethod.POST, "/api/register").permitAll()
-            // .requestMatchers(HttpMethod.POST, "/api/").permitAll()
-            // .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-            // .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-            .anyRequest().permitAll())
-        // .addFilterBefore(new LoginValidationFilter(),
-        // UsernamePasswordAuthenticationFilter.class)
-
-        .addFilter(new JwtAuthenticationFilter(authenticationConfiguration.getAuthenticationManager()))
-        .addFilter(new JwtValidationFilter(authenticationConfiguration.getAuthenticationManager()))
+            .requestMatchers("/api/auth/login").permitAll()
+            .requestMatchers("/api/users").hasAuthority("ROLE_ADMIN")
+            .requestMatchers("/api/users/profile").hasAuthority("ROLE_USER")
+            .anyRequest().authenticated())
+        .addFilter(new JwtAuthenticationFilter(
+            authenticationManager(), authService))
+        .addFilter(new JwtValidationFilter(
+            authenticationManager))
+        // .addFilter(jwtValidationFilter)
         .build();
   }
-
 }
