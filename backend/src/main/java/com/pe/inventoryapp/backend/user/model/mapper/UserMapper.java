@@ -49,9 +49,11 @@ public class UserMapper {
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new ListUsersResponse(
         user.getId(),
-        user.getFirstname(),
-        user.getLastname(),
-        user.getEmail(),
+        user.getFirstname()
+            .trim(),
+        user.getLastname()
+            .trim(),
+        user.getDni(),
         roles);
   }
 
@@ -74,9 +76,12 @@ public class UserMapper {
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new DetailUserResponse(
-        user.getFirstname(),
-        user.getLastname(),
-        user.getEmail(),
+        user.getFirstname()
+            .trim(),
+        user.getLastname()
+            .trim(),
+        user.getEmail()
+            .trim(),
         user.getDni(),
         roles);
 

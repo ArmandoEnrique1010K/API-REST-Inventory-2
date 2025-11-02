@@ -15,7 +15,7 @@ public class ListUsersResponse {
   private Long id;
   private String firstname;
   private String lastname;
-  private String dni;
+  private Integer dni;
   private List<String> roles;
 
   // private boolean isManager;

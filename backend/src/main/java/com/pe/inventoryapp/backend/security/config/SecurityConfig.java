@@ -42,22 +42,22 @@ public class SecurityConfig {
                                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
 
-                                                // AUTH
-                                                .requestMatchers("/api/auth/login").permitAll()
-                                                .requestMatchers("/api/auth/register").hasAuthority("ROLE_ADMIN")
+                                                // // AUTH
+                                                // .requestMatchers("/api/auth/login").permitAll()
+                                                // .requestMatchers("/api/auth/register").hasAuthority("ROLE_ADMIN")
 
-                                                // USERS
-                                                .requestMatchers("/api/users").hasAuthority("ROLE_ADMIN")
-                                                // Considera ambos métodos GET Y PUT
-                                                .requestMatchers("/api/users/profile")
-                                                .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
+                                                // // USERS
+                                                // .requestMatchers("/api/users").hasAuthority("ROLE_ADMIN")
+                                                // // Considera ambos métodos GET Y PUT
+                                                // .requestMatchers("/api/users/profile")
+                                                // .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
 
-                                                .requestMatchers("/api/users/update-password")
-                                                .hasAnyAuthority("ROLE_USER",
-                                                                "ROLE_OPERATOR", "ROLE_ADMIN")
-                                                .requestMatchers(HttpMethod.DELETE,
-                                                                "/api/users/**")
-                                                .hasAuthority("ROLE_ADMIN")
+                                                // .requestMatchers("/api/users/update-password")
+                                                // .hasAnyAuthority("ROLE_USER",
+                                                // "ROLE_OPERATOR", "ROLE_ADMIN")
+                                                // .requestMatchers(HttpMethod.DELETE,
+                                                // "/api/users/**")
+                                                // .hasAuthority("ROLE_ADMIN")
 
                                                 // PRODUCTS
                                                 .anyRequest().permitAll())

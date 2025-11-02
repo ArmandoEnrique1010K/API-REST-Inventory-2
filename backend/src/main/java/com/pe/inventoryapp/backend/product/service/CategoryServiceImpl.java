@@ -9,9 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
+import com.pe.inventoryapp.backend.product.model.dto.CategoryDto;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.mapper.CategoryMapper;
-import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
+import com.pe.inventoryapp.backend.product.model.response.CategoryListResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 
 @Service
@@ -22,7 +23,7 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional
-  public String save(CategoryResponse categoryResponse) {
+  public String save(CategoryDto categoryResponse) {
 
     Category category = new Category();
     category.setName(categoryResponse.getName());
@@ -34,7 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CategoryResponse> findAll() {
+  public List<CategoryListResponse> findAll() {
     List<Category> categories = (List<Category>) categoryRepository.findAll();
 
     return categories.stream()
@@ -43,7 +44,7 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public List<CategoryResponse> findAllByStatusTrue() {
+  public List<CategoryListResponse> findAllByStatusTrue() {
     List<Category> categories = (List<Category>) categoryRepository.findAllByStatusTrue();
 
     return categories.stream()
@@ -52,15 +53,35 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public Optional<CategoryResponse> findById(Long id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'findCategoryById'");
+  public String update(Long id, CategoryDto categoryRequest) {
+    Optional<Category> categoryById = categoryRepository.findById(id);
+
+    // Category categoryOptional = null;
+
+    // Si la categoria existe, lo actualiza con los datos proporcionados
+    if (categoryById.isPresent()) {
+      Category categoryData = categoryById.orElseThrow();
+
+      categoryData.setName(categoryRequest.getName());
+
+      // categoryOptional = categoryRepository.save(categoryData);
+      categoryRepository.save(categoryData);
+    }
+
+    // Optional.ofNullable(CategoryMapper.builder().setCategory(categoryOptional).buildListCategoriesResponse());
+    return "Se actualizo la categoria";
   }
 
   @Override
-  public Optional<CategoryResponse> findByName(String name) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'findByName'");
+  public Optional<CategoryDto> findById(Long id) {
+    return categoryRepository.findById(id)
+        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse());
+  }
+
+  @Override
+  public Optional<CategoryDto> findByName(String name) {
+    return categoryRepository.findByName(name)
+        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse());
   }
 
   @Override
@@ -70,15 +91,18 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public Optional<CategoryResponse> update(Long id, CategoryResponse categoryRequest) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'update'");
+  public void verifyCategoryNameExist(String name) {
+    if (categoryRepository.findByName(name).isPresent()) {
+      throw new FieldValidation("name", "La categoria con ese nombre ya existe, introduzca otra categoria");
+    }
   }
 
   @Override
-  public void verifyUserEmailExists(String email) {
-    if (categoryRepository.findByName(email).isPresent()) {
-      throw new FieldValidation("name", "La categoria con ese nombre ya existe, introduzca otra categoria");
-    }
+  public void changeStatus(Long id) {
+    Category changedCategory = categoryRepository.findById(id).orElseThrow();
+
+    // Cambia el estado de la categoria a false y lo guarda
+    changedCategory.setStatus(!changedCategory.isStatus());
+    categoryRepository.save(changedCategory);
   }
 }
