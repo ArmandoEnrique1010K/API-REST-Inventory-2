@@ -12,7 +12,7 @@ import com.pe.inventoryapp.backend.common.exception.RequestValidation;
 public class ValidationServiceImpl implements ValidationService {
 
   @Override
-  public void validateFieldsAndThrow(BindingResult result) {
+  public void validateFieldsAndThrowResponse(BindingResult result) {
     if (result.hasErrors()) {
       Map<String, String> errors = new HashMap<>();
       result.getFieldErrors().forEach(err -> {

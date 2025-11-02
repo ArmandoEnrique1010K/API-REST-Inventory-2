@@ -4,15 +4,15 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.pe.inventoryapp.backend.common.response.ErrorResponse;
-import com.pe.inventoryapp.backend.common.response.SuccessfulResponse;
+import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
 
   @Override
-  public SuccessfulResponse generateSuccessfulResponse(String type, String message) {
-    SuccessfulResponse successfulResponse = new SuccessfulResponse();
+  public CommonResponse generateCommonResponse(String type, String message) {
+    CommonResponse successfulResponse = new CommonResponse();
     successfulResponse.setType(type);
     successfulResponse.setMessage(message);
 
@@ -20,12 +20,13 @@ public class ResponseServiceImpl implements ResponseService {
   }
 
   @Override
-  public ErrorResponse generateErrorResponse(String type, String message, Map<String, String> fields) {
-    ErrorResponse errorResponse = new ErrorResponse();
-    errorResponse.setType(type);
-    errorResponse.setMessage(message);
-    errorResponse.setFields(fields);
+  public ErrorWithFieldsResponse generateErrorWithFieldsResponse(String type, String message,
+      Map<String, String> fields) {
+    ErrorWithFieldsResponse errorWithFieldsResponse = new ErrorWithFieldsResponse();
+    errorWithFieldsResponse.setType(type);
+    errorWithFieldsResponse.setMessage(message);
+    errorWithFieldsResponse.setFields(fields);
 
-    return errorResponse;
+    return errorWithFieldsResponse;
   }
 }

@@ -4,8 +4,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.auth.service.AuthService;
-import com.pe.inventoryapp.backend.common.response.ErrorResponse;
-import com.pe.inventoryapp.backend.common.response.SuccessfulResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
@@ -18,8 +16,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +30,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
-  private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
   @Autowired
   private UserService userService;
@@ -58,54 +52,40 @@ public class UserController {
 
   @GetMapping("/profile")
   public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String header) {
-
-    // String token = header.replace("Bearer ", "");
-
-    // Claims claims = Jwts.parser()
-    // .verifyWith((SecretKey) SECRET_KEY)
-    // .build()
-    // .parseSignedClaims(token)
-    // .getPayload();
-
-    // Long id = claims.get("id", Long.class);
-    // System.out.println("ID recibido en getProfile: " + id);
-
     Long id = authService.extracIdFromClaims(header);
     Optional<DetailUserResponse> user = userService.findById(id);
     return ResponseEntity.ok(user);
   }
 
-  @PutMapping("profile")
+  @PutMapping("/profile")
   public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String header,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
 
     Long id = authService.extracIdFromClaims(header);
 
     // Validar campos
-    validationService.validateFieldsAndThrow(result);
+    validationService.validateFieldsAndThrowResponse(result);
+
+    String currentEmail = userService.findById(id).get().getEmail();
+    String newEmail = profileRequest.getEmail();
 
     // Verificar que el usuario no haya modificado su email
     // Primero debe obtener el email del usuario actual
-    if (userService.findById(id).get().getEmail() != profileRequest.getEmail()) {
-      registerService.verifyUserEmailExists(profileRequest.getEmail());
-    } else {
-      return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "El usuario ya existe", null));
 
+    // No usar el operador !=, en su lugar utiliza el metodo equals
+    if (!currentEmail.equals(newEmail)) {
+      // System.out.println(userService.findById(id).get().getEmail());
+      // System.out.println(profileRequest.getEmail());
+      registerService.verifyUserEmailExists(profileRequest.getEmail());
     }
 
     if (userService.findById(id).isEmpty()) {
       return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "El usuario no existe", null));
-    }
-
-    if (result.hasErrors()) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "Complete los campos si o si", null));
+          .body(responseService.generateCommonResponse("error", "El usuario no existe"));
     }
 
     String message = userService.updateProfile(id, profileRequest);
-    return ResponseEntity.status(200).body(responseService.generateSuccessfulResponse("success", message));
+    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
   }
 
   @PutMapping("update-password")
@@ -113,37 +93,30 @@ public class UserController {
       @Valid @RequestBody PasswordRequest passwordRequest, BindingResult result) {
 
     Long id = authService.extracIdFromClaims(header);
-    validationService.validateFieldsAndThrow(result);
+    validationService.validateFieldsAndThrowResponse(result);
 
-    if (userService.findById(id).isEmpty()) {
+    Optional<DetailUserResponse> optionalUser = userService.findById(id);
+
+    // Si el usuario ya no existe
+    if (optionalUser.isEmpty()) {
       return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "El usuario no existe", null));
+          .body(responseService.generateCommonResponse("error", "El usuario no existe"));
     }
 
-    if (result.hasErrors()) {
+    // Si el usuario no ha cambiado de contraseña
+    if (passwordRequest.getCurrentPassword().equals(passwordRequest.getNewPassword())) {
       return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "Complete los campos si o si", null));
+          .body(responseService.generateCommonResponse("error", "No has cambiado de contraseña"));
     }
 
-    if (userService.validatePassword(id, passwordRequest)) {
-
-      // TODO : CORREGIR AQUI, LAS CONTRASEÑAS NO COINCIDEN
-      if (!passwordRequest.getNewPassword().equals(passwordRequest.getConfirmPassword())) {
-        System.out.println(passwordRequest.getNewPassword());
-        System.out.println(passwordRequest.getConfirmPassword());
-        return ResponseEntity.status(400)
-            .body(responseService.generateErrorResponse("error", "Confirma tu contraseña, parece que no es la misma",
-                null));
-      } else {
-        String message = userService.updatePassword(id, passwordRequest);
-        return ResponseEntity.status(200).body(responseService.generateSuccessfulResponse("success", message));
-
-      }
-
-    } else {
+    // Si las nuevas contraseñas no coinciden
+    if (!passwordRequest.getNewPassword().trim().equals(passwordRequest.getConfirmPassword().trim())) {
       return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "Intente de nuevo, no es la contraseña anterior", null));
+          .body(responseService.generateCommonResponse("error", "Confirma tu contraseña, parece que no es la misma"));
     }
+
+    String message = userService.updatePassword(id, passwordRequest);
+    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
 
   }
 
@@ -152,21 +125,19 @@ public class UserController {
 
     if (userService.findById(id).isEmpty()) {
       return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "El usuario no existe", null));
+          .body(responseService.generateCommonResponse("error", "El usuario no existe"));
     }
 
+    // El primer usuario jamas podra ser eliminado
     if (id == 1) {
       return ResponseEntity.status(400)
-          .body(responseService.generateErrorResponse("error", "Este usuario no se puede eliminar", null));
-
+          .body(responseService.generateCommonResponse("error", "Este usuario no se puede eliminar"));
     }
 
     userService.remove(id);
-    // return ResponseEntity.ok("Se ha eliminado el usuario");
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateSuccessfulResponse("success", "Usuario eliminado"));
-
+        .body(responseService.generateCommonResponse("success", "Usuario eliminado"));
   }
 
 }

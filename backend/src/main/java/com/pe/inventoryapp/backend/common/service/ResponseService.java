@@ -2,11 +2,12 @@ package com.pe.inventoryapp.backend.common.service;
 
 import java.util.Map;
 
-import com.pe.inventoryapp.backend.common.response.ErrorResponse;
-import com.pe.inventoryapp.backend.common.response.SuccessfulResponse;
+import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
 
 public interface ResponseService {
-  SuccessfulResponse generateSuccessfulResponse(String type, String message);
+  CommonResponse generateCommonResponse(String type, String message);
 
-  ErrorResponse generateErrorResponse(String type, String message, Map<String, String> fields);
+  ErrorWithFieldsResponse generateErrorWithFieldsResponse(String type, String message,
+      Map<String, String> fields);
 }

@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErrorResponse {
+
+// Esta clase representa una respuesta erronea, pero con campos asociados que
+// representan los campos en donde se generaron los errores
+public class ErrorWithFieldsResponse {
   private String type;
   private String message;
   private Map<String, String> fields;

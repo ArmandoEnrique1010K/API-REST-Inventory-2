@@ -33,7 +33,7 @@ public class AuthController {
   @PostMapping("/register")
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
-    validationService.validateFieldsAndThrow(result);
+    validationService.validateFieldsAndThrowResponse(result);
     registerService.verifyUserEmailExists(registerRequest.getEmail());
     var user = registerService.register(registerRequest);
 
@@ -42,7 +42,7 @@ public class AuthController {
     }
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateSuccessfulResponse("success", user));
+        .body(responseService.generateCommonResponse("success", user));
   }
 
 }

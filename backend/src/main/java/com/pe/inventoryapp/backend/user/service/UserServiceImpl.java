@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.user.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -59,17 +58,6 @@ public class UserServiceImpl implements UserService {
   @Override
   public void remove(Long id) {
     userRepository.deleteById(id);
-
-    // if (id == 1) {
-    // return "No se puede eliminar el usuario principal del sistema";
-    // }
-
-    // if (!userRepository.existsById(id)) {
-    // return "Usuario no encontrado con ID: " + id;
-    // }
-
-    // userRepository.deleteById(id);
-    // return "Usuario eliminado";
   }
 
   // Servicio para actualizar el perfil del usuario
@@ -81,6 +69,7 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
 
     // Actualizar los campos básicos
+
     user.setFirstname(profileRequest.getFirstname());
     user.setLastname(profileRequest.getLastname());
     user.setEmail(profileRequest.getEmail());
