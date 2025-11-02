@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
   @Override
   public void verifyUserEmailExists(String email) {
     if (userRepository.findByEmail(email).isPresent()) {
-      throw new FieldValidation("email", "Ese usuario ya existe, pruebe con otro email");
+      throw new FieldValidation("email", "El usuario con ese email ya existe, introduzca otro email");
     }
   }
 

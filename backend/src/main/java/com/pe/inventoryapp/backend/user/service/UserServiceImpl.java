@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
-import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
 import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
@@ -99,8 +98,12 @@ public class UserServiceImpl implements UserService {
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
-    user.setPassword(passwordRequest.getNewPassword());
 
+    String encodedPassword = passwordEncoderConfig.passwordEncoder().encode(passwordRequest.getNewPassword());
+
+    user.setPassword(encodedPassword);
+
+    userRepository.save(user);
     return "Contraseña del usuario actualizada";
   }
 

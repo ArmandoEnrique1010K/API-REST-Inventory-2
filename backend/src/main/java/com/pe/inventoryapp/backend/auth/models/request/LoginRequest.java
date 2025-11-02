@@ -11,13 +11,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 @NoArgsConstructor
-
 public class LoginRequest {
   @NotBlank(message = "El correo es obligatorio")
-  @Email
+  @Email(message = "El correo no tiene el formato adecuado")
   private String email;
 
   @NotBlank(message = "La contraseña es obligatoria")
   private String password;
-
 }

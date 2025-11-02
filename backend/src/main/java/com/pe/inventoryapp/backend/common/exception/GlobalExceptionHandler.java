@@ -1,43 +1,47 @@
 package com.pe.inventoryapp.backend.common.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.pe.inventoryapp.backend.common.response.Response;
+import com.pe.inventoryapp.backend.common.response.ErrorResponse;
+import com.pe.inventoryapp.backend.common.response.SuccessfulResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(RequestValidation.class)
-  public ResponseEntity<Response> handleValidationException(RequestValidation ex) {
-    Response errorResponse = new Response();
+  public ResponseEntity<ErrorResponse> handleValidationException(RequestValidation ex) {
+    ErrorResponse errorResponse = new ErrorResponse();
     errorResponse.setType("error_blank_fields");
     errorResponse.setMessage("Complete los campos faltantes");
-    // errorResponse.setErrors(ex.getErrors());
+    errorResponse.setFields(ex.getErrors());
 
     return ResponseEntity.badRequest().body(errorResponse);
   }
 
   @ExceptionHandler(FieldValidation.class)
-  public ResponseEntity<Response> handleGeneralException(FieldValidation ex) {
-    Response errorResponse = new Response();
+  public ResponseEntity<ErrorResponse> handleGeneralException(FieldValidation ex) {
+    ErrorResponse errorResponse = new ErrorResponse();
     errorResponse.setType("error_duplicate_data");
     errorResponse.setMessage("Error al guardar los datos (duplicación de datos)");
 
-    // Map<String, String> errors = new HashMap<>();
-    // errors.put(ex.getFieldName(), ex.getMessage());
-    // errorResponse.setErrors(errors);
+    Map<String, String> errors = new HashMap<>();
+    errors.put(ex.getFieldName(), ex.getMessage());
+    errorResponse.setFields(errors);
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-  public ResponseEntity<Response> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+  public ResponseEntity<SuccessfulResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
 
-    Response errorResponse = new Response();
+    SuccessfulResponse errorResponse = new SuccessfulResponse();
     errorResponse.setType("error_invalid_id");
     errorResponse.setMessage("Error de tipo de dato");
 

@@ -1,17 +1,21 @@
 package com.pe.inventoryapp.backend.auth.models.request;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
-@Builder
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class RegisterRequest {
   @NotBlank(message = "El nombre es obligatorio")
   private String firstname;
@@ -20,15 +24,20 @@ public class RegisterRequest {
   private String lastname;
 
   @NotBlank(message = "El correo es obligatorio")
-  @Email
+  @Email(message = "El correo no tiene el formato adecuado")
   private String email;
 
   @NotNull(message = "El DNI es obligatorio")
+  @Min(value = 10000000, message = "El valor no pasa del limite establecido")
+  @Max(value = 99999999, message = "El valor sobrepasa del limite establecido")
   private Integer dni;
 
   @NotBlank(message = "La contraseña es obligatoria")
+  @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+  @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]+$", message = "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número, sin caracteres especiales")
   private String password;
 
+  // TODO: INVESTIGAR SI SE PUEDEN VALIDAR CAMPOS BOOLEANOS
   private boolean isManager;
   private boolean isAdmin;
 }

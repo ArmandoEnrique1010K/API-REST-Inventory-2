@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pe.inventoryapp.backend.auth.models.UserPrincipal;
 import com.pe.inventoryapp.backend.auth.models.response.LoginErrorResponse;
 
 import io.jsonwebtoken.Claims;

@@ -12,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.pe.inventoryapp.backend.auth.models.request.RegisterRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
-import com.pe.inventoryapp.backend.common.response.Response;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 
@@ -32,7 +31,7 @@ public class AuthController {
   private ResponseService responseService;
 
   @PostMapping("/register")
-  public ResponseEntity<Response> register(@Valid @RequestBody RegisterRequest registerRequest,
+  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrow(result);
     registerService.verifyUserEmailExists(registerRequest.getEmail());
@@ -43,7 +42,7 @@ public class AuthController {
     }
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.writeAResponse("success", user));
+        .body(responseService.generateSuccessfulResponse("success", user));
   }
 
 }
