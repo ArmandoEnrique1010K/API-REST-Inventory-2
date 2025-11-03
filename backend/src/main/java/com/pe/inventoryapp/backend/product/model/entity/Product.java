@@ -34,18 +34,17 @@ public class Product {
     private LocalDate entryDate;
     private LocalDate caducityDate;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
     private Double length;
     private Double width;
     private Double height;
 
     private Integer stock;
 
-    private boolean status;
-
     private String imageUrl;
+
+    private boolean status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

@@ -9,9 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
-import com.pe.inventoryapp.backend.product.model.dto.CategoryDto;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.mapper.CategoryMapper;
+import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
+import com.pe.inventoryapp.backend.product.model.response.CategoryDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.CategoryListResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 
@@ -23,10 +24,10 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional
-  public String save(CategoryDto categoryResponse) {
+  public String save(CategoryRequest categoryRequest) {
 
     Category category = new Category();
-    category.setName(categoryResponse.getName());
+    category.setName(categoryRequest.getName());
     category.setStatus(true);
 
     categoryRepository.save(category);
@@ -53,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public String update(Long id, CategoryDto categoryRequest) {
+  public String update(Long id, CategoryRequest categoryRequest) {
     Optional<Category> categoryById = categoryRepository.findById(id);
 
     // Category categoryOptional = null;
@@ -73,13 +74,13 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public Optional<CategoryDto> findById(Long id) {
+  public Optional<CategoryDetailsResponse> findById(Long id) {
     return categoryRepository.findById(id)
         .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse());
   }
 
   @Override
-  public Optional<CategoryDto> findByName(String name) {
+  public Optional<CategoryDetailsResponse> findByName(String name) {
     return categoryRepository.findByName(name)
         .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse());
   }

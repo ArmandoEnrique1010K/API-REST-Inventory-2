@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.product.model.dto;
+package com.pe.inventoryapp.backend.product.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDto {
+public class CategoryRequest {
   @NotBlank(message = "Introduzca una categoria")
   private String name;
-  private Boolean status;
 }

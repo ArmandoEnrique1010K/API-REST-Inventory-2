@@ -14,7 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.product.model.dto.CategoryDto;
+import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
+import com.pe.inventoryapp.backend.product.model.response.CategoryDetailsResponse;
 import com.pe.inventoryapp.backend.product.service.CategoryService;
 
 import jakarta.validation.Valid;
@@ -50,12 +51,12 @@ public class CategoryController {
   }
 
   @PostMapping
-  public ResponseEntity<CommonResponse> saveCategory(@Valid @RequestBody CategoryDto categoryResponse,
+  public ResponseEntity<CommonResponse> saveCategory(@Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    categoryService.verifyCategoryNameExist(categoryResponse.getName());
+    categoryService.verifyCategoryNameExist(categoryRequest.getName());
 
-    var category = categoryService.save(categoryResponse);
+    var category = categoryService.save(categoryRequest);
 
     if (category == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al registrar el usuario");
@@ -66,22 +67,21 @@ public class CategoryController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody CategoryDto categoryResponse,
+  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
 
     validationService.validateFieldsAndThrowResponse(result);
 
-    Optional<CategoryDto> optionalCategoryResponse = categoryService.findById(id);
+    Optional<CategoryDetailsResponse> optionalCategoryResponse = categoryService.findById(id);
 
-    String currentName = categoryService.findById(id).get().getName();
-    String newName = categoryResponse.getName();
+    String newName = categoryRequest.getName();
 
     // No usar el operador !=, en su lugar utiliza el metodo equals
-    if (!currentName.equals(newName)) {
-      categoryService.verifyCategoryNameExist(categoryResponse.getName());
+    if (!optionalCategoryResponse.get().getName().equals(newName)) {
+      categoryService.verifyCategoryNameExist(newName);
     }
 
-    if (optionalCategoryResponse.get().getStatus() == false) {
+    if (optionalCategoryResponse.get().isStatus() == false) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "La categoria se encuentra desactivada"));
     }
@@ -91,7 +91,7 @@ public class CategoryController {
       return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "La categoria no existe"));
     }
 
-    String message = categoryService.update(id, categoryResponse);
+    String message = categoryService.update(id, categoryRequest);
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
   }
 
