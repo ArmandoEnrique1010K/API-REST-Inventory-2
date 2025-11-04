@@ -76,6 +76,11 @@ public class CategoryController {
 
     String newName = categoryRequest.getName();
 
+    // Si la categoria ya no existe
+    if (optionalCategoryResponse.isEmpty()) {
+      return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "La categoria no existe"));
+    }
+
     // No usar el operador !=, en su lugar utiliza el metodo equals
     if (!optionalCategoryResponse.get().getName().equals(newName)) {
       categoryService.verifyCategoryNameExist(newName);
@@ -84,11 +89,6 @@ public class CategoryController {
     if (optionalCategoryResponse.get().isStatus() == false) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "La categoria se encuentra desactivada"));
-    }
-
-    // Si la categoria ya no existe
-    if (optionalCategoryResponse.isEmpty()) {
-      return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "La categoria no existe"));
     }
 
     String message = categoryService.update(id, categoryRequest);

@@ -97,6 +97,12 @@ public class ProductController {
 
     // Campo cuyo nombre no se debe repetir
     String newName = productRequest.getName();
+
+    // Si el producto ya no existe
+    if (optionalProductResponse.isEmpty()) {
+      return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "El producto no existe"));
+    }
+
     if (!optionalProductResponse.get().getName().equals(newName)) {
       productService.verifyProductNameExist(newName);
     }
@@ -104,11 +110,6 @@ public class ProductController {
     if (optionalProductResponse.get().isStatus() == false) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "La categoria se encuentra desactivada"));
-    }
-
-    // Si el producto ya no existe
-    if (optionalProductResponse.isEmpty()) {
-      return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "El producto no existe"));
     }
 
     String message = productService.update(id, productRequest);
