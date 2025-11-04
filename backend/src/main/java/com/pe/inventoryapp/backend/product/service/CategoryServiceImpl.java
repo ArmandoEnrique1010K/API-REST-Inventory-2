@@ -80,18 +80,6 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public Optional<CategoryDetailsResponse> findByName(String name) {
-    return categoryRepository.findByName(name)
-        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse());
-  }
-
-  @Override
-  public Boolean getStatusById(Long id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getStatusById'");
-  }
-
-  @Override
   public void verifyCategoryNameExist(String name) {
     if (categoryRepository.findByName(name).isPresent()) {
       throw new FieldValidation("name", "La categoria con ese nombre ya existe, introduzca otra categoria");

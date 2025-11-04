@@ -1,13 +1,10 @@
 package com.pe.inventoryapp.backend.product.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +14,7 @@ import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.model.mapper.ProductMapper;
 import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
+import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
@@ -54,7 +52,6 @@ public class ProductServiceImpl implements ProductService {
 
     productRepository.save(product);
     return "Se guardo el producto";
-
   }
 
   @Override
@@ -77,10 +74,59 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
+  public Page<ProductListResponse> findAllByStatusTrue(Pageable pageable) {
+
+    return productRepository.findAllByStatusTrue(pageable)
+        .map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
+  }
+
+  @Override
   public void verifyProductNameExist(String name) {
     if (productRepository.findByName(name).isPresent()) {
       throw new FieldValidation("name", "El producto con ese nombre ya existe, introduzca otro producto");
     }
+  }
+
+  @Override
+  public void changeStatus(Long id) {
+    Product product = productRepository.findById(id).orElseThrow();
+
+    // Cambia el estado de la categoria a false y lo guarda
+    product.setStatus(!product.isStatus());
+    productRepository.save(product);
+  }
+
+  @Override
+  public Optional<ProductDetailsResponse> findById(Long id) {
+
+    return productRepository.findById(id)
+        .map(product -> ProductMapper.builder().setProduct(product).buildProductDetailsResponse());
+  }
+
+  @Override
+  public String update(Long id, ProductRequest productRequest) {
+
+    Optional<Product> productById = productRepository.findById(id);
+
+    if (productById.isPresent()) {
+
+      Category categoryId = categoryRepository.findById(productRequest.getIdCategory()).orElseThrow();
+
+      Product productData = productById.orElseThrow();
+      productData.setName(productRequest.getName());
+      productData.setEntryDate(productRequest.getEntryDate());
+      productData.setCaducityDate(productRequest.getCaducityDate());
+      productData.setLength(productRequest.getLength());
+      productData.setWidth(productRequest.getWidth());
+      productData.setHeight(productRequest.getHeight());
+      productData.setStock(productRequest.getStock());
+      productData.setImageUrl(productRequest.getImageUrl());
+      productData.setCategory(categoryId);
+
+      productRepository.save(productData);
+    }
+
+    return "Se actualizo el producto";
   }
 
 }

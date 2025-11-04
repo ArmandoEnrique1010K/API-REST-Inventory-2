@@ -25,10 +25,6 @@ public interface CategoryService {
   public Optional<CategoryDetailsResponse> findById(Long id);
 
   // Obtiene una categoria por su nombre
-  public Optional<CategoryDetailsResponse> findByName(String name);
-
-  // Obtiene el estado de una categoria por su id
-  public Boolean getStatusById(Long id);
 
   public void verifyCategoryNameExist(String name);
 }
