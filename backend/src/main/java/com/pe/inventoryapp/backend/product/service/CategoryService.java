@@ -25,6 +25,5 @@ public interface CategoryService {
   public Optional<CategoryDetailsResponse> findById(Long id);
 
   // Obtiene una categoria por su nombre
-
   public void verifyCategoryNameExist(String name);
 }

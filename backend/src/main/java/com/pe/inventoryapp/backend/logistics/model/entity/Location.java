@@ -1,0 +1,29 @@
+package com.pe.inventoryapp.backend.logistics.model.entity;
+
+import com.pe.inventoryapp.backend.product.model.entity.Product;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "ubicaciones")
+public class Location {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "region_id")
+    private Region region;
+
+}
