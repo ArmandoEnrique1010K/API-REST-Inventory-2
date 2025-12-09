@@ -40,7 +40,7 @@ public class InitialData {
       return roleRepository.save(newRole);
     });
 
-    roleRepository.findByName("ROLE_OPERATOR").orElseGet(() -> {
+    Role roleOperator = roleRepository.findByName("ROLE_OPERATOR").orElseGet(() -> {
       Role newRole = new Role();
       newRole.setName("ROLE_OPERATOR");
       return roleRepository.save(newRole);
@@ -54,7 +54,7 @@ public class InitialData {
 
     // El usuario por defecto (primer usuario de la app)
     if (userRepository.findByEmail("correo@example.com").isEmpty()) {
-      List<Role> roles = List.of(roleUser, roleAdmin);
+      List<Role> roles = List.of(roleUser, roleAdmin, roleOperator);
 
       User user = new User();
       user.setFirstname("Administrador");
