@@ -162,4 +162,17 @@ public class AuthServiceImpl implements AuthService {
 
   }
 
+  @Override
+  public void changePassword(String password, Long id) {
+
+    // Busca al usuario por ID
+    Optional<User> user = userRepository.findById(id);
+    // Guarda el nuevo password
+    if (user.isPresent()) {
+      user.get().setPassword(passwordEncoderConfig.passwordEncoder().encode(password));
+    }
+
+    userRepository.save(user.get());
+  }
+
 }

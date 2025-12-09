@@ -45,7 +45,13 @@ public class UserTokenServiceImpl implements UserTokenService {
   @Override
   public boolean isTokenValid(String value) {
     UserToken token = userTokenRepository.findByValue(value);
-    return token != null;
+    return token != null || this.isExpired(value);
+  }
+
+  @Override
+  public User findUserByToken(String token) {
+    UserToken userToken = userTokenRepository.findByValue(token);
+    return userToken.getUser();
   }
 
 }

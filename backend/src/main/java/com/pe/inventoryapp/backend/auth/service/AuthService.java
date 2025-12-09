@@ -16,4 +16,6 @@ public interface AuthService {
   public boolean existsUserByEmail(String email);
 
   public void sendResetPasswordToken(String toEmail, String token);
+
+  public void changePassword(String password, Long id);
 }

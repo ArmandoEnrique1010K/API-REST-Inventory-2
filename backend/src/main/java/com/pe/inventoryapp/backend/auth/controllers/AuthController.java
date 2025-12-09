@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pe.inventoryapp.backend.auth.models.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.auth.models.request.ForgotPasswordRequest;
+import com.pe.inventoryapp.backend.auth.models.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -23,6 +25,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
@@ -74,6 +77,38 @@ public class AuthController {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success",
             "Se le ha enviado el token de recuperación a su correo: " + zeroToken.getValue()));
+  }
+
+  @PostMapping("/validate-token")
+  public ResponseEntity<?> validateToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
+      BindingResult result) {
+    validationService.validateFieldsAndThrowResponse(result);
+    Boolean existToken = userTokenService.isTokenValid(validateTokenRequest.getValue());
+
+    // CORREGIR AQUI, NO DEBE MOSTRAR UN ERRROR 500
+    if (existToken == false || existToken == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(responseService.generateCommonResponse("error", "El token no existe"));
+    }
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(responseService.generateCommonResponse("success", "El token es valido, puede cambiar su contraseña"));
+  }
+
+  // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
+  // REQUIERE QUE EL TOKEN SEA VALIDADO
+  @PostMapping("/change-password/{value}")
+  public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+      BindingResult result,
+      @PathVariable String value) {
+    validationService.validateFieldsAndThrowResponse(result);
+
+    // BUSCA AL USUARIO POR EL TOKEN ENVIADO
+    User user = userTokenService.findUserByToken(value);
+
+    authService.changePassword(changePasswordRequest.getNewPassword(), user.getId());
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(responseService.generateCommonResponse("success",
+            "Ha cambiado su contraseña, puede iniciar sesión con la nueva  contraseña"));
   }
 
   @GetMapping("/test-dotenv")
