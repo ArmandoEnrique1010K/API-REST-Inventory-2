@@ -1,14 +1,11 @@
 package com.pe.inventoryapp.backend.user.service;
 
-import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.model.entity.UserToken;
-
 public interface UserTokenService {
-  boolean isExpired(String value);
+  boolean isExpired(String token);
 
-  UserToken createTokenForUserByEmail(String email);
+  String generateTokenForUserByEmail(String email);
 
-  boolean isTokenValid(String value);
+  boolean isTokenValid(String token);
 
-  User findUserByToken(String token);
+  Long findUserIdByUserToken(String token);
 }

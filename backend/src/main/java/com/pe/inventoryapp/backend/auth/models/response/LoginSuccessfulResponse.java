@@ -5,11 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @Builder
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
-
 public class LoginSuccessfulResponse {
   private String type;
   private String token;

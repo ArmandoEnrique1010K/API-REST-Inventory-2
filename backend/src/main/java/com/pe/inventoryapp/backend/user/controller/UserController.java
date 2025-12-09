@@ -48,9 +48,6 @@ public class UserController {
   @Autowired
   private ValidationService validationService;
 
-  @Autowired
-  private AuthService registerService;
-
   @GetMapping
   public List<?> listAll() {
     return userService.findAll();
@@ -60,8 +57,9 @@ public class UserController {
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    registerService.verifyUserEmailExists(registerRequest.getEmail());
-    var user = registerService.register(registerRequest);
+    authService.verifyUserEmailExists(registerRequest.getEmail());
+
+    var user = userService.register(registerRequest);
 
     if (user == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al registrar el usuario");
@@ -97,7 +95,7 @@ public class UserController {
     if (!currentEmail.equals(newEmail)) {
       // System.out.println(userService.findById(id).get().getEmail());
       // System.out.println(profileRequest.getEmail());
-      registerService.verifyUserEmailExists(profileRequest.getEmail());
+      authService.verifyUserEmailExists(profileRequest.getEmail());
     }
 
     if (userService.findById(id).isEmpty()) {

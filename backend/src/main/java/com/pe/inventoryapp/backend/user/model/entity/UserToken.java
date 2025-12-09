@@ -25,10 +25,11 @@ public class UserToken {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String value;
+  private String token;
+
   private LocalDateTime expirationTime;
   @ManyToOne
-  @JoinColumn(name = "user_id") // nombre de la columna en DB
-  private User user; // <- este nombre debe coincidir con "mappedBy" en User
+  @JoinColumn(name = "user_id")
+  private User user;
 
 }

@@ -1,9 +1,6 @@
 package com.pe.inventoryapp.backend.auth.service;
 
-import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
-
 public interface AuthService {
-  String register(RegisterRequest registerRequest);
 
   Long findIdByEmail(String email);
 
@@ -11,11 +8,7 @@ public interface AuthService {
 
   Long extracIdFromClaims(String header);
 
-  String generateToken();
+  boolean existsUserByEmail(String email);
 
-  public boolean existsUserByEmail(String email);
-
-  public void sendResetPasswordToken(String toEmail, String token);
-
-  public void changePassword(String password, Long id);
+  void changePassword(String password, Long id);
 }

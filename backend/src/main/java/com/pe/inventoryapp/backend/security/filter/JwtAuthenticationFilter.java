@@ -116,9 +116,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       AuthenticationException failed) throws IOException, ServletException {
 
-    // validationService.validateFieldsAndThrow(result);
-    // userService.verifyUser(registerRequest.getEmail());
-
     LoginErrorResponse loginErrorResponse = new LoginErrorResponse();
     loginErrorResponse.setType("error");
     loginErrorResponse.setMessage("Error en la autenticacion username o password incorrecto!");
