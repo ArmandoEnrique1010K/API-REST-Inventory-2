@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.user.model.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +24,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
-import com.pe.inventoryapp.backend.product.model.entity.Product;
 
 @Entity
 @Builder
@@ -61,8 +60,8 @@ public class User {
       @UniqueConstraint(columnNames = { "user_id", "role_id" }) })
   private List<Role> roles;
 
-  @OneToMany(mappedBy = "user")
-  private List<Token> tokens;
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<UserToken> tokens;
 
   @Transient
   private boolean isOperator;

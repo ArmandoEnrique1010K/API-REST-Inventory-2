@@ -13,7 +13,9 @@ import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.entity.UserToken;
 import com.pe.inventoryapp.backend.user.service.UserService;
+import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.validation.Valid;
@@ -41,6 +43,9 @@ public class AuthController {
   private ValidationService validationService;
 
   @Autowired
+  private UserTokenService userTokenService;
+
+  @Autowired
   private AuthService registerService;
 
   // Nota: El endpoint "/" ya esta siendo manejado por Spring Security
@@ -56,18 +61,19 @@ public class AuthController {
           .body(responseService.generateCommonResponse("error", "El correo no existe"));
     }
 
+    // String zeroToken = "000000";
     // Generar un token de 6 digitos
-    String token = authService.generateToken();
+    UserToken zeroToken = userTokenService.createTokenForUserByEmail(forgotPasswordRequest.getEmail());
     // Enviar el token al correo del usuario
     // authService.sendTokenToEmail(forgotPasswordRequest.getEmail(), token);
 
-    authService.sendResetPasswordToken(forgotPasswordRequest.getEmail(), token);
+    authService.sendResetPasswordToken(forgotPasswordRequest.getEmail(), zeroToken.getValue());
 
     // Guardar ese token en la base de datos de tokens
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success",
-            "Se le ha enviado el token de recuperación a su correo: " + token));
+            "Se le ha enviado el token de recuperación a su correo: " + zeroToken.getValue()));
   }
 
   @GetMapping("/test-dotenv")
