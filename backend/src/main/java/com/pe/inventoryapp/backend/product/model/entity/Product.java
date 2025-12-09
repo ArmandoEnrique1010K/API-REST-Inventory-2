@@ -3,6 +3,9 @@ package com.pe.inventoryapp.backend.product.model.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,20 +34,26 @@ public class Product {
     @Column(unique = true)
     private String name;
 
-    private LocalDate entryDate;
-    private LocalDate caducityDate;
-
-    private Double length;
     private Double width;
-    private Double height;
-
-    private Integer stock;
+    private Double length;
+    // private Double height;
 
     private String imageUrl;
 
-    private boolean status;
+    @CreationTimestamp
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
+    private boolean status;
+
+    // Fecha de entrada del producto
+    private LocalDate entryDate;
+
+    // Fecha de caducidad del producto
+    private LocalDate caducityDate;
+
+    // Sumatoria del stock total
+    private Integer stock;
 
     @ManyToOne
     @JoinColumn(name = "category_id")

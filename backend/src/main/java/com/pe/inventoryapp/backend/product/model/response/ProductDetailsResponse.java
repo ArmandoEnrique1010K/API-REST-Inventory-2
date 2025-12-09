@@ -19,7 +19,6 @@ public class ProductDetailsResponse {
 
   private Double length;
   private Double width;
-  private Double height;
 
   private Integer stock;
 

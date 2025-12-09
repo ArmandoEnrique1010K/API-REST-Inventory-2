@@ -22,12 +22,9 @@ import org.springframework.web.server.ResponseStatusException;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
 import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
-import com.pe.inventoryapp.backend.product.model.response.CategoryDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
-import com.pe.inventoryapp.backend.product.service.CategoryService;
 import com.pe.inventoryapp.backend.product.service.ProductService;
 
 import jakarta.validation.Valid;
@@ -39,9 +36,6 @@ public class ProductController {
 
   @Autowired
   private ProductService productService;
-
-  @Autowired
-  private CategoryService categoryService;
 
   @Autowired
   private ResponseService responseService;
@@ -78,6 +72,20 @@ public class ProductController {
     Pageable pageable = PageRequest.of(page, 10);
 
     return productService.findAllByStatusTrue(pageable);
+  }
+
+  @GetMapping("/search")
+  public Page<ProductListResponse> findAllByName(@RequestParam(defaultValue = "0") Integer page,
+      @RequestParam String name) {
+
+    Pageable pageable = PageRequest.of(page, 10);
+
+    return productService.searchAll(name, pageable);
+  }
+
+  @GetMapping("/{id}")
+  public Optional<ProductDetailsResponse> findById(@PathVariable Long id) {
+    return productService.findById(id);
   }
 
   @PatchMapping("/status/{id}")

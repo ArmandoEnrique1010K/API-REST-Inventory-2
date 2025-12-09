@@ -20,7 +20,7 @@ public class TokenCleanupScheduler {
   // Esta tarea se ejecuta cada 5 minutos
   @Scheduled(cron = "0 0/5 * * * *")
   public void deleteExpiredTokens() {
-    System.out.println(LocalDateTime.now() + ": Comienza el borrado de tokens expirados.");
+    System.out.println(LocalDateTime.now() + ": Comienza el borrado de tokens de 6 digitos expirados.");
     tokenRepository.deleteAllExpiredTokens(LocalDateTime.now());
   }
 }

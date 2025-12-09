@@ -1,11 +1,14 @@
 package com.pe.inventoryapp.backend.product.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,28 +36,35 @@ public class ProductServiceImpl implements ProductService {
   public String save(ProductRequest productRequest) {
 
     // Buscar la categoria por su ID
-    Category categoryId = categoryRepository.findById(productRequest.getIdCategory()).orElseThrow();
+    Category category = categoryRepository.findById(productRequest.getIdCategory())
+        .orElseThrow(() -> new RuntimeException("La categoría no existe"));
 
     Product product = new Product();
     product.setName(productRequest.getName());
-    product.setEntryDate(productRequest.getEntryDate());
+
+    if (productRequest.getEntryDate() == null) {
+      product.setEntryDate(LocalDate.now());
+    } else {
+      product.setEntryDate(productRequest.getEntryDate());
+    }
+
     product.setCaducityDate(productRequest.getCaducityDate());
     product.setLength(productRequest.getLength());
     product.setWidth(productRequest.getWidth());
-    product.setHeight(productRequest.getHeight());
-    product.setStock(productRequest.getStock());
     product.setImageUrl(productRequest.getImageUrl());
 
     product.setStatus(true);
     product.setCreatedAt(LocalDateTime.now());
     product.setUpdatedAt(LocalDateTime.now());
-    product.setCategory(categoryId);
+    product.setStock(0);
 
+    product.setCategory(category);
     productRepository.save(product);
     return "Se guardo el producto";
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Page<ProductListResponse> findAll(Pageable pageable) {
     // Obtiene la lista de productos desde el repositorio
     Page<Product> productPage = productRepository
@@ -74,6 +84,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Page<ProductListResponse> findAllByStatusTrue(Pageable pageable) {
 
     return productRepository.findAllByStatusTrue(pageable)
@@ -81,22 +92,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public void verifyProductNameExist(String name) {
-    if (productRepository.findByName(name).isPresent()) {
-      throw new FieldValidation("name", "El producto con ese nombre ya existe, introduzca otro producto");
-    }
-  }
-
-  @Override
-  public void changeStatus(Long id) {
-    Product product = productRepository.findById(id).orElseThrow();
-
-    // Cambia el estado de la categoria a false y lo guarda
-    product.setStatus(!product.isStatus());
-    productRepository.save(product);
-  }
-
-  @Override
+  @Transactional(readOnly = true)
   public Optional<ProductDetailsResponse> findById(Long id) {
 
     return productRepository.findById(id)
@@ -104,6 +100,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
+  @Transactional
   public String update(Long id, ProductRequest productRequest) {
 
     Optional<Product> productById = productRepository.findById(id);
@@ -118,8 +115,6 @@ public class ProductServiceImpl implements ProductService {
       productData.setCaducityDate(productRequest.getCaducityDate());
       productData.setLength(productRequest.getLength());
       productData.setWidth(productRequest.getWidth());
-      productData.setHeight(productRequest.getHeight());
-      productData.setStock(productRequest.getStock());
       productData.setImageUrl(productRequest.getImageUrl());
       productData.setCategory(categoryId);
 
@@ -129,4 +124,46 @@ public class ProductServiceImpl implements ProductService {
     return "Se actualizo el producto";
   }
 
+  @Override
+  @Transactional
+  public void changeStatus(Long id) {
+    Product product = productRepository.findById(id).orElseThrow();
+
+    // Cambia el estado de la categoria a false y lo guarda
+    product.setStatus(!product.isStatus());
+    productRepository.save(product);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public void verifyProductNameExist(String name) {
+    if (productRepository.findByName(name).isPresent()) {
+      throw new FieldValidation("name", "El producto con ese nombre ya existe, introduzca otro producto");
+    }
+  }
+
+  @Override
+  public Page<ProductListResponse> searchAll(String name, Pageable pageable) {
+
+    // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO
+
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+    boolean isAdmin = auth.getAuthorities().stream()
+        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+    Page<Product> products;
+
+    if (isAdmin) {
+      products = productRepository.findAllByName(name, pageable);
+    } else {
+      products = productRepository.findAllByNameAndStatusTrue(name, pageable);
+    }
+
+    return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
+
+    // return productRepository.findAllByName(name, pageable)
+    // .map(product ->
+    // ProductMapper.builder().setProduct(product).buildProductListResponse());
+  }
 }

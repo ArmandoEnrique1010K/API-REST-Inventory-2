@@ -30,9 +30,9 @@ public class ProductMapper {
         product.getId(),
         product.getName().trim(),
         product.getStock(),
-        product.getImageUrl()
-            .trim(),
-        product.getCategory().getName().trim());
+        product.getImageUrl().trim(),
+        product.getCategory().getName().trim(),
+        product.isStatus());
   }
 
   public ProductDetailsResponse buildProductDetailsResponse() {
@@ -48,7 +48,6 @@ public class ProductMapper {
         product.getCaducityDate(),
         product.getLength(),
         product.getWidth(),
-        product.getHeight(),
         product.getStock(),
         product.getImageUrl().trim(),
         product.isStatus(),

@@ -15,4 +15,5 @@ public class ProductListResponse {
   private Integer stock;
   private String imageUrl;
   private String categoryName;
+  private boolean status;
 }

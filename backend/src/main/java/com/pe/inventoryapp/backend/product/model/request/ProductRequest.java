@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,16 +19,19 @@ public class ProductRequest {
   @NotBlank(message = "Introduzca un nombre del producto")
   private String name;
 
+  // Estos campos son opcionales
+  private Double length;
+  private Double width;
+  private String imageUrl;
+
   @JsonFormat(pattern = "yyyy-MM-dd")
   @Nullable
   private LocalDate entryDate;
-  private LocalDate caducityDate;
-  private Double length;
-  private Double width;
-  private Double height;
 
-  @NotNull(message = "El stock es obligatorio")
-  private Integer stock;
-  private String imageUrl;
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  @Nullable
+  private LocalDate caducityDate;
+
+  // Opcionalmente puede ser nulo
   private Long idCategory;
 }

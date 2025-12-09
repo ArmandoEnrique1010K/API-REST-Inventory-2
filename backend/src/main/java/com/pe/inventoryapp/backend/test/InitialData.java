@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.pe.inventoryapp.backend.product.model.entity.Category;
+import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
@@ -25,9 +27,13 @@ public class InitialData {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
+  @Autowired
+  private CategoryRepository categoryRepository;
+
   @PostConstruct
   public void init() {
 
+    // Roles
     Role roleUser = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
       Role newRole = new Role();
       newRole.setName("ROLE_USER");
@@ -46,6 +52,7 @@ public class InitialData {
       return roleRepository.save(newRole);
     });
 
+    // El usuario por defecto (primer usuario de la app)
     if (userRepository.findByEmail("correo@example.com").isEmpty()) {
       List<Role> roles = List.of(roleUser, roleAdmin);
 
@@ -59,5 +66,14 @@ public class InitialData {
 
       userRepository.save(user);
     }
+
+    // La categoria por defecto (representa "sin categoria")
+    if (categoryRepository.findByName("Sin categoria").isEmpty()) {
+      Category category = new Category();
+      category.setName("Sin categoria");
+      category.setStatus(true);
+      categoryRepository.save(category);
+    }
+
   }
 }

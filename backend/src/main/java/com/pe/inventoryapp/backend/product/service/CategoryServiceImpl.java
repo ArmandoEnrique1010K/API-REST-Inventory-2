@@ -12,8 +12,7 @@ import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.mapper.CategoryMapper;
 import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
-import com.pe.inventoryapp.backend.product.model.response.CategoryDetailsResponse;
-import com.pe.inventoryapp.backend.product.model.response.CategoryListResponse;
+import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 
 @Service
@@ -36,20 +35,20 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CategoryListResponse> findAll() {
+  public List<CategoryResponse> findAll() {
     List<Category> categories = (List<Category>) categoryRepository.findAll();
 
     return categories.stream()
-        .map(category -> CategoryMapper.builder().setCategory(category).buildListCategoriesResponse())
+        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse())
         .collect(Collectors.toList());
   }
 
   @Override
-  public List<CategoryListResponse> findAllByStatusTrue() {
+  public List<CategoryResponse> findAllByStatusTrue() {
     List<Category> categories = (List<Category>) categoryRepository.findAllByStatusTrue();
 
     return categories.stream()
-        .map(category -> CategoryMapper.builder().setCategory(category).buildListCategoriesResponse())
+        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse())
         .collect(Collectors.toList());
   }
 
@@ -74,7 +73,7 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public Optional<CategoryDetailsResponse> findById(Long id) {
+  public Optional<CategoryResponse> findById(Long id) {
     return categoryRepository.findById(id)
         .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse());
   }

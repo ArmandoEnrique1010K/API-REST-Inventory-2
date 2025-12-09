@@ -1,8 +1,7 @@
 package com.pe.inventoryapp.backend.product.model.mapper;
 
 import com.pe.inventoryapp.backend.product.model.entity.Category;
-import com.pe.inventoryapp.backend.product.model.response.CategoryDetailsResponse;
-import com.pe.inventoryapp.backend.product.model.response.CategoryListResponse;
+import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
 
 public class CategoryMapper {
   private Category category;
@@ -20,24 +19,13 @@ public class CategoryMapper {
     return this;
   }
 
-  public CategoryListResponse buildListCategoriesResponse() {
+  public CategoryResponse buildCategoriesResponse() {
 
     if (category == null) {
       throw new RuntimeException("Debe pasar la entidad Category");
     }
     // Devuelve una nueva instancia de UserDto con los datos mapeados
-    return new CategoryListResponse(
-        category.getId(),
-        category.getName().trim());
-  }
-
-  public CategoryDetailsResponse buildCategoriesResponse() {
-
-    if (category == null) {
-      throw new RuntimeException("Debe pasar la entidad Category");
-    }
-    // Devuelve una nueva instancia de UserDto con los datos mapeados
-    return new CategoryDetailsResponse(
+    return new CategoryResponse(
         category.getId(),
         category.getName().trim(),
         category.isStatus());

@@ -15,7 +15,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
-import com.pe.inventoryapp.backend.product.model.response.CategoryDetailsResponse;
+import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
 import com.pe.inventoryapp.backend.product.service.CategoryService;
 
 import jakarta.validation.Valid;
@@ -72,7 +72,7 @@ public class CategoryController {
 
     validationService.validateFieldsAndThrowResponse(result);
 
-    Optional<CategoryDetailsResponse> optionalCategoryResponse = categoryService.findById(id);
+    Optional<CategoryResponse> optionalCategoryResponse = categoryService.findById(id);
 
     String newName = categoryRequest.getName();
 
@@ -97,6 +97,12 @@ public class CategoryController {
 
   @PatchMapping("/status/{id}")
   public ResponseEntity<CommonResponse> disableCategory(@PathVariable Long id) {
+
+    if (id == 1) {
+      return ResponseEntity.status(400)
+          .body(responseService.generateCommonResponse("error", "No se puede cambiar el estado de esta categoria"));
+    }
+
     categoryService.changeStatus(id);
     return ResponseEntity.status(HttpStatus.ACCEPTED)
         .body(responseService.generateCommonResponse("success", "Se ha cambiado el estado de la categoria"));
