@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.auth.service;
 
-import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 
 public interface AuthService {
@@ -15,4 +14,6 @@ public interface AuthService {
   String generateToken();
 
   public boolean existsUserByEmail(String email);
+
+  public void sendResetPasswordToken(String toEmail, String token);
 }

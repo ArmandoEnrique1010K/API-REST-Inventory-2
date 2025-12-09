@@ -15,10 +15,13 @@ import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -58,9 +61,20 @@ public class AuthController {
     // Enviar el token al correo del usuario
     // authService.sendTokenToEmail(forgotPasswordRequest.getEmail(), token);
 
+    authService.sendResetPasswordToken(forgotPasswordRequest.getEmail(), token);
+
+    // Guardar ese token en la base de datos de tokens
+
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success",
             "Se le ha enviado el token de recuperación a su correo: " + token));
+  }
+
+  @GetMapping("/test-dotenv")
+  public String getEnvironmentVariable() {
+    Dotenv dotenv = Dotenv.load();
+    String valor = dotenv.get("MY_TEST_ENV_VAR"); // Guardas el valor
+    return valor;
   }
 
 }

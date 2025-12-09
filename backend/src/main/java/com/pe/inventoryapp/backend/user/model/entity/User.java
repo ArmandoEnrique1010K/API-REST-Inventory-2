@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
@@ -22,6 +23,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+import com.pe.inventoryapp.backend.product.model.entity.Product;
 
 @Entity
 @Builder
@@ -57,6 +60,9 @@ public class User {
   @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false), uniqueConstraints = {
       @UniqueConstraint(columnNames = { "user_id", "role_id" }) })
   private List<Role> roles;
+
+  @OneToMany(mappedBy = "user")
+  private List<Token> tokens;
 
   @Transient
   private boolean isOperator;
