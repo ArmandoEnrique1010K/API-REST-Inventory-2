@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.auth.models.request;
+package com.pe.inventoryapp.backend.user.model.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;

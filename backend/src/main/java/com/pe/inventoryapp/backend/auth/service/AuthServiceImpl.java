@@ -5,6 +5,7 @@ import static com.pe.inventoryapp.backend.security.config.TokenJwtConfig.SECRET_
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -13,11 +14,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.auth.models.request.RegisterRequest;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -106,6 +107,20 @@ public class AuthServiceImpl implements AuthService {
     Long id = claims.get("id", Long.class);
 
     return id;
+  }
+
+  @Override
+  public boolean existsUserByEmail(String email) {
+    if (userRepository.findByEmail(email).isPresent()) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public String generateToken() {
+      int number = (int)(Math.random() * 900000) + 100000;
+      return String.valueOf(number);
   }
 
 }

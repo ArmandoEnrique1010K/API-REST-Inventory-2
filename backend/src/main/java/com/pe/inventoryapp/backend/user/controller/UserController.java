@@ -2,12 +2,14 @@ package com.pe.inventoryapp.backend.user.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
+import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
@@ -20,15 +22,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(originPatterns = "*")
 public class UserController {
 
   @Autowired
@@ -42,12 +47,28 @@ public class UserController {
 
   @Autowired
   private ValidationService validationService;
+
   @Autowired
   private AuthService registerService;
 
   @GetMapping
   public List<?> listAll() {
     return userService.findAll();
+  }
+
+  @PostMapping("/register")
+  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
+      BindingResult result) {
+    validationService.validateFieldsAndThrowResponse(result);
+    registerService.verifyUserEmailExists(registerRequest.getEmail());
+    var user = registerService.register(registerRequest);
+
+    if (user == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al registrar el usuario");
+    }
+
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(responseService.generateCommonResponse("success", user));
   }
 
   @GetMapping("/profile")

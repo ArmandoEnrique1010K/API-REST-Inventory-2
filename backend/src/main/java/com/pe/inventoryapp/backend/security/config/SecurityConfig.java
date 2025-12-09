@@ -25,60 +25,61 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
 
-        @Autowired
-        private AuthenticationConfiguration authenticationConfiguration;
+    @Autowired
+    private AuthenticationConfiguration authenticationConfiguration;
 
-        @Autowired
-        private AuthService authService;
+    @Autowired
+    private AuthService authService;
 
-        @Bean
-        AuthenticationManager authenticationManager() throws Exception {
-                return authenticationConfiguration.getAuthenticationManager();
-        }
+    @Bean
+    AuthenticationManager authenticationManager() throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
-                        throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
+            throws Exception {
 
-                // JwtAuthenticationFilter jwtAuthenticationFilter = new
-                // JwtAuthenticationFilter(authenticationManager);
-                // JwtValidationFilter jwtValidationFilter = new
-                // JwtValidationFilter(authenticationManager);
+        // JwtAuthenticationFilter jwtAuthenticationFilter = new
+        // JwtAuthenticationFilter(authenticationManager);
+        // JwtValidationFilter jwtValidationFilter = new
+        // JwtValidationFilter(authenticationManager);
 
-                return http
-                                .csrf(csrf -> csrf.disable())
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))   // ← FALTA ESTO
+        return http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ← FALTA ESTO
 
-                            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .authorizeHttpRequests(auth -> auth
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/forgot-password").permitAll()
 
-                                                // // AUTH
-                                                // .requestMatchers("/api/auth/login").permitAll()
-                                                // .requestMatchers("/api/auth/register").hasAuthority("ROLE_ADMIN")
+                        // // AUTH
+                        // .requestMatchers("/api/auth/login").permitAll()
+                        // .requestMatchers("/api/auth/register").hasAuthority("ROLE_ADMIN")
 
-                                                // // USERS
-                                                // .requestMatchers("/api/users").hasAuthority("ROLE_ADMIN")
-                                                // // Considera ambos métodos GET Y PUT
-                                                // .requestMatchers("/api/users/profile")
-                                                // .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
+                        // // USERS
+                        // .requestMatchers("/api/users").hasAuthority("ROLE_ADMIN")
+                        // // Considera ambos métodos GET Y PUT
+                        // .requestMatchers("/api/users/profile")
+                        // .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
 
-                                                // .requestMatchers("/api/users/update-password")
-                                                // .hasAnyAuthority("ROLE_USER",
-                                                // "ROLE_OPERATOR", "ROLE_ADMIN")
-                                                // .requestMatchers(HttpMethod.DELETE,
-                                                // "/api/users/**")
-                                                // .hasAuthority("ROLE_ADMIN")
+                        // .requestMatchers("/api/users/update-password")
+                        // .hasAnyAuthority("ROLE_USER",
+                        // "ROLE_OPERATOR", "ROLE_ADMIN")
+                        // .requestMatchers(HttpMethod.DELETE,
+                        // "/api/users/**")
+                        // .hasAuthority("ROLE_ADMIN")
 
-                                                // PRODUCTS
-                                                .anyRequest().permitAll())
-                                // .anyRequest().authenticated())
-                                .addFilter(new JwtAuthenticationFilter(
-                                                authenticationManager(), authService))
-                                .addFilter(new JwtValidationFilter(
-                                                authenticationManager))
-                                // .addFilter(jwtValidationFilter)
-                                .build();
-        }
+                        // PRODUCTS
+                        .anyRequest().permitAll())
+                // .anyRequest().authenticated())
+                .addFilter(new JwtAuthenticationFilter(
+                        authenticationManager(), authService))
+                .addFilter(new JwtValidationFilter(
+                        authenticationManager))
+                // .addFilter(jwtValidationFilter)
+                .build();
+    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
