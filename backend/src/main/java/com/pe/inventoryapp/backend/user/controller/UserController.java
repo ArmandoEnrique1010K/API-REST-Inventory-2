@@ -57,7 +57,7 @@ public class UserController {
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    authService.verifyUserEmailExists(registerRequest.getEmail());
+    userService.verifyUserEmailExists(registerRequest.getEmail());
 
     var user = userService.register(registerRequest);
 
@@ -95,7 +95,7 @@ public class UserController {
     if (!currentEmail.equals(newEmail)) {
       // System.out.println(userService.findById(id).get().getEmail());
       // System.out.println(profileRequest.getEmail());
-      authService.verifyUserEmailExists(profileRequest.getEmail());
+      userService.verifyUserEmailExists(profileRequest.getEmail());
     }
 
     if (userService.findById(id).isEmpty()) {

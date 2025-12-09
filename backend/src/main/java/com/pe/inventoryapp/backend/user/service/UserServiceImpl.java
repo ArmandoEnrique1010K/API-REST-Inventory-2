@@ -6,9 +6,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
@@ -73,9 +75,7 @@ public class UserServiceImpl implements UserService {
     }
 
     user.setRoles(roles);
-
     userRepository.save(user);
-
     return "Usuario registrado";
   }
 
@@ -95,30 +95,19 @@ public class UserServiceImpl implements UserService {
     return userRepository.findById(id).map(user -> UserMapper.builder().setUser(user).buildDetailUserResponse());
   }
 
-  // Busca un usuario por su email
-  @Override
-  @Transactional
-  public void remove(Long id) {
-    userRepository.deleteById(id);
-  }
-
-  // Actualiza el perfil del usuario (rol de usuario)
+  // Actualiza el perfil del usuario
   @Override
   @Transactional
   public String updateProfile(Long id, ProfileRequest profileRequest) {
-
-    // Buscar el usuario existente
     User user = userRepository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
 
-    // Actualizar los campos básicos
     user.setFirstname(profileRequest.getFirstname());
     user.setLastname(profileRequest.getLastname());
     user.setEmail(profileRequest.getEmail());
     user.setDni(profileRequest.getDni());
 
     userRepository.save(user);
-
     return "Su perfil ha sido actualizado";
   }
 
@@ -126,37 +115,35 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public String updatePassword(Long id, PasswordRequest passwordRequest) {
-
     User user = userRepository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
 
     String encodedPassword = passwordEncoderConfig.passwordEncoder().encode(passwordRequest.getNewPassword());
-
     user.setPassword(encodedPassword);
 
     userRepository.save(user);
     return "Contraseña del usuario actualizada";
   }
 
-  // Valida que la contraseña que el usuario ha ingresado, sea la misma que la
-  // constraseña actual
+  // Elimina un usuario del sistema
   @Override
-  @Transactional(readOnly = true)
-  public Boolean validatePassword(Long id, PasswordRequest passwordRequest) {
-    Optional<User> idUser = userRepository.findById(id);
-
-    if (idUser.isPresent()
-        && passwordEncoderConfig.passwordEncoder().matches(passwordRequest.getCurrentPassword(),
-            idUser.get().getPassword())) {
-      return true;
+  @Transactional
+  public void remove(Long id) {
+    Optional<User> optionalUser = userRepository.findById(id);
+    if (optionalUser.isPresent()) {
+      userRepository.deleteById(id);
     } else {
-      return false;
+      throw new EntityNotFoundException("Usuario no encontrado con ID: " + id);
     }
   }
 
+  // Verifica si el email del usuario ya existe, de lo contrario lanza una
+  // excepcion
   @Override
-  public User findUserById(Long id) {
-    return userRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+  @Transactional(readOnly = true)
+  public void verifyUserEmailExists(String email) {
+    if (userRepository.findByEmail(email).isPresent()) {
+      throw new FieldValidation("email", "El usuario con ese email ya existe, introduzca otro email");
+    }
   }
 }

@@ -17,7 +17,6 @@ import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.service.UserService;
 import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -46,10 +45,8 @@ public class AuthController {
   private UserTokenService userTokenService;
 
   @Autowired
-  private UserService userService;
-
-  @Autowired
   private MailerSendService mailerSendService;
+
   @Autowired
   private PasswordEncoderConfig passwordEncoderConfig;
 
@@ -105,7 +102,7 @@ public class AuthController {
     Long userId = userTokenService.findUserIdByUserToken(value);
 
     // ENCUENTRA AL USUARIO ACTUAL
-    User optionalUser = userService.findUserById(userId);
+    User optionalUser = authService.findUserById(userId);
 
     // Verifica que la nueva contraseña del usuario no sea la misma
 

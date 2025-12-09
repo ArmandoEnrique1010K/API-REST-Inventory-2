@@ -1,12 +1,13 @@
 package com.pe.inventoryapp.backend.auth.service;
 
+import com.pe.inventoryapp.backend.user.model.entity.User;
+
 public interface AuthService {
+  Long extracIdFromClaims(String header);
+
+  User findUserById(Long id);
 
   Long findIdByEmail(String email);
-
-  void verifyUserEmailExists(String email);
-
-  Long extracIdFromClaims(String header);
 
   boolean existsUserByEmail(String email);
 

@@ -23,5 +23,4 @@ public class TokenCleanupScheduler {
     System.out.println(LocalDateTime.now() + ": Comienza el borrado de tokens expirados.");
     tokenRepository.deleteAllExpiredTokens(LocalDateTime.now());
   }
-
 }
