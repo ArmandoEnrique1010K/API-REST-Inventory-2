@@ -102,6 +102,12 @@ public class LocationController {
           .body(responseService.generateCommonResponse("error", "La ubicación se encuentra desactivada"));
     }
 
+    // NO DEBE EDITAR LA UBICACION PRINCIPAL
+    if (id == 1) {
+      return ResponseEntity.status(400)
+          .body(responseService.generateCommonResponse("error", "No se puede actualizar esta ubicación"));
+    }
+
     String message = locationService.update(id, locationRequest);
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
 
@@ -109,6 +115,12 @@ public class LocationController {
 
   @PatchMapping("/status/{id}")
   public ResponseEntity<CommonResponse> disableLocation(@PathVariable Long id) {
+
+    if (id == 1) {
+      return ResponseEntity.status(400)
+          .body(responseService.generateCommonResponse("error", "No se puede cambiar el estado de esta ubicación"));
+    }
+
     locationService.changeStatus(id);
     return ResponseEntity.status(HttpStatus.ACCEPTED)
         .body(responseService.generateCommonResponse("success", "Se ha cambiado el estado del producto"));

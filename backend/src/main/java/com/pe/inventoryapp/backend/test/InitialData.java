@@ -6,7 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.pe.inventoryapp.backend.company.model.entity.Company;
+import com.pe.inventoryapp.backend.company.repository.CompanyRepository;
+import com.pe.inventoryapp.backend.organization.model.entity.Location;
 import com.pe.inventoryapp.backend.organization.model.entity.Region;
+import com.pe.inventoryapp.backend.organization.repository.LocationRepository;
 import com.pe.inventoryapp.backend.organization.repository.RegionRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
@@ -34,6 +38,12 @@ public class InitialData {
 
   @Autowired
   private RegionRepository regionRepository;
+
+  @Autowired
+  private LocationRepository locationRepository;
+
+  @Autowired
+  private CompanyRepository companyRepository;
 
   @PostConstruct
   public void init() {
@@ -87,5 +97,21 @@ public class InitialData {
       regionRepository.save(region);
     }
 
+    // La ubicación por defecto (representa "sin ubicación")
+    if (locationRepository.findByName("Sin ubicación").isEmpty()) {
+      Location location = new Location();
+      location.setName("Sin ubicación");
+      location.setRegion(regionRepository.findByName("Sin región").get());
+      ;
+      location.setStatus(true);
+      locationRepository.save(location);
+    }
+
+    // Una empresa por defecto (representa "propia de la empresa")
+    if (companyRepository.findByName("Propia de la empresa").isEmpty()) {
+      Company company = new Company();
+      company.setName("Propia de la empresa");
+      companyRepository.save(company);
+    }
   }
 }

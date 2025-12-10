@@ -96,7 +96,7 @@ public class ProductController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> putMethodName(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest,
+  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest,
       BindingResult result) {
 
     validationService.validateFieldsAndThrowResponse(result);

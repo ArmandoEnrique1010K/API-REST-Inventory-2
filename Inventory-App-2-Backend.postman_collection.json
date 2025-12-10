@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n{\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"password\": \"1233asdE\"\r\n}\r\n",
+							"raw": "// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n{\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"password\": \"1233asdD\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -40,7 +40,7 @@
 					"response": []
 				},
 				{
-					"name": "ForgotPassword",
+					"name": "forgotPassword",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -70,13 +70,13 @@
 					"response": []
 				},
 				{
-					"name": "ValidateToken",
+					"name": "validateToken",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"value\": \"642699\"\r\n}",
+							"raw": "{\r\n    \"value\": \"126552\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -100,13 +100,13 @@
 					"response": []
 				},
 				{
-					"name": "ChangePassword",
+					"name": "changePassword",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"newPassword\": \"1233asdE\"\r\n}",
+							"raw": "{\r\n    \"newPassword\": \"1233asdD\",\r\n    \"confirmNewPassword\": \"1233asdD\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,7 +114,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/auth/change-password/642699",
+							"raw": "http://localhost:8080/api/auth/change-password/126552",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -124,7 +124,7 @@
 								"api",
 								"auth",
 								"change-password",
-								"642699"
+								"126552"
 							]
 						}
 					},
@@ -143,7 +143,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzYyMTIwNjkxLCJleHAiOjE3NjIxMjQyOTF9.Frc00Q1uYtYmYJ_BN8qULLC7of-y7y4fTNiQ6QbboZI",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY1MzA3MjIwLCJleHAiOjE3NjUzMTA4MjB9.BBSsmUglsMpyu0ZUCCBLBM94V81H2ii4XUA3QVerwts",
 									"type": "string"
 								}
 							]
@@ -152,7 +152,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstname\": \"A\",\r\n    \"lastname\": \"3324\",\r\n    \"email\": \"correo111233@correo.com\",\r\n    \"dni\": \"12345678\",\r\n    \"password\": \"1233asdW\",\r\n    \"isManager\": false,\r\n    \"isAdmin\": false\r\n}",
+							"raw": "{\r\n    \"firstname\": \"Armando\",\r\n    \"lastname\": \"Rnrique\",\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"dni\": \"12345678\",\r\n    \"password\": \"1233asdW\",\r\n    \"isManager\": false,\r\n    \"isAdmin\": false\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -160,7 +160,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/auth/register",
+							"raw": "http://localhost:8080/api/users/register",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -168,7 +168,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"auth",
+								"users",
 								"register"
 							]
 						}
@@ -179,7 +179,14 @@
 					"name": "listAll",
 					"request": {
 						"auth": {
-							"type": "noauth"
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY1MzA3NjkxLCJleHAiOjE3NjUzMTEyOTF9.R99x5SeBgkXLq769Sicsf0WFiUOZ8j2WU3InSROQxCY",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"header": [],
@@ -206,7 +213,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzYxNzExMDY5LCJleHAiOjE3NjE3MTQ2Njl9.G-jmlasWlyUnLPx8UBf_eQqbrJjF7d2rGNzLQGxpsCc",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTcxMCwiZXhwIjoxNzY1MzI1MzEwfQ.x8m_NYPAGlZQ-w60MTVWcEqUjIMk1fNFiJ_ryzgwueM",
 									"type": "string"
 								}
 							]
@@ -237,7 +244,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWQiOjQsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE3NjIxMDM2NjIsImV4cCI6MTc2MjEwNzI2Mn0.LJ58ZQeEZilXmGTklGu8IPMW41-c0uzBQqnQqV5zEe0",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTg1MiwiZXhwIjoxNzY1MzI1NDUyfQ.8Ok3-mhjaKPiRvxXxbJwv9qwHOAVWDbU75IXcr7izIk",
 									"type": "string"
 								}
 							]
@@ -246,7 +253,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstname\": \"Usuario editado\",\r\n    \"lastname\": \"Apellido nuevo\",\r\n    \"email\": \"correonuevo2@correo.com\",\r\n    \"dni\": 11111111\r\n}",
+							"raw": "{\r\n    \"firstname\": \"Primer usuario\",\r\n    \"lastname\": \"De prueba\",\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"dni\": 11111111\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -254,7 +261,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/users/update-profile",
+							"raw": "http://localhost:8080/api/users/profile",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -263,7 +270,7 @@
 							"path": [
 								"api",
 								"users",
-								"update-profile"
+								"profile"
 							]
 						}
 					},
@@ -277,7 +284,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWQiOjQsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE3NjIxMDQyMzcsImV4cCI6MTc2MjEwNzgzN30.i4a2pgD0OUeKXK_vLRn5kEEuZprvBEIBqqwQHEyL6Ek",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTg1MiwiZXhwIjoxNzY1MzI1NDUyfQ.8Ok3-mhjaKPiRvxXxbJwv9qwHOAVWDbU75IXcr7izIk",
 									"type": "string"
 								}
 							]
@@ -286,7 +293,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"currentPassword\": \"12345678aB\",\r\n    \"newPassword\": \"12345678aA\",\r\n    \"confirmPassword\": \"12345678aA\"\r\n}",
+							"raw": "{\r\n    \"currentPassword\": \"12345\",\r\n    \"newPassword\": \"12345678aA\",\r\n    \"confirmPassword\": \"12345678aA\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -317,7 +324,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0IiwiaWQiOjQsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE3NjIxMDQyMzcsImV4cCI6MTc2MjEwNzgzN30.i4a2pgD0OUeKXK_vLRn5kEEuZprvBEIBqqwQHEyL6Ek",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY1MzA3NjkxLCJleHAiOjE3NjUzMTEyOTF9.R99x5SeBgkXLq769Sicsf0WFiUOZ8j2WU3InSROQxCY",
 									"type": "string"
 								}
 							]
@@ -334,7 +341,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/users/1",
+							"raw": "http://localhost:8080/api/users/9",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -343,7 +350,7 @@
 							"path": [
 								"api",
 								"users",
-								"1"
+								"9"
 							]
 						}
 					},
@@ -361,7 +368,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"categoria 21212213\"\r\n}",
+							"raw": "{\r\n    \"name\": \"NUEVA CATEGORIA\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -425,21 +432,12 @@
 					"response": []
 				},
 				{
-					"name": "update",
+					"name": "getById",
 					"request": {
-						"method": "PUT",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"categoria de 3 1231453\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:8080/api/category/13",
+							"raw": "http://localhost:8080/api/category/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -448,7 +446,37 @@
 							"path": [
 								"api",
 								"category",
-								"13"
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Sin categoria\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/category/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"category",
+								"1"
 							]
 						}
 					},
@@ -460,7 +488,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/category/status/13",
+							"raw": "http://localhost:8080/api/category/status/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -470,7 +498,7 @@
 								"api",
 								"category",
 								"status",
-								"13"
+								"2"
 							]
 						}
 					},
@@ -488,7 +516,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"42er\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"\",\r\n    \"width\": \"\",\r\n    \"height\": \"\",\r\n    \"stock\": \"100\",\r\n    \"imageUrl\": \"\",\r\n    \"idCategory\": 1\r\n}",
+							"raw": "{\r\n    \"name\": \"Producto de prueba 99\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"30\",\r\n    \"width\": \"10.2\",\r\n    \"imageUrl\": \"\",\r\n    \"idCategory\": 1\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -513,6 +541,9 @@
 				{
 					"name": "listAll",
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -564,21 +595,22 @@
 					"response": []
 				},
 				{
-					"name": "update",
+					"name": "searchAllActive",
 					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"producto 21\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"\",\r\n    \"width\": \"\",\r\n    \"height\": \"\",\r\n    \"stock\": \"100\",\r\n    \"imageUrl\": \"\",\r\n    \"idCategory\": 1\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTg1MiwiZXhwIjoxNzY1MzI1NDUyfQ.8Ok3-mhjaKPiRvxXxbJwv9qwHOAVWDbU75IXcr7izIk",
+									"type": "string"
 								}
-							}
+							]
 						},
+						"method": "GET",
+						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/product/3",
+							"raw": "http://localhost:8080/api/product/search?page=0&name=Producto",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -587,7 +619,47 @@
 							"path": [
 								"api",
 								"product",
-								"3"
+								"search"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "name",
+									"value": "Producto"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"producto de prueba 1 2132\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"\",\r\n    \"width\": \"\",\r\n    \"imageUrl\": \"texto\",\r\n    \"idCategory\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/product/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"2"
 							]
 						}
 					},
@@ -599,7 +671,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/product/status/1",
+							"raw": "http://localhost:8080/api/product/status/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -609,7 +681,95 @@
 								"api",
 								"product",
 								"status",
-								"1"
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "REGION",
+			"item": [
+				{
+					"name": "listAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/region",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"region"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "saveRegion",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"norte\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/region",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"region"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LOCATION",
+			"item": [
+				{
+					"name": "save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Lima 3\",\r\n    \"idRegion\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/location",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location"
 							]
 						}
 					},
