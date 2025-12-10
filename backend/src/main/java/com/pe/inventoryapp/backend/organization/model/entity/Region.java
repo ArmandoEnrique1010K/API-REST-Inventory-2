@@ -1,6 +1,5 @@
-package com.pe.inventoryapp.backend.logistics.model.entity;
+package com.pe.inventoryapp.backend.organization.model.entity;
 
-import com.pe.inventoryapp.backend.product.model.entity.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,16 +13,15 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ubicaciones")
-public class Location {
+@Table(name = "regiones")
+public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "region_id")
-    private Region region;
+    @OneToMany(mappedBy = "region")
+    private List<Location> locations;
 
 }

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.pe.inventoryapp.backend.organization.model.entity.Region;
+import com.pe.inventoryapp.backend.organization.repository.RegionRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
@@ -29,6 +31,9 @@ public class InitialData {
 
   @Autowired
   private CategoryRepository categoryRepository;
+
+  @Autowired
+  private RegionRepository regionRepository;
 
   @PostConstruct
   public void init() {
@@ -73,6 +78,13 @@ public class InitialData {
       category.setName("Sin categoria");
       category.setStatus(true);
       categoryRepository.save(category);
+    }
+
+    // La región por defecto (representa "sin región")
+    if (regionRepository.findByName("Sin región").isEmpty()) {
+      Region region = new Region();
+      region.setName("Sin región");
+      regionRepository.save(region);
     }
 
   }

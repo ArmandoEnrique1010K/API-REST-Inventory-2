@@ -50,6 +50,11 @@ public class CategoryController {
     return categoryService.findAllByStatusTrue();
   }
 
+  @GetMapping("/{id}")
+  public Optional<CategoryResponse> findById(@PathVariable Long id) {
+    return categoryService.findById(id);
+  }
+
   @PostMapping
   public ResponseEntity<CommonResponse> saveCategory(@Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
@@ -89,6 +94,11 @@ public class CategoryController {
     if (optionalCategoryResponse.get().isStatus() == false) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "La categoria se encuentra desactivada"));
+    }
+
+    if (id == 1) {
+      return ResponseEntity.status(400)
+          .body(responseService.generateCommonResponse("error", "No se puede actualizar esta categoria"));
     }
 
     String message = categoryService.update(id, categoryRequest);

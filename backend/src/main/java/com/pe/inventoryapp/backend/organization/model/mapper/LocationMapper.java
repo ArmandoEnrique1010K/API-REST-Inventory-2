@@ -1,7 +1,7 @@
-package com.pe.inventoryapp.backend.logistics.model.mapper;
+package com.pe.inventoryapp.backend.organization.model.mapper;
 
-import com.pe.inventoryapp.backend.logistics.model.entity.Location;
-import com.pe.inventoryapp.backend.logistics.model.response.LocationResponse;
+import com.pe.inventoryapp.backend.organization.model.entity.Location;
+import com.pe.inventoryapp.backend.organization.model.response.LocationResponse;
 
 public class LocationMapper {
     private Location location;
@@ -27,8 +27,7 @@ public class LocationMapper {
         return new LocationResponse(
                 location.getId(),
                 location.getName().trim(),
-                location.getRegion().getName().trim()
-        );
+                location.getRegion().getName().trim());
     }
 
 }

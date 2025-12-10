@@ -145,12 +145,11 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public Page<ProductListResponse> searchAll(String name, Pageable pageable) {
 
-    // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO
-
+    // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO PARA QUE OBTENGA SUS ROLES
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     boolean isAdmin = auth.getAuthorities().stream()
-        .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        .anyMatch(a -> a.getAuthority().equals("ROLE_OPERATOR"));
 
     Page<Product> products;
 

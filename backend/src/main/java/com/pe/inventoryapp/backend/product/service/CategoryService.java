@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
 import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
+import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
 
 public interface CategoryService {
   // Guarda una categoria

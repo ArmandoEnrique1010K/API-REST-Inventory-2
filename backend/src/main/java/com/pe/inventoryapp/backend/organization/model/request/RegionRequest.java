@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.logistics.model.request;
+package com.pe.inventoryapp.backend.organization.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.logistics.model.response;
+package com.pe.inventoryapp.backend.organization.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationResponse {
-    private Long id;
+public class LocationRequest {
     private String name;
     private String regionName;
 }
