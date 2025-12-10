@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationResponse {
-    private Long id;
-    private String name;
-    private String regionName;
+public class LocationListResponse {
+  private Long id;
+  private String name;
+  private boolean status;
 }

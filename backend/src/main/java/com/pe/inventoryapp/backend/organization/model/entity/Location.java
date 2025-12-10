@@ -23,4 +23,5 @@ public class Location {
     @JoinColumn(name = "region_id")
     private Region region;
 
+    private boolean status;
 }

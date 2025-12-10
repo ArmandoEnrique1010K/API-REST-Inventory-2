@@ -29,7 +29,6 @@ public class RegionServiceImpl implements RegionService {
 
     regionRepository.save(region);
     return "Se guardo la región";
-
   }
 
   @Override
