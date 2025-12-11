@@ -25,6 +25,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.pe.inventoryapp.backend.movement.models.entity.Movement;
+
 @Entity
 @Builder
 @Data
@@ -62,6 +64,9 @@ public class User {
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<UserToken> tokens;
+
+  @OneToMany(mappedBy = "user")
+  private List<Movement> movements;
 
   @Transient
   private boolean isOperator;

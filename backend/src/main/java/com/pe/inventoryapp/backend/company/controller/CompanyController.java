@@ -22,8 +22,6 @@ import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.company.model.request.CompanyRequest;
 import com.pe.inventoryapp.backend.company.model.response.CompanyResponse;
 import com.pe.inventoryapp.backend.company.service.CompanyService;
-import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
-import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
 
 import jakarta.validation.Valid;
 
