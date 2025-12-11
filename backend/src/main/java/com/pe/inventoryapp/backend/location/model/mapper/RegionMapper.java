@@ -1,7 +1,7 @@
-package com.pe.inventoryapp.backend.organization.model.mapper;
+package com.pe.inventoryapp.backend.location.model.mapper;
 
-import com.pe.inventoryapp.backend.organization.model.entity.Region;
-import com.pe.inventoryapp.backend.organization.model.response.RegionResponse;
+import com.pe.inventoryapp.backend.location.model.entity.Region;
+import com.pe.inventoryapp.backend.location.model.response.RegionResponse;
 
 public class RegionMapper {
     private Region region;

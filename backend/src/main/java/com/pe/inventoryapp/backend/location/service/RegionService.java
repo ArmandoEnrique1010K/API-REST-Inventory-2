@@ -1,10 +1,10 @@
-package com.pe.inventoryapp.backend.organization.service;
-
-import com.pe.inventoryapp.backend.organization.model.request.RegionRequest;
-import com.pe.inventoryapp.backend.organization.model.response.RegionResponse;
+package com.pe.inventoryapp.backend.location.service;
 
 import java.util.List;
 import java.util.Optional;
+
+import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
+import com.pe.inventoryapp.backend.location.model.response.RegionResponse;
 
 public interface RegionService {
     // Guarda una region

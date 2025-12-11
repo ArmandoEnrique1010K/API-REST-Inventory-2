@@ -1,11 +1,11 @@
-package com.pe.inventoryapp.backend.organization.service;
+package com.pe.inventoryapp.backend.location.service;
 
 import java.util.List;
 import java.util.Optional;
 
-import com.pe.inventoryapp.backend.organization.model.request.LocationRequest;
-import com.pe.inventoryapp.backend.organization.model.response.LocationDetailsResponse;
-import com.pe.inventoryapp.backend.organization.model.response.LocationListResponse;
+import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
+import com.pe.inventoryapp.backend.location.model.response.LocationDetailsResponse;
+import com.pe.inventoryapp.backend.location.model.response.LocationListResponse;
 
 public interface LocationService {
 

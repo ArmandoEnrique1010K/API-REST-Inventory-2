@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.organization.service;
+package com.pe.inventoryapp.backend.location.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
-import com.pe.inventoryapp.backend.organization.model.entity.Region;
-import com.pe.inventoryapp.backend.organization.model.mapper.RegionMapper;
-import com.pe.inventoryapp.backend.organization.model.request.RegionRequest;
-import com.pe.inventoryapp.backend.organization.model.response.RegionResponse;
-import com.pe.inventoryapp.backend.organization.repository.RegionRepository;
+import com.pe.inventoryapp.backend.location.model.entity.Region;
+import com.pe.inventoryapp.backend.location.model.mapper.RegionMapper;
+import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
+import com.pe.inventoryapp.backend.location.model.response.RegionResponse;
+import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 
 @Service
 public class RegionServiceImpl implements RegionService {

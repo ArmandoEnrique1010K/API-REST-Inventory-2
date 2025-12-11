@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.organization.model.entity;
+package com.pe.inventoryapp.backend.location.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

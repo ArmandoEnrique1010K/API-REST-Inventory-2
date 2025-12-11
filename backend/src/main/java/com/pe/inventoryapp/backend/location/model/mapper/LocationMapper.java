@@ -1,8 +1,8 @@
-package com.pe.inventoryapp.backend.organization.model.mapper;
+package com.pe.inventoryapp.backend.location.model.mapper;
 
-import com.pe.inventoryapp.backend.organization.model.entity.Location;
-import com.pe.inventoryapp.backend.organization.model.response.LocationDetailsResponse;
-import com.pe.inventoryapp.backend.organization.model.response.LocationListResponse;
+import com.pe.inventoryapp.backend.location.model.entity.Location;
+import com.pe.inventoryapp.backend.location.model.response.LocationDetailsResponse;
+import com.pe.inventoryapp.backend.location.model.response.LocationListResponse;
 
 public class LocationMapper {
     private Location location;

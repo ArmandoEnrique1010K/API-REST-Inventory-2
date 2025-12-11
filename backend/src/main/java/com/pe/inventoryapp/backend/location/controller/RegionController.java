@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.organization.controller;
+package com.pe.inventoryapp.backend.location.controller;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +21,9 @@ import org.springframework.web.server.ResponseStatusException;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.organization.model.request.RegionRequest;
-import com.pe.inventoryapp.backend.organization.model.response.RegionResponse;
-import com.pe.inventoryapp.backend.organization.service.RegionService;
+import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
+import com.pe.inventoryapp.backend.location.model.response.RegionResponse;
+import com.pe.inventoryapp.backend.location.service.RegionService;
 import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
 
 import jakarta.validation.Valid;

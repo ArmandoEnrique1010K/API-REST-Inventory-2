@@ -1,10 +1,10 @@
-package com.pe.inventoryapp.backend.organization.repository;
+package com.pe.inventoryapp.backend.location.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.pe.inventoryapp.backend.organization.model.entity.Region;
+import com.pe.inventoryapp.backend.location.model.entity.Region;
 
 public interface RegionRepository extends JpaRepository<Region, Long> {
 
