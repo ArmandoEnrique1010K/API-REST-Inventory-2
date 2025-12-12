@@ -37,7 +37,7 @@ public class RegisterRequest {
   @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]+$", message = "La contraseña debe contener al menos una letra mayúscula, una letra minúscula y un número, sin caracteres especiales")
   private String password;
 
-  // TODO: INVESTIGAR SI SE PUEDEN VALIDAR CAMPOS BOOLEANOS
-  private boolean isManager;
+  private boolean isOperator;
+  private boolean isSecretary;
   private boolean isAdmin;
 }

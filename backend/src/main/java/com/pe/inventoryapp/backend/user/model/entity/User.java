@@ -11,7 +11,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
@@ -25,6 +24,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.models.entity.Movement;
 
 @Entity
@@ -68,9 +68,6 @@ public class User {
   @OneToMany(mappedBy = "user")
   private List<Movement> movements;
 
-  @Transient
-  private boolean isOperator;
-
-  @Transient
-  private boolean isAdmin;
+  @OneToMany(mappedBy = "user")
+  private List<DeliveryOrder> deliveryOrders;
 }

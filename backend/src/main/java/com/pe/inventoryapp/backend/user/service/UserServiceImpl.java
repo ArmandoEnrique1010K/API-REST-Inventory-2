@@ -40,16 +40,29 @@ public class UserServiceImpl implements UserService {
   @Transactional
   @Override
   public String register(RegisterRequest registerRequest) {
-    Optional<Role> rol = roleRepository.findByName("ROLE_USER");
-
-    if (!rol.isPresent()) {
-      throw new IllegalStateException("El rol 'usuario' no existe en el sistema");
-    }
-
     List<Role> roles = new ArrayList<>();
 
-    if (rol.isPresent()) {
-      roles.add(rol.orElseThrow());
+    // Rol base siempre
+    Role baseRole = roleRepository.findByName("ROLE_USER")
+        .orElseThrow(() -> new IllegalStateException("ROLE_USER no existe"));
+    roles.add(baseRole);
+
+    if (registerRequest.isOperator()) {
+      Role managerRole = roleRepository.findByName("ROLE_OPERATOR")
+          .orElseThrow(() -> new IllegalStateException("ROLE_OPERATOR no existe"));
+      roles.add(managerRole);
+    }
+
+    if (registerRequest.isSecretary()) {
+      Role managerRole = roleRepository.findByName("ROLE_SECRETARY")
+          .orElseThrow(() -> new IllegalStateException("ROLE_SECRETARY no existe"));
+      roles.add(managerRole);
+    }
+
+    if (registerRequest.isAdmin()) {
+      Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+          .orElseThrow(() -> new IllegalStateException("ROLE_ADMIN no existe"));
+      roles.add(adminRole);
     }
 
     User user = new User();
@@ -58,21 +71,6 @@ public class UserServiceImpl implements UserService {
     user.setEmail(registerRequest.getEmail());
     user.setPassword(passwordEncoderConfig.passwordEncoder().encode(registerRequest.getPassword()));
     user.setDni(registerRequest.getDni());
-
-    if (user.isOperator()) {
-      Optional<Role> optionalAdmin = roleRepository.findByName("ROLE_OPERATOR");
-      if (optionalAdmin.isPresent()) {
-        roles.add(optionalAdmin.orElseThrow());
-      }
-    }
-
-    if (user.isAdmin()) {
-      Optional<Role> optionalManager = roleRepository.findByName("ROLE_ADMIN");
-      if (optionalManager.isPresent()) {
-        roles.add(optionalManager.orElseThrow());
-      }
-    }
-
     user.setRoles(roles);
     userRepository.save(user);
     return "Usuario registrado";
