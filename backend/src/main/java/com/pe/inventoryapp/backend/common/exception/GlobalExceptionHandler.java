@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
 
     CommonResponse commonResponse = new CommonResponse();
     commonResponse.setType("error_invalid_id");
-    commonResponse.setMessage("Error de tipo de dato");
+    commonResponse.setMessage("Error de tipo de dato " + ex);
 
     // Map<String, String> errors = new HashMap<>();
     // errors.put("id", "ID inválido, debe ser un número.");

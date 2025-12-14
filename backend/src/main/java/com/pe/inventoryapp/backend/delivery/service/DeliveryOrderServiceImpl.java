@@ -1,11 +1,14 @@
 package com.pe.inventoryapp.backend.delivery.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
@@ -78,6 +81,21 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
         .map(
             deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse())
         .collect(Collectors.toList());
+
+  }
+
+  @Override
+  public Page<DeliveryOrderResponse> findAllDeliveryOrdersByParams(Pageable pageable,
+      PreparationStatus status,
+      String createdByUser, String batch, Integer minQuantity,
+      Integer maxQuantity, LocalDateTime startDate, LocalDateTime endDate) {
+    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(pageable, status,
+        createdByUser, batch, minQuantity, maxQuantity, startDate, endDate);
+
+    return deliveryOrders
+        .map(
+            deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+                .buildDeliveryOrderResponse());
 
   }
 

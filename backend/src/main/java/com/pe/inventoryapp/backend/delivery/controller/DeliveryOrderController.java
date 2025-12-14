@@ -1,9 +1,15 @@
 package com.pe.inventoryapp.backend.delivery.controller;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -81,7 +87,6 @@ public class DeliveryOrderController {
         .body(responseService.generateCommonResponse("success", deliveryOrder));
   }
 
-  // TODO: UTILIZAR PÁGINACIÓN
   @GetMapping("/all")
   public List<?> listAll() {
     return deliveryOrderService.findAll();
@@ -91,6 +96,22 @@ public class DeliveryOrderController {
   @GetMapping("/pending")
   public List<?> listAllPending() {
     return deliveryOrderService.findAllByPreparationStatus(PreparationStatus.INPROGRESS);
+  }
+
+  @GetMapping("/search")
+  public Page<DeliveryOrderResponse> findAllByParams(@RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) PreparationStatus status,
+      @RequestParam(required = false) String createdByUser,
+      @RequestParam(required = false) String batch,
+      @RequestParam(required = false) Integer minQuantity,
+      @RequestParam(required = false) Integer maxQuantity,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+
+    Pageable pageable = PageRequest.of(page, 10);
+
+    return deliveryOrderService.findAllDeliveryOrdersByParams(pageable, status, createdByUser, batch, minQuantity,
+        maxQuantity, startDate, endDate);
   }
 
   @GetMapping("/{id}")
