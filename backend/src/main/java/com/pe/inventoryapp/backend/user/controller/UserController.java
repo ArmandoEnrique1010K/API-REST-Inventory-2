@@ -72,7 +72,7 @@ public class UserController {
   @GetMapping("/profile")
   public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String header) {
     Long id = authService.extractUserIdFromClaims(header);
-    Optional<DetailUserResponse> user = userService.findById(id);
+    Optional<DetailUserResponse> user = userService.findUserById(id);
     return ResponseEntity.ok(user);
   }
 
@@ -85,7 +85,7 @@ public class UserController {
     // Validar campos
     validationService.validateFieldsAndThrowResponse(result);
 
-    String currentEmail = userService.findById(id).get().getEmail();
+    String currentEmail = userService.findUserById(id).get().getEmail();
     String newEmail = profileRequest.getEmail();
 
     // Verificar que el usuario no haya modificado su email
@@ -93,12 +93,12 @@ public class UserController {
 
     // No usar el operador !=, en su lugar utiliza el metodo equals
     if (!currentEmail.equals(newEmail)) {
-      // System.out.println(userService.findById(id).get().getEmail());
+      // System.out.println(userService.findUserById(id).get().getEmail());
       // System.out.println(profileRequest.getEmail());
       userService.verifyUserEmailExists(profileRequest.getEmail());
     }
 
-    if (userService.findById(id).isEmpty()) {
+    if (userService.findUserById(id).isEmpty()) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "El usuario no existe"));
     }
@@ -114,7 +114,7 @@ public class UserController {
     Long id = authService.extractUserIdFromClaims(header);
     validationService.validateFieldsAndThrowResponse(result);
 
-    Optional<DetailUserResponse> optionalUser = userService.findById(id);
+    Optional<DetailUserResponse> optionalUser = userService.findUserById(id);
 
     // Si el usuario ya no existe
     if (optionalUser.isEmpty()) {
@@ -142,7 +142,7 @@ public class UserController {
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
 
-    if (userService.findById(id).isEmpty()) {
+    if (userService.findUserById(id).isEmpty()) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "El usuario no existe"));
     }

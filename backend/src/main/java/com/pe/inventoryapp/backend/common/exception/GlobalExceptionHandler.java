@@ -59,28 +59,16 @@ public class GlobalExceptionHandler {
         "Ha ocurrido un error, la entidad no encontrada");
   }
 
-  @ExceptionHandler(InvalidPassword.class)
-  public ResponseEntity<CommonResponse> handleInvalidPasswrd() {
-    return buildCommonError(
-        ErrorCode.PASSWORD_REUSE_NOT_ALLOWED,
-        ErrorCode.PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage());
+  @ExceptionHandler(BusinessException.class)
+  public ResponseEntity<CommonResponse> handleBusiness(BusinessException ex) {
 
-  }// return buildCommonError(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED, ErrorCode.
-   // PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage()); }
+    ErrorCode code = ex.getErrorCode();
 
-  @ExceptionHandler(PasswordMismatch.class)
-  public ResponseEntity<CommonResponse> handleMismatchPassword() {
-    return buildCommonError(
-        ErrorCode.PASSWORD_MISMATCH,
-        ErrorCode.PASSWORD_MISMATCH.getDefaultMessage());
+    CommonResponse response = new CommonResponse();
+    response.setCode(code.name());
+    response.setMessage(ex.getMessage());
 
-  }// return buildCommonError(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED, ErrorCode.
-
-  @ExceptionHandler(InvalidToken.class)
-  public ResponseEntity<CommonResponse> handleInvalidToken() {
-    return buildCommonError(
-        ErrorCode.INVALID_ID,
-        "Token inválido, vuelva a intentarlo");
+    return ResponseEntity.status(code.getStatus()).body(response);
   }
 
   // Helpers auxiliares

@@ -14,7 +14,7 @@ public interface UserService {
 
   List<ListUsersResponse> findAll();
 
-  Optional<DetailUserResponse> findById(Long id);
+  Optional<DetailUserResponse> findUserById(Long id);
 
   String updateProfile(Long id, ProfileRequest profileRequest);
 

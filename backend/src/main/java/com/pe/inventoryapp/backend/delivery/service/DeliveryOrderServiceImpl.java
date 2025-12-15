@@ -35,7 +35,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public String save(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    Optional<DetailUserResponse> user = userService.findById(id_user);
+    Optional<DetailUserResponse> user = userService.findUserById(id_user);
     String username = user.get().getFirstname() + " " + user.get().getLastname();
 
     DeliveryOrder deliveryOrder = new DeliveryOrder();

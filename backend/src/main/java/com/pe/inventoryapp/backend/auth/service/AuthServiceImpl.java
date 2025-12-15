@@ -11,9 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.common.data.ErrorCode;
-import com.pe.inventoryapp.backend.common.exception.InvalidPassword;
-import com.pe.inventoryapp.backend.common.exception.InvalidToken;
-import com.pe.inventoryapp.backend.common.exception.PasswordMismatch;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.ResourceNotFound;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
@@ -24,7 +22,6 @@ import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -58,14 +55,6 @@ public class AuthServiceImpl implements AuthService {
     return id;
   }
 
-  // Obtiene el usuario por su id
-  @Override
-  @Transactional(readOnly = true)
-  public User findUserById(Long id) {
-    return userRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID:" + id));
-  }
-
   // Obtiene el id del usuario por su email
   @Override
   @Transactional(readOnly = true)
@@ -73,16 +62,6 @@ public class AuthServiceImpl implements AuthService {
     return userRepository.findByEmail(email)
         .map(User::getId)
         .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
-  }
-
-  // Verifica si el email del usuario existe (devuelve true o false)
-  @Override
-  @Transactional(readOnly = true)
-  public boolean existsUserByEmail(String email) {
-    if (userRepository.findByEmail(email).isPresent()) {
-      return true;
-    }
-    return false;
   }
 
   // Cambia la contraseña actual del usuario y lo guarda (si el usuario no se
@@ -97,12 +76,6 @@ public class AuthServiceImpl implements AuthService {
         userId)
         .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-    System.out.println(user.getPassword());
-    System.out.println(changePasswordRequest.getNewPassword());
-    System.out.println(
-        passwordEncoderConfig.passwordEncoder().matches(changePasswordRequest.getNewPassword(), user.getPassword()));
-    System.out.println(changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword()));
-
     String newPassword = changePasswordRequest.getNewPassword();
     String confirmPassword = changePasswordRequest.getConfirmNewPassword();
 
@@ -110,26 +83,25 @@ public class AuthServiceImpl implements AuthService {
     // son iguales
     if (!newPassword.equals(confirmPassword)) {
       System.out.println("No son iguales");
-      throw new PasswordMismatch("");
+      throw new BusinessException(ErrorCode.PASSWORD_MISMATCH, ErrorCode.PASSWORD_MISMATCH.getDefaultMessage());
     }
 
     // 2° verificar si la nueva contraseña es igual a la anterior
     if (passwordEncoderConfig.passwordEncoder().matches(newPassword, user.getPassword())) {
       System.out.println("La nueva contraseña es igual a la anterior");
-      throw new InvalidPassword(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage());
+      throw new BusinessException(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED,
+          ErrorCode.PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage());
     }
 
     user.setPassword(passwordEncoderConfig.passwordEncoder().encode(
         changePasswordRequest.getConfirmNewPassword()));
 
     userRepository.save(user);
-
-    // TODO: ACTIVAR ESTO
-    // userTokenService.invalidateToken(token);
+    userTokenService.invalidateToken(token);
   }
 
   @Override
-  public DetailUserResponse findById(Long id) {
+  public DetailUserResponse findUserById(Long id) {
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new RuntimeException());
@@ -163,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
   public void validateResetToken(String token) {
 
     if (!userTokenService.isTokenValid(token)) {
-      throw new InvalidToken("El token no existe o ha caducado");
+      throw new BusinessException(ErrorCode.TOKEN_EXPIRED, ErrorCode.TOKEN_EXPIRED.getDefaultMessage());
     }
   }
 

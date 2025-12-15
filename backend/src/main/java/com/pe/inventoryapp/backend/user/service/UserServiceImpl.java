@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
   // Busca un usuario por su ID
   @Override
   @Transactional(readOnly = true)
-  public Optional<DetailUserResponse> findById(Long id) {
+  public Optional<DetailUserResponse> findUserById(Long id) {
     return userRepository.findById(id).map(user -> UserMapper.builder().setUser(user).buildDetailUserResponse());
   }
 
