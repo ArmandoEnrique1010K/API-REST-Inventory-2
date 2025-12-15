@@ -28,8 +28,8 @@ public class UserToken {
   private String token;
 
   private LocalDateTime expirationTime;
+
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
-
 }

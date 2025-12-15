@@ -42,5 +42,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         true,
         authorities);
   }
-
 }

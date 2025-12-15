@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.auth.models.response;
+package com.pe.inventoryapp.backend.auth.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

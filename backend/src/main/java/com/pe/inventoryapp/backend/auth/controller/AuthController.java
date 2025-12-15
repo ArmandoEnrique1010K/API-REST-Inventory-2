@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.auth.controllers;
+package com.pe.inventoryapp.backend.auth.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pe.inventoryapp.backend.auth.models.request.ChangePasswordRequest;
-import com.pe.inventoryapp.backend.auth.models.request.ForgotPasswordRequest;
-import com.pe.inventoryapp.backend.auth.models.request.ValidateTokenRequest;
+import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
+import com.pe.inventoryapp.backend.auth.model.request.ForgotPasswordRequest;
+import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.auth.service.MailerSendService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
@@ -19,13 +19,14 @@ import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -92,7 +93,7 @@ public class AuthController {
 
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
   // REQUIERE QUE EL TOKEN SEA VALIDADO
-  @PostMapping("/change-password/{value}")
+  @PutMapping("/change-password/{value}")
   public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
       BindingResult result,
       @PathVariable String value) {
@@ -133,12 +134,11 @@ public class AuthController {
             "Ha cambiado su contraseña, puede iniciar sesión con la nueva  contraseña"));
   }
 
-  @GetMapping("/test-dotenv")
-  public String getEnvironmentVariable() {
-    Dotenv dotenv = Dotenv.load();
-    String valor = dotenv.get("MY_TEST_ENV_VAR"); // Guardas el valor
-    return valor;
+  @GetMapping("/{id}")
+  public ResponseEntity<?> findById(@PathVariable Long id) {
+    return ResponseEntity.status(HttpStatus.OK).body(authService.findUserById(id));
   }
+
 }
 // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
 // 1. Envia un correo al email del usuario con un token

@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.auth.models.request;
+package com.pe.inventoryapp.backend.auth.model.request;
 
 import lombok.NoArgsConstructor;
 import lombok.Data;
@@ -15,6 +15,6 @@ import jakarta.validation.constraints.Email;
 public class ForgotPasswordRequest {
   @NotBlank(message = "El correo es obligatorio")
   @Email(message = "El correo no tiene el formato adecuado")
-  @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|hotmail\\.com|outlook\\.com)$", message = "El correo debe ser Gmail, Hotmail u Outlook")
+  @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|hotmail\\.com|outlook\\.com)$", message = "El correo debe pertenecer a Gmail, Hotmail u Outlook")
   private String email;
 }

@@ -61,7 +61,7 @@ public class DeliveryOrderController {
           .body(responseService.generateCommonResponse("error", "Falta el token de autorización"));
     }
 
-    Long id_user = authService.extracIdFromClaims(header);
+    Long id_user = authService.extractIdUserFromClaims(header);
 
     if (id_user == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

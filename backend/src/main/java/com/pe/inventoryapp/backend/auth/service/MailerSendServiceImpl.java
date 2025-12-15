@@ -22,16 +22,20 @@ public class MailerSendServiceImpl implements MailerSendService {
     String apiKey = dotenv.get("MAILERSEND_API_TOKEN");
     String testDomain = dotenv.get("MAILERSEND_TEST_DOMAIN");
 
+    System.out.println(apiKey);
+    System.out.println(testDomain);
+
     ms.setToken(apiKey);
 
     Email email = new Email();
-    email.setFrom("TuApp Inventory",
+    email.setFrom("Inventory App 2",
         testDomain);
     email.addRecipient("", toEmail);
     email.setSubject("Recuperar contraseña");
 
     String text = "Tu código para restablecer contraseña es: " + token;
-    String html = "<p>Tu código para restablecer contraseña es: <strong>" + token + "</strong></p>";
+    String html = "<p>Tu código de 6 digitos para restablecer contraseña es: <strong>" + token
+        + "</strong>. Recuerda que tienes 5 minutos para restablecer tu contraseña antes que el código expire</p>";
 
     email.setPlain(text);
     email.setHtml(html);

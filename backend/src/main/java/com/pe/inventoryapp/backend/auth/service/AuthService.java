@@ -3,7 +3,7 @@ package com.pe.inventoryapp.backend.auth.service;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 public interface AuthService {
-  Long extracIdFromClaims(String header);
+  Long extractIdUserFromClaims(String header);
 
   User findUserById(Long id);
 

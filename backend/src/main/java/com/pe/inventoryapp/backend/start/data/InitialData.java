@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.test;
+package com.pe.inventoryapp.backend.start.data;
 
 import java.util.List;
 

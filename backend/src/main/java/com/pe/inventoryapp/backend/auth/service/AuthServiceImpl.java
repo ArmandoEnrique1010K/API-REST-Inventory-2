@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
   // Extrae el id del usuario desde el JWT del header
   @Override
   @Transactional(readOnly = true)
-  public Long extracIdFromClaims(String header) {
+  public Long extractIdUserFromClaims(String header) {
     String token = header.replace("Bearer ", "");
 
     Claims claims = Jwts.parser()
