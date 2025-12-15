@@ -17,26 +17,17 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
   List<DeliveryOrder> findByPreparationStatus(PreparationStatus status);
 
   // Busca todas las ordenes por los siguientes parametros:
-  /**
-   * - Tipo de status
-   * - Nombre de usuario en createdByUser
-   * - Codigo de batch
-   * - Cantidad de productos en quantityTotal en 2 parametros: minQuantity y
-   * maxQuantity
-   * - Fecha de entrega en deliveredDate en 2 parametros: startDate y endDate
-   */
-
   @Query("""
         SELECT d
         FROM DeliveryOrder d
         WHERE (:status IS NULL OR d.preparationStatus = :status)
           AND (:createdByUser IS NULL OR d.createdByUser LIKE CONCAT('%', :createdByUser, '%'))
-          AND (:batch IS NULL OR d.batch = :batch)
+          AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
           AND (:minQuantity IS NULL OR d.quantityTotal >= :minQuantity)
           AND (:maxQuantity IS NULL OR d.quantityTotal <= :maxQuantity)
           AND (
               (:startDate IS NULL OR :endDate IS NULL)
-              OR d.deliveredDate BETWEEN :startDate AND :endDate
+              OR d.limitDate BETWEEN :startDate AND :endDate
           )
         ORDER BY d.createdAt DESC
       """)
@@ -51,4 +42,5 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
       @Param("endDate") LocalDateTime endDate);
 
   Optional<DeliveryOrder> findByBatch(String batch);
+
 }

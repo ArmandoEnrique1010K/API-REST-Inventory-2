@@ -1,7 +1,8 @@
 package com.pe.inventoryapp.backend.delivery.model.mapper;
 
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
 
 public class DeliveryOrderMapper {
   private DeliveryOrder deliveryOrder;
@@ -18,7 +19,21 @@ public class DeliveryOrderMapper {
     return this;
   }
 
-  public DeliveryOrderResponse buildDeliveryOrderResponse() {
+  public DeliveryOrderListResponse buildDeliveryOrderListResponse() {
+    if (deliveryOrder == null) {
+      throw new RuntimeException("Debe pasar la entidad DeliveryOrder");
+    } else {
+      return new DeliveryOrderListResponse(
+          deliveryOrder.getId(),
+          deliveryOrder.getBatch(),
+          deliveryOrder.getLimitDate(),
+          deliveryOrder.getCreatedByUser(),
+          deliveryOrder.getPreparationStatus(),
+          deliveryOrder.getQuantityTotal());
+    }
+  }
+
+  public DeliveryOrderDetailsResponse buildDeliveryOrderDetailsResponse() {
     if (deliveryOrder == null) {
       throw new RuntimeException("Debe pasar la entidad DeliveryOrder");
     } else {
@@ -28,11 +43,14 @@ public class DeliveryOrderMapper {
           ? deliveryOrder.getPreparationStatus().name()
           : "UNKNOWN";
 
-      return new DeliveryOrderResponse(
+      return new DeliveryOrderDetailsResponse(
           deliveryOrder.getId(),
           deliveryOrder.getBatch(),
-          deliveryOrder.getDeliveredDate(),
-          deliveryOrder.getCreatedAt().toString(),
+          deliveryOrder.getLimitDate(),
+          deliveryOrder.getCreatedByUser(),
+          deliveryOrder.getUpdatedByUser(),
+          deliveryOrder.getCreatedAt(),
+          deliveryOrder.getUpdatedAt(),
           deliveryOrder.getQuantityTotal(),
           status);
     }

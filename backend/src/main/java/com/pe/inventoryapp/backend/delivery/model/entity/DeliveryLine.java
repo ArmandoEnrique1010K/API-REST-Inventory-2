@@ -1,6 +1,9 @@
 package com.pe.inventoryapp.backend.delivery.model.entity;
 
 import java.time.LocalDateTime;
+
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.stock.models.entity.StockLot;
@@ -35,7 +38,8 @@ public class DeliveryLine {
 
   private Integer pendingQuantity;
 
-  private LocalDateTime registeredAt;
+  @UpdateTimestamp
+  private LocalDateTime updatedAt;
 
   @Enumerated
   private PreparationStatus preparationStatus;

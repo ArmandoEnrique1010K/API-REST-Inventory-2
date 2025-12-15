@@ -52,4 +52,14 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(commonResponse);
   }
 
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<CommonResponse> handleRuntime(RuntimeException ex) {
+
+    CommonResponse commonResponse = new CommonResponse();
+    commonResponse.setType("error_entity_not_found");
+    commonResponse.setMessage("Error al obtener la entidad, " + ex);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(commonResponse);
+  }
+
 }

@@ -1,8 +1,6 @@
 package com.pe.inventoryapp.backend.delivery.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -10,15 +8,20 @@ import org.springframework.data.domain.Pageable;
 
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.request.DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
 
 public interface DeliveryOrderService {
 
   String save(DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
-  List<DeliveryOrderResponse> findAll();
+  // TODO: ESTOS 2 METODOS NO SIRVEN
+  // List<DeliveryOrderDetailsResponse> findAll();
 
-  Page<DeliveryOrderResponse> findAllDeliveryOrdersByParams(
+  // List<DeliveryOrderDetailsResponse>
+  // findAllByPreparationStatus(PreparationStatus status);
+
+  Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
       Pageable pageable,
       PreparationStatus status,
       String createdByUser,
@@ -28,9 +31,7 @@ public interface DeliveryOrderService {
       LocalDateTime startDate,
       LocalDateTime endDate);
 
-  List<DeliveryOrderResponse> findAllByPreparationStatus(PreparationStatus status);
-
-  Optional<DeliveryOrderResponse> findById(Long id);
+  Optional<DeliveryOrderDetailsResponse> findById(Long id);
 
   String update(Long id, DeliveryOrderRequest deliveryOrderRequest);
 

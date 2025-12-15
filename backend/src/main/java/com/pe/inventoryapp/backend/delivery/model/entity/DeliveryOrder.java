@@ -39,7 +39,7 @@ public class DeliveryOrder {
 
   private Integer quantityTotal;
 
-  private LocalDateTime deliveredDate;
+  private LocalDateTime limitDate;
 
   @CreationTimestamp
   private LocalDateTime createdAt;
@@ -48,6 +48,7 @@ public class DeliveryOrder {
   private LocalDateTime updatedAt;
 
   private String createdByUser;
+  private String updatedByUser;
 
   @OneToMany(mappedBy = "deliveryOrder")
   private List<DeliveryLine> deliveryLines;

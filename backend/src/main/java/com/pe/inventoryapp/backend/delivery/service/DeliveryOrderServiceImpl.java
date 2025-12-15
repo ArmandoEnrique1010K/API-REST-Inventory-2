@@ -1,11 +1,7 @@
 package com.pe.inventoryapp.backend.delivery.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +12,8 @@ import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.delivery.model.mapper.DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.delivery.model.request.DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
@@ -44,7 +41,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     DeliveryOrder deliveryOrder = new DeliveryOrder();
     deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
     deliveryOrder.setCreatedByUser(username);
-    deliveryOrder.setDeliveredDate(null);
+    deliveryOrder.setUpdatedByUser(username);
+    deliveryOrder.setLimitDate(null);
     deliveryOrder.setQuantityTotal(0);
     deliveryOrder.setPreparationStatus(PreparationStatus.INPROGRESS);
 
@@ -62,30 +60,35 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
   }
 
+  // @Override
+  // public List<DeliveryOrderDetailsResponse> findAll() {
+  // List<DeliveryOrder> deliveryOrders = (List<DeliveryOrder>)
+  // deliveryOrderRepository.findAll();
+
+  // return deliveryOrders.stream()
+  // .map(
+  // deliveryOrder ->
+  // DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse())
+  // .collect(Collectors.toList());
+  // }
+
+  // @Override
+  // public List<DeliveryOrderDetailsResponse>
+  // findAllByPreparationStatus(PreparationStatus status) {
+
+  // List<DeliveryOrder> deliveryOrders = (List<DeliveryOrder>)
+  // deliveryOrderRepository.findByPreparationStatus(status);
+
+  // return deliveryOrders.stream()
+  // .map(
+  // deliveryOrder ->
+  // DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse())
+  // .collect(Collectors.toList());
+
+  // }
+
   @Override
-  public List<DeliveryOrderResponse> findAll() {
-    List<DeliveryOrder> deliveryOrders = (List<DeliveryOrder>) deliveryOrderRepository.findAll();
-
-    return deliveryOrders.stream()
-        .map(
-            deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse())
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public List<DeliveryOrderResponse> findAllByPreparationStatus(PreparationStatus status) {
-
-    List<DeliveryOrder> deliveryOrders = (List<DeliveryOrder>) deliveryOrderRepository.findByPreparationStatus(status);
-
-    return deliveryOrders.stream()
-        .map(
-            deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse())
-        .collect(Collectors.toList());
-
-  }
-
-  @Override
-  public Page<DeliveryOrderResponse> findAllDeliveryOrdersByParams(Pageable pageable,
+  public Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(Pageable pageable,
       PreparationStatus status,
       String createdByUser, String batch, Integer minQuantity,
       Integer maxQuantity, LocalDateTime startDate, LocalDateTime endDate) {
@@ -95,14 +98,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     return deliveryOrders
         .map(
             deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-                .buildDeliveryOrderResponse());
+                .buildDeliveryOrderListResponse());
 
   }
 
   @Override
-  public Optional<DeliveryOrderResponse> findById(Long id) {
+  public Optional<DeliveryOrderDetailsResponse> findById(Long id) {
     return deliveryOrderRepository.findById(id).map(
-        deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse());
+        deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+            .buildDeliveryOrderDetailsResponse());
   }
 
   @Override
@@ -112,6 +116,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     if (deliveryOrderById.isPresent()) {
       DeliveryOrder deliveryOrderData = deliveryOrderById.orElseThrow();
       deliveryOrderData.setBatch(deliveryOrderRequest.getBatch());
+      // TODO: TAMBIEN DEBE ACTUALIZAR EL USUARIO QUE HA ACTUALIZADO LA ORDEN (EL QUE
+      // HA INICIADO SESION)
 
       deliveryOrderRepository.save(deliveryOrderData);
       return "Pedido de entrega actualizado correctamente";

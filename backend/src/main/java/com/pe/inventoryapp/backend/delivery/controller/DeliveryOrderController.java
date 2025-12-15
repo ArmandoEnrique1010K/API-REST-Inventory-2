@@ -1,8 +1,6 @@
 package com.pe.inventoryapp.backend.delivery.controller;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +20,9 @@ import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.request.DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.delivery.service.DeliveryOrderService;
-import com.pe.inventoryapp.backend.location.model.response.LocationDetailsResponse;
-
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -86,20 +83,21 @@ public class DeliveryOrderController {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success", deliveryOrder));
   }
-
-  @GetMapping("/all")
-  public List<?> listAll() {
-    return deliveryOrderService.findAll();
-  }
-
   // TODO: ELIMINAR ESTO Y REEMPLAZARLO POR FILTROS
-  @GetMapping("/pending")
-  public List<?> listAllPending() {
-    return deliveryOrderService.findAllByPreparationStatus(PreparationStatus.INPROGRESS);
-  }
+
+  // @GetMapping("/all")
+  // public List<?> listAll() {
+  // return deliveryOrderService.findAll();
+  // }
+
+  // @GetMapping("/pending")
+  // public List<?> listAllPending() {
+  // return
+  // deliveryOrderService.findAllByPreparationStatus(PreparationStatus.INPROGRESS);
+  // }
 
   @GetMapping("/search")
-  public Page<DeliveryOrderResponse> findAllByParams(@RequestParam(defaultValue = "0") Integer page,
+  public Page<DeliveryOrderListResponse> findAllByParams(@RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) PreparationStatus status,
       @RequestParam(required = false) String createdByUser,
       @RequestParam(required = false) String batch,
@@ -116,7 +114,7 @@ public class DeliveryOrderController {
 
   @GetMapping("/{id}")
   public ResponseEntity<?> findById(@PathVariable Long id) {
-    Optional<DeliveryOrderResponse> deliveryOrder = deliveryOrderService.findById(id);
+    Optional<DeliveryOrderDetailsResponse> deliveryOrder = deliveryOrderService.findById(id);
     if (!deliveryOrder.isPresent()) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "No se ha encontrado la orden de entrega"));
@@ -129,7 +127,7 @@ public class DeliveryOrderController {
   public ResponseEntity<?> update(@PathVariable Long id,
       @Valid @RequestBody DeliveryOrderRequest deliveryOrderRequest, BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    Optional<DeliveryOrderResponse> optionalDeliveryOrderResponse = deliveryOrderService.findById(id);
+    Optional<DeliveryOrderDetailsResponse> optionalDeliveryOrderResponse = deliveryOrderService.findById(id);
 
     String newBatch = deliveryOrderRequest.getBatch();
 
