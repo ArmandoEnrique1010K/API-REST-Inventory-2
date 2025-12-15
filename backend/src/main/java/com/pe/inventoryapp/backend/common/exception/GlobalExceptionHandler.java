@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
 
     return buildFieldError(
         ErrorCode.DUPLICATE_RESOURCE,
-        "Error al guardar los datos (duplicación)",
+        "Error de duplicación al guardar los datos",
         errors);
   }
 
@@ -56,15 +56,31 @@ public class GlobalExceptionHandler {
 
     return buildCommonError(
         ErrorCode.ENTITY_NOT_FOUND,
-        "Entidad no encontrada");
+        "Ha ocurrido un error, la entidad no encontrada");
   }
 
   @ExceptionHandler(InvalidPassword.class)
   public ResponseEntity<CommonResponse> handleInvalidPasswrd() {
     return buildCommonError(
         ErrorCode.PASSWORD_REUSE_NOT_ALLOWED,
-        "La contraseña no puede ser usada");
+        ErrorCode.PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage());
 
+  }// return buildCommonError(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED, ErrorCode.
+   // PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage()); }
+
+  @ExceptionHandler(PasswordMismatch.class)
+  public ResponseEntity<CommonResponse> handleMismatchPassword() {
+    return buildCommonError(
+        ErrorCode.PASSWORD_MISMATCH,
+        ErrorCode.PASSWORD_MISMATCH.getDefaultMessage());
+
+  }// return buildCommonError(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED, ErrorCode.
+
+  @ExceptionHandler(InvalidToken.class)
+  public ResponseEntity<CommonResponse> handleInvalidToken() {
+    return buildCommonError(
+        ErrorCode.INVALID_ID,
+        "Token inválido, vuelva a intentarlo");
   }
 
   // Helpers auxiliares

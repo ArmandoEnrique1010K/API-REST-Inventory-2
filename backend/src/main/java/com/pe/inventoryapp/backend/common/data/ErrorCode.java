@@ -13,8 +13,9 @@ public enum ErrorCode {
   // 409
   DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Recurso duplicado"),
 
-  PASSWORD_REUSE_NOT_ALLOWED(HttpStatus.CONFLICT, "La contraseña no puede ser usada"),
-
+  PASSWORD_REUSE_NOT_ALLOWED(HttpStatus.CONFLICT,
+      "La contraseña no puede ser usada porque es la misma que la usada anteriormente"),
+  PASSWORD_MISMATCH(HttpStatus.CONFLICT, "Las contraseñas no coinciden..."),
   // 500
   INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno");
 

@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // String role = authResult.getAuthorities().toString();
 
     // OBTENER EL ID DEL USUARIO
-    Long id_user = authService.findIdByEmail(username);
+    Long id_user = authService.findUserIdByEmail(username);
 
     Map<String, Object> claims = new HashMap<>();
     claims.put("authorities", authResult.getAuthorities().stream()

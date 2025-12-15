@@ -61,7 +61,7 @@ public class DeliveryOrderController {
           .body(responseService.generateCommonResponse("error", "Falta el token de autorización"));
     }
 
-    Long id_user = authService.extractIdUserFromClaims(header);
+    Long id_user = authService.extractUserIdFromClaims(header);
 
     if (id_user == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -83,18 +83,6 @@ public class DeliveryOrderController {
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success", deliveryOrder));
   }
-  // TODO: ELIMINAR ESTO Y REEMPLAZARLO POR FILTROS
-
-  // @GetMapping("/all")
-  // public List<?> listAll() {
-  // return deliveryOrderService.findAll();
-  // }
-
-  // @GetMapping("/pending")
-  // public List<?> listAllPending() {
-  // return
-  // deliveryOrderService.findAllByPreparationStatus(PreparationStatus.INPROGRESS);
-  // }
 
   @GetMapping("/search")
   public Page<DeliveryOrderListResponse> findAllByParams(@RequestParam(defaultValue = "0") Integer page,

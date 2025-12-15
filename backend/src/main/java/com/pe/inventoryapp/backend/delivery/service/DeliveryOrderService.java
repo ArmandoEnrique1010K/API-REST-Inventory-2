@@ -15,12 +15,6 @@ public interface DeliveryOrderService {
 
   String save(DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
-  // TODO: ESTOS 2 METODOS NO SIRVEN
-  // List<DeliveryOrderDetailsResponse> findAll();
-
-  // List<DeliveryOrderDetailsResponse>
-  // findAllByPreparationStatus(PreparationStatus status);
-
   Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
       Pageable pageable,
       PreparationStatus status,

@@ -2,19 +2,19 @@ package com.pe.inventoryapp.backend.auth.service;
 
 import static com.pe.inventoryapp.backend.security.config.TokenJwtConfig.SECRET_KEY;
 
-import java.util.Optional;
-
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.common.data.ErrorCode;
 import com.pe.inventoryapp.backend.common.exception.InvalidPassword;
+import com.pe.inventoryapp.backend.common.exception.InvalidToken;
+import com.pe.inventoryapp.backend.common.exception.PasswordMismatch;
+import com.pe.inventoryapp.backend.common.exception.ResourceNotFound;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
@@ -38,10 +38,13 @@ public class AuthServiceImpl implements AuthService {
   @Autowired
   private UserTokenService userTokenService;
 
+  @Autowired
+  private MailerSendService mailerSendService;
+
   // Extrae el id del usuario desde el JWT del header
   @Override
   @Transactional(readOnly = true)
-  public Long extractIdUserFromClaims(String header) {
+  public Long extractUserIdFromClaims(String header) {
     String token = header.replace("Bearer ", "");
 
     Claims claims = Jwts.parser()
@@ -66,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
   // Obtiene el id del usuario por su email
   @Override
   @Transactional(readOnly = true)
-  public Long findIdByEmail(String email) {
+  public Long findUserIdByEmail(String email) {
     return userRepository.findByEmail(email)
         .map(User::getId)
         .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
@@ -86,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
   // acuerda de su contraseña anterior)
   @Override
   @Transactional
-  public void changePassword(String token, ChangePasswordRequest changePasswordRequest) {
+  public void changeUserPassword(String token, ChangePasswordRequest changePasswordRequest) {
 
     Long userId = userTokenService.findUserIdByUserToken(token);
 
@@ -94,15 +97,35 @@ public class AuthServiceImpl implements AuthService {
         userId)
         .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-    if (passwordEncoderConfig.passwordEncoder().matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
+    System.out.println(user.getPassword());
+    System.out.println(changePasswordRequest.getNewPassword());
+    System.out.println(
+        passwordEncoderConfig.passwordEncoder().matches(changePasswordRequest.getNewPassword(), user.getPassword()));
+    System.out.println(changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword()));
+
+    String newPassword = changePasswordRequest.getNewPassword();
+    String confirmPassword = changePasswordRequest.getConfirmNewPassword();
+
+    // 1° verificar si la nueva contraseña y la confirmación de la nueva contraseña
+    // son iguales
+    if (!newPassword.equals(confirmPassword)) {
+      System.out.println("No son iguales");
+      throw new PasswordMismatch("");
+    }
+
+    // 2° verificar si la nueva contraseña es igual a la anterior
+    if (passwordEncoderConfig.passwordEncoder().matches(newPassword, user.getPassword())) {
+      System.out.println("La nueva contraseña es igual a la anterior");
       throw new InvalidPassword(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage());
     }
 
     user.setPassword(passwordEncoderConfig.passwordEncoder().encode(
         changePasswordRequest.getConfirmNewPassword()));
+
     userRepository.save(user);
 
-    userTokenService.invalidateToken(token);
+    // TODO: ACTIVAR ESTO
+    // userTokenService.invalidateToken(token);
   }
 
   @Override
@@ -122,6 +145,26 @@ public class AuthServiceImpl implements AuthService {
                 .map(Role::getName)
                 .toList())
         .build();
+  }
+
+  @Override
+  @Transactional
+  public void processForgotPassword(String email) {
+    if (!userRepository.existsByEmail(email)) {
+      throw new ResourceNotFound("El correo no existe");
+    }
+
+    String token = userTokenService.generateTokenForUserByEmail(email);
+    mailerSendService.sendResetPasswordToken(email, token);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public void validateResetToken(String token) {
+
+    if (!userTokenService.isTokenValid(token)) {
+      throw new InvalidToken("El token no existe o ha caducado");
+    }
   }
 
 }

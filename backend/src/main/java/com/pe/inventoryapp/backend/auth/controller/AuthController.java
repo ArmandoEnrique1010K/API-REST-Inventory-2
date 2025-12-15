@@ -12,13 +12,8 @@ import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ForgotPasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
-import com.pe.inventoryapp.backend.auth.service.MailerSendService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
-import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
-import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
 import jakarta.validation.Valid;
 
@@ -26,8 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,37 +36,18 @@ public class AuthController {
   @Autowired
   private ValidationService validationService;
 
-  @Autowired
-  private UserTokenService userTokenService;
-
-  @Autowired
-  private MailerSendService mailerSendService;
-
-  @Autowired
-  private PasswordEncoderConfig passwordEncoderConfig;
-
-  // Nota: El endpoint "/" ya esta siendo manejado por Spring Security
+  // Nota: El endpoint POST "/" ya esta siendo manejado por Spring Security
 
   @PostMapping("/forgot-password")
   public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
 
-    // Verifica que el correo del usuario exista
-    Boolean existUser = authService.existsUserByEmail(forgotPasswordRequest.getEmail());
-
-    if (existUser == false) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(responseService.generateCommonResponse("error", "El correo no existe"));
-    }
-
-    // Crea un token para el usuario, lo envia al correo y lo guarda en la base de
-    // datos
-    String userToken = userTokenService.generateTokenForUserByEmail(forgotPasswordRequest.getEmail());
-    mailerSendService.sendResetPasswordToken(forgotPasswordRequest.getEmail(), userToken);
+    authService.processForgotPassword(forgotPasswordRequest.getEmail());
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success",
+        .body(responseService.generateCommonResponse(
+            "success",
             "Se le ha enviado un código de recuperación a su correo"));
   }
 
@@ -81,62 +55,23 @@ public class AuthController {
   public ResponseEntity<?> validateToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    Boolean existToken = userTokenService.isTokenValid(validateTokenRequest.getValue());
+    authService.validateResetToken(validateTokenRequest.getValue());
 
-    // CORREGIR AQUI, NO DEBE MOSTRAR UN ERRROR 500
-    if (existToken == false || existToken == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-          .body(responseService.generateCommonResponse("error", "El token no existe"));
-    }
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success", "El token es valido, puede cambiar su contraseña"));
+    return ResponseEntity.ok(
+        responseService.generateCommonResponse(
+            "success",
+            "El token es válido"));
   }
 
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
   // REQUIERE QUE EL TOKEN SEA VALIDADO
   @PutMapping("/change-password/{token}")
-  public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+  public ResponseEntity<?> changeUserPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
       BindingResult result,
       @PathVariable String token) {
-    // validationService.validateFieldsAndThrowResponse(result);
 
-    // // BUSCA AL USUARIO POR EL TOKEN ENVIADO
-    // Long userId = userTokenService.findUserIdByUserToken(value);
-
-    // // ENCUENTRA AL USUARIO ACTUAL
-
-    // User optionalUser = authService.findUserById(userId);
-
-    // // Verifica que la nueva contraseña del usuario no sea la misma
-
-    // // // Si el usuario ya no existe
-    // // if (optionalUser == null) {
-    // // return ResponseEntity.status(400)
-    // // .body(responseService.generateCommonResponse("error", "El usuario no
-    // // existe"));
-    // // }
-
-    // // Si el usuario no ha cambiado de contraseña
-    // if
-    // (passwordEncoderConfig.passwordEncoder().matches(changePasswordRequest.getNewPassword(),
-    // optionalUser.getPassword())) {
-    // return ResponseEntity.status(400)
-    // .body(responseService.generateCommonResponse(VALIDATION_ERROR, "No has
-    // cambiado de contraseña"));
-    // }
-
-    // // Si las nuevas contraseñas no coinciden
-    // if
-    // (!changePasswordRequest.getNewPassword().trim().equals(changePasswordRequest.getConfirmNewPassword().trim()))
-    // {
-    // return ResponseEntity.status(400)
-    // .body(responseService.generateCommonResponse("error", "Confirma tu
-    // contraseña, parece que no es la misma"));
-    // }
-
-    // // Cambia la contraseña del usuario
-    // authService.changePassword(changePasswordRequest.getNewPassword(), userId);
-    authService.changePassword(token, changePasswordRequest);
+    validationService.validateFieldsAndThrowResponse(result);
+    authService.changeUserPassword(token, changePasswordRequest);
 
     return ResponseEntity.ok(
         responseService.generateCommonResponse(

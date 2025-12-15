@@ -71,7 +71,7 @@ public class UserController {
 
   @GetMapping("/profile")
   public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String header) {
-    Long id = authService.extractIdUserFromClaims(header);
+    Long id = authService.extractUserIdFromClaims(header);
     Optional<DetailUserResponse> user = userService.findById(id);
     return ResponseEntity.ok(user);
   }
@@ -80,7 +80,7 @@ public class UserController {
   public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String header,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
 
-    Long id = authService.extractIdUserFromClaims(header);
+    Long id = authService.extractUserIdFromClaims(header);
 
     // Validar campos
     validationService.validateFieldsAndThrowResponse(result);
@@ -111,7 +111,7 @@ public class UserController {
   public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String header,
       @Valid @RequestBody PasswordRequest passwordRequest, BindingResult result) {
 
-    Long id = authService.extractIdUserFromClaims(header);
+    Long id = authService.extractUserIdFromClaims(header);
     validationService.validateFieldsAndThrowResponse(result);
 
     Optional<DetailUserResponse> optionalUser = userService.findById(id);
