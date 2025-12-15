@@ -18,4 +18,6 @@ public interface UserTokenRepository extends CrudRepository<UserToken, Long> {
   @Transactional
   @Query("DELETE FROM UserToken t WHERE t.expirationTime <= :now")
   void deleteAllExpiredTokens(LocalDateTime now);
+
+  void deleteByToken(String token);
 }

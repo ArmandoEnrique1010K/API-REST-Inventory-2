@@ -8,6 +8,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 public interface ResponseService {
   CommonResponse generateCommonResponse(String type, String message);
 
-  ErrorWithFieldsResponse generateErrorWithFieldsResponse(String type, String message,
-      Map<String, String> fields);
+  // ErrorWithFieldsResponse generateErrorWithFieldsResponse(String type, String
+  // message,
+  // Map<String, String> fields);
 }

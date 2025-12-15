@@ -8,4 +8,6 @@ public interface UserTokenService {
   boolean isTokenValid(String token);
 
   Long findUserIdByUserToken(String token);
+
+  void invalidateToken(String token);
 }

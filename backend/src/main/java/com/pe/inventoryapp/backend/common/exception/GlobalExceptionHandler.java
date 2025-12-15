@@ -1,15 +1,15 @@
 package com.pe.inventoryapp.backend.common.exception;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
+import com.pe.inventoryapp.backend.common.data.ErrorCode;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 
 @RestControllerAdvice
@@ -17,49 +17,80 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(RequestValidation.class)
   public ResponseEntity<ErrorWithFieldsResponse> handleValidationException(RequestValidation ex) {
-    ErrorWithFieldsResponse errorResponseWithFields = new ErrorWithFieldsResponse();
-    errorResponseWithFields.setType("error_blank_fields");
-    errorResponseWithFields.setMessage("Complete los campos faltantes");
-    errorResponseWithFields.setFields(ex.getErrors());
 
-    return ResponseEntity.badRequest().body(errorResponseWithFields);
+    return buildFieldError(
+        ErrorCode.VALIDATION_ERROR,
+        "Complete los campos faltantes",
+        ex.getErrors());
+
   }
 
   @ExceptionHandler(FieldValidation.class)
-  public ResponseEntity<ErrorWithFieldsResponse> handleGeneralException(FieldValidation ex) {
-    ErrorWithFieldsResponse errorResponseWithFields = new ErrorWithFieldsResponse();
-    errorResponseWithFields.setType("error_duplicate_data");
-    errorResponseWithFields.setMessage("Error al guardar los datos (duplicación de datos)");
+  public ResponseEntity<ErrorWithFieldsResponse> handleDuplicate(FieldValidation ex) {
+    Map<String, String> errors = Map.of(ex.getFieldName(), ex.getMessage());
 
-    Map<String, String> errors = new HashMap<>();
-    errors.put(ex.getFieldName(), ex.getMessage());
-    errorResponseWithFields.setFields(errors);
-
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseWithFields);
+    return buildFieldError(
+        ErrorCode.DUPLICATE_RESOURCE,
+        "Error al guardar los datos (duplicación)",
+        errors);
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-  public ResponseEntity<CommonResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+  public ResponseEntity<CommonResponse> handleTypeMismatch() {
 
-    CommonResponse commonResponse = new CommonResponse();
-    commonResponse.setType("error_invalid_id");
-    commonResponse.setMessage("Error de tipo de dato " + ex);
+    return buildCommonError(
+        ErrorCode.INVALID_ID,
+        "ID inválido, debe ser un número");
+  }
 
-    // Map<String, String> errors = new HashMap<>();
-    // errors.put("id", "ID inválido, debe ser un número.");
-    // errorResponse.setErrors(errors);
+  @ExceptionHandler(UsernameNotFoundException.class)
+  public ResponseEntity<CommonResponse> handleUserNotFound() {
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(commonResponse);
+    return buildCommonError(
+        ErrorCode.USER_NOT_FOUND,
+        "Usuario no encontrado");
   }
 
   @ExceptionHandler(RuntimeException.class)
-  public ResponseEntity<CommonResponse> handleRuntime(RuntimeException ex) {
+  public ResponseEntity<CommonResponse> handleRuntime() {
 
-    CommonResponse commonResponse = new CommonResponse();
-    commonResponse.setType("error_entity_not_found");
-    commonResponse.setMessage("Error al obtener la entidad, " + ex);
+    return buildCommonError(
+        ErrorCode.ENTITY_NOT_FOUND,
+        "Entidad no encontrada");
+  }
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(commonResponse);
+  @ExceptionHandler(InvalidPassword.class)
+  public ResponseEntity<CommonResponse> handleInvalidPasswrd() {
+    return buildCommonError(
+        ErrorCode.PASSWORD_REUSE_NOT_ALLOWED,
+        "La contraseña no puede ser usada");
+
+  }
+
+  // Helpers auxiliares
+
+  private ResponseEntity<ErrorWithFieldsResponse> buildFieldError(
+      ErrorCode code,
+      String message,
+      Map<String, String> fields) {
+
+    ErrorWithFieldsResponse response = new ErrorWithFieldsResponse();
+    response.setCode(code.name());
+    response.setMessage(message);
+    response.setFields(fields);
+
+    return ResponseEntity.status(code.getStatus()).body(response);
+  }
+
+  private ResponseEntity<CommonResponse> buildCommonError(
+      ErrorCode code,
+      String message) {
+
+    CommonResponse response = new CommonResponse();
+    response.setCode(code.name());
+    response.setMessage(message);
+
+    return ResponseEntity.status(code.getStatus()).body(response);
   }
 
 }

@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pe.inventoryapp.backend.auth.models.response.LoginErrorResponse;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -101,13 +101,13 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
     JwtException e) {
 
-      LoginErrorResponse loginErrorResponse = new LoginErrorResponse();
-      loginErrorResponse.setType("error");
-      loginErrorResponse.setMessage("El token JWT no es valido (error de token)");
+      CommonResponse commonResponse = new CommonResponse();
+      commonResponse.setCode("error");
+      commonResponse.setMessage("El token JWT no es valido (error de token)");
 
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response.setContentType("application/json");
-      response.getWriter().write(new ObjectMapper().writeValueAsString(loginErrorResponse));
+      response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
     }
 
   }

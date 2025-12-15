@@ -2,16 +2,25 @@ package com.pe.inventoryapp.backend.auth.service;
 
 import static com.pe.inventoryapp.backend.security.config.TokenJwtConfig.SECRET_KEY;
 
+import java.util.Optional;
+
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
+import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.exception.InvalidPassword;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
+import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
+import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -25,6 +34,9 @@ public class AuthServiceImpl implements AuthService {
 
   @Autowired
   private PasswordEncoderConfig passwordEncoderConfig;
+
+  @Autowired
+  private UserTokenService userTokenService;
 
   // Extrae el id del usuario desde el JWT del header
   @Override
@@ -48,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
   @Transactional(readOnly = true)
   public User findUserById(Long id) {
     return userRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID:" + id));
   }
 
   // Obtiene el id del usuario por su email
@@ -74,11 +86,42 @@ public class AuthServiceImpl implements AuthService {
   // acuerda de su contraseña anterior)
   @Override
   @Transactional
-  public void changePassword(String password, Long id) {
-    User user = userRepository.findById(id)
+  public void changePassword(String token, ChangePasswordRequest changePasswordRequest) {
+
+    Long userId = userTokenService.findUserIdByUserToken(token);
+
+    User user = userRepository.findById(
+        userId)
         .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-    user.setPassword(passwordEncoderConfig.passwordEncoder().encode(password));
+    if (passwordEncoderConfig.passwordEncoder().matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
+      throw new InvalidPassword(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage());
+    }
+
+    user.setPassword(passwordEncoderConfig.passwordEncoder().encode(
+        changePasswordRequest.getConfirmNewPassword()));
     userRepository.save(user);
+
+    userTokenService.invalidateToken(token);
   }
+
+  @Override
+  public DetailUserResponse findById(Long id) {
+
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException());
+
+    return DetailUserResponse.builder()
+        .firstname(user.getFirstname())
+        .lastname(user.getLastname())
+        .email(user.getEmail())
+        .dni(user.getDni())
+        .roles(
+            user.getRoles()
+                .stream()
+                .map(Role::getName)
+                .toList())
+        .build();
+  }
+
 }

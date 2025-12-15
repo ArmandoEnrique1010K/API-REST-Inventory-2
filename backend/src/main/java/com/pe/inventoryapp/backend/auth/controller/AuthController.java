@@ -17,6 +17,7 @@ import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
 import jakarta.validation.Valid;
@@ -73,7 +74,7 @@ public class AuthController {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success",
-            "Se le ha enviado el token de recuperación a su correo: " + userToken));
+            "Se le ha enviado un código de recuperación a su correo"));
   }
 
   @PostMapping("/validate-token")
@@ -93,50 +94,54 @@ public class AuthController {
 
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
   // REQUIERE QUE EL TOKEN SEA VALIDADO
-  @PutMapping("/change-password/{value}")
+  @PutMapping("/change-password/{token}")
   public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
       BindingResult result,
-      @PathVariable String value) {
-    validationService.validateFieldsAndThrowResponse(result);
+      @PathVariable String token) {
+    // validationService.validateFieldsAndThrowResponse(result);
 
-    // BUSCA AL USUARIO POR EL TOKEN ENVIADO
-    Long userId = userTokenService.findUserIdByUserToken(value);
+    // // BUSCA AL USUARIO POR EL TOKEN ENVIADO
+    // Long userId = userTokenService.findUserIdByUserToken(value);
 
-    // ENCUENTRA AL USUARIO ACTUAL
-    User optionalUser = authService.findUserById(userId);
+    // // ENCUENTRA AL USUARIO ACTUAL
 
-    // Verifica que la nueva contraseña del usuario no sea la misma
+    // User optionalUser = authService.findUserById(userId);
 
-    // Si el usuario ya no existe
-    if (optionalUser == null) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "El usuario no existe"));
-    }
+    // // Verifica que la nueva contraseña del usuario no sea la misma
 
-    // Si el usuario no ha cambiado de contraseña
-    if (passwordEncoderConfig.passwordEncoder().matches(changePasswordRequest.getNewPassword(),
-        optionalUser.getPassword())) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "No has cambiado de contraseña"));
-    }
+    // // // Si el usuario ya no existe
+    // // if (optionalUser == null) {
+    // // return ResponseEntity.status(400)
+    // // .body(responseService.generateCommonResponse("error", "El usuario no
+    // // existe"));
+    // // }
 
-    // Si las nuevas contraseñas no coinciden
-    if (!changePasswordRequest.getNewPassword().trim().equals(changePasswordRequest.getConfirmNewPassword().trim())) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "Confirma tu contraseña, parece que no es la misma"));
-    }
+    // // Si el usuario no ha cambiado de contraseña
+    // if
+    // (passwordEncoderConfig.passwordEncoder().matches(changePasswordRequest.getNewPassword(),
+    // optionalUser.getPassword())) {
+    // return ResponseEntity.status(400)
+    // .body(responseService.generateCommonResponse(VALIDATION_ERROR, "No has
+    // cambiado de contraseña"));
+    // }
 
-    // Cambia la contraseña del usuario
-    authService.changePassword(changePasswordRequest.getNewPassword(), userId);
+    // // Si las nuevas contraseñas no coinciden
+    // if
+    // (!changePasswordRequest.getNewPassword().trim().equals(changePasswordRequest.getConfirmNewPassword().trim()))
+    // {
+    // return ResponseEntity.status(400)
+    // .body(responseService.generateCommonResponse("error", "Confirma tu
+    // contraseña, parece que no es la misma"));
+    // }
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success",
-            "Ha cambiado su contraseña, puede iniciar sesión con la nueva  contraseña"));
-  }
+    // // Cambia la contraseña del usuario
+    // authService.changePassword(changePasswordRequest.getNewPassword(), userId);
+    authService.changePassword(token, changePasswordRequest);
 
-  @GetMapping("/{id}")
-  public ResponseEntity<?> findById(@PathVariable Long id) {
-    return ResponseEntity.status(HttpStatus.OK).body(authService.findUserById(id));
+    return ResponseEntity.ok(
+        responseService.generateCommonResponse(
+            "SUCCESS",
+            "La contraseña fue cambiada correctamente"));
   }
 
 }

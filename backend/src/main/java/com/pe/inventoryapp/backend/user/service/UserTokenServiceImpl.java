@@ -60,4 +60,9 @@ public class UserTokenServiceImpl implements UserTokenService {
     Optional<UserToken> userToken = userTokenRepository.findByToken(token);
     return userToken.isPresent() ? userToken.get().getUser().getId() : null;
   }
+
+  @Override
+  public void invalidateToken(String token) {
+    userTokenRepository.deleteByToken(token);
+  }
 }

@@ -18,9 +18,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pe.inventoryapp.backend.auth.models.response.LoginErrorResponse;
-import com.pe.inventoryapp.backend.auth.models.response.LoginSuccessfulResponse;
+import com.pe.inventoryapp.backend.auth.model.response.LoginSuccessfulResponse;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
@@ -116,11 +116,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       AuthenticationException failed) throws IOException, ServletException {
 
-    LoginErrorResponse loginErrorResponse = new LoginErrorResponse();
-    loginErrorResponse.setType("error");
-    loginErrorResponse.setMessage("Error en la autenticacion username o password incorrecto!");
+    CommonResponse commonResponse = new CommonResponse();
+    commonResponse.setCode("error");
+    commonResponse.setMessage("Error en la autenticacion, correo o contraseña incorrecta");
 
-    response.getWriter().write(new ObjectMapper().writeValueAsString(loginErrorResponse));
+    response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
     response.setStatus(401);
     response.setContentType("application/json");
   }

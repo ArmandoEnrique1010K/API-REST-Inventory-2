@@ -22,6 +22,8 @@ import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -119,6 +121,8 @@ public class ProductServiceImpl implements ProductService {
       productData.setCategory(categoryId);
 
       productRepository.save(productData);
+    } else {
+      throw new EntityNotFoundException();
     }
 
     return "Se actualizo el producto";
