@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.movement.models.data;
+package com.pe.inventoryapp.backend.movement.model.data;
 
 public enum Reason {
   DELIVERY,

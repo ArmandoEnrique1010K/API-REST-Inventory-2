@@ -6,7 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
-import com.pe.inventoryapp.backend.stock.models.entity.StockLot;
+import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;

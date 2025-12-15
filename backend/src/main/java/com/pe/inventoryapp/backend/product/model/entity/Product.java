@@ -7,7 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.pe.inventoryapp.backend.stock.models.entity.StockLot;
+import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

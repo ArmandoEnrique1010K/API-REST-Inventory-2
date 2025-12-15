@@ -1,13 +1,13 @@
-package com.pe.inventoryapp.backend.movement.models.entity;
+package com.pe.inventoryapp.backend.movement.model.entity;
 
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
-import com.pe.inventoryapp.backend.movement.models.data.MovementType;
-import com.pe.inventoryapp.backend.movement.models.data.Reason;
-import com.pe.inventoryapp.backend.stock.models.entity.StockLot;
+import com.pe.inventoryapp.backend.movement.model.data.MovementType;
+import com.pe.inventoryapp.backend.movement.model.data.Reason;
+import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.persistence.Entity;

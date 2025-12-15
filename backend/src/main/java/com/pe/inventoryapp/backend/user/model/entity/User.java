@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.movement.models.entity.Movement;
+import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 
 @Entity
 @Builder
