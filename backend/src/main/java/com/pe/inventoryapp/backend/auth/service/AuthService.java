@@ -4,7 +4,6 @@ import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 
 public interface AuthService {
-  Long extractUserIdFromClaims(String header);
 
   DetailUserResponse findUserById(Long id);
 

@@ -14,8 +14,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.service.JwtService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
@@ -48,7 +48,7 @@ public class DeliveryOrderController {
   private DeliveryOrderService deliveryOrderService;
 
   @Autowired
-  private AuthService authService;
+  private JwtService jwtService;
 
   // TODO: DESACTIVAR EL MODO REQUIRED FALSE, SOLAMENTE ES PARA PRUEBAS
   @PostMapping
@@ -61,7 +61,7 @@ public class DeliveryOrderController {
           .body(responseService.generateCommonResponse("error", "Falta el token de autorización"));
     }
 
-    Long id_user = authService.extractUserIdFromClaims(header);
+    Long id_user = jwtService.extractUserIdFromClaims(header);
 
     if (id_user == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

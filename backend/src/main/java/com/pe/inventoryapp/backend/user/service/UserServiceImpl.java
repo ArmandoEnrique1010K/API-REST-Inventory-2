@@ -1,10 +1,8 @@
 package com.pe.inventoryapp.backend.user.service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
-import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
@@ -53,7 +50,7 @@ public class UserServiceImpl implements UserService {
     user.setDni(registerRequest.getDni());
 
     // Asigna los roles al usuario
-    user.setRoles(getRoles(registerRequest.getRolesRequest()));
+    user.setRoles(getRoles(registerRequest.isAdmin(), registerRequest.isSecretary(), registerRequest.isOperator()));
 
     userRepository.save(user);
   }
@@ -70,14 +67,21 @@ public class UserServiceImpl implements UserService {
   // Busca un usuario por su ID
   @Override
   @Transactional(readOnly = true)
-  public Optional<DetailUserResponse> findUserById(Long id) {
-    return userRepository.findById(id).map(user -> UserMapper.builder().setUser(user).buildDetailUserResponse());
+  public DetailUserResponse findUserById(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(
+            ErrorCode.ENTITY_NOT_FOUND,
+            "El usuario no existe"));
+
+    return UserMapper.builder()
+        .setUser(user)
+        .buildDetailUserResponse();
   }
 
   // Actualiza el perfil del usuario
   @Override
   @Transactional
-  public String updateProfile(Long id, ProfileRequest profileRequest) {
+  public void updateUserProfile(Long id, ProfileRequest profileRequest) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
 
@@ -87,22 +91,24 @@ public class UserServiceImpl implements UserService {
     user.setDni(profileRequest.getDni());
 
     userRepository.save(user);
-    return "Su perfil ha sido actualizado";
   }
 
+  // TODO: NO BORRAR ESTE ENDPOINT
   // Actualiza la contraseña del usuario (si se acuerda su contraseña anterior)
-  @Override
-  @Transactional
-  public String updatePassword(Long id, PasswordRequest passwordRequest) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+  // @Override
+  // @Transactional
+  // public String updateUserPassword(Long id, PasswordRequest passwordRequest) {
+  // User user = userRepository.findById(id)
+  // .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID:
+  // " + id));
 
-    String encodedPassword = passwordEncoderConfig.passwordEncoder().encode(passwordRequest.getNewPassword());
-    user.setPassword(encodedPassword);
+  // String encodedPassword =
+  // passwordEncoderConfig.passwordEncoder().encode(passwordRequest.getNewPassword());
+  // user.setPassword(encodedPassword);
 
-    userRepository.save(user);
-    return "Contraseña del usuario actualizada";
-  }
+  // userRepository.save(user);
+  // return "Contraseña del usuario actualizada";
+  // }
 
   // Elimina un usuario del sistema
   @Override
@@ -126,24 +132,35 @@ public class UserServiceImpl implements UserService {
     }
   }
 
+  // Alterar los roles del usuario
+  @Override
+  public void alterRoles(Long id, RolesRequest rolesRequest) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+
+    List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
+    user.setRoles(roles);
+    userRepository.save(user);
+  }
+
   // MÉTODOS AUXILIARES
 
   // Agregar los roles al usuario
-  private List<Role> getRoles(RolesRequest rolesRequest) {
+  private List<Role> getRoles(boolean isAdmin, boolean isSecretary, boolean isOperator) {
     List<Role> roles = new ArrayList<>();
 
     // Rol base obligatorio
     roles.add(getRoleOrThrow("ROLE_USER", "El rol usuario no existe"));
 
-    if (rolesRequest.isOperator()) {
+    if (isOperator) {
       roles.add(getRoleOrThrow("ROLE_OPERATOR", "El rol operador no existe"));
     }
 
-    if (rolesRequest.isSecretary()) {
+    if (isSecretary) {
       roles.add(getRoleOrThrow("ROLE_SECRETARY", "El rol secretario no existe"));
     }
 
-    if (rolesRequest.isAdmin()) {
+    if (isAdmin) {
       roles.add(getRoleOrThrow("ROLE_ADMIN", "El rol administrador no existe"));
     }
 
@@ -154,4 +171,5 @@ public class UserServiceImpl implements UserService {
     return roleRepository.findByName(roleName)
         .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR, message));
   }
+
 }

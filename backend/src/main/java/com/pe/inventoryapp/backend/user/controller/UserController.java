@@ -5,11 +5,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.pe.inventoryapp.backend.auth.service.AuthService;
+import com.pe.inventoryapp.backend.common.service.JwtService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
+import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
@@ -43,6 +45,9 @@ public class UserController {
   private AuthService authService;
 
   @Autowired
+  private JwtService jwtService;
+
+  @Autowired
   private ResponseService responseService;
 
   @Autowired
@@ -64,10 +69,16 @@ public class UserController {
         .body(responseService.generateCommonResponse("success", "Usuario registrado"));
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<?> findById(@PathVariable Long id) {
+    DetailUserResponse user = userService.findUserById(id);
+    return ResponseEntity.ok(user);
+  }
+
   @GetMapping("/profile")
   public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String header) {
-    Long id = authService.extractUserIdFromClaims(header);
-    Optional<DetailUserResponse> user = userService.findUserById(id);
+    Long id = jwtService.extractUserIdFromClaims(header);
+    DetailUserResponse user = userService.findUserById(id);
     return ResponseEntity.ok(user);
   }
 
@@ -75,12 +86,12 @@ public class UserController {
   public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String header,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
 
-    Long id = authService.extractUserIdFromClaims(header);
+    Long id = jwtService.extractUserIdFromClaims(header);
 
     // Validar campos
     validationService.validateFieldsAndThrowResponse(result);
 
-    String currentEmail = userService.findUserById(id).get().getEmail();
+    String currentEmail = userService.findUserById(id).getEmail();
     String newEmail = profileRequest.getEmail();
 
     // Verificar que el usuario no haya modificado su email
@@ -93,50 +104,73 @@ public class UserController {
       userService.verifyUserEmailExists(profileRequest.getEmail());
     }
 
+    // TODO: CORREGIR AQUI
     if (userService.findUserById(id).isEmpty()) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "El usuario no existe"));
     }
 
-    String message = userService.updateProfile(id, profileRequest);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
+    userService.updateUserProfile(id, profileRequest);
+    return ResponseEntity.status(200)
+        .body(responseService.generateCommonResponse("success", "Su perfil ha sido actualizado"));
   }
 
-  @PutMapping("update-password")
-  public ResponseEntity<?> updatePassword(@RequestHeader("Authorization") String header,
-      @Valid @RequestBody PasswordRequest passwordRequest, BindingResult result) {
+  // TODO: NO BORRAR ESTE ENDPOINT
+  // @PutMapping("update-password")
+  // public ResponseEntity<?> updatePassword(@RequestHeader("Authorization")
+  // String header,
+  // @Valid @RequestBody PasswordRequest passwordRequest, BindingResult result) {
 
-    Long id = authService.extractUserIdFromClaims(header);
+  // Long id = jwtService.extractUserIdFromClaims(header);
+  // validationService.validateFieldsAndThrowResponse(result);
+
+  // Optional<DetailUserResponse> optionalUser = userService.findUserById(id);
+
+  // // Si el usuario ya no existe
+  // if (optionalUser.isEmpty()) {
+  // return ResponseEntity.status(400)
+  // .body(responseService.generateCommonResponse("error", "El usuario no
+  // existe"));
+  // }
+
+  // // Si el usuario no ha cambiado de contraseña
+  // if
+  // (passwordRequest.getCurrentPassword().equals(passwordRequest.getNewPassword()))
+  // {
+  // return ResponseEntity.status(400)
+  // .body(responseService.generateCommonResponse("error", "No has cambiado de
+  // contraseña"));
+  // }
+
+  // // Si las nuevas contraseñas no coinciden
+  // if
+  // (!passwordRequest.getNewPassword().trim().equals(passwordRequest.getConfirmPassword().trim()))
+  // {
+  // return ResponseEntity.status(400)
+  // .body(responseService.generateCommonResponse("error", "Confirma tu
+  // contraseña, parece que no es la misma"));
+  // }
+
+  // String message = userService.updateUserPassword(id, passwordRequest);
+  // return
+  // ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
+  // message));
+  // }
+
+  @PutMapping("/roles")
+  public ResponseEntity<?> updateRoles(@RequestHeader("Authorization") String header,
+      @Valid @RequestBody RolesRequest rolesRequest, BindingResult result) {
+    Long id = jwtService.extractUserIdFromClaims(header);
     validationService.validateFieldsAndThrowResponse(result);
-
-    Optional<DetailUserResponse> optionalUser = userService.findUserById(id);
-
-    // Si el usuario ya no existe
-    if (optionalUser.isEmpty()) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "El usuario no existe"));
-    }
-
-    // Si el usuario no ha cambiado de contraseña
-    if (passwordRequest.getCurrentPassword().equals(passwordRequest.getNewPassword())) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "No has cambiado de contraseña"));
-    }
-
-    // Si las nuevas contraseñas no coinciden
-    if (!passwordRequest.getNewPassword().trim().equals(passwordRequest.getConfirmPassword().trim())) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "Confirma tu contraseña, parece que no es la misma"));
-    }
-
-    String message = userService.updatePassword(id, passwordRequest);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
-
+    userService.alterRoles(id, rolesRequest);
+    return ResponseEntity.status(200)
+        .body(responseService.generateCommonResponse("success", "Se ha cambiado los roles del usuario"));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
 
+    // TODO: CORREGIR AQUI
     if (userService.findUserById(id).isEmpty()) {
       return ResponseEntity.status(400)
           .body(responseService.generateCommonResponse("error", "El usuario no existe"));

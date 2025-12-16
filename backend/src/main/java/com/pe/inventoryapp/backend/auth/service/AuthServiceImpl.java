@@ -1,14 +1,14 @@
 package com.pe.inventoryapp.backend.auth.service;
 
-import static com.pe.inventoryapp.backend.security.config.TokenJwtConfig.SECRET_KEY;
-
-import javax.crypto.SecretKey;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mailersend.sdk.MailerSend;
+import com.mailersend.sdk.MailerSendResponse;
+import com.mailersend.sdk.emails.Email;
+import com.mailersend.sdk.exceptions.MailerSendException;
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.common.data.ErrorCode;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
@@ -20,8 +20,7 @@ import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 import com.pe.inventoryapp.backend.user.service.UserTokenService;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.github.cdimascio.dotenv.Dotenv;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -34,26 +33,6 @@ public class AuthServiceImpl implements AuthService {
 
   @Autowired
   private UserTokenService userTokenService;
-
-  @Autowired
-  private MailerSendService mailerSendService;
-
-  // Extrae el id del usuario desde el JWT del header
-  @Override
-  @Transactional(readOnly = true)
-  public Long extractUserIdFromClaims(String header) {
-    String token = header.replace("Bearer ", "");
-
-    Claims claims = Jwts.parser()
-        .verifyWith((SecretKey) SECRET_KEY)
-        .build()
-        .parseSignedClaims(token)
-        .getPayload();
-
-    Long id = claims.get("id", Long.class);
-
-    return id;
-  }
 
   // Obtiene el id del usuario por su email
   @Override
@@ -124,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     String token = userTokenService.generateTokenForUserByEmail(email);
-    mailerSendService.sendResetPasswordToken(email, token);
+    sendResetPasswordToken(email, token);
   }
 
   @Override
@@ -134,6 +113,43 @@ public class AuthServiceImpl implements AuthService {
     if (!userTokenService.isTokenValid(token)) {
       throw new BusinessException(ErrorCode.AUTH_TOKEN_EXPIRED);
     }
+  }
+
+  // Metodos auxiliares
+
+  private void sendResetPasswordToken(String toEmail, String token) {
+    // Configuración de MailerSend
+    MailerSend ms = new MailerSend();
+
+    Dotenv dotenv = Dotenv.load();
+    String apiKey = dotenv.get("MAILERSEND_API_TOKEN");
+    String testDomain = dotenv.get("MAILERSEND_TEST_DOMAIN");
+
+    System.out.println(apiKey);
+    System.out.println(testDomain);
+
+    ms.setToken(apiKey);
+
+    Email email = new Email();
+    email.setFrom("Inventory App 2",
+        testDomain);
+    email.addRecipient("", toEmail);
+    email.setSubject("Recuperar contraseña");
+
+    String text = "Tu código para restablecer contraseña es: " + token;
+    String html = "<p>Tu código de 6 digitos para restablecer contraseña es: <strong>" + token
+        + "</strong>. Recuerda que tienes 5 minutos para restablecer tu contraseña antes que el código expire</p>";
+
+    email.setPlain(text);
+    email.setHtml(html);
+
+    try {
+      MailerSendResponse resp = ms.emails().send(email);
+      System.out.println("Email enviado, messageId: " + resp.messageId);
+    } catch (MailerSendException e) {
+      e.printStackTrace();
+    }
+
   }
 
 }

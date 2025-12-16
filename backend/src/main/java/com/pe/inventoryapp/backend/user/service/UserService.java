@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
+import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 
@@ -14,13 +15,13 @@ public interface UserService {
 
   List<ListUsersResponse> findAll();
 
-  Optional<DetailUserResponse> findUserById(Long id);
+  DetailUserResponse findUserById(Long id);
 
-  String updateProfile(Long id, ProfileRequest profileRequest);
+  void updateUserProfile(Long id, ProfileRequest profileRequest);
 
-  String updatePassword(Long id, PasswordRequest passwordRequest);
-
-  void remove(Long id);
+  void alterRoles(Long id, RolesRequest rolesRequest);
 
   void verifyUserEmailExists(String email);
+
+  void remove(Long id);
 }
