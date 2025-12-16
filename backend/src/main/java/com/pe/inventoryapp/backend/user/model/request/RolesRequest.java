@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RolesRequest {
-  // Recomendado utilizar Boolean en lugar de boolean
-  private Boolean isOperator;
-  private Boolean isSecretary;
-  private Boolean isAdmin;
+  // Recomendado utilizar boolean en lugar de Boolean
+  // No definir nombres de campos que empiezan con "is" o "has"
+  private boolean operator;
+  private boolean secretary;
+  private boolean admin;
 }

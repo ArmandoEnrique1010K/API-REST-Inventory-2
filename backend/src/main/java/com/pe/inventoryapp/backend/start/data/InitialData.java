@@ -48,6 +48,7 @@ public class InitialData {
   @Autowired
   private CompanyRepository companyRepository;
 
+  // Metodo que se ejecuta cada vez que se inicia la API REST
   @PostConstruct
   public void init() {
 

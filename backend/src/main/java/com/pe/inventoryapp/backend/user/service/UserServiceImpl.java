@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
@@ -128,35 +130,28 @@ public class UserServiceImpl implements UserService {
 
   // Agregar los roles al usuario
   private List<Role> getRoles(RolesRequest rolesRequest) {
-    List<Role> userRoles = new ArrayList<>();
-    Optional<Role> roleUser = roleRepository.findByName("ROLE_USER");
+    List<Role> roles = new ArrayList<>();
 
-    if (roleUser.isPresent()) {
-      userRoles.add(roleUser.orElseThrow(
-          () -> new RuntimeException("No se pudo obtener el rol ROLE_USER")));
+    // Rol base obligatorio
+    roles.add(getRoleOrThrow("ROLE_USER", "El rol usuario no existe"));
+
+    if (rolesRequest.isOperator()) {
+      roles.add(getRoleOrThrow("ROLE_OPERATOR", "El rol operador no existe"));
     }
 
-    if (rolesRequest.getIsOperator()) {
-      Optional<Role> roleOperator = roleRepository.findByName("ROLE_OPERATOR");
-      if (roleOperator.isPresent()) {
-        userRoles.add(roleOperator.orElseThrow());
-      }
+    if (rolesRequest.isSecretary()) {
+      roles.add(getRoleOrThrow("ROLE_SECRETARY", "El rol secretario no existe"));
     }
 
-    if (rolesRequest.getIsSecretary()) {
-      Optional<Role> roleSecretary = roleRepository.findByName("ROLE_SECRETARY");
-      if (roleSecretary.isPresent()) {
-        userRoles.add(roleSecretary.orElseThrow());
-      }
+    if (rolesRequest.isAdmin()) {
+      roles.add(getRoleOrThrow("ROLE_ADMIN", "El rol administrador no existe"));
     }
 
-    if (rolesRequest.getIsAdmin()) {
-      Optional<Role> roleAdmin = roleRepository.findByName("ROLE_ADMIN");
-      if (roleAdmin.isPresent()) {
-        userRoles.add(roleAdmin.orElseThrow());
-      }
-    }
+    return roles;
+  }
 
-    return userRoles;
+  private Role getRoleOrThrow(String roleName, String message) {
+    return roleRepository.findByName(roleName)
+        .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR, message));
   }
 }
