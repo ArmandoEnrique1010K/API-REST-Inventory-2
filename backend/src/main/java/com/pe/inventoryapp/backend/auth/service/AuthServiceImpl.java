@@ -82,15 +82,12 @@ public class AuthServiceImpl implements AuthService {
     // 1° verificar si la nueva contraseña y la confirmación de la nueva contraseña
     // son iguales
     if (!newPassword.equals(confirmPassword)) {
-      System.out.println("No son iguales");
-      throw new BusinessException(ErrorCode.PASSWORD_MISMATCH, ErrorCode.PASSWORD_MISMATCH.getDefaultMessage());
+      throw new BusinessException(ErrorCode.VALIDATION_PASSWORD_MISMATCH);
     }
 
     // 2° verificar si la nueva contraseña es igual a la anterior
     if (passwordEncoderConfig.passwordEncoder().matches(newPassword, user.getPassword())) {
-      System.out.println("La nueva contraseña es igual a la anterior");
-      throw new BusinessException(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED,
-          ErrorCode.PASSWORD_REUSE_NOT_ALLOWED.getDefaultMessage());
+      throw new BusinessException(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED);
     }
 
     user.setPassword(passwordEncoderConfig.passwordEncoder().encode(
@@ -135,7 +132,7 @@ public class AuthServiceImpl implements AuthService {
   public void validateResetToken(String token) {
 
     if (!userTokenService.isTokenValid(token)) {
-      throw new BusinessException(ErrorCode.TOKEN_EXPIRED, ErrorCode.TOKEN_EXPIRED.getDefaultMessage());
+      throw new BusinessException(ErrorCode.AUTH_TOKEN_EXPIRED);
     }
   }
 

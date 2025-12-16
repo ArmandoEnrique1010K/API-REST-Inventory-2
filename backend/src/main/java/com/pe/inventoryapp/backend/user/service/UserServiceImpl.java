@@ -1,8 +1,10 @@
 package com.pe.inventoryapp.backend.user.service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
 import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
+import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
@@ -39,41 +42,18 @@ public class UserServiceImpl implements UserService {
   // Registra un nuevo usuario en el sistema
   @Transactional
   @Override
-  public String register(RegisterRequest registerRequest) {
-    List<Role> roles = new ArrayList<>();
-
-    // Rol base siempre
-    Role baseRole = roleRepository.findByName("ROLE_USER")
-        .orElseThrow(() -> new IllegalStateException("ROLE_USER no existe"));
-    roles.add(baseRole);
-
-    if (registerRequest.isOperator()) {
-      Role managerRole = roleRepository.findByName("ROLE_OPERATOR")
-          .orElseThrow(() -> new IllegalStateException("ROLE_OPERATOR no existe"));
-      roles.add(managerRole);
-    }
-
-    if (registerRequest.isSecretary()) {
-      Role managerRole = roleRepository.findByName("ROLE_SECRETARY")
-          .orElseThrow(() -> new IllegalStateException("ROLE_SECRETARY no existe"));
-      roles.add(managerRole);
-    }
-
-    if (registerRequest.isAdmin()) {
-      Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-          .orElseThrow(() -> new IllegalStateException("ROLE_ADMIN no existe"));
-      roles.add(adminRole);
-    }
-
+  public void registerUser(RegisterRequest registerRequest) {
     User user = new User();
     user.setFirstname(registerRequest.getFirstname());
     user.setLastname(registerRequest.getLastname());
     user.setEmail(registerRequest.getEmail());
     user.setPassword(passwordEncoderConfig.passwordEncoder().encode(registerRequest.getPassword()));
     user.setDni(registerRequest.getDni());
-    user.setRoles(roles);
+
+    // Asigna los roles al usuario
+    user.setRoles(getRoles(registerRequest.getRolesRequest()));
+
     userRepository.save(user);
-    return "Usuario registrado";
   }
 
   // Lista todos los usuarios
@@ -142,5 +122,41 @@ public class UserServiceImpl implements UserService {
     if (userRepository.findByEmail(email).isPresent()) {
       throw new FieldValidation("email", "El usuario con ese email ya existe, introduzca otro email");
     }
+  }
+
+  // MÉTODOS AUXILIARES
+
+  // Agregar los roles al usuario
+  private List<Role> getRoles(RolesRequest rolesRequest) {
+    List<Role> userRoles = new ArrayList<>();
+    Optional<Role> roleUser = roleRepository.findByName("ROLE_USER");
+
+    if (roleUser.isPresent()) {
+      userRoles.add(roleUser.orElseThrow(
+          () -> new RuntimeException("No se pudo obtener el rol ROLE_USER")));
+    }
+
+    if (rolesRequest.getIsOperator()) {
+      Optional<Role> roleOperator = roleRepository.findByName("ROLE_OPERATOR");
+      if (roleOperator.isPresent()) {
+        userRoles.add(roleOperator.orElseThrow());
+      }
+    }
+
+    if (rolesRequest.getIsSecretary()) {
+      Optional<Role> roleSecretary = roleRepository.findByName("ROLE_SECRETARY");
+      if (roleSecretary.isPresent()) {
+        userRoles.add(roleSecretary.orElseThrow());
+      }
+    }
+
+    if (rolesRequest.getIsAdmin()) {
+      Optional<Role> roleAdmin = roleRepository.findByName("ROLE_ADMIN");
+      if (roleAdmin.isPresent()) {
+        userRoles.add(roleAdmin.orElseThrow());
+      }
+    }
+
+    return userRoles;
   }
 }

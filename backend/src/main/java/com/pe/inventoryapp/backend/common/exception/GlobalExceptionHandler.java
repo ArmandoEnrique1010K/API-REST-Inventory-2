@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponse> handleTypeMismatch() {
 
     return buildCommonError(
-        ErrorCode.INVALID_ID,
+        ErrorCode.VALIDATION_INVALID_ID,
         "ID inválido, debe ser un número");
   }
 

@@ -120,8 +120,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // Aqui no se puede utilizar excepciones, ya que se va a devolver un json
     CommonResponse commonResponse = new CommonResponse();
-    commonResponse.setCode(ErrorCode.AUTHENTICATION_ERROR.name());
-    commonResponse.setMessage(ErrorCode.AUTHENTICATION_ERROR.getDefaultMessage());
+    commonResponse.setCode(ErrorCode.AUTH_INVALID_CREDENTIALS.name());
+    commonResponse.setMessage(ErrorCode.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
 
     response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
     response.setStatus(401);

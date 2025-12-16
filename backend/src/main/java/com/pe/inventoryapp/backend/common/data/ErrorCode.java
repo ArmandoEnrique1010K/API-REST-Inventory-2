@@ -3,24 +3,59 @@ package com.pe.inventoryapp.backend.common.data;
 import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
-  VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "Error de validación"),
-  INVALID_ID(HttpStatus.BAD_REQUEST, "ID inválido"),
-  USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "Usuario no encontrado"),
-  AUTHENTICATION_ERROR(HttpStatus.UNAUTHORIZED, "Error en la autenticacion, correo o contraseña incorrecta"),
+
+  // 400
+  VALIDATION_ERROR(
+      HttpStatus.BAD_REQUEST,
+      "Error de validación"),
+
+  VALIDATION_INVALID_ID(
+      HttpStatus.BAD_REQUEST,
+      "ID inválido"),
+
+  VALIDATION_PASSWORD_MISMATCH(
+      HttpStatus.BAD_REQUEST,
+      "Las contraseñas no coinciden"),
+
+  // 401
+  // Error en la autenticacion, correo o contraseña incorrecta
+  AUTH_INVALID_CREDENTIALS(
+      HttpStatus.UNAUTHORIZED,
+      "Credenciales inválidas"),
+
+  // Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
+  AUTH_TOKEN_EXPIRED(
+      HttpStatus.UNAUTHORIZED,
+      "Token inválido o expirado"),
 
   // 403
-  TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "Token invalido o expirado, vuelva a iniciar sesión"),
+  AUTH_FORBIDDEN(
+      HttpStatus.FORBIDDEN,
+      "No tiene permisos para realizar esta acción"),
 
   // 404
-  ENTITY_NOT_FOUND(HttpStatus.NOT_FOUND, "Entidad no encontrada"),
+  USER_NOT_FOUND(
+      HttpStatus.NOT_FOUND,
+      "Usuario no encontrado"),
+
+  // TODO: ESTE ERROR ES SOLAMENTE PARA PRUEBAS
+  ENTITY_NOT_FOUND(
+      HttpStatus.NOT_FOUND,
+      "Entidad no encontrada"),
 
   // 409
-  DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Recurso duplicado"),
+  // Recurso duplicado
+  RESOURCE_DUPLICATE(
+      HttpStatus.CONFLICT,
+      "El recurso ya existe"),
 
+  // La contraseña no puede ser usada porque es la misma que la anterior
   PASSWORD_REUSE_NOT_ALLOWED(
       HttpStatus.CONFLICT,
-      "La contraseña no puede ser usada porque es la misma que la anterior"),
-  PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "Las contraseñas no coinciden"),
+      "Contraseña no válida"),
+
+  DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Recurso duplicado"),
+
   // 500
   INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno");
 

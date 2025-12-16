@@ -41,6 +41,7 @@ public class UserMapper {
             case "ROLE_USER" -> "Usuario";
             case "ROLE_OPERATOR" -> "Operador";
             case "ROLE_ADMIN" -> "Administrador";
+            case "ROLE_SECRETARY" -> "Secretario";
             default -> "Desconocido";
           };
         })

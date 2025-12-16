@@ -58,15 +58,10 @@ public class UserController {
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     userService.verifyUserEmailExists(registerRequest.getEmail());
-
-    var user = userService.register(registerRequest);
-
-    if (user == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al registrar el usuario");
-    }
+    userService.registerUser(registerRequest);
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success", user));
+        .body(responseService.generateCommonResponse("success", "Usuario registrado"));
   }
 
   @GetMapping("/profile")

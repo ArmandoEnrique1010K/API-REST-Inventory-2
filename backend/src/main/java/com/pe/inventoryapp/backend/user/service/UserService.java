@@ -10,7 +10,7 @@ import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 
 public interface UserService {
-  String register(RegisterRequest registerRequest);
+  void registerUser(RegisterRequest registerRequest);
 
   List<ListUsersResponse> findAll();
 
