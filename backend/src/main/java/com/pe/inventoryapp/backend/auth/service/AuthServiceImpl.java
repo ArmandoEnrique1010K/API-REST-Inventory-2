@@ -98,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional
   public void processForgotPassword(String email) {
-    if (!userRepository.existsByEmail(email)) {
+    if (!userRepository.existsUserByEmail(email)) {
       throw new ResourceNotFound("El correo no existe");
     }
 
@@ -150,6 +150,14 @@ public class AuthServiceImpl implements AuthService {
       e.printStackTrace();
     }
 
+  }
+
+  @Override
+  public boolean existsUserByEmail(String email) {
+    if (userRepository.findByEmail(email).get() != null) {
+      return true;
+    }
+    return false;
   }
 
 }

@@ -14,4 +14,6 @@ public interface AuthService {
   void processForgotPassword(String email);
 
   public void validateResetToken(String token);
+
+  boolean existsUserByEmail(String email);
 }

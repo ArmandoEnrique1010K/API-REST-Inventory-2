@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.entity.UserToken;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -36,10 +38,14 @@ public class UserTokenServiceImpl implements UserTokenService {
     String stringtoken = String.format("%06d", number);
 
     // Devolver usuario por email
-    User user = userRepository.findUserByEmail(email);
+    Optional<User> user = userRepository.findByEmail(email);
+
+    if (!user.isPresent()) {
+      throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "El usuario no existe");
+    }
 
     UserToken token = new UserToken();
-    token.setUser(user);
+    token.setUser(user.get());
     token.setToken(stringtoken);
     token.setExpirationTime(LocalDateTime.now().plusMinutes(5)); // 5 minutos
     userTokenRepository.save(token);

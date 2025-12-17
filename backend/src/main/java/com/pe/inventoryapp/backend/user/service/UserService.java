@@ -1,9 +1,6 @@
 package com.pe.inventoryapp.backend.user.service;
 
 import java.util.List;
-import java.util.Optional;
-
-import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;

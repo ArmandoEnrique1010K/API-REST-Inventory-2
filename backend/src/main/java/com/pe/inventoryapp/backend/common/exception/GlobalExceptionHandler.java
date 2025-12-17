@@ -2,6 +2,8 @@ package com.pe.inventoryapp.backend.common.exception;
 
 import java.util.Map;
 
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -69,6 +71,14 @@ public class GlobalExceptionHandler {
     response.setMessage(ex.getMessage());
 
     return ResponseEntity.status(code.getStatus()).body(response);
+  }
+
+  // Error de base de datos
+  @ExceptionHandler(DataAccessException.class)
+  public ResponseEntity<?> handleDatabase(DataAccessException ex) {
+    return ResponseEntity
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body("Error, se perdio la conectividad con la base de datos");
   }
 
   // Helpers auxiliares

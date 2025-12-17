@@ -115,6 +115,11 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void remove(Long id) {
     Optional<User> optionalUser = userRepository.findById(id);
+    // El primer usuario jamas podra ser eliminado
+    if (id == 1) {
+      throw new BusinessException(ErrorCode.INTERNAL_ERROR, "El primer usuario no se puede eliminar");
+    }
+
     if (optionalUser.isPresent()) {
       userRepository.deleteById(id);
     } else {

@@ -42,9 +42,6 @@ public class UserController {
   private UserService userService;
 
   @Autowired
-  private AuthService authService;
-
-  @Autowired
   private JwtService jwtService;
 
   @Autowired
@@ -176,11 +173,11 @@ public class UserController {
           .body(responseService.generateCommonResponse("error", "El usuario no existe"));
     }
 
-    // El primer usuario jamas podra ser eliminado
-    if (id == 1) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "Este usuario no se puede eliminar"));
-    }
+    // if (id == 1) {
+    // return ResponseEntity.status(400)
+    // .body(responseService.generateCommonResponse("error", "Este usuario no se
+    // puede eliminar"));
+    // }
 
     userService.remove(id);
 
