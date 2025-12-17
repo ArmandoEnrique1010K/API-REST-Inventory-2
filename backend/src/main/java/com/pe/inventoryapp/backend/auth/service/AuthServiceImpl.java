@@ -98,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional
   public void processForgotPassword(String email) {
-    if (!userRepository.existsUserByEmail(email)) {
+    if (!this.existsUserByEmail(email)) {
       throw new ResourceNotFound("El correo no existe");
     }
 

@@ -89,6 +89,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
       // UsernamePasswordAuthenticationToken(principal, null,
       // authorities);
 
+      // username es el email
       UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null,
           authorities);
 

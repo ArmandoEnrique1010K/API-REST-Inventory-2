@@ -14,10 +14,9 @@ import jakarta.transaction.Transactional;
 public interface UserTokenRepository extends CrudRepository<UserToken, Long> {
   Optional<UserToken> findByToken(String token);
 
+  // Método personalizado de eliminar tokens expirados
   @Modifying
   @Transactional
   @Query("DELETE FROM UserToken t WHERE t.expirationTime <= :now")
   void deleteAllExpiredTokens(LocalDateTime now);
-
-  void deleteByToken(String token);
 }

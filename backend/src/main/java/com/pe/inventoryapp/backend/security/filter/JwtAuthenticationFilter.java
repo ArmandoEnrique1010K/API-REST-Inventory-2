@@ -80,6 +80,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // String role = authResult.getAuthorities().toString();
 
+    // AQUI SE ENCUENTRA EL ORIGEN DE EXTRACCIÓN DEL USERNAME
     // OBTENER EL ID DEL USUARIO
     Long id_user = authService.findUserIdByEmail(username);
 

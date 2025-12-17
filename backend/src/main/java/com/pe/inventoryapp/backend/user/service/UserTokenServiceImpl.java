@@ -69,6 +69,14 @@ public class UserTokenServiceImpl implements UserTokenService {
 
   @Override
   public void invalidateToken(String token) {
-    userTokenRepository.deleteByToken(token);
+
+    // Buscar token por token
+    Optional<UserToken> userToken = userTokenRepository.findByToken(token);
+    if (!userToken.isPresent()) {
+      throw new BusinessException(ErrorCode.AUTH_TOKEN_EXPIRED);
+    }
+
+    // Eliminar token
+    userTokenRepository.delete(userToken.get());
   }
 }

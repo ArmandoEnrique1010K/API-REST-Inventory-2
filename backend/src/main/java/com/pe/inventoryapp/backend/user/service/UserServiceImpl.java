@@ -110,10 +110,31 @@ public class UserServiceImpl implements UserService {
   // return "Contraseña del usuario actualizada";
   // }
 
+  // Alterar los roles del usuario
+  @Override
+  public void updateUserRoles(Long id, RolesRequest rolesRequest) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+
+    List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
+    user.setRoles(roles);
+    userRepository.save(user);
+  }
+
+  // Verifica si el email del usuario ya existe, de lo contrario lanza una
+  // excepcion
+  @Override
+  @Transactional(readOnly = true)
+  public void verifyUserEmailExists(String email) {
+    if (userRepository.findByEmail(email).isPresent()) {
+      throw new FieldValidation("email", "El usuario con ese email ya existe, introduzca otro email");
+    }
+  }
+
   // Elimina un usuario del sistema
   @Override
   @Transactional
-  public void remove(Long id) {
+  public void deleteUser(Long id) {
     Optional<User> optionalUser = userRepository.findById(id);
     // El primer usuario jamas podra ser eliminado
     if (id == 1) {
@@ -127,29 +148,7 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  // Verifica si el email del usuario ya existe, de lo contrario lanza una
-  // excepcion
-  @Override
-  @Transactional(readOnly = true)
-  public void verifyUserEmailExists(String email) {
-    if (userRepository.findByEmail(email).isPresent()) {
-      throw new FieldValidation("email", "El usuario con ese email ya existe, introduzca otro email");
-    }
-  }
-
-  // Alterar los roles del usuario
-  @Override
-  public void alterRoles(Long id, RolesRequest rolesRequest) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
-
-    List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
-    user.setRoles(roles);
-    userRepository.save(user);
-  }
-
   // MÉTODOS AUXILIARES
-
   // Agregar los roles al usuario
   private List<Role> getRoles(boolean isAdmin, boolean isSecretary, boolean isOperator) {
     List<Role> roles = new ArrayList<>();
@@ -172,6 +171,7 @@ public class UserServiceImpl implements UserService {
     return roles;
   }
 
+  // Busca un rol por su nombre, de lo contrario lanza una excepcion
   private Role getRoleOrThrow(String roleName, String message) {
     return roleRepository.findByName(roleName)
         .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR, message));

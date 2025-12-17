@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.pe.inventoryapp.backend.auth.service.AuthService;
+import com.pe.inventoryapp.backend.common.service.AuthenticationService;
 import com.pe.inventoryapp.backend.common.service.JwtService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
@@ -23,6 +25,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,6 +53,10 @@ public class UserController {
   @Autowired
   private ValidationService validationService;
 
+  @Autowired
+  private AuthenticationService authenticationService;
+
+  // TODO: DEBE SER UNA PAGINA DE USUARIOS
   @GetMapping
   public List<?> listAll() {
     return userService.findAll();
@@ -66,16 +73,36 @@ public class UserController {
         .body(responseService.generateCommonResponse("success", "Usuario registrado"));
   }
 
+  // TODO: ESTE ES UN MÉTODO DE PRUEBA PARA OBTENER EL ID Y EL EMAIL DESDE LOS
+  // HEADERS
+
+  // FUNCIONA EL METODO PARA EXTRAER EL ID DESDE EL JWT
   @GetMapping("/{id}")
-  public ResponseEntity<?> findById(@PathVariable Long id) {
+  public ResponseEntity<?> findById(@PathVariable Long id, Authentication authentication) {
+
+    String username = (String) authentication.getPrincipal();
+
+    // Sin utilizar el metodo extractUserIdFromClaims
+    // Long id = jwtService.extractUserIdFromClaims(header);
+
     DetailUserResponse user = userService.findUserById(id);
+    System.out.println("PRINCIPAL: " + username);
+    System.out.println(id);
     return ResponseEntity.ok(user);
   }
 
+  // @GetMapping("/profile")
+  // public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String
+  // header) {
+  // Long id = jwtService.extractUserIdFromClaims(header);
+  // DetailUserResponse user = userService.findUserById(id);
+  // return ResponseEntity.ok(user);
+  // }
+
   @GetMapping("/profile")
-  public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String header) {
-    Long id = jwtService.extractUserIdFromClaims(header);
-    DetailUserResponse user = userService.findUserById(id);
+  public ResponseEntity<?> getProfile(Authentication authentication) {
+    Long username = authenticationService.extractUserIdFromAuthentication(authentication);
+    DetailUserResponse user = userService.findUserById(username);
     return ResponseEntity.ok(user);
   }
 
@@ -179,7 +206,7 @@ public class UserController {
     // puede eliminar"));
     // }
 
-    userService.remove(id);
+    userService.deleteUser(id);
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success", "Usuario eliminado"));

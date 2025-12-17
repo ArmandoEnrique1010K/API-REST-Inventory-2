@@ -16,9 +16,9 @@ public interface UserService {
 
   void updateUserProfile(Long id, ProfileRequest profileRequest);
 
-  void alterRoles(Long id, RolesRequest rolesRequest);
+  void updateUserRoles(Long id, RolesRequest rolesRequest);
 
   void verifyUserEmailExists(String email);
 
-  void remove(Long id);
+  void deleteUser(Long id);
 }
