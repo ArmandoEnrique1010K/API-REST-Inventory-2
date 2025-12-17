@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.user.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.common.data.ErrorCode;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
-import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
@@ -24,8 +22,6 @@ import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -83,14 +79,13 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void updateUserProfile(Long id, ProfileRequest profileRequest) {
-    // Obtener el correo del usuario actual y el nuevo
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ErrorCode.ENTITY_NOT_FOUND,
             "El usuario no existe"));
 
+    // Obtener el correo del usuario actual y el nuevo
     String currentEmail = user.getEmail();
-
     String newEmail = profileRequest.getEmail();
 
     // Verificar que el usuario haya modificado su email
@@ -106,28 +101,13 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
-  // TODO: NO BORRAR ESTE ENDPOINT
-  // Actualiza la contraseña del usuario (si se acuerda su contraseña anterior)
-  // @Override
-  // @Transactional
-  // public String updateUserPassword(Long id, PasswordRequest passwordRequest) {
-  // User user = userRepository.findById(id)
-  // .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID:
-  // " + id));
-
-  // String encodedPassword =
-  // passwordEncoderConfig.passwordEncoder().encode(passwordRequest.getNewPassword());
-  // user.setPassword(encodedPassword);
-
-  // userRepository.save(user);
-  // return "Contraseña del usuario actualizada";
-  // }
-
-  // Alterar los roles del usuario
+  // Actualizar los roles del usuario
   @Override
   public void updateUserRoles(Long id, RolesRequest rolesRequest) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+        .orElseThrow(() -> new BusinessException(
+            ErrorCode.ENTITY_NOT_FOUND,
+            "El usuario no existe"));
 
     List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
     user.setRoles(roles);
@@ -140,7 +120,7 @@ public class UserServiceImpl implements UserService {
   @Transactional(readOnly = true)
   public void verifyUserEmailExists(String email) {
     if (userRepository.findByEmail(email).isPresent()) {
-      throw new FieldValidation("email", "El usuario con ese email ya existe, introduzca otro email");
+      throw new FieldValidation("email", "El usuario con ese email ya existe");
     }
   }
 
@@ -149,7 +129,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void deleteUser(Long id) {
     if (id == 1) {
-      throw new BusinessException(ErrorCode.INTERNAL_ERROR, "Este usuario no se puede eliminar");
+      throw new BusinessException(ErrorCode.DEFAULT_RESOURCE, "Este usuario no se puede eliminar");
     }
 
     User user = userRepository.findById(id)
@@ -188,5 +168,4 @@ public class UserServiceImpl implements UserService {
     return roleRepository.findByName(roleName)
         .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR, message));
   }
-
 }

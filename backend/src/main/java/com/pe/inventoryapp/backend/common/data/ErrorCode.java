@@ -4,75 +4,78 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
 
-  // 400
-  VALIDATION_ERROR(
-      HttpStatus.BAD_REQUEST,
-      "Error de validación"),
+    // 400
+    VALIDATION_ERROR(
+            HttpStatus.BAD_REQUEST,
+            "Error de validación"),
 
-  VALIDATION_INVALID_ID(
-      HttpStatus.BAD_REQUEST,
-      "ID inválido"),
+    VALIDATION_INVALID_ID(
+            HttpStatus.BAD_REQUEST,
+            "ID inválido"),
 
-  VALIDATION_PASSWORD_MISMATCH(
-      HttpStatus.BAD_REQUEST,
-      "Las contraseñas no coinciden"),
+    VALIDATION_PASSWORD_MISMATCH(
+            HttpStatus.BAD_REQUEST,
+            "Las contraseñas no coinciden"),
 
-  // 401
-  // Error en la autenticacion, correo o contraseña incorrecta
-  AUTH_INVALID_CREDENTIALS(
-      HttpStatus.UNAUTHORIZED,
-      "Credenciales inválidas"),
+    // 401
+    // Error en la autenticacion, correo o contraseña incorrecta
+    AUTH_INVALID_CREDENTIALS(
+            HttpStatus.UNAUTHORIZED,
+            "Credenciales inválidas"),
 
-  // Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
-  AUTH_TOKEN_EXPIRED(
-      HttpStatus.UNAUTHORIZED,
-      "Token inválido o expirado"),
+    // Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
+    AUTH_TOKEN_EXPIRED(
+            HttpStatus.UNAUTHORIZED,
+            "Token inválido o expirado"),
 
-  // 403
-  AUTH_FORBIDDEN(
-      HttpStatus.FORBIDDEN,
-      "No tiene permisos para realizar esta acción"),
+    // 403
+    AUTH_FORBIDDEN(
+            HttpStatus.FORBIDDEN,
+            "No tiene permisos para realizar esta acción"),
 
-  // 404
-  USER_NOT_FOUND(
-      HttpStatus.NOT_FOUND,
-      "Usuario no encontrado"),
+    // 404
+    USER_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "Usuario no encontrado"),
 
-  // TODO: ESTE ERROR ES SOLAMENTE PARA PRUEBAS
-  ENTITY_NOT_FOUND(
-      HttpStatus.NOT_FOUND,
-      "Entidad no encontrada"),
+    ENTITY_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "Entidad no encontrada"),
 
-  // 409
-  // Recurso duplicado
-  RESOURCE_DUPLICATE(
-      HttpStatus.CONFLICT,
-      "El recurso ya existe"),
+    // 409
+    // Recurso duplicado
+    RESOURCE_DUPLICATE(
+            HttpStatus.CONFLICT,
+            "El recurso ya existe"),
 
-  // La contraseña no puede ser usada porque es la misma que la anterior
-  PASSWORD_REUSE_NOT_ALLOWED(
-      HttpStatus.CONFLICT,
-      "Contraseña no válida"),
+    DEFAULT_RESOURCE(
+            HttpStatus.CONFLICT,
+            "Este recurso no se puede eliminar"),
 
-  DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Recurso duplicado"),
+    // La contraseña no puede ser usada porque es la misma que la anterior
+    PASSWORD_REUSE_NOT_ALLOWED(
+            HttpStatus.CONFLICT,
+            "Contraseña no válida"),
 
-  // 500
-  INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno");
+    DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Recurso duplicado"),
 
-  private final HttpStatus status;
-  private final String defaultMessage;
+    // 500
+    INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno");
 
-  ErrorCode(HttpStatus status, String defaultMessage) {
-    this.status = status;
-    this.defaultMessage = defaultMessage;
-  }
+    private final HttpStatus status;
+    private final String defaultMessage;
 
-  public HttpStatus getStatus() {
-    return status;
-  }
+    ErrorCode(HttpStatus status, String defaultMessage) {
+        this.status = status;
+        this.defaultMessage = defaultMessage;
+    }
 
-  public String getDefaultMessage() {
-    return defaultMessage;
-  }
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public String getDefaultMessage() {
+        return defaultMessage;
+    }
 
 }
