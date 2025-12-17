@@ -2,15 +2,9 @@ package com.pe.inventoryapp.backend.user.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.service.AuthenticationService;
-import com.pe.inventoryapp.backend.common.service.JwtService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.model.request.PasswordRequest;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
@@ -20,8 +14,6 @@ import com.pe.inventoryapp.backend.user.service.UserService;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +23,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,9 +34,6 @@ public class UserController {
 
   @Autowired
   private UserService userService;
-
-  @Autowired
-  private JwtService jwtService;
 
   @Autowired
   private ResponseService responseService;
@@ -73,21 +61,12 @@ public class UserController {
         .body(responseService.generateCommonResponse("success", "Usuario registrado"));
   }
 
-  // TODO: ESTE ES UN MÉTODO DE PRUEBA PARA OBTENER EL ID Y EL EMAIL DESDE LOS
-  // HEADERS
+  // TODO: ESTE ES UN MÉTODO DE PRUEBA PARA OBTENER EL ID DESDE LOS HEADERS
 
-  // FUNCIONA EL METODO PARA EXTRAER EL ID DESDE EL JWT
   @GetMapping("/{id}")
   public ResponseEntity<?> findById(@PathVariable Long id, Authentication authentication) {
-
-    String username = (String) authentication.getPrincipal();
-
-    // Sin utilizar el metodo extractUserIdFromClaims
-    // Long id = jwtService.extractUserIdFromClaims(header);
-
-    DetailUserResponse user = userService.findUserById(id);
-    System.out.println("PRINCIPAL: " + username);
-    System.out.println(id);
+    Long userId = authenticationService.extractUserIdFromAuthentication(authentication);
+    DetailUserResponse user = userService.findUserById(userId);
     return ResponseEntity.ok(user);
   }
 
@@ -107,34 +86,14 @@ public class UserController {
   }
 
   @PutMapping("/profile")
-  public ResponseEntity<?> updateProfile(@RequestHeader("Authorization") String header,
+  public ResponseEntity<?> updateProfile(Authentication authentication,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
 
-    Long id = jwtService.extractUserIdFromClaims(header);
+    Long userId = authenticationService.extractUserIdFromAuthentication(authentication);
 
-    // Validar campos
     validationService.validateFieldsAndThrowResponse(result);
 
-    String currentEmail = userService.findUserById(id).getEmail();
-    String newEmail = profileRequest.getEmail();
-
-    // Verificar que el usuario no haya modificado su email
-    // Primero debe obtener el email del usuario actual
-
-    // No usar el operador !=, en su lugar utiliza el metodo equals
-    if (!currentEmail.equals(newEmail)) {
-      // System.out.println(userService.findUserById(id).get().getEmail());
-      // System.out.println(profileRequest.getEmail());
-      userService.verifyUserEmailExists(profileRequest.getEmail());
-    }
-
-    // TODO: CORREGIR AQUI
-    if (userService.findUserById(id).isEmpty()) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "El usuario no existe"));
-    }
-
-    userService.updateUserProfile(id, profileRequest);
+    userService.updateUserProfile(userId, profileRequest);
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", "Su perfil ha sido actualizado"));
   }
@@ -182,29 +141,18 @@ public class UserController {
   // }
 
   @PutMapping("/roles")
-  public ResponseEntity<?> updateRoles(@RequestHeader("Authorization") String header,
+  public ResponseEntity<?> updateRoles(Authentication authentication,
       @Valid @RequestBody RolesRequest rolesRequest, BindingResult result) {
-    Long id = jwtService.extractUserIdFromClaims(header);
+
+    Long id = authenticationService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
-    userService.alterRoles(id, rolesRequest);
+    userService.updateUserRoles(id, rolesRequest);
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", "Se ha cambiado los roles del usuario"));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-
-    // TODO: CORREGIR AQUI
-    if (userService.findUserById(id).isEmpty()) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "El usuario no existe"));
-    }
-
-    // if (id == 1) {
-    // return ResponseEntity.status(400)
-    // .body(responseService.generateCommonResponse("error", "Este usuario no se
-    // puede eliminar"));
-    // }
 
     userService.deleteUser(id);
 

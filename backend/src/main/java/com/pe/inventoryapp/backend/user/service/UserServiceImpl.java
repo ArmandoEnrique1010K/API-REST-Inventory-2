@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService {
   private RoleRepository roleRepository;
 
   @Autowired
-  private PasswordEncoderConfig passwordEncoderConfig;
+  private PasswordEncoder passwordEncoder;
 
   // Registra un nuevo usuario en el sistema
   @Transactional
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService {
     user.setFirstname(registerRequest.getFirstname());
     user.setLastname(registerRequest.getLastname());
     user.setEmail(registerRequest.getEmail());
-    user.setPassword(passwordEncoderConfig.passwordEncoder().encode(registerRequest.getPassword()));
+    user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
     user.setDni(registerRequest.getDni());
 
     // Asigna los roles al usuario
@@ -82,8 +83,20 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void updateUserProfile(Long id, ProfileRequest profileRequest) {
+    // Obtener el correo del usuario actual y el nuevo
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
+        .orElseThrow(() -> new BusinessException(
+            ErrorCode.ENTITY_NOT_FOUND,
+            "El usuario no existe"));
+
+    String currentEmail = user.getEmail();
+
+    String newEmail = profileRequest.getEmail();
+
+    // Verificar que el usuario haya modificado su email
+    if (!currentEmail.equals(newEmail)) {
+      verifyUserEmailExists(newEmail);
+    }
 
     user.setFirstname(profileRequest.getFirstname());
     user.setLastname(profileRequest.getLastname());
@@ -135,17 +148,16 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void deleteUser(Long id) {
-    Optional<User> optionalUser = userRepository.findById(id);
-    // El primer usuario jamas podra ser eliminado
     if (id == 1) {
-      throw new BusinessException(ErrorCode.INTERNAL_ERROR, "El primer usuario no se puede eliminar");
+      throw new BusinessException(ErrorCode.INTERNAL_ERROR, "Este usuario no se puede eliminar");
     }
 
-    if (optionalUser.isPresent()) {
-      userRepository.deleteById(id);
-    } else {
-      throw new EntityNotFoundException("Usuario no encontrado con ID: " + id);
-    }
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(
+            ErrorCode.ENTITY_NOT_FOUND,
+            "El usuario no existe"));
+
+    userRepository.delete(user);
   }
 
   // MÉTODOS AUXILIARES
