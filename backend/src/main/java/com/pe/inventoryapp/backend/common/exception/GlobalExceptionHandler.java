@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
-import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 
 @RestControllerAdvice
@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorWithFieldsResponse> handleValidationException(RequestValidation ex) {
 
     return buildFieldError(
-        ErrorCode.VALIDATION_ERROR,
+        ResponseStatusCodes.VALIDATION_ERROR,
         "Complete los campos faltantes",
         ex.getErrors());
 
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     Map<String, String> errors = Map.of(ex.getFieldName(), ex.getMessage());
 
     return buildFieldError(
-        ErrorCode.DUPLICATE_RESOURCE,
+        ResponseStatusCodes.DUPLICATE_RESOURCE,
         "Error de duplicación al guardar los datos",
         errors);
   }
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponse> handleTypeMismatch() {
 
     return buildCommonError(
-        ErrorCode.VALIDATION_INVALID_ID,
+        ResponseStatusCodes.VALIDATION_INVALID_ID,
         "ID inválido, debe ser un número");
   }
 
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponse> handleUserNotFound() {
 
     return buildCommonError(
-        ErrorCode.USER_NOT_FOUND,
+        ResponseStatusCodes.USER_NOT_FOUND,
         "Usuario no encontrado");
   }
 
@@ -57,14 +57,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponse> handleRuntime() {
 
     return buildCommonError(
-        ErrorCode.ENTITY_NOT_FOUND,
+        ResponseStatusCodes.ENTITY_NOT_FOUND,
         "Ha ocurrido un error, la entidad no encontrada");
   }
 
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<CommonResponse> handleBusiness(BusinessException ex) {
 
-    ErrorCode code = ex.getErrorCode();
+    ResponseStatusCodes code = ex.getResponseStatusCodes();
 
     CommonResponse response = new CommonResponse();
     response.setType("error");
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(DataAccessException.class)
   public ResponseEntity<?> handleDatabase(DataAccessException ex) {
 
-    HttpStatus code = ErrorCode.INTERNAL_ERROR.getStatus();
+    HttpStatus code = ResponseStatusCodes.INTERNAL_ERROR.getStatus();
 
     CommonResponse response = new CommonResponse();
     response.setType("error");
@@ -91,7 +91,7 @@ public class GlobalExceptionHandler {
   // Helpers auxiliares
 
   private ResponseEntity<ErrorWithFieldsResponse> buildFieldError(
-      ErrorCode code,
+      ResponseStatusCodes code,
       String message,
       Map<String, String> fields) {
 
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
   }
 
   private ResponseEntity<CommonResponse> buildCommonError(
-      ErrorCode code,
+      ResponseStatusCodes code,
       String message) {
 
     CommonResponse response = new CommonResponse();

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.auth.model.response.LoginSuccessfulResponse;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
-import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.user.model.entity.User;
@@ -121,16 +121,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // Aqui no se puede utilizar excepciones, ya que se va a devolver un json
     CommonResponse commonResponse = new CommonResponse();
-    commonResponse.setCode(ErrorCode.AUTH_INVALID_CREDENTIALS.name());
-    commonResponse.setMessage(ErrorCode.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
+    commonResponse.setCode(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.name());
+    commonResponse.setMessage(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
 
     response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
     response.setStatus(401);
 
     response.setContentType("application/json");
 
-    // throw new BusinessException(ErrorCode.AUTHENTICATION_ERROR,
-    // ErrorCode.AUTHENTICATION_ERROR.getDefaultMessage());
+    // throw new BusinessException(ResponseStatusCodes.AUTHENTICATION_ERROR,
+    // ResponseStatusCodes.AUTHENTICATION_ERROR.getDefaultMessage());
 
   }
 

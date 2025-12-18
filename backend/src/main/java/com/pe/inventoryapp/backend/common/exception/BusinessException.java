@@ -1,21 +1,21 @@
 package com.pe.inventoryapp.backend.common.exception;
 
-import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 
 public class BusinessException extends RuntimeException {
-  private final ErrorCode errorCode;
+  private final ResponseStatusCodes ResponseStatusCodes;
 
-  public BusinessException(ErrorCode errorCode) {
-    super(errorCode.getDefaultMessage());
-    this.errorCode = errorCode;
+  public BusinessException(ResponseStatusCodes ResponseStatusCodes) {
+    super(ResponseStatusCodes.getDefaultMessage());
+    this.ResponseStatusCodes = ResponseStatusCodes;
   }
 
-  public BusinessException(ErrorCode errorCode, String customMessage) {
+  public BusinessException(ResponseStatusCodes ResponseStatusCodes, String customMessage) {
     super(customMessage);
-    this.errorCode = errorCode;
+    this.ResponseStatusCodes = ResponseStatusCodes;
   }
 
-  public ErrorCode getErrorCode() {
-    return errorCode;
+  public ResponseStatusCodes getResponseStatusCodes() {
+    return ResponseStatusCodes;
   }
 }

@@ -3,7 +3,7 @@ package com.pe.inventoryapp.backend.user.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.service.AuthenticationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -19,7 +19,6 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -63,7 +62,7 @@ public class UserController {
     userService.registerUser(registerRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha creado el usuario"));
   }
 
@@ -83,7 +82,7 @@ public class UserController {
     userService.updateUserProfile(userId, profileRequest);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Su perfil ha sido actualizado"));
   }
 
@@ -95,7 +94,7 @@ public class UserController {
     userService.updateUserRoles(id, rolesRequest);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se han cambiado los roles del usuario"));
   }
 
@@ -104,7 +103,7 @@ public class UserController {
     userService.deleteUser(id);
 
     return ResponseEntity.status(204)
-        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Usuario eliminado"));
   }
 }

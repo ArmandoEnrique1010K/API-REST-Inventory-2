@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
   public DetailUserResponse findUserById(Long id) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ErrorCode.ENTITY_NOT_FOUND,
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
             "El usuario no existe"));
 
     return UserMapper.builder()
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
   public void updateUserProfile(Long id, ProfileRequest profileRequest) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ErrorCode.ENTITY_NOT_FOUND,
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
             "El usuario no existe"));
 
     // Obtener el correo del usuario actual y el nuevo
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
   public void updateUserRoles(Long id, RolesRequest rolesRequest) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ErrorCode.ENTITY_NOT_FOUND,
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
             "El usuario no existe"));
 
     List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
@@ -129,12 +129,12 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void deleteUser(Long id) {
     if (id == 1) {
-      throw new BusinessException(ErrorCode.DEFAULT_RESOURCE, "Este usuario no se puede eliminar");
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Este usuario no se puede eliminar");
     }
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ErrorCode.ENTITY_NOT_FOUND,
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
             "El usuario no existe"));
 
     userRepository.delete(user);
@@ -166,6 +166,6 @@ public class UserServiceImpl implements UserService {
   // Busca un rol por su nombre, de lo contrario lanza una excepcion
   private Role getRoleOrThrow(String roleName, String message) {
     return roleRepository.findByName(roleName)
-        .orElseThrow(() -> new BusinessException(ErrorCode.VALIDATION_ERROR, message));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.VALIDATION_ERROR, message));
   }
 }

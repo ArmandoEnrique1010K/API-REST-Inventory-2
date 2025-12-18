@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.entity.UserToken;
@@ -41,7 +41,7 @@ public class UserTokenServiceImpl implements UserTokenService {
     Optional<User> user = userRepository.findByEmail(email);
 
     if (!user.isPresent()) {
-      throw new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "El usuario no existe");
+      throw new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe");
     }
 
     UserToken token = new UserToken();
@@ -73,7 +73,7 @@ public class UserTokenServiceImpl implements UserTokenService {
     // Buscar token por token
     Optional<UserToken> userToken = userTokenRepository.findByToken(token);
     if (!userToken.isPresent()) {
-      throw new BusinessException(ErrorCode.AUTH_TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED);
     }
 
     // Eliminar token

@@ -2,7 +2,7 @@ package com.pe.inventoryapp.backend.common.data;
 
 import org.springframework.http.HttpStatus;
 
-public enum ErrorCode {
+public enum ResponseStatusCodes {
 
         // 200
         SUCCESS_RESPONSE(HttpStatus.OK, "Se ha realizado la operación correctamente"),
@@ -69,7 +69,7 @@ public enum ErrorCode {
         private final HttpStatus status;
         private final String defaultMessage;
 
-        ErrorCode(HttpStatus status, String defaultMessage) {
+        ResponseStatusCodes(HttpStatus status, String defaultMessage) {
                 this.status = status;
                 this.defaultMessage = defaultMessage;
         }

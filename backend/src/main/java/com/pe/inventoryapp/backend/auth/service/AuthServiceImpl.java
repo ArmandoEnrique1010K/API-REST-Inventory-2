@@ -10,7 +10,7 @@ import com.mailersend.sdk.MailerSendResponse;
 import com.mailersend.sdk.emails.Email;
 import com.mailersend.sdk.exceptions.MailerSendException;
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
-import com.pe.inventoryapp.backend.common.data.ErrorCode;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.ResourceNotFound;
 import com.pe.inventoryapp.backend.security.config.PasswordEncoderConfig;
@@ -61,12 +61,12 @@ public class AuthServiceImpl implements AuthService {
     // 1° verificar si la nueva contraseña y la confirmación de la nueva contraseña
     // son iguales
     if (!newPassword.equals(confirmPassword)) {
-      throw new BusinessException(ErrorCode.VALIDATION_PASSWORD_MISMATCH);
+      throw new BusinessException(ResponseStatusCodes.VALIDATION_PASSWORD_MISMATCH);
     }
 
     // 2° verificar si la nueva contraseña es igual a la anterior
     if (passwordEncoderConfig.passwordEncoder().matches(newPassword, user.getPassword())) {
-      throw new BusinessException(ErrorCode.PASSWORD_REUSE_NOT_ALLOWED);
+      throw new BusinessException(ResponseStatusCodes.PASSWORD_REUSE_NOT_ALLOWED);
     }
 
     user.setPassword(passwordEncoderConfig.passwordEncoder().encode(
@@ -111,7 +111,7 @@ public class AuthServiceImpl implements AuthService {
   public void validateResetToken(String token) {
 
     if (!userTokenService.isTokenValid(token)) {
-      throw new BusinessException(ErrorCode.AUTH_TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED);
     }
   }
 
