@@ -54,7 +54,7 @@ public class AuthController {
   public ResponseEntity<?> validateToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    authService.validateResetToken(validateTokenRequest.getValue());
+    authService.validateAndActivateResetToken(validateTokenRequest.getValue());
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,

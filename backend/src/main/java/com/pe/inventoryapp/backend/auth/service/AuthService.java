@@ -9,5 +9,5 @@ public interface AuthService {
 
   void processForgotPassword(String email);
 
-  void validateResetToken(String token);
+  void validateAndActivateResetToken(String token);
 }

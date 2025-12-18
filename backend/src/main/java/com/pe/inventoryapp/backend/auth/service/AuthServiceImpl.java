@@ -56,10 +56,22 @@ public class AuthServiceImpl implements AuthService {
   }
 
   // Verifica si el token de 6 digitos es valido
-  @Override
-  @Transactional(readOnly = true)
-  public void validateResetToken(String token) {
-    getValidUserTokenOrThrow(token);
+  @Transactional
+  public void validateAndActivateResetToken(String token) {
+
+    UserToken userToken = userTokenRepository.findByToken(token)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED));
+
+    if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
+      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED);
+    }
+
+    if (userToken.isActive()) {
+      return; // idempotente, no hace nada si ya está activo
+    }
+
+    userToken.setActive(true);
+    userTokenRepository.save(userToken);
   }
 
   // Cambia la contraseña actual del usuario y lo guarda (si el usuario no se
@@ -69,6 +81,10 @@ public class AuthServiceImpl implements AuthService {
   public void updateUserPassword(String token, ChangePasswordRequest changePasswordRequest) {
     UserToken userToken = getValidUserTokenOrThrow(token);
     User user = userToken.getUser();
+
+    if (userToken.isActive() == false) {
+      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED, "El token de 6 digitos ha expirado");
+    }
 
     if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword())) {
       throw new BusinessException(ResponseStatusCodes.VALIDATION_PASSWORD_MISMATCH);
@@ -98,6 +114,7 @@ public class AuthServiceImpl implements AuthService {
     UserToken userToken = new UserToken();
     userToken.setUser(user);
     userToken.setToken(token);
+    userToken.setActive(false);
     userToken.setExpirationTime(LocalDateTime.now().plusMinutes(5));
 
     userTokenRepository.save(userToken);
@@ -105,7 +122,6 @@ public class AuthServiceImpl implements AuthService {
   }
 
   // Verifica si el token de 6 digitos es valido y si no ha expirado
-  @Transactional(readOnly = true)
   private UserToken getValidUserTokenOrThrow(String token) {
 
     UserToken userToken = userTokenRepository.findByToken(token)
@@ -114,6 +130,9 @@ public class AuthServiceImpl implements AuthService {
     if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
       throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED);
     }
+
+    userToken.setActive(true);
+    userTokenRepository.save(userToken);
 
     return userToken;
   }

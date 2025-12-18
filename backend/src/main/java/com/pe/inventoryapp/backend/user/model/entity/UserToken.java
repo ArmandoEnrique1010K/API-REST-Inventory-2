@@ -27,6 +27,8 @@ public class UserToken {
 
   private String token;
 
+  private boolean active;
+
   private LocalDateTime expirationTime;
 
   @ManyToOne
