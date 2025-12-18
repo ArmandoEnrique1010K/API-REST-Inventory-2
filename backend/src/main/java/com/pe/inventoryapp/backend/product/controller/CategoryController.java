@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.product.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -41,18 +43,21 @@ public class CategoryController {
   private ResponseService responseService;
 
   @GetMapping
-  public List<?> listAll() {
-    return categoryService.findAll();
+  public ResponseEntity<?> listAll() {
+    List<CategoryResponse> categories = categoryService.findAll();
+    return ResponseEntity.status(200).body(categories);
   }
 
   @GetMapping("/active")
-  public List<?> listAllActive() {
-    return categoryService.findAllByStatusTrue();
+  public ResponseEntity<?> listAllActive() {
+    List<CategoryResponse> categories = categoryService.findAllByStatusTrue();
+    return ResponseEntity.status(200).body(categories);
   }
 
   @GetMapping("/{id}")
-  public Optional<CategoryResponse> findById(@PathVariable Long id) {
-    return categoryService.findById(id);
+  public ResponseEntity<?> findById(@PathVariable Long id) {
+    CategoryResponse categoryResponse = categoryService.findById(id);
+    return ResponseEntity.status(200).body(categoryResponse);
   }
 
   @PostMapping
@@ -61,16 +66,13 @@ public class CategoryController {
     validationService.validateFieldsAndThrowResponse(result);
     categoryService.verifyCategoryNameExist(categoryRequest.getName());
 
-    var category = categoryService.save(categoryRequest);
-
-    if (category == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al registrar el usuario");
-    }
-
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success", category));
+    categoryService.save(categoryRequest);
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se guardo la categoria"));
   }
 
+  // TODO: CONTINUAR AQUI
   @PutMapping("/{id}")
   public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {

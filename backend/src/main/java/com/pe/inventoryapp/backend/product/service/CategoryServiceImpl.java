@@ -1,13 +1,14 @@
 package com.pe.inventoryapp.backend.product.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.mapper.CategoryMapper;
@@ -23,14 +24,14 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional
-  public String save(CategoryRequest categoryRequest) {
+  public void save(CategoryRequest categoryRequest) {
 
     Category category = new Category();
     category.setName(categoryRequest.getName());
     category.setStatus(true);
 
     categoryRepository.save(category);
-    return "Se guardo la categoria";
+    // return "Se guardo la categoria";
   }
 
   @Override
@@ -53,35 +54,31 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public String update(Long id, CategoryRequest categoryRequest) {
-    Optional<Category> categoryById = categoryRepository.findById(id);
+  public CategoryResponse findById(Long id) {
 
-    // Category categoryOptional = null;
+    Category category = categoryRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La caregoria no existe"));
 
-    // Si la categoria existe, lo actualiza con los datos proporcionados
-    if (categoryById.isPresent()) {
-      Category categoryData = categoryById.orElseThrow();
-
-      categoryData.setName(categoryRequest.getName());
-
-      // categoryOptional = categoryRepository.save(categoryData);
-      categoryRepository.save(categoryData);
-    }
-
-    // Optional.ofNullable(CategoryMapper.builder().setCategory(categoryOptional).buildListCategoriesResponse());
-    return "Se actualizo la categoria";
+    return CategoryMapper.builder().setCategory(category).buildCategoriesResponse();
   }
 
   @Override
-  public Optional<CategoryResponse> findById(Long id) {
-    return categoryRepository.findById(id)
-        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse());
+  public void update(Long id, CategoryRequest categoryRequest) {
+
+    Category category = categoryRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La caregoria no existe"));
+
+    category.setName(categoryRequest.getName());
+
+    categoryRepository.save(category);
   }
+
+  // return "Se actualizo la categoria";
 
   @Override
   public void verifyCategoryNameExist(String name) {
     if (categoryRepository.findByName(name).isPresent()) {
-      throw new FieldValidation("name", "La categoria con ese nombre ya existe, introduzca otra categoria");
+      throw new FieldValidation("name", "La categoria con ese nombre ya existe");
     }
   }
 
