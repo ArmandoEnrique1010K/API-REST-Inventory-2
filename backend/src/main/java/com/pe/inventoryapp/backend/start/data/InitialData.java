@@ -1,9 +1,7 @@
 package com.pe.inventoryapp.backend.start.data;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -78,7 +76,7 @@ public class InitialData {
     });
 
     // El usuario por defecto (primer usuario de la app)
-    if (userRepository.findByEmail("correo@example.com").isEmpty()) {
+    if (userRepository.findById(1L).isEmpty()) {
 
       List<Role> allRoles = new ArrayList<>();
       allRoles.add(roleUser);

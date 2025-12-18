@@ -1,7 +1,6 @@
 package com.pe.inventoryapp.backend.auth.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,6 +11,7 @@ import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ForgotPasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 
@@ -45,9 +45,8 @@ public class AuthController {
 
     authService.processForgotPassword(forgotPasswordRequest.getEmail());
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse(
-            "success",
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se le ha enviado un código de recuperación a su correo"));
   }
 
@@ -57,25 +56,23 @@ public class AuthController {
     validationService.validateFieldsAndThrowResponse(result);
     authService.validateResetToken(validateTokenRequest.getValue());
 
-    return ResponseEntity.ok(
-        responseService.generateCommonResponse(
-            "success",
-            "El token es válido"));
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "El token es válido, puede cambiar su contraseña"));
   }
 
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
   // REQUIERE QUE EL TOKEN SEA VALIDADO
   @PutMapping("/change-password/{token}")
-  public ResponseEntity<?> changeUserPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+  public ResponseEntity<?> updateUserPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
       BindingResult result,
       @PathVariable String token) {
 
     validationService.validateFieldsAndThrowResponse(result);
-    authService.changeUserPassword(token, changePasswordRequest);
+    authService.updateUserPassword(token, changePasswordRequest);
 
-    return ResponseEntity.ok(
-        responseService.generateCommonResponse(
-            "SUCCESS",
+    return ResponseEntity.status(200)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "La contraseña fue cambiada correctamente"));
   }
 

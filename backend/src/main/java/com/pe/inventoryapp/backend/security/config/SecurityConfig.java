@@ -62,8 +62,6 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/users/listAll").hasAuthority("ROLE_ADMIN")
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/profile")
                                                 .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
-                                                .requestMatchers(HttpMethod.PUT, "/api/users/update-password")
-                                                .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
                                                 .requestMatchers(HttpMethod.DELETE, "/api/users/**")
                                                 .hasAuthority("ROLE_ADMIN")
 
