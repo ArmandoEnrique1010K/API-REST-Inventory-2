@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 // Esta clase representa una respuesta común, que se puede utilizar tanto para
 // respuestas exitosas como para respuestas erroneas
 public class CommonResponse {
+  private String type;
   private String code;
   private String message;
 }

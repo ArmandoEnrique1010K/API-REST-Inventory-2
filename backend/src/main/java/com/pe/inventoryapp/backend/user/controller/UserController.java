@@ -2,13 +2,17 @@ package com.pe.inventoryapp.backend.user.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.pe.inventoryapp.backend.common.data.ErrorCode;
 import com.pe.inventoryapp.backend.common.service.AuthenticationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -46,8 +50,9 @@ public class UserController {
 
   // TODO: DEBE SER UNA PAGINA DE USUARIOS
   @GetMapping
-  public List<?> listAll() {
-    return userService.findAll();
+  public ResponseEntity<?> listAll() {
+    List<ListUsersResponse> users = userService.findAll();
+    return ResponseEntity.status(200).body(users);
   }
 
   @PostMapping("/register")
@@ -57,9 +62,9 @@ public class UserController {
     userService.verifyUserEmailExists(registerRequest.getEmail());
     userService.registerUser(registerRequest);
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        // TODO: ES POSIBLE CREAR UNA RESPUESTA POR DEFECTO EN ERRORCODE.JAVA
-        .body(responseService.generateCommonResponse("success", "Usuario registrado"));
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+            "Se ha creado el usuario"));
   }
 
   @GetMapping("/profile")
@@ -67,7 +72,7 @@ public class UserController {
     Long username = authenticationService.extractUserIdFromAuthentication(authentication);
     DetailUserResponse user = userService.findUserById(username);
 
-    return ResponseEntity.ok(user);
+    return ResponseEntity.status(200).body(user);
   }
 
   @PutMapping("/profile")
@@ -78,7 +83,8 @@ public class UserController {
     userService.updateUserProfile(userId, profileRequest);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", "Su perfil ha sido actualizado"));
+        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+            "Su perfil ha sido actualizado"));
   }
 
   @PutMapping("/roles")
@@ -89,14 +95,16 @@ public class UserController {
     userService.updateUserRoles(id, rolesRequest);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", "Se ha cambiado los roles del usuario"));
+        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+            "Se han cambiado los roles del usuario"));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
     userService.deleteUser(id);
 
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success", "Usuario eliminado"));
+    return ResponseEntity.status(204)
+        .body(responseService.generateCommonResponse("success", ErrorCode.SUCCESS_RESPONSE,
+            "Usuario eliminado"));
   }
 }

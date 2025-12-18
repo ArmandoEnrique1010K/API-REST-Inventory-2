@@ -67,6 +67,7 @@ public class GlobalExceptionHandler {
     ErrorCode code = ex.getErrorCode();
 
     CommonResponse response = new CommonResponse();
+    response.setType("error");
     response.setCode(code.name());
     response.setMessage(ex.getMessage());
 
@@ -76,9 +77,15 @@ public class GlobalExceptionHandler {
   // Error de base de datos
   @ExceptionHandler(DataAccessException.class)
   public ResponseEntity<?> handleDatabase(DataAccessException ex) {
-    return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body("Error, se perdio la conectividad con la base de datos");
+
+    HttpStatus code = ErrorCode.INTERNAL_ERROR.getStatus();
+
+    CommonResponse response = new CommonResponse();
+    response.setType("error");
+    response.setCode(code.name());
+    response.setMessage("Se ha producido un error en la base de datos");
+
+    return ResponseEntity.status(code).body(response);
   }
 
   // Helpers auxiliares
@@ -89,6 +96,7 @@ public class GlobalExceptionHandler {
       Map<String, String> fields) {
 
     ErrorWithFieldsResponse response = new ErrorWithFieldsResponse();
+    response.setType("error");
     response.setCode(code.name());
     response.setMessage(message);
     response.setFields(fields);
@@ -101,6 +109,7 @@ public class GlobalExceptionHandler {
       String message) {
 
     CommonResponse response = new CommonResponse();
+    response.setType("error");
     response.setCode(code.name());
     response.setMessage(message);
 
