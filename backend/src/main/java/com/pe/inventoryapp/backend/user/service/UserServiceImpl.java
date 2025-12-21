@@ -65,61 +65,61 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional(readOnly = true)
   public DetailUserResponse findUserById(Long id) {
-    if (id != null) {
-      User user = userRepository.findById(id)
-          .orElseThrow(() -> new BusinessException(
-              ResponseStatusCodes.ENTITY_NOT_FOUND,
-              "El usuario no existe"));
-
-      return UserMapper.builder()
-          .setUser(user)
-          .buildDetailUserResponse();
-
-    } else {
+    if (id == null) {
       throw new BusinessException(
-          ResponseStatusCodes.COMMON_ERROR,
-          ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
+          ResponseStatusCodes.COMMON_ERROR);
     }
 
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            "El usuario no existe"));
+
+    return UserMapper.builder()
+        .setUser(user)
+        .buildDetailUserResponse();
   }
 
   // Actualiza el perfil del usuario
   @Override
   @Transactional
   public void updateUserProfile(Long id, ProfileRequest profileRequest) {
-
-    if (id != null) {
-      User user = userRepository.findById(id)
-          .orElseThrow(() -> new BusinessException(
-              ResponseStatusCodes.ENTITY_NOT_FOUND,
-              "El usuario no existe"));
-
-      // Obtener el correo del usuario actual y el nuevo
-      String currentEmail = user.getEmail();
-      String newEmail = profileRequest.getEmail();
-
-      // Verificar que el usuario haya modificado su email
-      if (!currentEmail.equals(newEmail)) {
-        verifyUserEmailExists(newEmail);
-      }
-
-      user.setFirstname(profileRequest.getFirstname());
-      user.setLastname(profileRequest.getLastname());
-      user.setEmail(profileRequest.getEmail());
-      user.setDni(profileRequest.getDni());
-
-      userRepository.save(user);
-
-    } else {
+    if (id == null) {
       throw new BusinessException(
-          ResponseStatusCodes.ENTITY_NOT_FOUND,
-          "El usuario no existe");
+          ResponseStatusCodes.COMMON_ERROR);
     }
+
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            "El usuario no existe"));
+
+    // Obtener el correo del usuario actual y el nuevo
+    String currentEmail = user.getEmail();
+    String newEmail = profileRequest.getEmail();
+
+    // Verificar que el usuario haya modificado su email
+    if (!currentEmail.equals(newEmail)) {
+      verifyUserEmailExists(newEmail);
+    }
+
+    user.setFirstname(profileRequest.getFirstname());
+    user.setLastname(profileRequest.getLastname());
+    user.setEmail(profileRequest.getEmail());
+    user.setDni(profileRequest.getDni());
+
+    userRepository.save(user);
+
   }
 
   // Actualizar los roles del usuario
   @Override
   public void updateUserRoles(Long id, RolesRequest rolesRequest) {
+    if (id == null) {
+      throw new BusinessException(
+          ResponseStatusCodes.COMMON_ERROR);
+    }
+
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatusCodes.ENTITY_NOT_FOUND,
@@ -144,16 +144,26 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional
   public void deleteUser(Long id) {
-    if (id == 1) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Este usuario no se puede eliminar");
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(
+    if (id == 1L) {
+      throw new BusinessException(
+          ResponseStatusCodes.DEFAULT_RESOURCE,
+          "Este usuario no se puede eliminar");
+    }
+
+    User user = userRepository.findById(id).orElseThrow(
+        () -> new BusinessException(
             ResponseStatusCodes.ENTITY_NOT_FOUND,
             "El usuario no existe"));
 
-    userRepository.delete(user);
+    if (user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    } else {
+      userRepository.delete(user);
+    }
   }
 
   // MÉTODOS AUXILIARES
