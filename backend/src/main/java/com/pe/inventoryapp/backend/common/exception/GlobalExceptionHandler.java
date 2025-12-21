@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
 
     return buildCommonError(
         ResponseStatusCodes.ENTITY_NOT_FOUND,
-        "Ha ocurrido un error, la entidad no encontrada");
+        "Ha ocurrido un error, la entidad no encontrada 22");
   }
 
   @ExceptionHandler(BusinessException.class)
@@ -71,7 +71,16 @@ public class GlobalExceptionHandler {
     response.setCode(code.name());
     response.setMessage(ex.getMessage());
 
-    return ResponseEntity.status(code.getStatus()).body(response);
+    HttpStatus status = code.getStatus();
+
+    if (status != null) {
+      return ResponseEntity.status(status).body(response);
+    } else {
+      status = ResponseStatusCodes.COMMON_ERROR.getStatus();
+      response.setCode(ResponseStatusCodes.COMMON_ERROR.name());
+      response.setMessage(ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
+      return ResponseEntity.status(status.value()).body(response);
+    }
   }
 
   // Error de base de datos
@@ -101,7 +110,16 @@ public class GlobalExceptionHandler {
     response.setMessage(message);
     response.setFields(fields);
 
-    return ResponseEntity.status(code.getStatus()).body(response);
+    HttpStatus status = code.getStatus();
+
+    if (status != null) {
+      return ResponseEntity.status(status).body(response);
+    } else {
+      status = ResponseStatusCodes.COMMON_ERROR.getStatus();
+      response.setCode(ResponseStatusCodes.COMMON_ERROR.name());
+      response.setMessage(ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
+      return ResponseEntity.status(status.value()).body(response);
+    }
   }
 
   private ResponseEntity<CommonResponse> buildCommonError(
@@ -113,7 +131,15 @@ public class GlobalExceptionHandler {
     response.setCode(code.name());
     response.setMessage(message);
 
-    return ResponseEntity.status(code.getStatus()).body(response);
-  }
+    HttpStatus status = code.getStatus();
 
+    if (status != null) {
+      return ResponseEntity.status(status).body(response);
+    } else {
+      status = ResponseStatusCodes.COMMON_ERROR.getStatus();
+      response.setCode(ResponseStatusCodes.COMMON_ERROR.name());
+      response.setMessage(ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
+      return ResponseEntity.status(status.value()).body(response);
+    }
+  }
 }

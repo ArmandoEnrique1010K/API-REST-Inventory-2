@@ -65,40 +65,56 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional(readOnly = true)
   public DetailUserResponse findUserById(Long id) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "El usuario no existe"));
+    if (id != null) {
+      User user = userRepository.findById(id)
+          .orElseThrow(() -> new BusinessException(
+              ResponseStatusCodes.ENTITY_NOT_FOUND,
+              "El usuario no existe"));
 
-    return UserMapper.builder()
-        .setUser(user)
-        .buildDetailUserResponse();
+      return UserMapper.builder()
+          .setUser(user)
+          .buildDetailUserResponse();
+
+    } else {
+      throw new BusinessException(
+          ResponseStatusCodes.COMMON_ERROR,
+          ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
+    }
+
   }
 
   // Actualiza el perfil del usuario
   @Override
   @Transactional
   public void updateUserProfile(Long id, ProfileRequest profileRequest) {
-    User user = userRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "El usuario no existe"));
 
-    // Obtener el correo del usuario actual y el nuevo
-    String currentEmail = user.getEmail();
-    String newEmail = profileRequest.getEmail();
+    if (id != null) {
+      User user = userRepository.findById(id)
+          .orElseThrow(() -> new BusinessException(
+              ResponseStatusCodes.ENTITY_NOT_FOUND,
+              "El usuario no existe"));
 
-    // Verificar que el usuario haya modificado su email
-    if (!currentEmail.equals(newEmail)) {
-      verifyUserEmailExists(newEmail);
+      // Obtener el correo del usuario actual y el nuevo
+      String currentEmail = user.getEmail();
+      String newEmail = profileRequest.getEmail();
+
+      // Verificar que el usuario haya modificado su email
+      if (!currentEmail.equals(newEmail)) {
+        verifyUserEmailExists(newEmail);
+      }
+
+      user.setFirstname(profileRequest.getFirstname());
+      user.setLastname(profileRequest.getLastname());
+      user.setEmail(profileRequest.getEmail());
+      user.setDni(profileRequest.getDni());
+
+      userRepository.save(user);
+
+    } else {
+      throw new BusinessException(
+          ResponseStatusCodes.ENTITY_NOT_FOUND,
+          "El usuario no existe");
     }
-
-    user.setFirstname(profileRequest.getFirstname());
-    user.setLastname(profileRequest.getLastname());
-    user.setEmail(profileRequest.getEmail());
-    user.setDni(profileRequest.getDni());
-
-    userRepository.save(user);
   }
 
   // Actualizar los roles del usuario
