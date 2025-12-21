@@ -25,9 +25,10 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   @Transactional
   public void save(CategoryRequest categoryRequest) {
+    verifyCategoryNameExist(categoryRequest.getName());
 
     Category category = new Category();
-    category.setName(categoryRequest.getName());
+    category.setName(categoryRequest.getName().trim());
     category.setStatus(true);
 
     categoryRepository.save(category);
@@ -56,6 +57,10 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   public CategoryResponse findById(Long id) {
 
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La caregoria no existe"));
 
@@ -64,30 +69,52 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   public void update(Long id, CategoryRequest categoryRequest) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    if (id == 1L) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta categoria no se puede editar");
+    }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La caregoria no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
 
-    category.setName(categoryRequest.getName());
+    if (category.isStatus() == false) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+    }
+
+    verifyCategoryNameExist(categoryRequest.getName().trim());
+
+    category.setName(categoryRequest.getName().trim());
 
     categoryRepository.save(category);
   }
 
-  // return "Se actualizo la categoria";
-
-  @Override
-  public void verifyCategoryNameExist(String name) {
-    if (categoryRepository.findByName(name).isPresent()) {
-      throw new FieldValidation("name", "La categoria con ese nombre ya existe");
-    }
-  }
+  // Obtiene una categoria por su nombre y verifica que no exista
 
   @Override
   public void changeStatus(Long id) {
-    Category changedCategory = categoryRepository.findById(id).orElseThrow();
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    if (id == 1L) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta categoria no se puede inhabilitar");
+    }
+
+    Category changedCategory = categoryRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
 
     // Cambia el estado de la categoria a false y lo guarda
     changedCategory.setStatus(!changedCategory.isStatus());
     categoryRepository.save(changedCategory);
+  }
+
+  // METODOS AUXILIARES
+  private void verifyCategoryNameExist(String name) {
+    if (categoryRepository.findByName(name).isPresent()) {
+      throw new FieldValidation("name", "La categoria con ese nombre ya existe");
+    }
   }
 }

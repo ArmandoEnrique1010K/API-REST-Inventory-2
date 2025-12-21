@@ -33,13 +33,12 @@ public class RegisterRequest {
   private Integer dni;
 
   @NotBlank(message = "La contraseña es obligatoria")
-  // @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
-  // @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]+$", message =
-  // "La contraseña debe contener al menos una letra mayúscula, una letra
-  // minúscula y un número, sin caracteres especiales")
   private String password;
 
+  @NotNull
   private boolean operator;
+  @NotNull
   private boolean secretary;
+  @NotNull
   private boolean admin;
 }

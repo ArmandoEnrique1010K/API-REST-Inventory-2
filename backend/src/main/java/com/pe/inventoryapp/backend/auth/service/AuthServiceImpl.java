@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword())) {
-      throw new BusinessException(ResponseStatusCodes.VALIDATION_PASSWORD_MISMATCH);
+      throw new BusinessException(ResponseStatusCodes.VALIDATION_ERROR, "Las contraseñas no coinciden");
     }
 
     if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
