@@ -31,7 +31,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional
-  public void save(ProductRequest productRequest) {
+  public void saveProduct(ProductRequest productRequest) {
     verifyProductNameExist(productRequest.getName());
 
     Long idCategory = productRequest.getIdCategory();
@@ -70,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
 
   // Conviene usar Boolean en lugar de boolean
   @Override
-  public Page<ProductListResponse> searchAllByParams(
+  public Page<ProductListResponse> searchAllProductsByParams(
       String name,
       Integer minStock,
       Integer maxStock,
@@ -90,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ProductListResponse> searchAllByParamsAndStatusTrue(String name,
+  public Page<ProductListResponse> searchAllProductsByParamsAndStatusTrue(String name,
       Integer minStock,
       Integer maxStock,
       Long categoryId,
@@ -103,7 +103,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public ProductDetailsResponse findById(Long id) {
+  public ProductDetailsResponse findProductById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -115,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional
-  public void update(Long id, ProductRequest productRequest) {
+  public void updateProductById(Long id, ProductRequest productRequest) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -149,7 +149,7 @@ public class ProductServiceImpl implements ProductService {
   // Cambia el estado del producto a false y lo guarda
   @Override
   @Transactional
-  public void changeStatus(Long id) {
+  public void changeStatusProductById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }

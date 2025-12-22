@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n{\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"password\": \"1233asdD\"\r\n}\r\n",
+							"raw": "{\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"password\": \"Dark267AA2\"\r\n}\r\n\r\n// {\r\n//     \"email\": \"enrique1010k@gmail.com\",\r\n//     \"password\": \"kingDark267\"\r\n// }\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -40,7 +40,7 @@
 					"response": []
 				},
 				{
-					"name": "forgotPassword",
+					"name": "forgotUserPassword",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -70,13 +70,13 @@
 					"response": []
 				},
 				{
-					"name": "validateToken",
+					"name": "validateUserToken",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"value\": \"126552\"\r\n}",
+							"raw": "{\r\n    \"value\": \"455766\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -100,13 +100,13 @@
 					"response": []
 				},
 				{
-					"name": "changePassword",
+					"name": "updateUserPassword",
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"newPassword\": \"1233asdD\",\r\n    \"confirmNewPassword\": \"1233asdD\"\r\n}",
+							"raw": "{\r\n    \"newPassword\": \"Dark267AA2\",\r\n    \"confirmNewPassword\": \"Dark267AA2\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,7 +114,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/auth/change-password/126552",
+							"raw": "http://localhost:8080/api/auth/change-password/455766",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -124,7 +124,7 @@
 								"api",
 								"auth",
 								"change-password",
-								"126552"
+								"455766"
 							]
 						}
 					},
@@ -136,14 +136,14 @@
 			"name": "USER",
 			"item": [
 				{
-					"name": "register",
+					"name": "registerUser",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY1MzA3MjIwLCJleHAiOjE3NjUzMTA4MjB9.BBSsmUglsMpyu0ZUCCBLBM94V81H2ii4XUA3QVerwts",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWQiOjIsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE3NjYzNDU5ODMsImV4cCI6MTc2NjM0OTU4M30.nM5tyQVudz20XDG0BoYLkXyniTrbNDfZR5YafVWeHlw",
 									"type": "string"
 								}
 							]
@@ -152,7 +152,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstname\": \"Armando\",\r\n    \"lastname\": \"Rnrique\",\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"dni\": \"12345678\",\r\n    \"password\": \"1233asdW\",\r\n    \"isManager\": false,\r\n    \"isAdmin\": false\r\n}",
+							"raw": "{\r\n    \"firstname\": \"Armando\",\r\n    \"lastname\": \"Enrique\",\r\n    \"email\": \"usuari234o@gmail.com\",\r\n    \"dni\": \"73017920\",\r\n    \"password\": \"12345\",\r\n    \"operator\": true,\r\n    \"secretary\": false,\r\n    \"admin\": false\r\n\r\n    // \"rolesRequest\": {\r\n    //     \"operator\": true,\r\n    //     \"secretary\": false,\r\n    //     \"admin\": false\r\n    // }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -160,7 +160,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/users/register",
+							"raw": "http://localhost:8080/api/user/register",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -168,7 +168,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"users",
+								"user",
 								"register"
 							]
 						}
@@ -176,14 +176,14 @@
 					"response": []
 				},
 				{
-					"name": "listAll",
+					"name": "listAllUsers",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY1MzA3NjkxLCJleHAiOjE3NjUzMTEyOTF9.R99x5SeBgkXLq769Sicsf0WFiUOZ8j2WU3InSROQxCY",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWQiOjIsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9TRUNSRVRBUlkiLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY2MzUxMTI3LCJleHAiOjE3NjYzNTQ3Mjd9.0bdbLUDQvxq4ihcws-zxo72mnPQ5NSNj2Q-E2RNOL0E",
 									"type": "string"
 								}
 							]
@@ -191,7 +191,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/users",
+							"raw": "http://localhost:8080/api/user",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -199,29 +199,22 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"users"
+								"user"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "profile",
+					"name": "getUserProfile",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTcxMCwiZXhwIjoxNzY1MzI1MzEwfQ.x8m_NYPAGlZQ-w60MTVWcEqUjIMk1fNFiJ_ryzgwueM",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/users/profile",
+							"raw": "http://localhost:8080/api/user/profile",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -229,7 +222,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"users",
+								"user",
 								"profile"
 							]
 						}
@@ -237,23 +230,16 @@
 					"response": []
 				},
 				{
-					"name": "updateProfile",
+					"name": "updateUserProfile",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTg1MiwiZXhwIjoxNzY1MzI1NDUyfQ.8Ok3-mhjaKPiRvxXxbJwv9qwHOAVWDbU75IXcr7izIk",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstname\": \"Primer usuario\",\r\n    \"lastname\": \"De prueba\",\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"dni\": 11111111\r\n}",
+							"raw": "{\r\n    \"firstname\": \"Primer usuario\",\r\n    \"lastname\": \"De prueba\",\r\n    \"email\": \"correo2123@gmail.com\",\r\n    \"dni\": 11111111\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -261,7 +247,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/users/profile",
+							"raw": "http://localhost:8080/api/user/profile",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -269,7 +255,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"users",
+								"user",
 								"profile"
 							]
 						}
@@ -277,23 +263,16 @@
 					"response": []
 				},
 				{
-					"name": "updatePassword",
+					"name": "updateUserRoles",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTg1MiwiZXhwIjoxNzY1MzI1NDUyfQ.8Ok3-mhjaKPiRvxXxbJwv9qwHOAVWDbU75IXcr7izIk",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"currentPassword\": \"12345\",\r\n    \"newPassword\": \"12345678aA\",\r\n    \"confirmPassword\": \"12345678aA\"\r\n}",
+							"raw": "{\r\n    \"operator\": true,\r\n    \"secretary\": true,\r\n    \"admin\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -301,7 +280,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/users/update-password",
+							"raw": "http://localhost:8080/api/user/roles",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -309,8 +288,8 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"users",
-								"update-password"
+								"user",
+								"roles"
 							]
 						}
 					},
@@ -324,7 +303,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY1MzA3NjkxLCJleHAiOjE3NjUzMTEyOTF9.R99x5SeBgkXLq769Sicsf0WFiUOZ8j2WU3InSROQxCY",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWQiOjIsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9TRUNSRVRBUlkiLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY2MzUxMzA2LCJleHAiOjE3NjYzNTQ5MDZ9.mD__0eyJH85bt8hUMKk0eJj1eraDgdkxQOF1KfBk2qE",
 									"type": "string"
 								}
 							]
@@ -341,7 +320,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/users/9",
+							"raw": "http://localhost:8080/api/user/6",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -349,8 +328,8 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"users",
-								"9"
+								"user",
+								"6"
 							]
 						}
 					},
@@ -362,13 +341,13 @@
 			"name": "CATEGORY",
 			"item": [
 				{
-					"name": "save",
+					"name": "registerCategory",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"NUEVA CATEGORIA\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Coca Kola\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -391,7 +370,7 @@
 					"response": []
 				},
 				{
-					"name": "listAll",
+					"name": "listAllCategories",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -411,7 +390,7 @@
 					"response": []
 				},
 				{
-					"name": "listAllByStatusTrue",
+					"name": "listAllCategoriesActive",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -432,7 +411,7 @@
 					"response": []
 				},
 				{
-					"name": "getById",
+					"name": "getCategory",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -453,7 +432,7 @@
 					"response": []
 				},
 				{
-					"name": "update",
+					"name": "updateCategory",
 					"request": {
 						"method": "PUT",
 						"header": [],
@@ -483,7 +462,7 @@
 					"response": []
 				},
 				{
-					"name": "changeStatus",
+					"name": "changeStatusCategory",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -510,13 +489,13 @@
 			"name": "PRODUCT",
 			"item": [
 				{
-					"name": "save",
+					"name": "registerProduct",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Producto de prueba 99\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"30\",\r\n    \"width\": \"10.2\",\r\n    \"imageUrl\": \"\",\r\n    \"idCategory\": 1\r\n}",
+							"raw": "{\r\n    \"name\": \"Cajas 21\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"30\",\r\n    \"width\": \"10.2\",\r\n    \"imageUrl\": \"\",\r\n    \"idCategory\": 3\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -539,7 +518,7 @@
 					"response": []
 				},
 				{
-					"name": "listAll",
+					"name": "listAllProducts",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -547,7 +526,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/product?page=0",
+							"raw": "http://localhost:8080/api/product",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -560,75 +539,33 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "0"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "listAllActive",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/product/active?page=0",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"product",
-								"active"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "searchAllActive",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTMyMTg1MiwiZXhwIjoxNzY1MzI1NDUyfQ.8Ok3-mhjaKPiRvxXxbJwv9qwHOAVWDbU75IXcr7izIk",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/product/search?page=0&name=Producto",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"product",
-								"search"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
+									"value": "0",
+									"disabled": true
 								},
 								{
 									"key": "name",
-									"value": "Producto"
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minStock",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "maxStock",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": null,
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": null,
+									"disabled": true
 								}
 							]
 						}
@@ -636,7 +573,28 @@
 					"response": []
 				},
 				{
-					"name": "update",
+					"name": "getProduct",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateProduct",
 					"request": {
 						"method": "PUT",
 						"header": [],
@@ -650,7 +608,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/product/2",
+							"raw": "http://localhost:8080/api/product/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -659,14 +617,14 @@
 							"path": [
 								"api",
 								"product",
-								"2"
+								"1"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "changeStatus",
+					"name": "changeStatusProduct",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -681,6 +639,111 @@
 								"api",
 								"product",
 								"status",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "COMPANY",
+			"item": [
+				{
+					"name": "save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"NUEVA EMPRESA DESTINO\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/company",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"company"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/company",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"company"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/company/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"company",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Primera empresa\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/company/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"company",
 								"2"
 							]
 						}
@@ -713,6 +776,27 @@
 					"response": []
 				},
 				{
+					"name": "findById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/region/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"region",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "saveRegion",
 					"request": {
 						"method": "POST",
@@ -736,6 +820,36 @@
 							"path": [
 								"api",
 								"region"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"norte\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/region/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"region",
+								"2"
 							]
 						}
 					},
@@ -774,11 +888,391 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "listAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/location",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAllActive",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/location/active",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location",
+								"active"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "findById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/location/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "findByRegionId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/location/region/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location",
+								"region",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Tumbes\",\r\n    \"idRegion\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/location/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "disableLocation",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/location/status/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location",
+								"status",
+								"1"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "getEnvironmentVariable",
+			"name": "DELIVERY_ORDER",
+			"item": [
+				{
+					"name": "save",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTUxNDkzOCwiZXhwIjoxNzY1NTE4NTM4fQ.vSyH6Oa0la7bKVjxEKK9H9UksRgIuT3_JM6CJd5MCVY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"batch\": \"12345678\"\r\n}\r\n\r\n// NO OLVIDAR EL TOKEN DEL USUARIO QUE HA INICIADO SESION",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-order",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-order/search?page=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-order",
+								"search"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "createdByUser",
+									"value": "null",
+									"disabled": true
+								},
+								{
+									"key": "batch",
+									"value": "3",
+									"disabled": true
+								},
+								{
+									"key": "minQuantity",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "maxQuantity",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "2020-01-01T00:00:00",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "2025-01-01T00:00:00",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "INPROGRESS",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "findById",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-order/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-order",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"batch\": \"Nuevo codigo\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-order/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-order",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "changePreparationStatus",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-order/2/CANCELED",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-order",
+								"2",
+								"CANCELED"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DELIVERY_LINE",
+			"item": [
+				{
+					"name": "findAllByDeliveryOrder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-line/delivery-order/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-line",
+								"delivery-order",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"requiredQuantity\": 100,\r\n    \"idLocation\": 2,\r\n    \"idDeliveryOrder\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-line",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-line"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "getEnv",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
@@ -800,6 +1294,57 @@
 						"api",
 						"auth",
 						"test-dotenv"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "welcome",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "findById",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiaWQiOjMsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE3NjU3NjYyNTIsImV4cCI6MTc2NTc2OTg1Mn0.Ddn3PVZFB4oF8IYtCOVD_hBms9bW1C0hlNzEi_oUbnQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/auth/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"2"
 					]
 				}
 			},

@@ -7,18 +7,18 @@ import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
 
 public interface CategoryService {
   // Guarda una categoria
-  void save(CategoryRequest categoryRequest);
+  void saveCategory(CategoryRequest categoryRequest);
 
-  List<CategoryResponse> findAll();
+  List<CategoryResponse> findAllCategories();
 
-  List<CategoryResponse> findAllByStatusTrue();
+  List<CategoryResponse> findAllCategoriesByStatusTrue();
 
   // Obtiene una categoria por su id
-  CategoryResponse findById(Long id);
+  CategoryResponse findCategoryById(Long id);
 
   // Actualiza una categoria por su id
-  void update(Long id, CategoryRequest categoryRequest);
+  void updateCategoryById(Long id, CategoryRequest categoryRequest);
 
   // Cambia el estado de una categoria por su id
-  void changeStatus(Long id);
+  void changeStatusCategoryById(Long id);
 }

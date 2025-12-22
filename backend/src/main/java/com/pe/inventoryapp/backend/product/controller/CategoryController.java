@@ -37,10 +37,10 @@ public class CategoryController {
   private ResponseService responseService;
 
   @PostMapping
-  public ResponseEntity<CommonResponse> saveCategory(@Valid @RequestBody CategoryRequest categoryRequest,
+  public ResponseEntity<CommonResponse> registerCategory(@Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    categoryService.save(categoryRequest);
+    categoryService.saveCategory(categoryRequest);
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
@@ -48,28 +48,28 @@ public class CategoryController {
   }
 
   @GetMapping
-  public ResponseEntity<?> listAll() {
-    List<CategoryResponse> categories = categoryService.findAll();
+  public ResponseEntity<?> listAllCategories() {
+    List<CategoryResponse> categories = categoryService.findAllCategories();
     return ResponseEntity.status(200).body(categories);
   }
 
   @GetMapping("/active")
-  public ResponseEntity<?> listAllActive() {
-    List<CategoryResponse> categories = categoryService.findAllByStatusTrue();
+  public ResponseEntity<?> listAllCategoriesActive() {
+    List<CategoryResponse> categories = categoryService.findAllCategoriesByStatusTrue();
     return ResponseEntity.status(200).body(categories);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> findById(@PathVariable Long id) {
-    CategoryResponse categoryResponse = categoryService.findById(id);
+  public ResponseEntity<?> getCategory(@PathVariable Long id) {
+    CategoryResponse categoryResponse = categoryService.findCategoryById(id);
     return ResponseEntity.status(200).body(categoryResponse);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest,
+  public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    categoryService.update(id, categoryRequest);
+    categoryService.updateCategoryById(id, categoryRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
@@ -77,8 +77,8 @@ public class CategoryController {
   }
 
   @PatchMapping("/status/{id}")
-  public ResponseEntity<CommonResponse> disableCategory(@PathVariable Long id) {
-    categoryService.changeStatus(id);
+  public ResponseEntity<CommonResponse> changeStatusCategory(@PathVariable Long id) {
+    categoryService.changeStatusCategoryById(id);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,

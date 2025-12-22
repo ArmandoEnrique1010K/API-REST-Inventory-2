@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
   // Lista todos los usuarios
   @Override
   @Transactional(readOnly = true)
-  public List<ListUsersResponse> findAll() {
+  public List<ListUsersResponse> findAllUsers() {
     List<User> users = (List<User>) userRepository.findAll();
     return users.stream().map(user -> UserMapper.builder().setUser(user).buildListUserResponse())
         .collect(Collectors.toList());
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
   // Actualiza el perfil del usuario
   @Override
   @Transactional
-  public void updateUserProfile(Long id, ProfileRequest profileRequest) {
+  public void updateUserProfileById(Long id, ProfileRequest profileRequest) {
     if (id == null) {
       throw new BusinessException(
           ResponseStatusCodes.COMMON_ERROR);
@@ -117,7 +117,7 @@ public class UserServiceImpl implements UserService {
 
   // Actualizar los roles del usuario
   @Override
-  public void updateUserRoles(Long id, RolesRequest rolesRequest) {
+  public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
     if (id == null) {
       throw new BusinessException(
           ResponseStatusCodes.COMMON_ERROR);
@@ -139,7 +139,7 @@ public class UserServiceImpl implements UserService {
   // Elimina un usuario del sistema
   @Override
   @Transactional
-  public void deleteUser(Long id) {
+  public void deleteUserById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }

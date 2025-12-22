@@ -7,7 +7,7 @@ public interface AuthService {
 
   void updateUserPassword(String token, ChangePasswordRequest changePasswordRequest);
 
-  void processForgotPassword(String email);
+  void processUserForgotPassword(String email);
 
   void validateAndActivateResetToken(String token);
 }

@@ -8,9 +8,9 @@ import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse
 import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
 
 public interface ProductService {
-  void save(ProductRequest productRequest);
+  void saveProduct(ProductRequest productRequest);
 
-  Page<ProductListResponse> searchAllByParams(
+  Page<ProductListResponse> searchAllProductsByParams(
       String name,
       Integer minStock,
       Integer maxStock,
@@ -18,16 +18,16 @@ public interface ProductService {
       Boolean status,
       Pageable pageable);
 
-  Page<ProductListResponse> searchAllByParamsAndStatusTrue(
+  Page<ProductListResponse> searchAllProductsByParamsAndStatusTrue(
       String name,
       Integer minStock,
       Integer maxStock,
       Long categoryId,
       Pageable pageable);
 
-  ProductDetailsResponse findById(Long id);
+  ProductDetailsResponse findProductById(Long id);
 
-  void update(Long id, ProductRequest productRequest);
+  void updateProductById(Long id, ProductRequest productRequest);
 
-  void changeStatus(Long id);
+  void changeStatusProductById(Long id);
 }

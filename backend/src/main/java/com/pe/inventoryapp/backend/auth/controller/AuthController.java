@@ -39,11 +39,10 @@ public class AuthController {
   // Nota: El endpoint POST "/" ya esta siendo manejado por Spring Security
 
   @PostMapping("/forgot-password")
-  public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
+  public ResponseEntity<?> forgotUserPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-
-    authService.processForgotPassword(forgotPasswordRequest.getEmail());
+    authService.processUserForgotPassword(forgotPasswordRequest.getEmail());
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
@@ -51,7 +50,7 @@ public class AuthController {
   }
 
   @PostMapping("/validate-token")
-  public ResponseEntity<?> validateToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
+  public ResponseEntity<?> validateUserToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     authService.validateAndActivateResetToken(validateTokenRequest.getValue());

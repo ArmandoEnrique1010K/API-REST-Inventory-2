@@ -10,13 +10,13 @@ import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 public interface UserService {
   void registerUser(RegisterRequest registerRequest);
 
-  List<ListUsersResponse> findAll();
+  List<ListUsersResponse> findAllUsers();
 
   DetailUserResponse findUserById(Long id);
 
-  void updateUserProfile(Long id, ProfileRequest profileRequest);
+  void updateUserProfileById(Long id, ProfileRequest profileRequest);
 
-  void updateUserRoles(Long id, RolesRequest rolesRequest);
+  void updateUserRolesById(Long id, RolesRequest rolesRequest);
 
-  void deleteUser(Long id);
+  void deleteUserById(Long id);
 }

@@ -43,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
   // Envia un correo al usuario con un token de 6 digitos
   @Override
   @Transactional
-  public void processForgotPassword(String email) {
+  public void processUserForgotPassword(String email) {
 
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));

@@ -24,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional
-  public void save(CategoryRequest categoryRequest) {
+  public void saveCategory(CategoryRequest categoryRequest) {
     verifyCategoryNameExist(categoryRequest.getName());
 
     Category category = new Category();
@@ -37,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CategoryResponse> findAll() {
+  public List<CategoryResponse> findAllCategories() {
     List<Category> categories = (List<Category>) categoryRepository.findAll();
 
     return categories.stream()
@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public List<CategoryResponse> findAllByStatusTrue() {
+  public List<CategoryResponse> findAllCategoriesByStatusTrue() {
     List<Category> categories = (List<Category>) categoryRepository.findAllByStatusTrue();
 
     return categories.stream()
@@ -55,7 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public CategoryResponse findById(Long id) {
+  public CategoryResponse findCategoryById(Long id) {
 
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
@@ -68,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   @Override
-  public void update(Long id, CategoryRequest categoryRequest) {
+  public void updateCategoryById(Long id, CategoryRequest categoryRequest) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -92,9 +92,8 @@ public class CategoryServiceImpl implements CategoryService {
   }
 
   // Obtiene una categoria por su nombre y verifica que no exista
-
   @Override
-  public void changeStatus(Long id) {
+  public void changeStatusCategoryById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }

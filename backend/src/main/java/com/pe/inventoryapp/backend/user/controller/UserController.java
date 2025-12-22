@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @CrossOrigin(originPatterns = "*")
 public class UserController {
 
@@ -46,23 +46,8 @@ public class UserController {
   @Autowired
   private AuthenticationService authenticationService;
 
-  // TODO: DEBE SER UNA PAGINA DE USUARIOS
-  @GetMapping
-  public ResponseEntity<?> listAll() {
-    List<ListUsersResponse> users = userService.findAll();
-    return ResponseEntity.status(200).body(users);
-  }
-
-  @GetMapping("/profile")
-  public ResponseEntity<?> getProfile(Authentication authentication) {
-    Long username = authenticationService.extractUserIdFromAuthentication(authentication);
-    DetailUserResponse user = userService.findUserById(username);
-
-    return ResponseEntity.status(200).body(user);
-  }
-
   @PostMapping("/register")
-  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
+  public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     userService.registerUser(registerRequest);
@@ -72,12 +57,27 @@ public class UserController {
             "Se ha creado el usuario"));
   }
 
+  // TODO: DEBE SER UNA PAGINA DE USUARIOS
+  @GetMapping
+  public ResponseEntity<?> listAllUsers() {
+    List<ListUsersResponse> users = userService.findAllUsers();
+    return ResponseEntity.status(200).body(users);
+  }
+
+  @GetMapping("/profile")
+  public ResponseEntity<?> getUserProfile(Authentication authentication) {
+    Long username = authenticationService.extractUserIdFromAuthentication(authentication);
+    DetailUserResponse user = userService.findUserById(username);
+
+    return ResponseEntity.status(200).body(user);
+  }
+
   @PutMapping("/profile")
-  public ResponseEntity<?> updateProfile(Authentication authentication,
+  public ResponseEntity<?> updateUserProfile(Authentication authentication,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
     Long userId = authenticationService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
-    userService.updateUserProfile(userId, profileRequest);
+    userService.updateUserProfileById(userId, profileRequest);
 
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
@@ -85,11 +85,11 @@ public class UserController {
   }
 
   @PutMapping("/roles")
-  public ResponseEntity<?> updateRoles(Authentication authentication,
+  public ResponseEntity<?> updateUserRoles(Authentication authentication,
       @Valid @RequestBody RolesRequest rolesRequest, BindingResult result) {
     Long id = authenticationService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
-    userService.updateUserRoles(id, rolesRequest);
+    userService.updateUserRolesById(id, rolesRequest);
 
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
@@ -99,7 +99,7 @@ public class UserController {
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-    userService.deleteUser(id);
+    userService.deleteUserById(id);
 
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
