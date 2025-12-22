@@ -18,14 +18,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pe.inventoryapp.backend.auth.model.response.LoginSuccessfulResponse;
+import com.pe.inventoryapp.backend.auth.model.request.LoginRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
-import com.pe.inventoryapp.backend.user.model.entity.User;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -44,14 +44,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
       throws AuthenticationException {
-    User user = null;
-    String email = null;
-    String password = null;
-
     try {
-      user = new ObjectMapper().readValue(request.getInputStream(), User.class);
-      email = user.getEmail();
-      password = user.getPassword();
+      LoginRequest login = new ObjectMapper()
+          .readValue(request.getInputStream(), LoginRequest.class);
+      UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+          login.getEmail(),
+          login.getPassword());
+
+      return authenticationManager.authenticate(authToken);
     } catch (StreamReadException e) {
       e.printStackTrace();
     } catch (DatabindException e) {
@@ -60,9 +60,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
       e.printStackTrace();
     }
 
-    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password);
-
-    return authenticationManager.authenticate(authToken);
+    return null;
   }
 
   @Override
@@ -71,13 +69,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
         .getUsername();
-
-    // String role = authResult.getAuthorities().stream()
-    // .findAny()
-    // .map(GrantedAuthority::getAuthority)
-    // .orElse(null);
-
-    // String role = authResult.getAuthorities().toString();
 
     // AQUI SE ENCUENTRA EL ORIGEN DE EXTRACCIÓN DEL USERNAME
     // OBTENER EL ID DEL USUARIO
@@ -88,30 +79,35 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         .map(GrantedAuthority::getAuthority)
         .toList());
 
-    // claims.put("email", username);
     claims.put("id", id_user);
 
     String token = Jwts.builder()
         .subject(
             id_user.toString())
-        // .subject(username)
         .claims(claims)
         .issuedAt(new Date())
-        .expiration(new Date(System.currentTimeMillis() + 3600000))
+        .expiration(new Date(System.currentTimeMillis() + 3600000 * 24))
         .signWith(SECRET_KEY)
         .compact();
 
-    response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
+    // Configuración de cookies
+    Cookie jwtCookie = new Cookie("ACCESS_TOKEN", token);
+    jwtCookie.setHttpOnly(true); // NO accesible por JS
+    jwtCookie.setSecure(true); // HTTPS (false solo en local)
+    jwtCookie.setPath("/");
+    jwtCookie.setMaxAge(60 * 60 * 24); // 1 dia
+    jwtCookie.setAttribute("SameSite", "Strict");
 
-    LoginSuccessfulResponse loginSuccessfulResponse = new LoginSuccessfulResponse();
-    loginSuccessfulResponse.setType("success");
-    loginSuccessfulResponse.setToken(token);
-    loginSuccessfulResponse.setMessage(String.format("Has iniciado sesión con exito"));
+    response.addCookie(jwtCookie);
 
-    response.getWriter().write(new ObjectMapper().writeValueAsString(loginSuccessfulResponse));
-    response.setStatus(200);
+    CommonResponse commonResponse = new CommonResponse();
+    commonResponse.setType("success");
+    commonResponse.setCode(ResponseStatusCodes.SUCCESS_RESPONSE.name());
+    commonResponse.setMessage("Has iniciado sesión con éxito");
+
+    response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType("application/json");
-
+    response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
   }
 
   @Override
@@ -120,17 +116,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // Aqui no se puede utilizar excepciones, ya que se va a devolver un json
     CommonResponse commonResponse = new CommonResponse();
+    commonResponse.setType("error");
     commonResponse.setCode(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.name());
     commonResponse.setMessage(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
 
     response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
     response.setStatus(401);
-
     response.setContentType("application/json");
-
-    // throw new BusinessException(ResponseStatusCodes.AUTHENTICATION_ERROR,
-    // ResponseStatusCodes.AUTHENTICATION_ERROR.getDefaultMessage());
-
   }
 
 }

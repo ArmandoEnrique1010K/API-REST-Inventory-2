@@ -17,9 +17,6 @@ public enum ResponseStatusCodes {
                         "ID inválido"),
 
         COMMON_ERROR(HttpStatus.BAD_REQUEST, "Ha ocurrido un error inesperado"), // BAD_REQUEST
-        // VALIDATION_PASSWORD_MISMATCH(
-        // HttpStatus.BAD_REQUEST,
-        // "Las contraseñas no coinciden"),
 
         // 401 - UNAUTHORIZED
         // Error en la autenticacion, correo o contraseña incorrecta

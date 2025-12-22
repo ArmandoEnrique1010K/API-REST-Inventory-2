@@ -36,38 +36,36 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
                         throws Exception {
-
-                // JwtAuthenticationFilter jwtAuthenticationFilter = new
-                // JwtAuthenticationFilter(authenticationManager);
-                // JwtValidationFilter jwtValidationFilter = new
-                // JwtValidationFilter(authenticationManager);
-
                 return http
                                 .csrf(csrf -> csrf.disable())
-                                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ← FALTA ESTO
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 // AUTH
                                                 .requestMatchers("/api/auth/**").permitAll()
 
-                                                // .requestMatchers("/api/auth/login").permitAll()
-                                                // .requestMatchers("/api/auth/register").hasAuthority("ROLE_ADMIN")
-
                                                 // USERS
-                                                // .requestMatchers(HttpMethod.POST, "/api/users/register")
-                                                // .hasAnyAuthority("ROLE_ADMIN")
-                                                .requestMatchers(HttpMethod.GET, "/api/users/profile")
-                                                .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
-                                                .requestMatchers("/api/users/listAll").hasAuthority("ROLE_ADMIN")
-                                                .requestMatchers(HttpMethod.PUT, "/api/users/profile")
-                                                .hasAnyAuthority("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN")
+                                                .requestMatchers(HttpMethod.POST, "/api/users/register")
+                                                .hasAnyAuthority("ROLE_ADMIN")
+
+                                                .requestMatchers(HttpMethod.GET, "/api/users")
+                                                .hasAnyAuthority("ROLE_ADMIN")
+
+                                                .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
+
+                                                .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/users/roles")
+                                                .hasAnyAuthority("ROLE_ADMIN")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/users/*")
+                                                .hasAnyAuthority("ROLE_ADMIN")
+
                                                 // .requestMatchers(HttpMethod.DELETE, "/api/users/**")
                                                 // .hasAuthority("ROLE_ADMIN")
 
                                                 // PRODUCTS
-                                                .anyRequest().permitAll())
-                                // .anyRequest().authenticated())
+                                                // .anyRequest().permitAll())
+                                                .anyRequest().authenticated())
                                 .addFilter(new JwtAuthenticationFilter(
                                                 authenticationManager(), authService))
                                 .addFilter(new JwtValidationFilter(
@@ -81,7 +79,9 @@ public class SecurityConfig {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
                 config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-                config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+                // config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+                config.setAllowedHeaders(Arrays.asList("*"));
+
                 config.setAllowCredentials(true);
 
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

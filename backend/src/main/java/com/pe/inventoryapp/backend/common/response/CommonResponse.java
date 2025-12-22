@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 // Esta clase representa una respuesta común, que se puede utilizar tanto para
 // respuestas exitosas como para respuestas erroneas
 public class CommonResponse {

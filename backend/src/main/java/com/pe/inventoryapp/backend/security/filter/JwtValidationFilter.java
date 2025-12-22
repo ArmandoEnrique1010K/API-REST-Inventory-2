@@ -26,6 +26,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -36,18 +37,27 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
     super(authenticationManager);
   }
 
+  private String getTokenFromCookie(HttpServletRequest request) {
+    if (request.getCookies() == null)
+      return null;
+
+    for (Cookie cookie : request.getCookies()) {
+      if ("ACCESS_TOKEN".equals(cookie.getName())) {
+        return cookie.getValue();
+      }
+    }
+    return null;
+  }
+
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws IOException, ServletException {
+    String token = getTokenFromCookie(request);
 
-    String header = request.getHeader(HEADER_AUTHORIZATION);
-
-    if (header == null || !header.startsWith(PREFIX_TOKEN)) {
+    if (token == null) {
       chain.doFilter(request, response);
       return;
     }
-
-    String token = header.replace(PREFIX_TOKEN, "").trim();
 
     try {
 
@@ -59,7 +69,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
           .getPayload();
 
       // 2. Extraer username (subject)
-      String username = claims.getSubject();
+      String userId = claims.getSubject(); // en tu caso: id_user como String
       // Long userId = claims.get("id", Long.class);
       // 3. Extraer roles (múltiples)
 
@@ -90,7 +100,8 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
       // authorities);
 
       // username es el email
-      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, null,
+      UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+          userId, null,
           authorities);
 
       SecurityContextHolder.getContext().setAuthentication(authentication);

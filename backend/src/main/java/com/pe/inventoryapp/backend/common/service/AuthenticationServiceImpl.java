@@ -5,11 +5,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
-
   @Override
   public Long extractUserIdFromAuthentication(Authentication authentication) {
-    String username = (String) authentication.getPrincipal();
-    return Long.parseLong(username);
+    String userId = (String) authentication.getPrincipal();
+    return Long.parseLong(userId);
   }
-
 }
