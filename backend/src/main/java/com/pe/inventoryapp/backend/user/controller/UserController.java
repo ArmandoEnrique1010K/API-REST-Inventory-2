@@ -57,7 +57,6 @@ public class UserController {
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    userService.verifyUserEmailExists(registerRequest.getEmail());
     userService.registerUser(registerRequest);
 
     return ResponseEntity.status(201)

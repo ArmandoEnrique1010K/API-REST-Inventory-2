@@ -39,6 +39,9 @@ public class UserServiceImpl implements UserService {
   @Transactional
   @Override
   public void registerUser(RegisterRequest registerRequest) {
+
+    verifyUserEmailExists(registerRequest.getEmail());
+
     User user = new User();
     user.setFirstname(registerRequest.getFirstname());
     user.setLastname(registerRequest.getLastname());
@@ -132,13 +135,6 @@ public class UserServiceImpl implements UserService {
 
   // Verifica si el email del usuario ya existe, de lo contrario lanza una
   // excepcion
-  @Override
-  @Transactional(readOnly = true)
-  public void verifyUserEmailExists(String email) {
-    if (userRepository.findByEmail(email).isPresent()) {
-      throw new FieldValidation("email", "El usuario con ese email ya existe");
-    }
-  }
 
   // Elimina un usuario del sistema
   @Override
@@ -193,5 +189,11 @@ public class UserServiceImpl implements UserService {
   private Role getRoleOrThrow(String roleName, String message) {
     return roleRepository.findByName(roleName)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.VALIDATION_ERROR, message));
+  }
+
+  private void verifyUserEmailExists(String email) {
+    if (userRepository.findByEmail(email).isPresent()) {
+      throw new FieldValidation("email", "El usuario con ese email ya existe");
+    }
   }
 }

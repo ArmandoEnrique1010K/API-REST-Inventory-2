@@ -19,9 +19,9 @@ public class Location {
 
     private String name;
 
+    private boolean status;
+
     @ManyToOne
     @JoinColumn(name = "region_id")
     private Region region;
-
-    private boolean status;
 }

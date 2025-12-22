@@ -40,8 +40,8 @@ public class UserMapper {
           return switch (role.getName()) {
             case "ROLE_USER" -> "Usuario";
             case "ROLE_OPERATOR" -> "Operador";
-            case "ROLE_ADMIN" -> "Administrador";
             case "ROLE_SECRETARY" -> "Secretario";
+            case "ROLE_ADMIN" -> "Administrador";
             default -> "Desconocido";
           };
         })
@@ -69,8 +69,8 @@ public class UserMapper {
           return switch (role.getName()) {
             case "ROLE_USER" -> "Usuario";
             case "ROLE_OPERATOR" -> "Operador";
-            case "ROLE_ADMIN" -> "Administrador";
             case "ROLE_SECRETARY" -> "Secretario";
+            case "ROLE_ADMIN" -> "Administrador";
             default -> "Desconocido";
           };
         })

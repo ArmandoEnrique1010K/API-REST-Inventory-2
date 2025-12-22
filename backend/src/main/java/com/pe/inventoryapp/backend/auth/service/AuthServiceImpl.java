@@ -83,7 +83,8 @@ public class AuthServiceImpl implements AuthService {
     User user = userToken.getUser();
 
     if (userToken.isActive() == false) {
-      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED, "El token de 6 digitos ha expirado");
+      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED,
+          "El token de 6 digitos ha expirado, vuelva a solicitar un nuevo token");
     }
 
     if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword())) {

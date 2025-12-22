@@ -23,5 +23,4 @@ public class Region {
 
     @OneToMany(mappedBy = "region")
     private List<Location> locations;
-
 }

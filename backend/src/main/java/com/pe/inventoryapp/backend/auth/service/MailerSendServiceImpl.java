@@ -34,7 +34,7 @@ public class MailerSendServiceImpl implements MailerSendService {
 
     String text = "Tu código para restablecer contraseña es: " + token;
     String html = "<p>Tu código de 6 digitos para restablecer contraseña es: <strong>" + token
-        + "</strong>. Recuerda que tienes 5 minutos para restablecer tu contraseña antes que el código expire</p>";
+        + "</strong>. Recuerda que tienes 10 minutos para restablecer tu contraseña antes que el código expire</p>";
 
     email.setPlain(text);
     email.setHtml(html);
