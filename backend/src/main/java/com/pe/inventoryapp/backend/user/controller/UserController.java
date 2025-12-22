@@ -53,6 +53,14 @@ public class UserController {
     return ResponseEntity.status(200).body(users);
   }
 
+  @GetMapping("/profile")
+  public ResponseEntity<?> getProfile(Authentication authentication) {
+    Long username = authenticationService.extractUserIdFromAuthentication(authentication);
+    DetailUserResponse user = userService.findUserById(username);
+
+    return ResponseEntity.status(200).body(user);
+  }
+
   @PostMapping("/register")
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
@@ -62,14 +70,6 @@ public class UserController {
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha creado el usuario"));
-  }
-
-  @GetMapping("/profile")
-  public ResponseEntity<?> getProfile(Authentication authentication) {
-    Long username = authenticationService.extractUserIdFromAuthentication(authentication);
-    DetailUserResponse user = userService.findUserById(username);
-
-    return ResponseEntity.status(200).body(user);
   }
 
   @PutMapping("/profile")

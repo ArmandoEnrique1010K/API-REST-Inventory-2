@@ -11,22 +11,38 @@ import org.springframework.data.repository.query.Param;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-  Page<Product> findAllByStatusTrue(Pageable pageable);
+  @Query("""
+      SELECT p
+      FROM Product p
+      WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
+        AND (:minStock IS NULL OR p.stock >= :minStock)
+        AND (:maxStock IS NULL OR p.stock <= :maxStock)
+        AND (:categoryId IS NULL OR p.category.id = :categoryId)
+        AND (:status IS NULL OR p.status = :status)
+        """)
+  Page<Product> findAllByName(
+      @Param("name") String name,
+      @Param("minStock") Integer minStock,
+      @Param("maxStock") Integer maxStock,
+      @Param("categoryId") Long categoryId,
+      @Param("status") Boolean status,
+      Pageable pageable);
 
   @Query("""
           SELECT p
           FROM Product p
-          WHERE p.status = true
-            AND LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))
+          WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
+            AND (:minStock IS NULL OR p.stock >= :minStock)
+            AND (:maxStock IS NULL OR p.stock <= :maxStock)
+            AND (:categoryId IS NULL OR p.category.id = :categoryId)
+            AND p.status = true
       """)
-  Page<Product> findAllByNameAndStatusTrue(@Param("name") String name, Pageable pageable);
-
-  @Query("""
-          SELECT p
-          FROM Product p
-            WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))
-      """)
-  Page<Product> findAllByName(@Param("name") String name, Pageable pageable);
+  Page<Product> findAllByNameAndStatusTrue(
+      @Param("name") String name,
+      @Param("minStock") Integer minStock,
+      @Param("maxStock") Integer maxStock,
+      @Param("categoryId") Long categoryId,
+      Pageable pageable);
 
   Optional<Product> findByName(String name);
 }

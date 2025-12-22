@@ -2,16 +2,14 @@ package com.pe.inventoryapp.backend.product.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -21,8 +19,6 @@ import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse
 import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
-
-import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -35,11 +31,19 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional
-  public String save(ProductRequest productRequest) {
+  public void save(ProductRequest productRequest) {
+    verifyProductNameExist(productRequest.getName());
+
+    Long idCategory = productRequest.getIdCategory();
+
+    if (idCategory == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
     // Buscar la categoria por su ID
-    Category category = categoryRepository.findById(productRequest.getIdCategory())
-        .orElseThrow(() -> new RuntimeException("La categoría no existe"));
+    Category category = categoryRepository.findById(
+        idCategory)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
 
     Product product = new Product();
     product.setName(productRequest.getName());
@@ -62,111 +66,103 @@ public class ProductServiceImpl implements ProductService {
 
     product.setCategory(category);
     productRepository.save(product);
-    return "Se guardo el producto";
+  }
+
+  // Conviene usar Boolean en lugar de boolean
+  @Override
+  public Page<ProductListResponse> searchAllByParams(
+      String name,
+      Integer minStock,
+      Integer maxStock,
+      Long categoryId,
+      Boolean status,
+      Pageable pageable) {
+
+    // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO PARA QUE OBTENGA SUS ROLES
+    // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    // boolean isAdmin = auth.getAuthorities().stream()
+    // .anyMatch(a -> a.getAuthority().equals("ROLE_OPERATOR"));
+
+    Page<Product> products = productRepository.findAllByName(name, minStock, maxStock, categoryId, status, pageable);
+
+    return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ProductListResponse> findAll(Pageable pageable) {
-    // Obtiene la lista de productos desde el repositorio
-    Page<Product> productPage = productRepository
-        .findAll(pageable);
+  public Page<ProductListResponse> searchAllByParamsAndStatusTrue(String name,
+      Integer minStock,
+      Integer maxStock,
+      Long categoryId,
+      Pageable pageable) {
+    Page<Product> products = productRepository.findAllByNameAndStatusTrue(name, minStock, maxStock, categoryId,
+        pageable);
 
-    // // Convierte la lista de entidades Product en una lista de ProductDto
-    // List<ProductListResponse> productDtoList = productPage.stream()
-    // .map(product ->
-    // ProductMapper.builder().setProduct(product).buildProductListResponse())
-    // .collect(Collectors.toList());
-
-    // // Retorna la página de ProductDto
-    // return new PageImpl<>(productDtoList, pageable,
-    // productPage.getTotalElements());
-
-    return productPage.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
+    return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
   }
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ProductListResponse> findAllByStatusTrue(Pageable pageable) {
+  public ProductDetailsResponse findById(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+    Product product = productRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
 
-    return productRepository.findAllByStatusTrue(pageable)
-        .map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public Optional<ProductDetailsResponse> findById(Long id) {
-
-    return productRepository.findById(id)
-        .map(product -> ProductMapper.builder().setProduct(product).buildProductDetailsResponse());
+    return ProductMapper.builder().setProduct(product).buildProductDetailsResponse();
   }
 
   @Override
   @Transactional
-  public String update(Long id, ProductRequest productRequest) {
-
-    Optional<Product> productById = productRepository.findById(id);
-
-    if (productById.isPresent()) {
-
-      Category categoryId = categoryRepository.findById(productRequest.getIdCategory()).orElseThrow();
-
-      Product productData = productById.orElseThrow();
-      productData.setName(productRequest.getName());
-      productData.setEntryDate(productRequest.getEntryDate());
-      productData.setCaducityDate(productRequest.getCaducityDate());
-      productData.setLength(productRequest.getLength());
-      productData.setWidth(productRequest.getWidth());
-      productData.setImageUrl(productRequest.getImageUrl());
-      productData.setCategory(categoryId);
-
-      productRepository.save(productData);
-    } else {
-      throw new EntityNotFoundException();
+  public void update(Long id, ProductRequest productRequest) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    return "Se actualizo el producto";
+    Product productData = productRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+
+    verifyProductNameExist(productRequest.getName().trim());
+
+    Long categoryId = productRequest.getIdCategory();
+
+    if (categoryId == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    Category category = categoryRepository.findById(
+        categoryId)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
+
+    productData.setName(productRequest.getName().trim());
+    productData.setEntryDate(productRequest.getEntryDate());
+    productData.setCaducityDate(productRequest.getCaducityDate());
+    productData.setLength(productRequest.getLength());
+    productData.setWidth(productRequest.getWidth());
+    productData.setImageUrl(productRequest.getImageUrl());
+    productData.setCategory(category);
+
+    productRepository.save(productData);
   }
 
+  // Cambia el estado del producto a false y lo guarda
   @Override
   @Transactional
   public void changeStatus(Long id) {
-    Product product = productRepository.findById(id).orElseThrow();
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
-    // Cambia el estado de la categoria a false y lo guarda
+    Product product = productRepository.findById(id).orElseThrow();
     product.setStatus(!product.isStatus());
     productRepository.save(product);
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public void verifyProductNameExist(String name) {
+  // METODOS PRIVADOS
+  private void verifyProductNameExist(String name) {
     if (productRepository.findByName(name).isPresent()) {
       throw new FieldValidation("name", "El producto con ese nombre ya existe, introduzca otro producto");
     }
-  }
-
-  @Override
-  public Page<ProductListResponse> searchAll(String name, Pageable pageable) {
-
-    // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO PARA QUE OBTENGA SUS ROLES
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-    boolean isAdmin = auth.getAuthorities().stream()
-        .anyMatch(a -> a.getAuthority().equals("ROLE_OPERATOR"));
-
-    Page<Product> products;
-
-    if (isAdmin) {
-      products = productRepository.findAllByName(name, pageable);
-    } else {
-      products = productRepository.findAllByNameAndStatusTrue(name, pageable);
-    }
-
-    return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
-
-    // return productRepository.findAllByName(name, pageable)
-    // .map(product ->
-    // ProductMapper.builder().setProduct(product).buildProductListResponse());
   }
 }

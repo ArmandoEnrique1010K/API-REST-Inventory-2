@@ -51,26 +51,24 @@ public class SecurityConfig {
 
                                                 .requestMatchers(HttpMethod.GET, "/api/users")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-
                                                 .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
 
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/roles")
                                                 .hasAnyAuthority("ROLE_ADMIN")
+
                                                 .requestMatchers(HttpMethod.DELETE, "/api/users/*")
                                                 .hasAnyAuthority("ROLE_ADMIN")
 
-                                                // .requestMatchers(HttpMethod.DELETE, "/api/users/**")
-                                                // .hasAuthority("ROLE_ADMIN")
-
                                                 // PRODUCTS
-                                                // .anyRequest().permitAll())
-                                                .anyRequest().authenticated())
+
+                                                .requestMatchers("/api/category").permitAll()
+                                                .anyRequest().permitAll())
+                                // .anyRequest().authenticated())
                                 .addFilter(new JwtAuthenticationFilter(
                                                 authenticationManager(), authService))
                                 .addFilter(new JwtValidationFilter(
                                                 authenticationManager))
-                                // .addFilter(jwtValidationFilter)
                                 .build();
         }
 

@@ -36,6 +36,17 @@ public class CategoryController {
   @Autowired
   private ResponseService responseService;
 
+  @PostMapping
+  public ResponseEntity<CommonResponse> saveCategory(@Valid @RequestBody CategoryRequest categoryRequest,
+      BindingResult result) {
+    validationService.validateFieldsAndThrowResponse(result);
+    categoryService.save(categoryRequest);
+
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se guardo la categoria"));
+  }
+
   @GetMapping
   public ResponseEntity<?> listAll() {
     List<CategoryResponse> categories = categoryService.findAll();
@@ -52,17 +63,6 @@ public class CategoryController {
   public ResponseEntity<?> findById(@PathVariable Long id) {
     CategoryResponse categoryResponse = categoryService.findById(id);
     return ResponseEntity.status(200).body(categoryResponse);
-  }
-
-  @PostMapping
-  public ResponseEntity<CommonResponse> saveCategory(@Valid @RequestBody CategoryRequest categoryRequest,
-      BindingResult result) {
-    validationService.validateFieldsAndThrowResponse(result);
-    categoryService.save(categoryRequest);
-
-    return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Se guardo la categoria"));
   }
 
   @PutMapping("/{id}")
