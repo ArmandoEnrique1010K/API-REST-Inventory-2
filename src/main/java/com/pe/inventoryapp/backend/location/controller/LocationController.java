@@ -1,30 +1,30 @@
 package com.pe.inventoryapp.backend.location.controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
-import com.pe.inventoryapp.backend.common.service.ResponseService;
-import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
-import com.pe.inventoryapp.backend.location.model.response.LocationDetailsResponse;
-import com.pe.inventoryapp.backend.location.service.LocationService;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.validation.Valid;
+
+import com.pe.inventoryapp.backend.location.service.LocationService;
+import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
+import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
+import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.common.service.ResponseService;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 
 @RestController
 @RequestMapping("/api/location")
@@ -39,91 +39,88 @@ public class LocationController {
   private ValidationService validationService;
 
   @PostMapping
-  public ResponseEntity<CommonResponse> save(@Valid @RequestBody LocationRequest locationRequest,
+  public ResponseEntity<CommonResponse> registerLocation(@Valid @RequestBody LocationRequest locationRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    locationService.verifyLocationNameExist(locationRequest.getName());
+    locationService.saveLocation(locationRequest);
 
-    var location = locationService.save(locationRequest);
-
-    if (location == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al registrar la ubicación");
-    }
-
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success", location));
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se guardo la ubicación"));
   }
 
   @GetMapping
-  public List<?> listAll() {
-    return locationService.findAll();
+  public ResponseEntity<?> listAllLocations(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) Long regionId,
+      @RequestParam(required = false) Boolean status) {
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<LocationResponse> locations = locationService.searchAllLocations(name, regionId, status, pageable);
+
+    return ResponseEntity.status(200).body(locations);
   }
 
   @GetMapping("/active")
-  public List<?> listAllActive() {
-    return locationService.findAllByStatusTrue();
+  public ResponseEntity<?> listAllActiveLocations(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) Long regionId) {
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<LocationResponse> locations = locationService.searchAllLocations(name, regionId, true, pageable);
+
+    return ResponseEntity.status(200).body(locations);
+  }
+
+  @GetMapping("/region/{id}")
+  public ResponseEntity<?> listAllLocationsByRegion(
+      @PathVariable Long id,
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) Boolean status) {
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<LocationResponse> locations = locationService.searchAllLocations(name, id, status, pageable);
+
+    return ResponseEntity.status(200).body(locations);
+  }
+
+  @GetMapping("/active/region/{id}")
+  public ResponseEntity<?> listAllActiveLocationsByRegion(
+      @PathVariable Long id,
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name) {
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<LocationResponse> locations = locationService.searchAllLocations(name, id, true, pageable);
+
+    return ResponseEntity.status(200).body(locations);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> findById(@PathVariable Long id) {
-    Optional<LocationDetailsResponse> location = locationService.findById(id);
-    if (!location.isPresent()) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "No se ha encontrado la ubicación"));
-    }
-
-    return ResponseEntity.status(200).body(location);
-  }
-
-  // Método para listar las ubicaciones por region
-  @GetMapping("/region/{id}")
-  public List<?> listByRegionId(@PathVariable Long id) {
-    return locationService.findByRegionId(id);
+  public ResponseEntity<?> getLocation(@PathVariable Long id) {
+    LocationResponse locationResponse = locationService.findLocationById(id);
+    return ResponseEntity.status(200).body(locationResponse);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody LocationRequest locationRequest,
+  public ResponseEntity<?> updateLocation(@PathVariable Long id, @Valid @RequestBody LocationRequest locationRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-    Optional<LocationDetailsResponse> optionalDetailsResponse = locationService.findById(id);
+    locationService.updateLocationById(id, locationRequest);
 
-    String newName = locationRequest.getName();
-
-    if (optionalDetailsResponse.isEmpty()) {
-      return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "La ubicación no existe"));
-    }
-
-    if (!optionalDetailsResponse.get().getName().equals(newName)) {
-      locationService.verifyLocationNameExist(newName);
-    }
-
-    if (optionalDetailsResponse.get().isStatus() == false) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "La ubicación se encuentra desactivada"));
-    }
-
-    // NO DEBE EDITAR LA UBICACION PRINCIPAL
-    if (id == 1) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "No se puede actualizar esta ubicación"));
-    }
-
-    String message = locationService.update(id, locationRequest);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
-
+    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
+        ResponseStatusCodes.SUCCESS_RESPONSE,
+        "Se actualizo la ubicación"));
   }
 
   @PatchMapping("/status/{id}")
   public ResponseEntity<CommonResponse> disableLocation(@PathVariable Long id) {
-
-    if (id == 1) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "No se puede cambiar el estado de esta ubicación"));
-    }
-
-    locationService.changeStatus(id);
-    return ResponseEntity.status(HttpStatus.ACCEPTED)
-        .body(responseService.generateCommonResponse("success", "Se ha cambiado el estado del producto"));
+    locationService.changeStatusLocationById(id);
+    return ResponseEntity.status(200)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se ha cambiado el estado de la ubicación"));
   }
-
 }

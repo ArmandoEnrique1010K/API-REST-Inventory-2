@@ -1,20 +1,19 @@
 package com.pe.inventoryapp.backend.location.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.model.entity.Region;
 import com.pe.inventoryapp.backend.location.model.mapper.LocationMapper;
 import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
-import com.pe.inventoryapp.backend.location.model.response.LocationDetailsResponse;
-import com.pe.inventoryapp.backend.location.model.response.LocationListResponse;
+import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 
@@ -29,83 +28,105 @@ public class LocationServiceImpl implements LocationService {
 
   @Override
   @Transactional
-  public String save(LocationRequest locationRequest) {
+  public void saveLocation(LocationRequest locationRequest) {
+    verifyLocationNameExist(locationRequest.getName());
 
-    Region region = regionRepository.findById(locationRequest.getIdRegion())
-        .orElseThrow(() -> new RuntimeException("Region not found"));
+    Long idRegion = locationRequest.getIdRegion();
+
+    if (idRegion == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    Region region = regionRepository.findById(
+        idRegion)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
 
     Location location = new Location();
     location.setName(locationRequest.getName());
     location.setStatus(true);
     location.setRegion(region);
-    locationRepository.save(location);
 
-    return "Se guardo la ubicación";
+    locationRepository.save(location);
   }
+  // return"Se guardo la ubicación";
 
   @Override
   @Transactional(readOnly = true)
-  public List<LocationListResponse> findAll() {
-    List<Location> locations = (List<Location>) locationRepository.findAll();
+  public Page<LocationResponse> searchAllLocations(
+      String name,
+      Long regionId,
+      Boolean status,
+      Pageable pageable) {
+    if (regionId != null && !regionRepository.existsById(regionId)) {
+      throw new BusinessException(
+          ResponseStatusCodes.ENTITY_NOT_FOUND,
+          "La región no existe");
+    }
+    Page<Location> locations = locationRepository.findAllByParams(name, regionId, status, pageable);
 
-    return locations.stream().map(location -> LocationMapper.builder().setLocation(
-        location).buildLocationListResponse()).collect(Collectors.toList());
+    return locations.map(location -> LocationMapper.builder().setLocation(location).buildLocationResponse());
   }
 
   @Override
-  public List<LocationListResponse> findAllByStatusTrue() {
-    List<Location> locations = (List<Location>) locationRepository.findAllByStatusTrue();
-
-    return locations.stream().map(location -> LocationMapper.builder().setLocation(
-        location).buildLocationListResponse()).collect(Collectors.toList());
-  }
-
-  @Override
-  public List<LocationListResponse> findByRegionId(Long regionId) {
-    List<Location> locations = (List<Location>) locationRepository.findByRegionId(regionId);
-
-    return locations.stream()
-        .map(location -> LocationMapper.builder().setLocation(location).buildLocationListResponse())
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public Optional<LocationDetailsResponse> findById(Long id) {
-    return locationRepository.findById(id)
-        .map(location -> LocationMapper.builder().setLocation(location).buildLocationDetailsResponse());
-  }
-
-  @Override
-  public String update(Long id, LocationRequest productRequest) {
-    Optional<Location> locationById = locationRepository.findById(id);
-
-    if (locationById.isPresent()) {
-
-      Region region = regionRepository.findById(productRequest.getIdRegion()).orElseThrow();
-
-      Location locationData = locationById.orElseThrow();
-      locationData.setName(productRequest.getName());
-      locationData.setRegion(region);
-
-      locationRepository.save(locationData);
+  public LocationResponse findLocationById(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    return "Se actualizo la ubicación";
+    Location location = locationRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+
+    return LocationMapper.builder().setLocation(location).buildLocationResponse();
   }
 
   @Override
-  public void changeStatus(Long id) {
-    Location location = locationRepository.findById(id).orElseThrow();
-    // Cambia el estado de la categoria a false y lo guarda
+  public void updateLocationById(Long id, LocationRequest locationRequest) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    Location location = locationRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+
+    if (location.isStatus() == false) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
+    }
+
+    verifyLocationNameExist(locationRequest.getName().trim());
+
+    Long idRegion = locationRequest.getIdRegion();
+    if (idRegion == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    Region region = regionRepository.findById(idRegion)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+    location.setName(locationRequest.getName().trim());
+    location.setRegion(region);
+
+    locationRepository.save(location);
+  }
+
+  @Override
+  public void changeStatusLocationById(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    if (id == 1L) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta ubicación no se puede inhabilitar");
+    }
+
+    Location location = locationRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
     location.setStatus(!location.isStatus());
     locationRepository.save(location);
   }
 
-  @Override
-  public void verifyLocationNameExist(String name) {
+  // METODOS AUXILIARES
+  private void verifyLocationNameExist(String name) {
     if (locationRepository.findByName(name).isPresent()) {
       throw new FieldValidation("name", "La ubicación con ese nombre ya existe, introduzca otra ubicación");
     }
   }
-
 }

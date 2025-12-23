@@ -1,13 +1,14 @@
 package com.pe.inventoryapp.backend.location.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.location.model.entity.Region;
 import com.pe.inventoryapp.backend.location.model.mapper.RegionMapper;
@@ -23,17 +24,19 @@ public class RegionServiceImpl implements RegionService {
 
   @Override
   @Transactional
-  public String save(RegionRequest regionRequest) {
+  public void saveRegion(RegionRequest regionRequest) {
+    verifyRegionNameExist(regionRequest.getName());
+
     Region region = new Region();
     region.setName(regionRequest.getName());
 
     regionRepository.save(region);
-    return "Se guardo la región";
   }
+  // return"Se guardo la región";
 
   @Override
   @Transactional(readOnly = true)
-  public List<RegionResponse> findAll() {
+  public List<RegionResponse> findAllRegions() {
     List<Region> regions = (List<Region>) regionRepository.findAll();
 
     return regions.stream()
@@ -42,37 +45,43 @@ public class RegionServiceImpl implements RegionService {
   }
 
   @Override
-  public Optional<RegionResponse> findById(Long id) {
-    return regionRepository.findById(id)
-        .map(region -> RegionMapper.builder().setRegion(region).buildRegionResponse());
-  }
+  public RegionResponse findRegionById(Long id) {
 
-  @Override
-  public String update(Long id, RegionRequest regionRequest) {
-    Optional<Region> regionById = regionRepository.findById(id);
-
-    // Category categoryOptional = null;
-
-    // Si la categoria existe, lo actualiza con los datos proporcionados
-    if (regionById.isPresent()) {
-      Region regionData = regionById.orElseThrow();
-
-      regionData.setName(regionRequest.getName());
-
-      // categoryOptional = categoryRepository.save(categoryData);
-      regionRepository.save(regionData);
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    // Optional.ofNullable(CategoryMapper.builder().setCategory(categoryOptional).buildListCategoriesResponse());
-    return "Se actualizo la región";
+    Region region = regionRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe"));
 
+    return RegionMapper.builder().setRegion(region).buildRegionResponse();
   }
 
   @Override
-  public void verifyRegionNameExist(String name) {
+  public void updateRegionById(Long id, RegionRequest regionRequest) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    if (id == 1L) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta región no se puede editar");
+    }
+
+    Region region = regionRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe"));
+
+    verifyRegionNameExist(regionRequest.getName().trim());
+
+    region.setName(regionRequest.getName().trim());
+
+    regionRepository.save(region);
+  }
+  // return"Se actualizo la región";
+
+  // METODOS PRIVADOS
+  private void verifyRegionNameExist(String name) {
     if (regionRepository.findByName(name).isPresent()) {
       throw new FieldValidation("name", "La region con ese nombre ya existe, inserte otra region");
     }
   }
-
 }

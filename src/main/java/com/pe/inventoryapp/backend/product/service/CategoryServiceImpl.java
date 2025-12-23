@@ -62,7 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La caregoria no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
 
     return CategoryMapper.builder().setCategory(category).buildCategoriesResponse();
   }

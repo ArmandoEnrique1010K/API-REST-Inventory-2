@@ -1,29 +1,27 @@
 package com.pe.inventoryapp.backend.location.controller;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
-import com.pe.inventoryapp.backend.common.service.ResponseService;
-import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
-import com.pe.inventoryapp.backend.location.model.response.RegionResponse;
-import com.pe.inventoryapp.backend.location.service.RegionService;
+import java.util.List;
 
 import jakarta.validation.Valid;
+
+import com.pe.inventoryapp.backend.location.service.RegionService;
+import com.pe.inventoryapp.backend.location.model.response.RegionResponse;
+import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
+import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.common.service.ResponseService;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 
 @RestController
 @RequestMapping("/api/region")
@@ -37,67 +35,38 @@ public class RegionController {
   @Autowired
   private ResponseService responseService;
 
+  @PostMapping
+  public ResponseEntity<CommonResponse> registerRegion(@Valid @RequestBody RegionRequest regionRequest,
+      BindingResult result) {
+    validationService.validateFieldsAndThrowResponse(result);
+    regionService.saveRegion(regionRequest);
+
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se guardo la región"));
+  }
+
   @GetMapping
-  public List<?> listAll() {
-    return regionService.findAll();
+  public ResponseEntity<?> listAllRegions() {
+    List<RegionResponse> regions = regionService.findAllRegions();
+    return ResponseEntity.status(200).body(regions);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<?> findById(@PathVariable Long id) {
-    Optional<RegionResponse> region = regionService.findById(id);
-
-    if (region.isEmpty()) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "No se ha encontrado la región"));
-    }
-
-    return ResponseEntity.ok(region.get());
-
-  }
-
-  @PostMapping
-  public ResponseEntity<CommonResponse> saveRegion(@Valid @RequestBody RegionRequest regionRequest,
-      BindingResult result) {
-    validationService.validateFieldsAndThrowResponse(result);
-    regionService.verifyRegionNameExist(regionRequest.getName());
-
-    var region = regionService.save(regionRequest);
-
-    if (region == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error al registrar la región");
-    }
-
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success", region));
+  public ResponseEntity<?> getRegion(@PathVariable Long id) {
+    RegionResponse regionResponse = regionService.findRegionById(id);
+    return ResponseEntity.status(200).body(regionResponse);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody RegionRequest regionRequest,
+  public ResponseEntity<?> updateRegion(@PathVariable Long id, @Valid @RequestBody RegionRequest regionRequest,
       BindingResult result) {
 
     validationService.validateFieldsAndThrowResponse(result);
+    regionService.updateRegionById(id, regionRequest);
 
-    Optional<RegionResponse> optionalRegionResponse = regionService.findById(id);
-
-    String newName = regionRequest.getName();
-
-    // Si la categoria ya no existe
-    if (optionalRegionResponse.isEmpty()) {
-      return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "La categoria no existe"));
-    }
-
-    // En el caso de que se tome el nombre de una región existente
-    // No usar el operador !=, en su lugar utiliza el metodo equals
-    if (!optionalRegionResponse.get().getName().equals(newName)) {
-      regionService.verifyRegionNameExist(newName);
-    }
-
-    if (id == 1) {
-      return ResponseEntity.status(400)
-          .body(responseService.generateCommonResponse("error", "No se puede actualizar esta región"));
-    }
-
-    String message = regionService.update(id, regionRequest);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success", message));
+    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
+        ResponseStatusCodes.SUCCESS_RESPONSE,
+        "Se actualizo la región"));
   }
 }

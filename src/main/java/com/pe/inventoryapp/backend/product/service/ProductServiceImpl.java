@@ -81,41 +81,13 @@ public class ProductServiceImpl implements ProductService {
       Long categoryId,
       Boolean status,
       Pageable pageable) {
-
-    if (categoryId == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+      throw new BusinessException(
+          ResponseStatusCodes.ENTITY_NOT_FOUND,
+          "La categoria no existe");
     }
 
-    Category category = categoryRepository.findById(categoryId)
-        .orElseThrow(() -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "La categoría no existe"));
-
-    Page<Product> products = productRepository.findAllByName(name, minStock, maxStock, category.getId(), status,
-        pageable);
-
-    return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public Page<ProductListResponse> searchAllProductsByParamsAndStatusTrue(String name,
-      Integer minStock,
-      Integer maxStock,
-      Long categoryId,
-      Pageable pageable) {
-
-    if (categoryId == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-    }
-
-    Category category = categoryRepository.findById(categoryId)
-        .orElseThrow(() -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "La categoría no existe"));
-
-    Page<Product> products = productRepository.findAllByNameAndStatusTrue(name, minStock, maxStock,
-        category.getId(),
+    Page<Product> products = productRepository.findAllByParams(name, minStock, maxStock, categoryId, status,
         pageable);
 
     return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
@@ -127,6 +99,7 @@ public class ProductServiceImpl implements ProductService {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
+
     Product product = productRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
 
@@ -140,8 +113,12 @@ public class ProductServiceImpl implements ProductService {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    Product productData = productRepository.findById(id)
+    Product product = productRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+
+    if (product.isStatus() == false) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+    }
 
     verifyProductNameExist(productRequest.getName().trim());
 
@@ -155,15 +132,15 @@ public class ProductServiceImpl implements ProductService {
         categoryId)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
 
-    productData.setName(productRequest.getName().trim());
-    productData.setEntryDate(productRequest.getEntryDate());
-    productData.setCaducityDate(productRequest.getCaducityDate());
-    productData.setLength(productRequest.getLength());
-    productData.setWidth(productRequest.getWidth());
-    productData.setImageUrl(productRequest.getImageUrl());
-    productData.setCategory(category);
+    product.setName(productRequest.getName().trim());
+    product.setEntryDate(productRequest.getEntryDate());
+    product.setCaducityDate(productRequest.getCaducityDate());
+    product.setLength(productRequest.getLength());
+    product.setWidth(productRequest.getWidth());
+    product.setImageUrl(productRequest.getImageUrl());
+    product.setCategory(category);
 
-    productRepository.save(productData);
+    productRepository.save(product);
   }
 
   // Cambia el estado del producto a false y lo guarda

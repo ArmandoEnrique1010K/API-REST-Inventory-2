@@ -78,8 +78,8 @@ public class ProductController {
       @RequestParam(required = false) Long categoryId) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParamsAndStatusTrue(name, minStock, maxStock,
-        categoryId, pageable);
+    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+        categoryId, true, pageable);
 
     return ResponseEntity.status(200).body(products);
   }
@@ -111,8 +111,8 @@ public class ProductController {
       @RequestParam(required = false) Integer maxStock) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParamsAndStatusTrue(name, minStock, maxStock,
-        id, pageable);
+    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+        id, true, pageable);
 
     return ResponseEntity.status(200).body(products);
   }

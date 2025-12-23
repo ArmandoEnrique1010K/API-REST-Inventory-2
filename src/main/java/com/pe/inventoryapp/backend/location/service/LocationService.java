@@ -1,28 +1,24 @@
 package com.pe.inventoryapp.backend.location.service;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
-import com.pe.inventoryapp.backend.location.model.response.LocationDetailsResponse;
-import com.pe.inventoryapp.backend.location.model.response.LocationListResponse;
+import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
 
 public interface LocationService {
 
-  String save(LocationRequest locationRequest);
+  void saveLocation(LocationRequest locationRequest);
 
-  List<LocationListResponse> findAll();
+  Page<LocationResponse> searchAllLocations(
+      String name,
+      Long regionId,
+      Boolean status,
+      Pageable pageable);
 
-  List<LocationListResponse> findAllByStatusTrue();
+  LocationResponse findLocationById(Long id);
 
-  List<LocationListResponse> findByRegionId(Long regionId);
+  void updateLocationById(Long id, LocationRequest productRequest);
 
-  public Optional<LocationDetailsResponse> findById(Long id);
-
-  public String update(Long id, LocationRequest productRequest);
-
-  public void changeStatus(Long id);
-
-  public void verifyLocationNameExist(String name);
-
+  void changeStatusLocationById(Long id);
 }

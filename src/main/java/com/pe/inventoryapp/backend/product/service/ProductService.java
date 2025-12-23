@@ -18,13 +18,6 @@ public interface ProductService {
       Boolean status,
       Pageable pageable);
 
-  Page<ProductListResponse> searchAllProductsByParamsAndStatusTrue(
-      String name,
-      Integer minStock,
-      Integer maxStock,
-      Long categoryId,
-      Pageable pageable);
-
   ProductDetailsResponse findProductById(Long id);
 
   void updateProductById(Long id, ProductRequest productRequest);

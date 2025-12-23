@@ -1,8 +1,7 @@
 package com.pe.inventoryapp.backend.location.model.mapper;
 
 import com.pe.inventoryapp.backend.location.model.entity.Location;
-import com.pe.inventoryapp.backend.location.model.response.LocationDetailsResponse;
-import com.pe.inventoryapp.backend.location.model.response.LocationListResponse;
+import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
 
 public class LocationMapper {
     private Location location;
@@ -20,24 +19,12 @@ public class LocationMapper {
         return this;
     }
 
-    public LocationListResponse buildLocationListResponse() {
-        if (location == null) {
-            throw new RuntimeException("Debe pasar la entidad Location");
-        } else {
-            return new LocationListResponse(
-                    location.getId(),
-                    location.getName().trim(),
-                    location.isStatus());
-        }
-
-    }
-
-    public LocationDetailsResponse buildLocationDetailsResponse() {
+    public LocationResponse buildLocationResponse() {
 
         if (location == null) {
             throw new RuntimeException("Debe pasar la entidad Location");
         }
-        return new LocationDetailsResponse(
+        return new LocationResponse(
                 location.getId(),
                 location.getName().trim(),
                 location.getRegion().getName().trim(),

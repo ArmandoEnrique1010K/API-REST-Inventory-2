@@ -20,7 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         AND (:categoryId IS NULL OR p.category.id = :categoryId)
         AND (:status IS NULL OR p.status = :status)
         """)
-  Page<Product> findAllByName(
+  Page<Product> findAllByParams(
       @Param("name") String name,
       @Param("minStock") Integer minStock,
       @Param("maxStock") Integer maxStock,

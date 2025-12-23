@@ -76,7 +76,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"value\": \"455766\"\r\n}",
+							"raw": "{\r\n    \"value\": \"154931\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -114,7 +114,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/auth/change-password/455766",
+							"raw": "http://localhost:8080/api/auth/change-password/154931",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -124,7 +124,7 @@
 								"api",
 								"auth",
 								"change-password",
-								"455766"
+								"154931"
 							]
 						}
 					},
@@ -390,7 +390,7 @@
 					"response": []
 				},
 				{
-					"name": "listAllCategoriesActive",
+					"name": "listAllActiveCategories",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -549,6 +549,113 @@
 								},
 								{
 									"key": "minStock",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxStock",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAllActiveProducts",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/active?page=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"active"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "name",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "minStock",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxStock",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAllProductsByCategory",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/category/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"category",
+								"1"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minStock",
 									"value": null,
 									"disabled": true
 								},
@@ -565,6 +672,54 @@
 								{
 									"key": "status",
 									"value": null,
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAllActiveProductsByCategory",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/product/active/category/6",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"product",
+								"active",
+								"category",
+								"6"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "minStock",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxStock",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "categoryId",
+									"value": "",
 									"disabled": true
 								}
 							]
@@ -727,7 +882,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Primera empresa\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Segunda empresa \"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -756,48 +911,7 @@
 			"name": "REGION",
 			"item": [
 				{
-					"name": "listAll",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/region",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"region"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "findById",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/region/1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"region",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "saveRegion",
+					"name": "registerRegion",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -826,13 +940,54 @@
 					"response": []
 				},
 				{
-					"name": "update",
+					"name": "listAllRegions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/region",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"region"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRegion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/region/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"region",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateRegion",
 					"request": {
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"norte\"\r\n}",
+							"raw": "{\r\n    \"name\": \"SUR\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -861,7 +1016,7 @@
 			"name": "LOCATION",
 			"item": [
 				{
-					"name": "save",
+					"name": "registerLocation",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -890,12 +1045,12 @@
 					"response": []
 				},
 				{
-					"name": "listAll",
+					"name": "listAllLocations",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location",
+							"raw": "http://localhost:8080/api/location?page=0",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -904,6 +1059,12 @@
 							"path": [
 								"api",
 								"location"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								}
 							]
 						}
 					},
@@ -931,6 +1092,51 @@
 					"response": []
 				},
 				{
+					"name": "listAllLocationsByRegion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/location/region/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location",
+								"region",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAllActiveLocationsByRegion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/location/active/region/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"location",
+								"active",
+								"region",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "findById",
 					"request": {
 						"method": "GET",
@@ -952,28 +1158,6 @@
 					"response": []
 				},
 				{
-					"name": "findByRegionId",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/location/region/2",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"location",
-								"region",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "update",
 					"request": {
 						"method": "PUT",
@@ -988,7 +1172,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/location/5",
+							"raw": "http://localhost:8080/api/location/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -997,7 +1181,7 @@
 							"path": [
 								"api",
 								"location",
-								"5"
+								"2"
 							]
 						}
 					},
@@ -1009,7 +1193,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location/status/1",
+							"raw": "http://localhost:8080/api/location/status/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1019,7 +1203,7 @@
 								"api",
 								"location",
 								"status",
-								"1"
+								"2"
 							]
 						}
 					},
@@ -1272,6 +1456,26 @@
 			]
 		},
 		{
+			"name": "welcome",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "getEnv",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -1300,42 +1504,15 @@
 			"response": []
 		},
 		{
-			"name": "welcome",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "findById",
+			"name": "testDatabase",
 			"request": {
 				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiaWQiOjMsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdLCJpYXQiOjE3NjU3NjYyNTIsImV4cCI6MTc2NTc2OTg1Mn0.Ddn3PVZFB4oF8IYtCOVD_hBms9bW1C0hlNzEi_oUbnQ",
-							"type": "string"
-						}
-					]
+					"type": "noauth"
 				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/auth/2",
+					"raw": "http://localhost:8080/api/database",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -1343,8 +1520,7 @@
 					"port": "8080",
 					"path": [
 						"api",
-						"auth",
-						"2"
+						"database"
 					]
 				}
 			},

@@ -7,7 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.pe.inventoryapp.backend.location.model.entity.Region;
 
 public interface RegionRepository extends JpaRepository<Region, Long> {
-
   Optional<Region> findByName(String name);
-
 }

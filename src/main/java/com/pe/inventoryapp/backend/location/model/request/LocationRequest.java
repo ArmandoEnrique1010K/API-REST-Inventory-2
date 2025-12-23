@@ -11,6 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LocationRequest {
     private String name;
-    // private String regionName;
     private Long idRegion;
 }
