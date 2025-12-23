@@ -1,2 +1,0 @@
-export { AuthSchema } from './AuthTypes';
-
