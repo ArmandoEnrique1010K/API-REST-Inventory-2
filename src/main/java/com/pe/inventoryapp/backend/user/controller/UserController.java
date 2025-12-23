@@ -4,9 +4,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
-import com.pe.inventoryapp.backend.common.service.AuthenticationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
@@ -44,7 +44,7 @@ public class UserController {
   private ValidationService validationService;
 
   @Autowired
-  private AuthenticationService authenticationService;
+  private AuthenticationContextService authenticationContextService;
 
   @PostMapping("/register")
   public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest,
@@ -66,7 +66,7 @@ public class UserController {
 
   @GetMapping("/profile")
   public ResponseEntity<?> getUserProfile(Authentication authentication) {
-    Long username = authenticationService.extractUserIdFromAuthentication(authentication);
+    Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
     DetailUserResponse user = userService.findUserById(username);
 
     return ResponseEntity.status(200).body(user);
@@ -75,7 +75,7 @@ public class UserController {
   @PutMapping("/profile")
   public ResponseEntity<?> updateUserProfile(Authentication authentication,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
-    Long userId = authenticationService.extractUserIdFromAuthentication(authentication);
+    Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
     userService.updateUserProfileById(userId, profileRequest);
 
@@ -87,7 +87,7 @@ public class UserController {
   @PutMapping("/roles")
   public ResponseEntity<?> updateUserRoles(Authentication authentication,
       @Valid @RequestBody RolesRequest rolesRequest, BindingResult result) {
-    Long id = authenticationService.extractUserIdFromAuthentication(authentication);
+    Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
     userService.updateUserRolesById(id, rolesRequest);
 

@@ -47,9 +47,6 @@ public class DeliveryOrderController {
   @Autowired
   private DeliveryOrderService deliveryOrderService;
 
-  @Autowired
-  private JwtService jwtService;
-
   // TODO: DESACTIVAR EL MODO REQUIRED FALSE, SOLAMENTE ES PARA PRUEBAS
   @PostMapping
   public ResponseEntity<CommonResponse> save(@RequestHeader(value = "Authorization", required = false) String header,
@@ -61,6 +58,7 @@ public class DeliveryOrderController {
           .body(responseService.generateCommonResponse("error", "Falta el token de autorización"));
     }
 
+    // TODO: USAR AUTHENTICATIONCONTEXTSERVICEIMPL
     Long id_user = jwtService.extractUserIdFromClaims(header);
 
     if (id_user == null) {

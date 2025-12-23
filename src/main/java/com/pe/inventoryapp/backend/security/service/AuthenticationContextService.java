@@ -1,7 +1,7 @@
-package com.pe.inventoryapp.backend.common.service;
+package com.pe.inventoryapp.backend.security.service;
 
 import org.springframework.security.core.Authentication;
 
-public interface AuthenticationService {
+public interface AuthenticationContextService {
   Long extractUserIdFromAuthentication(Authentication authentication);
 }
