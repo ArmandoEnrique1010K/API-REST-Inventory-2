@@ -67,6 +67,10 @@ public class ProductServiceImpl implements ProductService {
     product.setCategory(category);
     productRepository.save(product);
   }
+  // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO PARA QUE OBTENGA SUS ROLES
+  // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+  // boolean isAdmin = auth.getAuthorities().stream()
+  // .anyMatch(a -> a.getAuthority().equals("ROLE_OPERATOR"));
 
   // Conviene usar Boolean en lugar de boolean
   @Override
@@ -78,12 +82,17 @@ public class ProductServiceImpl implements ProductService {
       Boolean status,
       Pageable pageable) {
 
-    // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO PARA QUE OBTENGA SUS ROLES
-    // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    // boolean isAdmin = auth.getAuthorities().stream()
-    // .anyMatch(a -> a.getAuthority().equals("ROLE_OPERATOR"));
+    if (categoryId == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
-    Page<Product> products = productRepository.findAllByName(name, minStock, maxStock, categoryId, status, pageable);
+    Category category = categoryRepository.findById(categoryId)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            "La categoría no existe"));
+
+    Page<Product> products = productRepository.findAllByName(name, minStock, maxStock, category.getId(), status,
+        pageable);
 
     return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
   }
@@ -95,7 +104,18 @@ public class ProductServiceImpl implements ProductService {
       Integer maxStock,
       Long categoryId,
       Pageable pageable) {
-    Page<Product> products = productRepository.findAllByNameAndStatusTrue(name, minStock, maxStock, categoryId,
+
+    if (categoryId == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    Category category = categoryRepository.findById(categoryId)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            "La categoría no existe"));
+
+    Page<Product> products = productRepository.findAllByNameAndStatusTrue(name, minStock, maxStock,
+        category.getId(),
         pageable);
 
     return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());

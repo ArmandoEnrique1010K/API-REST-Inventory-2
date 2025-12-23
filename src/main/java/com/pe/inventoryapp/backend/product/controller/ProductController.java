@@ -84,6 +84,39 @@ public class ProductController {
     return ResponseEntity.status(200).body(products);
   }
 
+  @GetMapping("/category/{id}")
+  public ResponseEntity<?> listAllProductsByCategory(
+      @PathVariable Long id,
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) Integer minStock,
+      @RequestParam(required = false) Integer maxStock,
+      @RequestParam(required = false) Boolean status) {
+
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, id,
+        status,
+        pageable);
+
+    return ResponseEntity.status(200).body(products);
+  }
+
+  @GetMapping("/active/category/{id}")
+  public ResponseEntity<?> listAllActiveProductsByCategory(
+      @PathVariable Long id,
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) Integer minStock,
+      @RequestParam(required = false) Integer maxStock) {
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<ProductListResponse> products = productService.searchAllProductsByParamsAndStatusTrue(name, minStock, maxStock,
+        id, pageable);
+
+    return ResponseEntity.status(200).body(products);
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<?> getProduct(@PathVariable Long id) {
     ProductDetailsResponse productDetailsResponse = productService.findProductById(id);
