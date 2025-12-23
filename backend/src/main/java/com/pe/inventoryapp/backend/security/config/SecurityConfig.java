@@ -48,21 +48,29 @@ public class SecurityConfig {
                                                 // USERS
                                                 .requestMatchers(HttpMethod.POST, "/api/users/register")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-
                                                 .requestMatchers(HttpMethod.GET, "/api/users")
                                                 .hasAnyAuthority("ROLE_ADMIN")
                                                 .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
-
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/roles")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-
                                                 .requestMatchers(HttpMethod.DELETE, "/api/users/*")
                                                 .hasAnyAuthority("ROLE_ADMIN")
 
-                                                // PRODUCTS
+                                                // CATEGORY
+                                                .requestMatchers(HttpMethod.POST, "/api/category")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.GET, "/api/category")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.GET, "/api/category/active").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/category/*").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/category/*")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/category/status/*")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
-                                                .requestMatchers("/api/category").permitAll()
+                                                // TODO: CONTINUAR CON PRODUCTS
+
                                                 .anyRequest().permitAll())
                                 // .anyRequest().authenticated())
                                 .addFilter(new JwtAuthenticationFilter(
