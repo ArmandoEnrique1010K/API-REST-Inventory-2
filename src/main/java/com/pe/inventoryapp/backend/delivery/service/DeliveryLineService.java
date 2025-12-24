@@ -1,25 +1,39 @@
 package com.pe.inventoryapp.backend.delivery.service;
 
-import java.util.Optional;
+import java.time.LocalDate;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineDetailsResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
 
 public interface DeliveryLineService {
 
-  // Guardar una linea
-  void save(DeliveryLineRequest deliveryLineRequest);
+  // Guardar una linea de entrega
+  void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_user);
 
   // Busca todas las lineas de una orden de entrega
-  Page<DeliveryLineResponse> findAllByIdDeliveryOrderPageable(Long idDeliveryOrder, Pageable pageable);
+  Page<DeliveryLineListResponse> findAllDeliveryLinesByDeliveryOrderIdPageable(
+    Long deliveryOrderId, 
+    Integer minRequiredQuantity,
+    Integer maxRequiredQuantity,
+    LocalDate minLimitDate, 
+    LocalDate maxLimitDate, 
+    PreparationStatus preparationStatus, 
+    String location, 
+    Pageable pageable);
 
   // Busca una linea por id
-  Optional<DeliveryLineResponse> findById(Long id);
+  DeliveryLineDetailsResponse findDeliveryLineById(Long id);
 
-  // INVENTAR UN METODO QUE PERMITA AÑADIR VARIAS LINEAS A UNA MISMA ORDEN
+  void updateDeliveryLineById(Long id, DeliveryLineRequest deliveryLineRequest, Long id_user);
+
+  void deleteDeliveryLineById(Long id);
+
+  // TODO: INVENTAR UN METODO QUE PERMITA AÑADIR VARIAS LINEAS A UNA MISMA ORDEN
   // void saveAll(DeliveryLineRequest deliveryLineRequest, Long id_user);
 
 }

@@ -15,27 +15,29 @@ public interface DeliveryOrderService {
   void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
   Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
-      Pageable pageable,
       PreparationStatus status,
       String createdByUser,
       String batch,
       Integer minQuantity,
       Integer maxQuantity,
       LocalDateTime startDate,
-      LocalDateTime endDate);
+      LocalDateTime endDate,
+            Pageable pageable
+    );
 
   Page<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
-      Pageable pageable,
       String createdByUser,
       String batch,
       Integer minQuantity,
       Integer maxQuantity,
       LocalDateTime startDate,
-      LocalDateTime endDate);
+      LocalDateTime endDate,
+          Pageable pageable
+    );
 
   DeliveryOrderDetailsResponse findDeliveryOrderById(Long id);
 
   void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
-  void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus status);
+  void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus status, Long id_user);
 }

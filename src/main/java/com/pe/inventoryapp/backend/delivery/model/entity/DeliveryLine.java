@@ -43,7 +43,8 @@ public class DeliveryLine {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  private LocalDate limiDate;
+  private LocalDate limitDate;
+  private String updatedByUser;
 
   @Enumerated(EnumType.STRING)
   private PreparationStatus preparationStatus;

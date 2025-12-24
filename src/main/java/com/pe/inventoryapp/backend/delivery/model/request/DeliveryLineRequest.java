@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryLineRequest {
-
-  // TODO: SE PODRIA ELIMINAR ESTE REQUEST
   private Integer requiredQuantity;
   private Long idLocation;
   private Long idDeliveryOrder;

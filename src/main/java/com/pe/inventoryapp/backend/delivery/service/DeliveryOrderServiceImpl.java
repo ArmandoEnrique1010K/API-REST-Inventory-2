@@ -41,6 +41,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
     String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
 
+    // TODO: SUGERENCIA DE QUE EL BATCH SE PUEDA GENERAR AUTOMATICAMENTE CON CADA ORDEN DE ENTREGA
     DeliveryOrder deliveryOrder = new DeliveryOrder();
     deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
     deliveryOrder.setCreatedByUser(username);
@@ -89,14 +90,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
   @Override
   public Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
-      Pageable pageable,
       PreparationStatus status,
       String createdByUser,
       String batch,
       Integer minQuantity,
       Integer maxQuantity,
       LocalDateTime startDate,
-      LocalDateTime endDate) {
+      LocalDateTime endDate,
+          Pageable pageable
+    ) {
     Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(pageable, status,
         createdByUser, batch, minQuantity, maxQuantity, startDate, endDate);
 
@@ -107,13 +109,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
   @Override
   public Page<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
-      Pageable pageable,
       String createdByUser,
       String batch,
       Integer minQuantity,
       Integer maxQuantity,
       LocalDateTime startDate,
-      LocalDateTime endDate) {
+      LocalDateTime endDate,
+          Pageable pageable) {
     Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable,
         createdByUser, batch, minQuantity, maxQuantity, startDate, endDate);
 
@@ -169,14 +171,20 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   // return "Pedido de entrega actualizado correctamente";
 
   @Override
-  public void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus status) {
+  public void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus preparationStatus, Long id_user) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
 
-    deliveryOrder.setPreparationStatus(status);
+    // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
+    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
+    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
+
+    deliveryOrder.setPreparationStatus(preparationStatus);
+    deliveryOrder.setUpdatedByUser(username);
     deliveryOrderRepository.save(deliveryOrder);
   }
 

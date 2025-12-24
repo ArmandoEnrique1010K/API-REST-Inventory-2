@@ -151,7 +151,9 @@ public class ProductServiceImpl implements ProductService {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    Product product = productRepository.findById(id).orElseThrow();
+    Product product = productRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+
     product.setStatus(!product.isStatus());
     productRepository.save(product);
   }

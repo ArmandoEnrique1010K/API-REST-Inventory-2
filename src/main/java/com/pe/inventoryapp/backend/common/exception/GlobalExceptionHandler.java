@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
 
     return buildCommonError(
         ResponseStatusCodes.ENTITY_NOT_FOUND,
-        "Ha ocurrido un error, la entidad no encontrada 22");
+        "Ha ocurrido un error, la entidad no ha sido encontrada");
   }
 
   @ExceptionHandler(BusinessException.class)

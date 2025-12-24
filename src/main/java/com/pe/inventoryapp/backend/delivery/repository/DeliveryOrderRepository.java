@@ -13,14 +13,14 @@ import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 
 public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Long> {
-  Page<DeliveryOrder> findByPreparationStatus(PreparationStatus status);
+  // Page<DeliveryOrder> findByPreparationStatus(PreparationStatus status);
 
   // Busca todas las ordenes que estan activas (estado Ready e InProgress)
   // TODO: CORREGIR EL QUERY
   @Query("""
         SELECT d
         FROM DeliveryOrder d
-        WHERE (d.preparationStatus = 'READY' OR d.preparationStatus = 'IN_PROGRESS')
+        WHERE (d.preparationStatus = 'READY' OR d.preparationStatus = 'INPROGRESS')
           AND (:createdByUser IS NULL OR d.createdByUser LIKE CONCAT('%', :createdByUser, '%'))
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
           AND (:minQuantity IS NULL OR d.quantityTotal >= :minQuantity)

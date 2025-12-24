@@ -1,7 +1,8 @@
 package com.pe.inventoryapp.backend.delivery.model.mapper;
 
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineDetailsResponse;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
 
 public class DeliveryLineMapper {
   private DeliveryLine deliveryLine;
@@ -18,19 +19,38 @@ public class DeliveryLineMapper {
     return this;
   }
 
-  public DeliveryLineResponse buildDeliveryLineResponse() {
+  public DeliveryLineDetailsResponse buildDeliveryLineDetailsResponse() {
     if (deliveryLine == null) {
       throw new RuntimeException("Debe pasar la entidad DeliveryLine");
     } else {
-      return new DeliveryLineResponse(
+      return new DeliveryLineDetailsResponse(
           deliveryLine.getId(),
           deliveryLine.getRequiredQuantity(),
           deliveryLine.getDeliveredQuantity(),
           deliveryLine.getPendingQuantity(),
           deliveryLine.getUpdatedAt(),
+          deliveryLine.getLimitDate(),
+          deliveryLine.getUpdatedByUser(),
           deliveryLine.getPreparationStatus(),
           deliveryLine.getLocation().getName(),
           deliveryLine.getLocation().getRegion().getName());
     }
   }
+
+  public DeliveryLineListResponse buildDeliveryLineListResponse() {
+    if (deliveryLine == null) {
+      throw new RuntimeException("Debe pasar la entidad DeliveryLine");
+    } else {
+      return new DeliveryLineListResponse(
+          deliveryLine.getId(),
+          deliveryLine.getRequiredQuantity(),
+          deliveryLine.getDeliveredQuantity(),
+          deliveryLine.getPendingQuantity(),
+          deliveryLine.getLimitDate(),
+          deliveryLine.getPreparationStatus(),
+          deliveryLine.getLocation().getName(),
+          deliveryLine.getLocation().getRegion().getName());
+    }
+  }
+
 }
