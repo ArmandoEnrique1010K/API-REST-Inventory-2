@@ -26,8 +26,8 @@ public class DeliveryLineMapper {
           deliveryLine.getId(),
           deliveryLine.getRequiredQuantity(),
           deliveryLine.getDeliveredQuantity(),
-          // deliveryLine.getPendingQuantity(),
-          // deliveryLine.getUpdatedAt(),
+          deliveryLine.getPendingQuantity(),
+          deliveryLine.getUpdatedAt(),
           deliveryLine.getPreparationStatus(),
           deliveryLine.getLocation().getName(),
           deliveryLine.getLocation().getRegion().getName());

@@ -1,7 +1,6 @@
 package com.pe.inventoryapp.backend.delivery.service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +12,7 @@ import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResp
 
 public interface DeliveryOrderService {
 
-  String save(DeliveryOrderRequest deliveryOrderRequest, Long id_user);
+  void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
   Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
       Pageable pageable,
@@ -25,12 +24,18 @@ public interface DeliveryOrderService {
       LocalDateTime startDate,
       LocalDateTime endDate);
 
-  Optional<DeliveryOrderDetailsResponse> findById(Long id);
+  Page<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
+      Pageable pageable,
+      String createdByUser,
+      String batch,
+      Integer minQuantity,
+      Integer maxQuantity,
+      LocalDateTime startDate,
+      LocalDateTime endDate);
 
-  String update(Long id, DeliveryOrderRequest deliveryOrderRequest);
+  DeliveryOrderDetailsResponse findDeliveryOrderById(Long id);
 
-  void changePreparationStatus(Long id, PreparationStatus status);
+  void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
-  void verifyBatchExist(String batch);
-
+  void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus status);
 }

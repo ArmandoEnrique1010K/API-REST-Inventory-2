@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
@@ -33,10 +35,11 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   private UserRepository userRepository;
 
   @Override
-  public String save(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
+  public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
+    verifyBatchExist(deliveryOrderRequest.getBatch());
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    Optional<DetailUserResponse> user = userService.findUserById(id_user);
-    String username = user.get().getFirstname() + " " + user.get().getLastname();
+    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
+    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
 
     DeliveryOrder deliveryOrder = new DeliveryOrder();
     deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
@@ -47,18 +50,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     deliveryOrder.setPreparationStatus(PreparationStatus.INPROGRESS);
 
     // BUSCAR AL USUARIO POR SU ID
-
-    Optional<User> userEmail = userRepository.findByEmail(user.get().getEmail());
-    User userEntity = userEmail.orElseThrow(() -> new RuntimeException("El usuario no existe"));
+    Optional<User> userEmail = userRepository.findByEmail(detailsUserResponse.getEmail());
+    User userEntity = userEmail.orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND,
+        "El usuario no existe"));
 
     deliveryOrder.setUser(userEntity);
-
     deliveryOrderRepository.save(deliveryOrder);
-
-    // Guardar el pedido de entrega en la base de datos
-    return "Pedido de entrega guardado correctamente";
-
   }
+  // Guardar el pedido de entrega en la base de datos
+  // return "Pedido de entrega guardado correctamente";
 
   // @Override
   // public List<DeliveryOrderDetailsResponse> findAll() {
@@ -88,56 +88,101 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   // }
 
   @Override
-  public Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(Pageable pageable,
+  public Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
+      Pageable pageable,
       PreparationStatus status,
-      String createdByUser, String batch, Integer minQuantity,
-      Integer maxQuantity, LocalDateTime startDate, LocalDateTime endDate) {
+      String createdByUser,
+      String batch,
+      Integer minQuantity,
+      Integer maxQuantity,
+      LocalDateTime startDate,
+      LocalDateTime endDate) {
     Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(pageable, status,
         createdByUser, batch, minQuantity, maxQuantity, startDate, endDate);
 
     return deliveryOrders
-        .map(
-            deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-                .buildDeliveryOrderListResponse());
-
+        .map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+            .buildDeliveryOrderListResponse());
   }
 
   @Override
-  public Optional<DeliveryOrderDetailsResponse> findById(Long id) {
-    return deliveryOrderRepository.findById(id).map(
-        deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-            .buildDeliveryOrderDetailsResponse());
+  public Page<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
+      Pageable pageable,
+      String createdByUser,
+      String batch,
+      Integer minQuantity,
+      Integer maxQuantity,
+      LocalDateTime startDate,
+      LocalDateTime endDate) {
+    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable,
+        createdByUser, batch, minQuantity, maxQuantity, startDate, endDate);
+
+    return deliveryOrders
+        .map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+            .buildDeliveryOrderListResponse());
   }
 
   @Override
-  public String update(Long id, DeliveryOrderRequest deliveryOrderRequest) {
-    Optional<DeliveryOrder> deliveryOrderById = deliveryOrderRepository.findById(id);
-
-    if (deliveryOrderById.isPresent()) {
-      DeliveryOrder deliveryOrderData = deliveryOrderById.orElseThrow();
-      deliveryOrderData.setBatch(deliveryOrderRequest.getBatch());
-      // TODO: TAMBIEN DEBE ACTUALIZAR EL USUARIO QUE HA ACTUALIZADO LA ORDEN (EL QUE
-      // HA INICIADO SESION)
-
-      deliveryOrderRepository.save(deliveryOrderData);
-      return "Pedido de entrega actualizado correctamente";
-    } else {
-      return "Pedido de entrega no encontrado";
+  public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
+
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+        .orElseThrow(
+            () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+
+    return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+        .buildDeliveryOrderDetailsResponse();
   }
 
   @Override
-  public void changePreparationStatus(Long id, PreparationStatus status) {
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow();
+  public void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    // TAMBIEN DEBE ACTUALIZAR EL USUARIO QUE HA ACTUALIZADO LA ORDEN (EL QUE
+    // HA INICIADO SESION)
+
+    // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
+    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
+    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
+    // BUSCAR AL USUARIO POR SU ID
+    // Optional<User> userEmail =
+    // userRepository.findByEmail(detailsUserResponse.getEmail());
+    // User userEntity = userEmail.orElseThrow(() -> new
+    // BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND,
+    // "El usuario no existe"));
+
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+
+    verifyBatchExist(deliveryOrderRequest.getBatch());
+
+    deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
+    deliveryOrder.setUpdatedByUser(username);
+
+    deliveryOrderRepository.save(deliveryOrder);
+  }
+  // return "Pedido de entrega actualizado correctamente";
+
+  @Override
+  public void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus status) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+
     deliveryOrder.setPreparationStatus(status);
     deliveryOrderRepository.save(deliveryOrder);
   }
 
-  @Override
-  public void verifyBatchExist(String batch) {
+  private void verifyBatchExist(String batch) {
     if (deliveryOrderRepository.findByBatch(batch).isPresent()) {
-      throw new FieldValidation("batch", "El lote ya existe, introduzca otro lote");
+      throw new FieldValidation("batch", "El lote de entrega ya existe, introduzca otro lote");
     }
   }
-
 }

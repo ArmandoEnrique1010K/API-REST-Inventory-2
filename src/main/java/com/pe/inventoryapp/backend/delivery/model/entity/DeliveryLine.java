@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.delivery.model.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.UpdateTimestamp;
@@ -9,6 +10,7 @@ import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -41,7 +43,9 @@ public class DeliveryLine {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  @Enumerated
+  private LocalDate limiDate;
+
+  @Enumerated(EnumType.STRING)
   private PreparationStatus preparationStatus;
 
   @ManyToOne

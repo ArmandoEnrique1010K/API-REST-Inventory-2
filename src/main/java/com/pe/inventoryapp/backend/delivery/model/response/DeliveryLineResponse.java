@@ -17,8 +17,8 @@ public class DeliveryLineResponse {
   private Long id;
   private Integer requiredQuantity;
   private Integer deliveredQuantity;
-  // private Integer pendingQuantity;
-  // private LocalDateTime registeredAt;
+  private Integer pendingQuantity;
+  private LocalDateTime updatedAt;
   private PreparationStatus preparationStatus;
   private String location;
   private String region;
