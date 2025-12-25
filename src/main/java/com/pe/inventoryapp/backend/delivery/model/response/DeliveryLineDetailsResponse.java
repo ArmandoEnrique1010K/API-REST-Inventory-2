@@ -20,7 +20,7 @@ public class DeliveryLineDetailsResponse {
   private Integer deliveredQuantity;
   private Integer pendingQuantity;
   private LocalDateTime updatedAt;
-  private LocalDate limitDate;
+  private LocalDateTime limitDate;
   private String updatedByUser;
   private PreparationStatus preparationStatus;
   private String location;

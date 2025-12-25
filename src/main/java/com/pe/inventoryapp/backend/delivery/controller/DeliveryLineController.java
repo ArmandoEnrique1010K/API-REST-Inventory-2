@@ -1,15 +1,11 @@
 package com.pe.inventoryapp.backend.delivery.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -32,7 +28,6 @@ import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineRequest;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineDetailsResponse;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.delivery.service.DeliveryLineService;
-import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 
 import jakarta.validation.Valid;
@@ -51,13 +46,16 @@ public class DeliveryLineController {
 
   @Autowired
   private AuthenticationContextService authenticationContextService;
-  @PostMapping("/delivery-order/{id}")
+  @PostMapping("/delivery-order")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
-      @PathVariable Long id,
+      Authentication authentication,
       @Valid @RequestBody DeliveryLineRequest deliveryOrderRequest,
       BindingResult result) {
+
+        Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.saveDeliveryLine(deliveryOrderRequest, id);
+    deliveryLineService.saveDeliveryLine(deliveryOrderRequest, id_user);
 
     return ResponseEntity.status(201).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,

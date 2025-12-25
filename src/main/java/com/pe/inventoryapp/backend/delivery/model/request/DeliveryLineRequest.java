@@ -1,6 +1,9 @@
 package com.pe.inventoryapp.backend.delivery.model.request;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,8 +18,9 @@ public class DeliveryLineRequest {
   private Integer requiredQuantity;
   private Long idLocation;
   private Long idDeliveryOrder;
-  private LocalDate limitDate;
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  private LocalDateTime limitDate;
 
-  // TODO: Este campo puede ser opcional
+  // TODO: Este campo puede ser opcional (SE PUEDE ELIMINAR)
   private Long idStockLot;
 }

@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.delivery.model.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 
@@ -18,7 +19,7 @@ public class DeliveryLineListResponse {
   private Integer requiredQuantity;
   private Integer deliveredQuantity;
   private Integer pendingQuantity;
-  private LocalDate limitDate;
+  private LocalDateTime limitDate;
   private PreparationStatus preparationStatus;
   private String location;
   private String region;
