@@ -28,8 +28,7 @@ public class DeliveryOrderMapper {
           deliveryOrder.getBatch(),
           deliveryOrder.getLimitDate(),
           deliveryOrder.getCreatedByUser(),
-          deliveryOrder.getPreparationStatus(),
-          deliveryOrder.getQuantityTotal());
+          deliveryOrder.getPreparationStatus());
     }
   }
 
@@ -51,7 +50,6 @@ public class DeliveryOrderMapper {
           deliveryOrder.getUpdatedByUser(),
           deliveryOrder.getCreatedAt(),
           deliveryOrder.getUpdatedAt(),
-          deliveryOrder.getQuantityTotal(),
           status);
     }
 

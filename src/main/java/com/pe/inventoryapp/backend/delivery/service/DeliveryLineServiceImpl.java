@@ -87,7 +87,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrder.setLimitDate(getClosestLimitDate(idDeliveryOrder));
 
     // 2° actualizar la cantidad de deliveryOrder sumando todos los totales lineas de entrega
-    deliveryOrder.setQuantityTotal(deliveryLineRepository.sumRequiredQuantityByDeliveryOrderId(idDeliveryOrder));
+    // deliveryOrder.setQuantityTotal(deliveryLineRepository.sumRequiredQuantityByDeliveryOrderId(idDeliveryOrder));
     // deliveryOrder.setQuantityTotal(1000);
 
     // 3° actualizar el estado a INPROGRESS cada vez que se guarde una nueva linea de entrega
@@ -170,10 +170,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // 2° actualizar la cantidad de deliveryOrder sumando todos los totales lineas
     // de entrega
-    Integer total = deliveryLineRepository
-        .sumRequiredQuantityByDeliveryOrderId(deliveryOrder_id);
+    // Integer total = deliveryLineRepository
+    //     .sumRequiredQuantityByDeliveryOrderId(deliveryOrder_id);
 
-    deliveryOrder.setQuantityTotal(total != null ? total : 0);
+    // deliveryOrder.setQuantityTotal(total != null ? total : 0);
     
     // CASOS ESPECIALES
 

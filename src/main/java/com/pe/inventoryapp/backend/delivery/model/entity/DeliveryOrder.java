@@ -37,7 +37,6 @@ public class DeliveryOrder {
 
   private String batch;
 
-  private Integer quantityTotal;
 
   private LocalDateTime limitDate;
 

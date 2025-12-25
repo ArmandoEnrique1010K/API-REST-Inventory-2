@@ -89,13 +89,11 @@ public class DeliveryOrderController {
       @RequestParam(required = false) PreparationStatus preparationStatus,
       @RequestParam(required = false) String createdByUser,
       @RequestParam(required = false) String batch,
-      @RequestParam(required = false) Integer minQuantity,
-      @RequestParam(required = false) Integer maxQuantity,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllDeliveryOrdersByParams(preparationStatus, createdByUser, batch, minQuantity, maxQuantity, startDate, endDate, pageable);
+    Page<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllDeliveryOrdersByParams(preparationStatus, createdByUser, batch, startDate, endDate, pageable);
 
 
     return ResponseEntity.status(200).body(deliveryOrders);
@@ -107,15 +105,13 @@ public class DeliveryOrderController {
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) String createdByUser,
       @RequestParam(required = false) String batch,
-      @RequestParam(required = false) Integer minQuantity,
-      @RequestParam(required = false) Integer maxQuantity,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
 
     Pageable pageable = PageRequest.of(page, 20);
 
     Page<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllActiveDeliveryOrdersByParams(
-        createdByUser, batch, minQuantity, maxQuantity, startDate, endDate, pageable);
+        createdByUser, batch, startDate, endDate, pageable);
 
     return ResponseEntity.status(200).body(deliveryOrders);
   }

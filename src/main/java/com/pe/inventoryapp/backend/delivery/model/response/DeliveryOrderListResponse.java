@@ -19,5 +19,4 @@ public class DeliveryOrderListResponse {
   private LocalDateTime limitDate;
   private String createdByUser;
   private PreparationStatus status;
-  private Integer quantity;
 }

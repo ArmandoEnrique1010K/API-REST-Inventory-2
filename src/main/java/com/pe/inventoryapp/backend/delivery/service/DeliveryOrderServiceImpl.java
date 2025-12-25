@@ -47,7 +47,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     deliveryOrder.setCreatedByUser(username);
     deliveryOrder.setUpdatedByUser(username);
     deliveryOrder.setLimitDate(null);
-    deliveryOrder.setQuantityTotal(0);
     deliveryOrder.setPreparationStatus(PreparationStatus.INPROGRESS);
 
     // BUSCAR AL USUARIO POR SU ID
@@ -93,14 +92,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
       PreparationStatus status,
       String createdByUser,
       String batch,
-      Integer minQuantity,
-      Integer maxQuantity,
       LocalDateTime startDate,
       LocalDateTime endDate,
           Pageable pageable
     ) {
     Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(pageable, status,
-        createdByUser, batch, minQuantity, maxQuantity, startDate, endDate);
+        createdByUser, batch, startDate, endDate);
 
     return deliveryOrders
         .map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -111,13 +108,11 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   public Page<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
       String createdByUser,
       String batch,
-      Integer minQuantity,
-      Integer maxQuantity,
       LocalDateTime startDate,
       LocalDateTime endDate,
           Pageable pageable) {
     Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable,
-        createdByUser, batch, minQuantity, maxQuantity, startDate, endDate);
+        createdByUser, batch,  startDate, endDate);
 
     return deliveryOrders
         .map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)

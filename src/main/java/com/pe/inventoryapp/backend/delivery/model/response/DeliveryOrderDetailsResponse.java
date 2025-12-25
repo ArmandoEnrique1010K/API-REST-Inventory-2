@@ -19,6 +19,5 @@ public class DeliveryOrderDetailsResponse {
   private String updatedByUser;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
-  private Integer quantityTotal;
   private String preparationStatus;
 }

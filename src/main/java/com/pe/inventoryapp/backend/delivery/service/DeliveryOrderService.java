@@ -18,8 +18,6 @@ public interface DeliveryOrderService {
       PreparationStatus status,
       String createdByUser,
       String batch,
-      Integer minQuantity,
-      Integer maxQuantity,
       LocalDateTime startDate,
       LocalDateTime endDate,
             Pageable pageable
@@ -28,8 +26,6 @@ public interface DeliveryOrderService {
   Page<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
       String createdByUser,
       String batch,
-      Integer minQuantity,
-      Integer maxQuantity,
       LocalDateTime startDate,
       LocalDateTime endDate,
           Pageable pageable
