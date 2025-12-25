@@ -7,7 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.pe.inventoryapp.backend.delivery.model.entity.Item;
+import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 
 import jakarta.persistence.Column;
@@ -68,6 +68,6 @@ public class Product {
     private List<StockLot> stockLots;
     
     @OneToMany(mappedBy = "product")
-    private List<Item> items;
+    private List<DeliveryLine> deliveryLines;
 
 }

@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
+import com.pe.inventoryapp.backend.product.model.entity.Product;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -55,9 +56,13 @@ public class DeliveryLine {
   private Location location;
 
   @ManyToOne
-  @JoinColumn(name = "item_id")
-  private Item item;
+  @JoinColumn(name = "product_id")
+  private Product product;
 
   @OneToMany(mappedBy = "deliveryLine")
   private List<Movement> movements;
+
+  @ManyToOne
+  @JoinColumn(name = "delivery_order_id")
+  private DeliveryOrder deliveryOrder;
 }
