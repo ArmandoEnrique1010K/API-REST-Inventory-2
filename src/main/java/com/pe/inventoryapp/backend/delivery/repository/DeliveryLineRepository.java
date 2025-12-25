@@ -19,7 +19,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
 
   // Busqueda con filtros 
   @Query("""
-      SELECT d
+      SELECT DISTINCT d
       FROM DeliveryLine d
       WHERE d.deliveryOrder.id = :deliveryOrderId
         AND (:minRequiredQuantity IS NULL OR d.requiredQuantity >= :minRequiredQuantity)
@@ -33,8 +33,8 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
     Long deliveryOrderId, 
     Integer minRequiredQuantity,
     Integer maxRequiredQuantity,
-    LocalDate minLimitDate, 
-    LocalDate maxLimitDate, 
+    LocalDateTime minLimitDate, 
+    LocalDateTime maxLimitDate, 
     PreparationStatus preparationStatus, 
     String location, 
     Pageable pageable);

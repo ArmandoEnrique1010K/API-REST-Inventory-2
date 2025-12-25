@@ -16,6 +16,7 @@ import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.delivery.model.mapper.DeliveryLineMapper;
 import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineRequest;
+import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineUpdateRequest;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineDetailsResponse;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryLineRepository;
@@ -105,8 +106,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       Long deliveryOrderId,
       Integer minRequiredQuantity,
       Integer maxRequiredQuantity,
-      LocalDate minLimitDate,
-      LocalDate maxLimitDate,
+      LocalDateTime minLimitDate,
+      LocalDateTime maxLimitDate,
       PreparationStatus preparationStatus,
       String location,
       Pageable pageable) {
@@ -138,7 +139,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   // TODO: ESTE MÉTODO SIRVE PARA CAMBIAR LA CANTIDAD REQUERIDA Y LA FECHA LIMITE
   @Override
-  public void updateDeliveryLineById(Long id, DeliveryLineRequest deliveryLineRequest, Long id_user) {
+  public void updateDeliveryLineById(Long id, DeliveryLineUpdateRequest deliveryLineUpdateRequest, Long id_user) {
+    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
+    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -146,9 +150,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
-    // TODO: SE IGNORAN LOS CAMPOS idLocation y idDeliveryOrder PORQUE NO SE PUEDEN CAMBIAR
-    deliveryLine.setRequiredQuantity(deliveryLineRequest.getRequiredQuantity());  
-    deliveryLine.setLimitDate(deliveryLineRequest.getLimitDate());
+    deliveryLine.setRequiredQuantity(deliveryLineUpdateRequest.getRequiredQuantity());  
+    deliveryLine.setLimitDate(deliveryLineUpdateRequest.getLimitDate());
+    deliveryLine.setUpdatedByUser(username);
+
 
     Long deliveryLine_id = deliveryLine.getId();
 
@@ -156,28 +161,44 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
     
+    Long deliveryOrder_id = deliveryLine.getDeliveryOrder().getId();
+
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
-        deliveryLine_id)
+        deliveryOrder_id)
         .orElseThrow(
             () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El pedido de entrega no existe"));
 
-    Long deliveryOrder_id = deliveryOrder.getId();
     // TODO: SI SE ACTUALIZA UNA LINEA DE ENTREGA
 
     // 1° actualizar la fecha limite de deliveryOrder comparando todas las lineas de
     // entrega y tomar el valor con la fecha más cercana que no haya sido entregada
     deliveryOrder.setLimitDate(getClosestLimitDate(deliveryOrder_id));
 
-    // 2° actualizar la cantidad de deliveryOrder sumando todos los totales lineas
-    // de entrega
-    // Integer total = deliveryLineRepository
-    //     .sumRequiredQuantityByDeliveryOrderId(deliveryOrder_id);
-
-    // deliveryOrder.setQuantityTotal(total != null ? total : 0);
     
-    // CASOS ESPECIALES
+    // 2° CASOS ESPECIALES
 
-    // TODO: COMPLETAR EL 3° PASO, QUE ES VERIFICAR SI UNA ORDEN DE ENTREGA ESTA LISTA PARA SER ENTREGADA
+    // SI LA CANTIDAD REQUERIDA CAMBIA Y LA CANTIDAD ENTREGADA ES MENOR
+    if (deliveryLine.getRequiredQuantity() > deliveryLine.getDeliveredQuantity()) {
+      // Calcular el nuevo total que hace falta entregar
+      deliveryLine.setPendingQuantity(deliveryLine.getRequiredQuantity() - deliveryLine.getDeliveredQuantity());
+      deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    }
+
+    // INVERSO, SI LA CANTIDAD REQUERIDA ES MAYOR QUE LA CANTIDAD ENTREGADA
+    if (deliveryLine.getRequiredQuantity() < deliveryLine.getDeliveredQuantity()) {
+      // TODO: ESTO SERIA UN EXCESO DE CANTIDAD (NUMERO NEGATIVO RESULTANTE), QUEDA PENDIENTE EL MANEJO DE CANTIDAD EXCESIVA
+      deliveryLine.setPendingQuantity(deliveryLine.getRequiredQuantity() - deliveryLine.getDeliveredQuantity());
+      deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    }
+
+    // PERO SI LA CANTIDAD REQUERIDA ES IGUAL QUE LA ENTREGADA
+    if (deliveryLine.getRequiredQuantity() == deliveryLine.getDeliveredQuantity()){
+      deliveryLine.setPendingQuantity(0);
+      deliveryLine.setPreparationStatus(PreparationStatus.READY);
+    }
+
+    // TODO: PENDIENTE EL MANEJO DE LA FECHA LIMITE
+
     deliveryLineRepository.save(deliveryLine);
   }
 
@@ -193,12 +214,30 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     if (deliveryLine == null){
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     } else {
+      // SI HAY CANTIDAD ENTREGADA, ENTONCES YA NO SE PODRA ELIMINAR ESTE CAMPO
+      if (deliveryLine.getDeliveredQuantity() > 0) {
+        throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "No se puede eliminar porque ya hay una cantidad a entregar");
+      }
       deliveryLineRepository.delete(deliveryLine);
     }
-
-    // TODO: SI SE BORRA UNA LINEA DE ENTREGA, SE TIENE QUE ACTUALIZAR STOCKLOT (EL PEDIDO PASA A STOCK) Y DELIVERYORDER (EL TOTAL DE UNIDADES DEBE CAMBIAR)
   }
 
+  @Override
+  public void changePreparationStatusDeliveryLineById(Long id, PreparationStatus preparationStatus, Long id_user){
+    if (id == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+    DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+
+    // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
+    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
+    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
+    deliveryLine.setPreparationStatus(preparationStatus);
+    deliveryLine.setUpdatedByUser(username);
+    deliveryLineRepository.save(deliveryLine);
+  }
 
   // Metodo auxiliar
   // Busca si existe una linea de entrega que pertenezca a esa ubicación y tambien a esa misma orden de entrega

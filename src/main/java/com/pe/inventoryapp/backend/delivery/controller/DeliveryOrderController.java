@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.delivery.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,8 +19,10 @@ import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
+import com.pe.inventoryapp.backend.delivery.service.DeliveryLineService;
 import com.pe.inventoryapp.backend.delivery.service.DeliveryOrderService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 
@@ -45,6 +48,9 @@ public class DeliveryOrderController {
 
   @Autowired
   private DeliveryOrderService deliveryOrderService;
+
+  @Autowired
+  private DeliveryLineService deliveryLineService;
 
   @Autowired
   private AuthenticationContextService authenticationContextService;
@@ -131,6 +137,27 @@ public class DeliveryOrderController {
   //   return deliveryOrderService.findAllDeliveryOrdersByParams(pageable, status, createdByUser, batch, minQuantity,
   //       maxQuantity, startDate, endDate);
   // }
+
+
+  @GetMapping("/{id}/delivery-lines")
+  public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
+      @PathVariable Long id, 
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) Integer minRequiredQuantity,
+      @RequestParam(required = false) Integer maxRequiredQuantity,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime minLimitDate,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime maxLimitDate,
+      @RequestParam(required = false) PreparationStatus preparationStatus,
+      @RequestParam(required = false) String location    
+    ) {
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<DeliveryLineListResponse> deliveryOrder = deliveryLineService.findAllDeliveryLinesByDeliveryOrderIdPageable(id, 
+        minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, preparationStatus, location, pageable);
+
+    return ResponseEntity.status(200).body(deliveryOrder);
+  }
+
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getDeliveryOrder(@PathVariable Long id) {

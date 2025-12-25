@@ -75,6 +75,7 @@ public class AuthController {
             "La contraseña fue cambiada correctamente"));
   }
 
+  // TODO: CREAR UN ENDPOINT PARA CERRAR SESIÓN Y BORRAR EL TOKEN DE LAS COOKIES
 }
 // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
 // 1. Envia un correo al email del usuario con un token
