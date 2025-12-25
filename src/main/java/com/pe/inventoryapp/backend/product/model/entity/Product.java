@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.pe.inventoryapp.backend.delivery.model.entity.Item;
 import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 
 import jakarta.persistence.Column;
@@ -35,7 +36,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String name;
 
     private Double width;
@@ -65,4 +66,8 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<StockLot> stockLots;
+    
+    @OneToMany(mappedBy = "product")
+    private List<Item> items;
+
 }

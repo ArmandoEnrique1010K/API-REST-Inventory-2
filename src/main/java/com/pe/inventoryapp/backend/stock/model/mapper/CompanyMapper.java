@@ -1,7 +1,7 @@
-package com.pe.inventoryapp.backend.company.model.mapper;
+package com.pe.inventoryapp.backend.stock.model.mapper;
 
-import com.pe.inventoryapp.backend.company.model.entity.Company;
-import com.pe.inventoryapp.backend.company.model.response.CompanyResponse;
+import com.pe.inventoryapp.backend.stock.model.entity.Company;
+import com.pe.inventoryapp.backend.stock.model.response.CompanyResponse;
 
 public class CompanyMapper {
   private Company company;

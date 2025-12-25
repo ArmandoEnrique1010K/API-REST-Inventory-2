@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.company.model.entity;
+package com.pe.inventoryapp.backend.stock.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

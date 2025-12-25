@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +33,6 @@ public class ProductRequest {
   @Nullable
   private LocalDate caducityDate;
 
-  // Opcionalmente puede ser nulo
+  @NotNull(message = "Seleccione una categoria")
   private Long idCategory;
 }

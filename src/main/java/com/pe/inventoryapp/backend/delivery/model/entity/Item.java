@@ -1,39 +1,43 @@
-package com.pe.inventoryapp.backend.user.model.entity;
+package com.pe.inventoryapp.backend.delivery.model.entity;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
-import jakarta.persistence.Column;
+import com.pe.inventoryapp.backend.product.model.entity.Product;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Entity
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user_tokens")
-public class UserToken {
+@Table(name = "item_de_entrega")
+public class Item {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  
-  @Column(unique = true, nullable = false)
-  private String token;
 
-  private boolean active;
-
-  private LocalDateTime expirationTime;
+  private Integer totalQuantity;
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+  @JoinColumn(name = "product_id")
+  private Product product;
+
+  @ManyToOne
+  @JoinColumn(name = "delivery_order_id")
+  private DeliveryOrder deliveryOrder;
+
+  @OneToMany(mappedBy = "item")
+  private List<DeliveryLine> deliveryLines;
 }

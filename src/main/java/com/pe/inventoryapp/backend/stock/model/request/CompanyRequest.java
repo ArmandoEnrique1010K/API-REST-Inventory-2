@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.company.model.request;
+package com.pe.inventoryapp.backend.stock.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

@@ -50,8 +50,8 @@ public class DeliveryOrder {
   private String createdByUser;
   private String updatedByUser;
 
-  @OneToMany(mappedBy = "deliveryOrder")
-  private List<DeliveryLine> deliveryLines;
+  @OneToMany(mappedBy = "item")
+  private List<Item> items;
 
   @ManyToOne
   @JoinColumn(name = "user_id")

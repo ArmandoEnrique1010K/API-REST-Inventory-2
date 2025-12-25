@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.company.controller;
+package com.pe.inventoryapp.backend.stock.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +16,10 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.company.model.request.CompanyRequest;
-import com.pe.inventoryapp.backend.company.model.response.CompanyResponse;
-import com.pe.inventoryapp.backend.company.service.CompanyService;
+import com.pe.inventoryapp.backend.stock.model.request.CompanyRequest;
+import com.pe.inventoryapp.backend.stock.model.response.CompanyResponse;
+import com.pe.inventoryapp.backend.stock.service.CompanyService;
+
 import jakarta.validation.Valid;
 
 @RestController

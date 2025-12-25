@@ -1,9 +1,9 @@
-package com.pe.inventoryapp.backend.company.service;
+package com.pe.inventoryapp.backend.stock.service;
 
 import java.util.List;
 
-import com.pe.inventoryapp.backend.company.model.request.CompanyRequest;
-import com.pe.inventoryapp.backend.company.model.response.CompanyResponse;
+import com.pe.inventoryapp.backend.stock.model.request.CompanyRequest;
+import com.pe.inventoryapp.backend.stock.model.response.CompanyResponse;
 
 public interface CompanyService {
   void saveCompany(CompanyRequest companyRequest);

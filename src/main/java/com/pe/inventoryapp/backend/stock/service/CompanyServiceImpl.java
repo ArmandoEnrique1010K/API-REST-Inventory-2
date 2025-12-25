@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.company.service;
+package com.pe.inventoryapp.backend.stock.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
-import com.pe.inventoryapp.backend.company.model.entity.Company;
-import com.pe.inventoryapp.backend.company.model.mapper.CompanyMapper;
-import com.pe.inventoryapp.backend.company.model.request.CompanyRequest;
-import com.pe.inventoryapp.backend.company.model.response.CompanyResponse;
-import com.pe.inventoryapp.backend.company.repository.CompanyRepository;
+import com.pe.inventoryapp.backend.stock.model.entity.Company;
+import com.pe.inventoryapp.backend.stock.model.mapper.CompanyMapper;
+import com.pe.inventoryapp.backend.stock.model.request.CompanyRequest;
+import com.pe.inventoryapp.backend.stock.model.response.CompanyResponse;
+import com.pe.inventoryapp.backend.stock.repository.CompanyRepository;
 
 @Service
 public class CompanyServiceImpl implements CompanyService {

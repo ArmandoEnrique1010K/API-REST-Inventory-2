@@ -36,9 +36,9 @@ public class ProductServiceImpl implements ProductService {
 
     Long idCategory = productRequest.getIdCategory();
 
-    if (idCategory == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-    }
+     if (idCategory == null) {
+       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+     }
 
     // Buscar la categoria por su ID
     Category category = categoryRepository.findById(
