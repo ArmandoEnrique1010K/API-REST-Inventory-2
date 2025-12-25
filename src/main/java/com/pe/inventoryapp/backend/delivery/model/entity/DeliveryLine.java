@@ -53,9 +53,9 @@ public class DeliveryLine {
   @JoinColumn(name = "delivery_order_id")
   private DeliveryOrder deliveryOrder;
 
-  @ManyToOne
-  @JoinColumn(name = "stock_lot_id")
-  private StockLot stockLot;
+  // @ManyToOne
+  // @JoinColumn(name = "stock_lot_id")
+  // private StockLot stockLot;
 
   @ManyToOne
   @JoinColumn(name = "location_id")

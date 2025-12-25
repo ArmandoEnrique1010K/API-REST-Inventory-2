@@ -33,6 +33,7 @@ public class Movement {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+  
   private Integer quantity;
 
   @CreationTimestamp
@@ -56,10 +57,4 @@ public class Movement {
   @ManyToOne
   @JoinColumn(name = "delivery_line_id")
   private DeliveryLine deliveryLine;
-
-  @Enumerated
-  private Reason reason;
-
-  @Enumerated
-  private MovementType movementType;
 }

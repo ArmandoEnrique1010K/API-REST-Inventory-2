@@ -60,6 +60,6 @@ public class StockLot {
   @JoinColumn(name = "company_id")
   private Company company;
 
-  @OneToMany(mappedBy = "stockLot")
-  private List<DeliveryLine> deliveryLines;
+  // @OneToMany(mappedBy = "stockLot")
+  // private List<DeliveryLine> deliveryLines;
 }
