@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 
 import jakarta.persistence.Column;
@@ -70,4 +71,6 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<DeliveryLine> deliveryLines;
 
+    @OneToMany(mappedBy = "product")
+    private List<Movement> movements;
 }

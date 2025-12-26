@@ -32,4 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
+
 .env
+
+# TODO: INTENTAR OCULTAR LAS NUEVAS VARIABLES DE ENTORNO
+# application-secrets
+# /src/main/resources/application-secrets

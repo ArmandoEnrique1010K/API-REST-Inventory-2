@@ -5,13 +5,11 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
-import com.pe.inventoryapp.backend.movement.model.data.MovementType;
-import com.pe.inventoryapp.backend.movement.model.data.Reason;
+import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -57,4 +55,8 @@ public class Movement {
   @ManyToOne
   @JoinColumn(name = "delivery_line_id")
   private DeliveryLine deliveryLine;
+
+  @ManyToOne
+  @JoinColumn(name = "product_id")
+  private Product product;
 }
