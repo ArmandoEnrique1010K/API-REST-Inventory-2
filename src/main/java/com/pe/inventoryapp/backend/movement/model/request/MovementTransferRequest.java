@@ -1,7 +1,5 @@
 package com.pe.inventoryapp.backend.movement.model.request;
 
-import java.time.LocalDate;
-
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,17 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 
-// AJUSTE MANUAL DEL STOCK
-public class MovementAdjustmentRequest {
-  @NotNull
+// TRANSFERIR STOCK ENTRE DOS LOTES DEL MISMO PRODUCTO
+public class MovementTransferRequest {
   private Integer quantity;
-
   private String comment;
-  
   @NotNull
-  private Long idStockLot;
-
-  private LocalDate caducityDate;
-
-  private boolean alterQuantityReceived;
+  private Long idStockLotEmitter;
+  @NotNull
+  private Long idStockLotReceiver;
 }

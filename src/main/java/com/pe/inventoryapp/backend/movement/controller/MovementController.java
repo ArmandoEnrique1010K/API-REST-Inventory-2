@@ -13,6 +13,7 @@ import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.service.MovementService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
@@ -67,5 +68,18 @@ public class MovementController {
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha modificado manualmente el stock del producto"));
-}
+  }
+
+  @PostMapping("/transfer")
+  public ResponseEntity<CommonResponse> transferStockLot(Authentication authentication,
+      @Valid @RequestBody MovementTransferRequest movementTransferRequest,
+      BindingResult result) {
+    Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    validationService.validateFieldsAndThrowResponse(result);
+    movementService.saveMovementTransfer(movementTransferRequest, id);
+      
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se ha realizado una transferencia entre 2 stocks"));
+  }
 }

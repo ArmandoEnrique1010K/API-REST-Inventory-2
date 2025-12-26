@@ -11,6 +11,7 @@ import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
@@ -43,8 +44,6 @@ public class MovementServiceImpl implements MovementService {
   @Autowired
   private UserRepository userRepository;
 
-  @Autowired
-  private UserService userService;
 
   @Autowired
   private CompanyRepository companyRepository;
@@ -170,6 +169,57 @@ public class MovementServiceImpl implements MovementService {
   // DeliveryLine deliveryLine =
   // deliveryLineRepository.findById(movementRequest.getIdDeliveryLine())
   // .orElseThrow(() -> new RuntimeException("DeliveryLine no existe"));
+
+  @Override
+  public void saveMovementTransfer(MovementTransferRequest movementTransferRequest, Long id_user) {
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+    String username = user.getFirstname() + " " + user.getLastname();
+
+    Long id_stock_lot_emitter = movementTransferRequest.getIdStockLotEmitter();
+    Long id_stock_lot_receiver = movementTransferRequest.getIdStockLotReceiver();
+
+    // Encontrar el producto por id de stockLot
+    StockLot stockLotEmitter = stockLotRepository.findById(id_stock_lot_emitter).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe")
+    );
+    StockLot stockLotReceiver = stockLotRepository.findById(id_stock_lot_receiver).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock receptor no existe")
+    );
+
+    int newAvailableEmitter = stockLotEmitter.getQuantityAvailable() - movementTransferRequest.getQuantity();
+    int newAvailableReceiver = stockLotReceiver.getQuantityAvailable() + movementTransferRequest.getQuantity();
+
+    // Verificar que ambos lotes correspondan al mismo producto
+    if (stockLotEmitter.getProduct().getId() != stockLotReceiver.getProduct().getId())
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Los lotes deben pertenecer al mismo producto");
+
+    if (newAvailableEmitter < 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
+    }
+
+    stockLotEmitter.setQuantityAvailable(newAvailableEmitter);
+    stockLotReceiver.setQuantityAvailable(newAvailableReceiver);
+
+    // NOTA: NO SE RECALCULA EL TOTAL DE STOCK PORQUE ES UNA TRANSFERENCIA DE STOCK
+
+    stockLotRepository.save(stockLotEmitter);
+    stockLotRepository.save(stockLotReceiver);
+
+    // NOTA: SE TOMA EL PRODUCTO DEL EMISOR, PORQUE ES EL MISMO QUE EL RECEPTOR
+    Product product = stockLotEmitter.getProduct();
+
+    Movement movement = new Movement();
+    movement.setUsername_snapshot(username);
+    movement.setComment(movementTransferRequest.getComment());
+    movement.setProduct(product);
+    movement.setUser(user);
+    movement.setMovementType(MovementType.TRANSFER);
+    // NOTA: SE TOMA EL STOCKLOT DEL RECEPTOR
+    movement.setStockLot(stockLotReceiver);
+    movement.setQuantity(movementTransferRequest.getQuantity());
+    movementRepository.save(movement);
+  }
 
     // StockLot stockLot = stockLotRepository.findById(movementRequest.getIdStockLot())
     //     .orElseThrow(() -> new RuntimeException("StockLot no existe"));
