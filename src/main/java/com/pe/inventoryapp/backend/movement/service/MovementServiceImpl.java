@@ -1,21 +1,15 @@
 package com.pe.inventoryapp.backend.movement.service;
 
-import java.time.LocalDateTime;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
-import com.pe.inventoryapp.backend.movement.model.data.Reason;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
-import com.pe.inventoryapp.backend.movement.model.request.MovementRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -25,7 +19,6 @@ import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stock.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stock.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
@@ -58,14 +51,20 @@ public class MovementServiceImpl implements MovementService {
 
   // MOVIMIENTO DE AGREGAR AL STOCK UN PRODUCTO
   @Override
-  public void saveMovementToStockLot(MovementSendRequest movementSendRequest, Long id_user) {
+  public void saveMovementSend(MovementSendRequest movementSendRequest, Long id_user) {
 
-    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+    // TODO: VERIFICAR SI ESTO CONVIENE USARLO  O NO
+    // DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
+
+    // User user = userRepository.findById(id_user).orElseThrow(
+    //     () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe")
+    // );
+
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe")
-    );
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+
+    String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_product = movementSendRequest.getIdProduct();
 
@@ -76,7 +75,7 @@ public class MovementServiceImpl implements MovementService {
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
 
     // TODO: UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
-    product.setStock(3000);
+    product.setStock(stockLotRepository.sumAvailableByProductId(id_product));
 
     productRepository.save(product);
 
@@ -107,12 +106,70 @@ public class MovementServiceImpl implements MovementService {
     movement.setProduct(product);
     movement.setStockLot(stockLot);
     movement.setUser(user);
+    movement.setMovementType(MovementType.SEND);
 
     movementRepository.save(movement);
   }
-    // // Obtener la linea de entrega por id
-    // DeliveryLine deliveryLine = deliveryLineRepository.findById(movementRequest.getIdDeliveryLine())
-    //     .orElseThrow(() -> new RuntimeException("DeliveryLine no existe"));
+
+  @Override
+  public void saveMovementAdjustment(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
+
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+    String username = user.getFirstname() + " " + user.getLastname();
+
+    Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
+
+    // Encontrar el producto por id de stockLot
+    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe")
+    );
+
+    int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
+
+
+    Product product = stockLot.getProduct();
+
+    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
+    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+
+    productRepository.save(product);
+
+
+    // Se debe pasar la cantidad en la que se quiere incrementar o decrementar el stock
+    if (newAvailable < 0)
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
+
+    stockLot.setQuantityAvailable(newAvailable);
+
+    if (movementAdjustmentRequest.isAlterQuantityReceived()) {
+      stockLot.setQuantityReceived(stockLot.getQuantityReceived() + movementAdjustmentRequest.getQuantity());
+    }
+    stockLot.setCaducityDate(movementAdjustmentRequest.getCaducityDate());
+    stockLotRepository.save(stockLot);
+
+    Movement movement = new Movement();
+    movement.setQuantity(movementAdjustmentRequest.getQuantity());
+    movement.setUsername_snapshot(username);
+    movement.setComment(movementAdjustmentRequest.getComment());
+    movement.setUser(user);
+    movement.setProduct(product);
+
+    // ESTE CAMPO SE PODRIA MODIFICAR SI SE TRATA DE ALTERAR LA CANTIDAD RECIBIDA
+    if (movementAdjustmentRequest.isAlterQuantityReceived()) {
+      movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_RECEIVED);
+    } else {
+      movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_AVAILABLE);
+    }
+
+
+    movement.setStockLot(stockLot);
+    movementRepository.save(movement);
+  }
+  // // Obtener la linea de entrega por id
+  // DeliveryLine deliveryLine =
+  // deliveryLineRepository.findById(movementRequest.getIdDeliveryLine())
+  // .orElseThrow(() -> new RuntimeException("DeliveryLine no existe"));
 
     // StockLot stockLot = stockLotRepository.findById(movementRequest.getIdStockLot())
     //     .orElseThrow(() -> new RuntimeException("StockLot no existe"));
@@ -153,8 +210,5 @@ public class MovementServiceImpl implements MovementService {
     // movementRepository.save(movement);
 
 
-  @Override
-  public void movementToStockLot(MovementRequest movementRequest) {
-  }
 
 }

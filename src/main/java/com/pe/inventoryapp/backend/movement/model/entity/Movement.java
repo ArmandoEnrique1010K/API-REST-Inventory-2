@@ -5,11 +5,14 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -42,6 +45,10 @@ public class Movement {
 
   // Comentario adicional
   private String comment;
+
+  // Tipo de movimiento
+  @Enumerated(EnumType.STRING)
+  private MovementType movementType;
 
   // Relaciones
   @ManyToOne

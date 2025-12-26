@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.movement.model.data;
 
 public enum MovementType {
-  IN,
-  OUT
+  SEND,
+  ADJUSTMENT_QUANTITY_AVAILABLE,
+  ADJUSTMENT_QUANTITY_RECEIVED
 }

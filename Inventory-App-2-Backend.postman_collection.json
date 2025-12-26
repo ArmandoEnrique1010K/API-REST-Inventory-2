@@ -987,7 +987,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"SUR\"\r\n}",
+							"raw": "{\r\n    \"name\": \"NORTE\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1022,7 +1022,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Lima 3\",\r\n    \"idRegion\": 1\r\n}",
+							"raw": "{\r\n    \"name\": \"Piura\",\r\n    \"idRegion\": 2\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1215,23 +1215,16 @@
 			"name": "DELIVERY_ORDER",
 			"item": [
 				{
-					"name": "save",
+					"name": "registerDeliveryOrder",
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWQiOjEsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9VU0VSIl0sImlhdCI6MTc2NTUxNDkzOCwiZXhwIjoxNzY1NTE4NTM4fQ.vSyH6Oa0la7bKVjxEKK9H9UksRgIuT3_JM6CJd5MCVY",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"batch\": \"12345678\"\r\n}\r\n\r\n// NO OLVIDAR EL TOKEN DEL USUARIO QUE HA INICIADO SESION",
+							"raw": "{\r\n    \"batch\": \"Tercera orden de entrega\"\r\n}\r\n\r\n// NO OLVIDAR EL TOKEN DEL USUARIO QUE HA INICIADO SESION",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1254,12 +1247,12 @@
 					"response": []
 				},
 				{
-					"name": "search",
+					"name": "listAllDeliveryOrder",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/delivery-order/search?page=0",
+							"raw": "http://localhost:8080/api/delivery-order",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1267,14 +1260,9 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"delivery-order",
-								"search"
+								"delivery-order"
 							],
 							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
 								{
 									"key": "createdByUser",
 									"value": "null",
@@ -1306,8 +1294,8 @@
 									"disabled": true
 								},
 								{
-									"key": "status",
-									"value": "INPROGRESS",
+									"key": "preparationStatus",
+									"value": "READY",
 									"disabled": true
 								}
 							]
@@ -1316,7 +1304,82 @@
 					"response": []
 				},
 				{
-					"name": "findById",
+					"name": "listAllPendingDeliveryOrder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-order/pending",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-order",
+								"pending"
+							],
+							"query": [
+								{
+									"key": "createdByUser",
+									"value": "null",
+									"disabled": true
+								},
+								{
+									"key": "batch",
+									"value": "3",
+									"disabled": true
+								},
+								{
+									"key": "minQuantity",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "maxQuantity",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "2020-01-01T00:00:00",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "2025-01-01T00:00:00",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAllDeliveryLinesByDeliveryOrder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-order/2/delivery-lines",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-order",
+								"2",
+								"delivery-lines"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDeliveryOrder",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -1340,7 +1403,7 @@
 					"response": []
 				},
 				{
-					"name": "update",
+					"name": "updateDeliveryOrder",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -1373,7 +1436,7 @@
 					"response": []
 				},
 				{
-					"name": "changePreparationStatus",
+					"name": "changePreparationStatusDeliveryOrder",
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -1381,7 +1444,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/delivery-order/2/CANCELED",
+							"raw": "http://localhost:8080/api/delivery-order/INPROGRESS/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1390,8 +1453,8 @@
 							"path": [
 								"api",
 								"delivery-order",
-								"2",
-								"CANCELED"
+								"INPROGRESS",
+								"2"
 							]
 						}
 					},
@@ -1403,12 +1466,21 @@
 			"name": "DELIVERY_LINE",
 			"item": [
 				{
-					"name": "findAllByDeliveryOrder",
+					"name": "registerDeliveryLine",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"requiredQuantity\": 5000,\r\n    \"idLocation\": 2,\r\n    \"idDeliveryOrder\": 1,\r\n    \"limitDate\": \"2025-12-01 23:59:59\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://localhost:8080/api/delivery-line/delivery-order/1",
+							"raw": "http://localhost:8080/api/delivery-line/delivery-order",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1417,29 +1489,19 @@
 							"path": [
 								"api",
 								"delivery-line",
-								"delivery-order",
-								"1"
+								"delivery-order"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "save",
+					"name": "getDeliveryLine",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"requiredQuantity\": 100,\r\n    \"idLocation\": 2,\r\n    \"idDeliveryOrder\": 2\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:8080/api/delivery-line",
+							"raw": "http://localhost:8080/api/delivery-line/5",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1447,7 +1509,125 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"delivery-line"
+								"delivery-line",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateDeliveryLine",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"requiredQuantity\": 400,\r\n    \"limitDate\": \"2026-02-20 23:59:59\"\r\n}\r\n\r\n// TODO: CREAR UN NUEVO REQUEST PARA PASAR LOS DATOS NECESARIOS",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-line/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-line",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDeliveryLine Copy",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-line/5/MISSING",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-line",
+								"5",
+								"MISSING"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteDeliveryLine",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"requiredQuantity\": 20,\r\n    \"limitDate\": \"2026-02-20\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/delivery-line/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"delivery-line",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "MOVEMENT",
+			"item": [
+				{
+					"name": "sendStockLot",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\": 10000,\r\n    \"comment\": \"Prueba\",\r\n    \"batch\": \"Segundo lote\",\r\n    \"idProduct\": 2,\r\n    \"idCompany\": 1,\r\n    \"caducityDate\": \"2025-02-20\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movement/receive",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movement",
+								"receive"
 							]
 						}
 					},
@@ -1461,15 +1641,14 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/",
+					"raw": "http://localhost:8080/api",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
 					"port": "8080",
 					"path": [
-						"api",
-						""
+						"api"
 					]
 				}
 			},
@@ -1477,18 +1656,11 @@
 		},
 		{
 			"name": "getEnv",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n// {\r\n//     \"email\": \"correo@example.com\",\r\n//     \"password\": \"12345\"\r\n// }\r\n\r\n{\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"password\": \"1233asdW\"\r\n}\r\n"
-				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/test-dotenv",
+					"raw": "http://localhost:8080/api/dotenv",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -1496,8 +1668,7 @@
 					"port": "8080",
 					"path": [
 						"api",
-						"auth",
-						"test-dotenv"
+						"dotenv"
 					]
 				}
 			},

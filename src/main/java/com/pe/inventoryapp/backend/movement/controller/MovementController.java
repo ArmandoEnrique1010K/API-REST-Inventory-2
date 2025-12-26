@@ -11,9 +11,12 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.service.MovementService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
+import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
+import com.pe.inventoryapp.backend.stock.service.StockLotService;
 
 import jakarta.validation.Valid;
 
@@ -33,6 +36,8 @@ public class MovementController {
   private ValidationService validationService;
   @Autowired
   private ResponseService responseService;
+  @Autowired
+  private StockLotService stockLotService;
 
   @PostMapping("/receive")
   public ResponseEntity<CommonResponse> sendStockLot(Authentication authentication,
@@ -40,10 +45,27 @@ public class MovementController {
       BindingResult result) {
       Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
       validationService.validateFieldsAndThrowResponse(result);
-      movementService.saveMovementToStockLot(movementSendRequest, id);
+      movementService.saveMovementSend(movementSendRequest, id);
+      // stockLotService.sumAvailableQuantityByProductId(movementSendRequest.getIdProduct());
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha agregado contenido al stock"));
   }
+
+  @PostMapping("/adjustment")
+  public ResponseEntity<CommonResponse> adjustmentStockLot(Authentication authentication,
+      @Valid @RequestBody MovementAdjustmentRequest movementAdjustmentRequest,
+      BindingResult result) {
+      Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
+      validationService.validateFieldsAndThrowResponse(result);
+      movementService.saveMovementAdjustment(movementAdjustmentRequest, id);
+
+
+      // stockLotService.sumAvailableQuantityByProductId(movementAdjustmentRequest.getIdStockLot());
+
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se ha modificado manualmente el stock del producto"));
+}
 }
