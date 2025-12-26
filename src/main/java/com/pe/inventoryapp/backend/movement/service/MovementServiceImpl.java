@@ -10,6 +10,7 @@ import com.pe.inventoryapp.backend.delivery.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
@@ -221,44 +222,43 @@ public class MovementServiceImpl implements MovementService {
     movementRepository.save(movement);
   }
 
-    // StockLot stockLot = stockLotRepository.findById(movementRequest.getIdStockLot())
-    //     .orElseThrow(() -> new RuntimeException("StockLot no existe"));
+  // Movimiento de perdida del almacen
+  @Override
+  public void saveMovementLoss(MovementLossRequest movementLossRequest, Long id_user) {
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+    String username = user.getFirstname() + " " + user.getLastname();
 
-    // MovementType movementType = movementRequest.getMovementType();
-    // Reason reason = movementRequest.getReason();
-    // Long idStockLot = movementRequest.getIdStockLot();
-    // Long idDeliveryLine = movementRequest.getIdDeliveryLine();
+    Long id_stock_lot = movementLossRequest.getIdStockLot();
+    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+    int newAvailableEmitter = stockLot.getQuantityAvailable() - movementLossRequest.getQuantity();
 
-    // Movement movement = new Movement();
-    // movement.setQuantity(movementRequest.getQuantity());
-    // movement.setComment(movementRequest.getComment());
-    // movement.setMovementType(movementRequest.getMovementType());
-    // movement.setReason(movementRequest.getReason());
-    // movement.setDeliveryLine(deliveryLine);
-    // movement.setReason(reason);
-    // movement.setMovementType(movementType);
+    if (newAvailableEmitter < 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
+    }
 
-    // // TODO: CORREGIR ESTA LINEA (LLAMAR A LA ENTIDAD POR ID)
-    // movement.setStockLot(stockLot);
+    stockLot.setQuantityAvailable(newAvailableEmitter);
+    stockLotRepository.save(stockLot);
 
-    // // AQUI SE HACEN LAS MODIFICACIONES RESPECTIVAS
-    // // SALIDA
-    // if (movementType.equals(MovementType.OUT) && reason.equals(Reason.DELIVERY)) {
-    //   // Cantidad entregada
-    //   deliveryLine.setDeliveredQuantity(movementRequest.getQuantity());
-    //   // Cantidad pendiente
-    //   deliveryLine.setPendingQuantity(deliveryLine.getRequiredQuantity() - deliveryLine.getDeliveredQuantity());
-    //   deliveryLine.setUpdatedAt(LocalDateTime.now());
+    Product product = stockLot.getProduct();
 
-    //   // Si la cantidad entregada es igual a la cantidad requerida
-    //   if (deliveryLine.getPendingQuantity() == 0) {
-    //     deliveryLine.setPreparationStatus(PreparationStatus.READY);
-    //   }
+    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
+    // PRODUCTOS
+    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
 
-    // }
+    productRepository.save(product);
 
-    // movementRepository.save(movement);
+    Movement movement = new Movement();
+    movement.setUsername_snapshot(username);
+    movement.setComment(movementLossRequest.getComment());
+    movement.setProduct(product);
+    movement.setUser(user);
+    movement.setMovementType(MovementType.LOSS);
+    movement.setStockLot(stockLot);
+    movement.setQuantity(movementLossRequest.getQuantity());
+    movementRepository.save(movement);
 
-
+  }
 
 }

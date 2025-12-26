@@ -12,6 +12,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.service.MovementService;
@@ -82,4 +83,18 @@ public class MovementController {
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha realizado una transferencia entre 2 stocks"));
   }
+
+  @PostMapping("/loss")
+  public ResponseEntity<CommonResponse> lossStockLot(Authentication authentication,
+      @Valid @RequestBody MovementLossRequest movementLossRequest,
+      BindingResult result) {
+    Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    validationService.validateFieldsAndThrowResponse(result);
+    movementService.saveMovementLoss(movementLossRequest, id);
+
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se ha descontado el stock de un producto"));
+  }
+  
 }
