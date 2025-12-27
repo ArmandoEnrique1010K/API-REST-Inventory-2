@@ -82,6 +82,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     
     deliveryLineRepository.save(deliveryLine);
 
+    // TODO: SI TODAS LAS ORDENES DE ENTREGA YA ESTAN MARCADAS COMO READY, ENTONCES LA ORDEN DE ENTRRGA DEBE MARCARSE COMO READY
+    
     // TODO: AQUI DEBE REALIZAR LAS OPERACIONES CON LA ORDEN DE ENTREGA (DELIVERY ORDER)
 
     // 1° actualizar la fecha limite de deliveryOrder comparando todas las lineas de entrega y tomar el valor con la fecha más cercana que no haya sido entregada

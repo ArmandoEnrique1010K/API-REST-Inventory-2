@@ -64,6 +64,8 @@ public class User {
   private List<Role> roles;
 
   // NOTA: USAR @JsonIgnore evita tener un error de recursividad (StackOverflow) al imprimir la entidad
+  
+  // Pero  cuando se trata de editar datos en el servicio, no ocurre una sobrecarga porque no se esta serializando la entidad
   @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<UserToken> tokens;
