@@ -16,7 +16,10 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -26,10 +29,18 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 
 @Entity
 @Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
+// CON ELLO SE EVITA EL PROBLEMA DE RECURSIVIDAD INFINITA
+
+// No utilizar @Data 
+// @Data
+
+// En su lugar utilizar @Getter y @Setter y @ToString
+@Getter
+@Setter
+@ToString(exclude = { "deliveryOrders", "movements", "tokens", "roles" })
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,15 +63,15 @@ public class User {
   })
   private List<Role> roles;
 
-  // NOTA: USAR @JsonIgnore evita tener un error de recursividad (StackOverflow)
+  // NOTA: USAR @JsonIgnore evita tener un error de recursividad (StackOverflow) al imprimir la entidad
   @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<UserToken> tokens;
-
+  
   @JsonIgnore
   @OneToMany(mappedBy = "user")
   private List<Movement> movements;
-  
+
   @JsonIgnore
   @OneToMany(mappedBy = "user")
   private List<DeliveryOrder> deliveryOrders;

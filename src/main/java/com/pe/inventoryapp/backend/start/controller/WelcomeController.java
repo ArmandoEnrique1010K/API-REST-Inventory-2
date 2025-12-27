@@ -52,14 +52,17 @@ public class WelcomeController {
   @GetMapping("/stackoverflow/{id}")
   public ResponseEntity<?> stackOverflow(@PathVariable Long id) {
     // Encontrar al usuario y traer la entidad relacionada como respuesta
-    Optional<User> user = userRepository.findById(id);
+    User user = userRepository.findById(id).get();
 
-    if (user.isPresent()) {
-      return ResponseEntity.ok(user.get());
+    if (user != null) {
+
+      System.out.println("El usuario " + user.getFirstname()+ " se encuentra");
+      System.out.println(user);
+      System.out.println(user.getTokens());
+      return ResponseEntity.ok(user);
     } else {
       return ResponseEntity.ok("No se encuentra el usuario");
     }
-
 
   }
 }
