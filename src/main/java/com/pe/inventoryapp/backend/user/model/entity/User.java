@@ -19,6 +19,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 
@@ -50,12 +52,16 @@ public class User {
   })
   private List<Role> roles;
 
+  // NOTA: USAR @JsonIgnore evita tener un error de recursividad (StackOverflow)
+  @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<UserToken> tokens;
 
+  @JsonIgnore
   @OneToMany(mappedBy = "user")
   private List<Movement> movements;
-
+  
+  @JsonIgnore
   @OneToMany(mappedBy = "user")
   private List<DeliveryOrder> deliveryOrders;
 }

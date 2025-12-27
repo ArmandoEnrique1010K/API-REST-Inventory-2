@@ -1,11 +1,17 @@
 package com.pe.inventoryapp.backend.start.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.repository.UserRepository;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -16,6 +22,8 @@ public class WelcomeController {
   @Autowired
   private UserService userService;
 
+  @Autowired
+  private UserRepository userRepository;
   @GetMapping
   public String welcome() {
     return "Se ha inicializado el backend";
@@ -38,5 +46,20 @@ public class WelcomeController {
     } else {
       return "La base de datos no funciona correctamente";
     }
+  }
+
+  // PRUEBA DE STACK OVERFLOW
+  @GetMapping("/stackoverflow/{id}")
+  public ResponseEntity<?> stackOverflow(@PathVariable Long id) {
+    // Encontrar al usuario y traer la entidad relacionada como respuesta
+    Optional<User> user = userRepository.findById(id);
+
+    if (user.isPresent()) {
+      return ResponseEntity.ok(user.get());
+    } else {
+      return ResponseEntity.ok("No se encuentra el usuario");
+    }
+
+
   }
 }
