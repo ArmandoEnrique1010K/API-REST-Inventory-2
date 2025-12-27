@@ -82,3 +82,5 @@ public class AuthController {
 // 2. El usuario debe ingresar el token
 // 3. El usuario debe ingresar su nueva contraseña
 // 4. El usuario debe iniciar sesión con la nueva contraseña
+
+// Nuevo comentario
