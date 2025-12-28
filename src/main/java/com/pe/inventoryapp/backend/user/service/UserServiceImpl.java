@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,13 +57,27 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
-  // Lista todos los usuarios
   @Override
   @Transactional(readOnly = true)
-  public List<ListUsersResponse> findAllUsers() {
-    List<User> users = (List<User>) userRepository.findAll();
-    return users.stream().map(user -> UserMapper.builder().setUser(user).buildListUserResponse())
-        .collect(Collectors.toList());
+  public Page<ListUsersResponse> findAllUsersByParams(
+    String name, 
+      List<Long> roleIds, Pageable pageable) {
+    Page<User> users = null;
+
+    if (roleIds == null || roleIds.isEmpty()) {
+      users = userRepository.findAllByName(name, pageable);
+    } else {
+      users = userRepository.findAllByParamsAndHavingRoles(
+          name,
+          roleIds,
+          roleIds.size(),
+          pageable);
+    }
+
+    return users.map(user -> UserMapper.builder()
+        .setUser(user)
+        .buildListUserResponse());
+
   }
 
   // Busca un usuario por su ID

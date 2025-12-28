@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.user.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
@@ -18,6 +19,9 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -57,11 +61,16 @@ public class UserController {
             "Se ha creado el usuario"));
   }
 
-  // TODO: DEBE SER UNA PAGINA DE USUARIOS
   @GetMapping
-  public ResponseEntity<?> listAllUsers() {
-    List<ListUsersResponse> users = userService.findAllUsers();
-    return ResponseEntity.status(200).body(users);
+  public ResponseEntity<?> listAllUsers(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) List<Long> idRoles) {
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
+
+    return ResponseEntity.ok(users);
   }
 
   @GetMapping("/profile")

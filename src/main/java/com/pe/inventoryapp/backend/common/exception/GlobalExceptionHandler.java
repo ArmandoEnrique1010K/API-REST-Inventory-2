@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException.Forbidden;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
@@ -55,6 +56,14 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(RuntimeException.class)
   public ResponseEntity<CommonResponse> handleRuntime() {
+
+    return buildCommonError(
+        ResponseStatusCodes.ENTITY_NOT_FOUND,
+        "Ha ocurrido un error, la entidad no ha sido encontrada");
+  }
+
+  @ExceptionHandler(Forbidden.class)
+  public ResponseEntity<CommonResponse> handleForbidden403() {
 
     return buildCommonError(
         ResponseStatusCodes.ENTITY_NOT_FOUND,
