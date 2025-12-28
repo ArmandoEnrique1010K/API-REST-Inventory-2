@@ -14,11 +14,11 @@ import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementReturnRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.service.MovementService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
-import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stock.service.StockLotService;
 
 import jakarta.validation.Valid;
@@ -110,4 +110,18 @@ public class MovementController {
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha preparado una linea de entrega"));
   }
+
+  @PostMapping("/return")
+  public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
+          @Valid @RequestBody MovementReturnRequest movementReturnRequest,
+          BindingResult result) {
+      Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
+      validationService.validateFieldsAndThrowResponse(result);
+      movementService.saveMovementReturn(movementReturnRequest, id);
+
+      return ResponseEntity.status(201)
+              .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+                      "Se ha devuelto una linea de entrega"));
+  }
+  
 }

@@ -36,6 +36,8 @@ public class DeliveryLine {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  private Integer originalQuantity;
+
   private Integer requiredQuantity;
 
   private Integer deliveredQuantity;

@@ -371,116 +371,157 @@ public class MovementServiceImpl implements MovementService {
           "La linea de entrega no tiene el estado 'listo' de entrega");
     }
 
-    // Calculo de la nueva cantidad entregada
-    int newDelivered = deliveryLine.getDeliveredQuantity() - movementReturnRequest.getQuantity();
-    if (newDelivered < 0) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
-          "No se puede devolver esa cantidad porque excede a la cantidad entregada");
-    }
+    boolean isReturnByChange = movementReturnRequest.isReturnByChange();
+    int quantity = movementReturnRequest.getQuantity();
 
-    // SI SE HA COMPLETADO LA CANTIDAD REQUERIDA DE UNA LINEA DE ENTREGA, DEBE
-    // CAMBIAR SU STATUS
-    deliveryLine.setDeliveredQuantity(newDelivered);
-    // deliveryLine.setRequiredQuantity(newDelivered);
-
-    // Aqui se debe verificar si se trata de alterar la cantidad por devolución o por cambio en la orden de entrega del cliente
-
-    // // Si se trata de un retorno por cambio en la linea de entrega
-    // if (movementReturnRequest.isReturnByChange()){
-    //   // deliveryLine.setRequiredQuantity(newDelivered);
-
-    //   // No se cambia el estado porque se sobreentiende que ya tiene el estado Ready, al inicio hay una validación para aquello
-    //   // deliveryLine.setPreparationStatus(PreparationStatus.READY);
-
-    // } else {
-    //   // Pero si se trata de un retorno por daños en el producto, no altera la cantidad requerida
-    //   deliveryLine.setPendingQuantity(deliveryLine.getPendingQuantity() + movementReturnRequest.getQuantity());
-    //   deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    // Si hay un retorno por cambio en la linea de entrega y la linea de entrega ya fue entregada
+    // NO SE ACEPTAN DEVOLUCIONES
+    // if (movementReturnRequest.isReturnByChange()
+    //     && deliveryLine.getPreparationStatus() == PreparationStatus.DELIVERED) {
+    //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "No se puede devolver porque la linea de entrega ya fue entregada");
     // }
+    /*
+     * =======================
+     * CASO 1: RETORNO POR DAÑO
+     * =======================
+     */
+    if (!isReturnByChange) {
 
-
-    // Si se trata de un movimiento de retorno por daños en el producto
-    if (!movementReturnRequest.isReturnByChange()){
-
-      // Verificar que la cantidad requerida no pase de la cantidad entregada
-      int newPending = deliveryLine.getPendingQuantity() + movementReturnRequest.getQuantity();
-
-      if (newPending > deliveryLine.getRequiredQuantity()) {
-        throw new BusinessException(
-            ResponseStatusCodes.DEFAULT_RESOURCE,
-            "La cantidad pendiente no puede superar la cantidad requerida");
+      int newDelivered = deliveryLine.getDeliveredQuantity() - quantity;
+      if (newDelivered < 0) {
+        throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
+            "La devolución excede la cantidad entregada");
       }
 
-       deliveryLine.setPendingQuantity(deliveryLine.getPendingQuantity() + movementReturnRequest.getQuantity());
-       deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+      deliveryLine.setDeliveredQuantity(newDelivered);
+
+      /*
+       * ============================
+       * CASO 2: CAMBIO EN LA ORDEN
+       * ============================
+       */
+    } else {
+
+      if (deliveryLine.getPreparationStatus() == PreparationStatus.DELIVERED) {
+        throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
+            "No se puede modificar una línea ya entregada");
+      }
+
+      int newRequired = deliveryLine.getRequiredQuantity() - quantity;
+
+      if (newRequired < deliveryLine.getDeliveredQuantity()) {
+        throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
+            "La cantidad requerida no puede ser menor a la ya entregada");
+      }
+
+      deliveryLine.setRequiredQuantity(newRequired);
     }
 
+    /*
+     * =======================
+     * CANTIDAD PENDIENTE
+     * =======================
+     */
+    int pending = deliveryLine.getRequiredQuantity()
+        - deliveryLine.getDeliveredQuantity();
 
+    deliveryLine.setPendingQuantity(pending);
+    
+    /*
+     * =======================
+     * ESTADO
+     * =======================
+     */
+    if (deliveryLine.getDeliveredQuantity() >= deliveryLine.getRequiredQuantity()) {
+      deliveryLine.setPreparationStatus(PreparationStatus.DELIVERED);
+    } else {
+      deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    }
 
-    // TODO: ¿SE DEBE ACTUALIZAR EL USUARIO?
     deliveryLine.setUpdatedByUser(username);
     deliveryLineRepository.save(deliveryLine);
 
+    /*
+     * =======================
+     * STOCK (solo por daño)
+     * =======================
+     */
+    StockLot targetStockLot = null;
     Product product = deliveryLine.getProduct();
 
-    StockLot targetStockLot;
+    if (!isReturnByChange) {
 
-    // Si no encuentra el stockLot del producto más reciente, debe crear uno
-    LocalDateTime limit = LocalDateTime.now().minusHours(24);
-    Optional<StockLot> optStockLot = stockLotRepository.findTopByProductIdAndCreatedAtAfterOrderByCreatedAtDesc(product.getId(), limit);
+      LocalDateTime limit = LocalDateTime.now().minusHours(24);
 
-    if (optStockLot.isEmpty()) {
-      // Si no lo encontro debe crear uno
-      // En este caso, debe crear un nuevo stockLot para guardar la cantidad que se va
-      // a devolver
-      targetStockLot = new StockLot();
+      targetStockLot = stockLotRepository
+          .findTopByProductIdAndCreatedAtAfterOrderByCreatedAtDesc(
+              product.getId(), limit)
+          .orElseGet(() -> {
+            StockLot lot = new StockLot();
+            lot.setBatch("Devolución por daño DL " + deliveryLine.getId());
+            lot.setProduct(product);
+            lot.setQuantityAvailable(0);
+            lot.setQuantityReceived(0);
+            return lot;
+          });
 
-      if (movementReturnRequest.isReturnByChange()){
-        targetStockLot.setBatch("Devolución de la entrega por cambio " + deliveryLine.getId());
-      } else {
-        targetStockLot.setBatch("Devolución de la entrega por daños " + deliveryLine.getId());
-      }
+      targetStockLot.setQuantityAvailable(
+          targetStockLot.getQuantityAvailable() + quantity);
+      targetStockLot.setQuantityReceived(
+          targetStockLot.getQuantityReceived() + quantity);
 
-      targetStockLot.setQuantityAvailable(movementReturnRequest.getQuantity());
-      targetStockLot.setQuantityReceived(movementReturnRequest.getQuantity());
-      // + 1 dia desde el dia de hoy
-      // La fecha limite se debe establecer en un dia despues, porque se van a
-      // acumular las lineas de entregas devueltas
-      // stockLot.setCreatedAt(LocalDateTime.now());
-      targetStockLot.setProduct(product);
       stockLotRepository.save(targetStockLot);
 
+      product.setStock(
+          stockLotRepository.sumAvailableByProductId(product.getId()));
+      productRepository.save(product);
     } else {
-      targetStockLot = optStockLot.get();
-      // Pero si hay uno, entonces debe actualizarlo
-      targetStockLot.setQuantityAvailable(targetStockLot.getQuantityAvailable() + movementReturnRequest.getQuantity());
-      targetStockLot.setQuantityReceived(targetStockLot.getQuantityReceived() + movementReturnRequest.getQuantity());
+      // TODO: CORREGIR AQUI, EL STOCK NO SE ACTUALIZA
+      LocalDateTime limit = LocalDateTime.now().minusHours(24);
+
+      targetStockLot = stockLotRepository
+          .findTopByProductIdAndCreatedAtAfterOrderByCreatedAtDesc(
+              product.getId(), limit)
+          .orElseGet(() -> {
+            StockLot lot = new StockLot();
+            lot.setBatch("Devolución por orden de entrega " + deliveryLine.getId());
+            lot.setProduct(product);
+            lot.setQuantityAvailable(0);
+            lot.setQuantityReceived(0);
+            return lot;
+          });
+
+      targetStockLot.setQuantityAvailable(
+          targetStockLot.getQuantityAvailable() + quantity);
+      targetStockLot.setQuantityReceived(
+          targetStockLot.getQuantityReceived() + quantity);
 
       stockLotRepository.save(targetStockLot);
+
+      product.setStock(
+          stockLotRepository.sumAvailableByProductId(product.getId()));
+      productRepository.save(product);
+
     }
 
-    // UNA OPERACIÓN PARA CALCULAR EL NUEVO TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
-    // PRODUCTOS
-    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
-
-    productRepository.save(product);
-
-    // MOVIMIENTO
+    /*
+     * =======================
+     * MOVIMIENTO
+     * =======================
+     */
     Movement movement = new Movement();
     movement.setUsername_snapshot(username);
     movement.setComment(movementReturnRequest.getComment());
     movement.setProduct(product);
     movement.setUser(user);
-
-    if (movementReturnRequest.isReturnByChange()) {
-      movement.setMovementType(MovementType.RETURN_BY_CHANGE);
-    } else {
-      movement.setMovementType(MovementType.RETURN_BY_DAMAGE);
-    }
-
-    movement.setStockLot(targetStockLot);
-    movement.setQuantity(movementReturnRequest.getQuantity());
+    movement.setQuantity(quantity);
     movement.setDeliveryLine(deliveryLine);
+    movement.setStockLot(targetStockLot);
+    movement.setMovementType(
+        isReturnByChange
+            ? MovementType.RETURN_BY_CHANGE
+            : MovementType.RETURN_BY_DAMAGE);
+
     movementRepository.save(movement);
   }
 

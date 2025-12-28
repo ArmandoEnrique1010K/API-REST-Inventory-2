@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 
 public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Long> {

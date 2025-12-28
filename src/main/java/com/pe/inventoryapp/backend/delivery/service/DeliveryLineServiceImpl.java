@@ -23,6 +23,8 @@ import com.pe.inventoryapp.backend.delivery.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
+import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
@@ -38,6 +40,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   private DeliveryOrderRepository deliveryOrderRepository;
 
   @Autowired
+  private ProductRepository productRepository;
+
+  @Autowired
   private UserService userService;
 
   @Override
@@ -51,6 +56,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     DeliveryLine deliveryLine = new DeliveryLine();
 
+    deliveryLine.setOriginalQuantity(deliveryLineRequest.getRequiredQuantity());
     deliveryLine.setRequiredQuantity(deliveryLineRequest.getRequiredQuantity());
     deliveryLine.setDeliveredQuantity(0);
     deliveryLine.setPendingQuantity(deliveryLineRequest.getRequiredQuantity());
@@ -62,6 +68,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Buscar el id de la ubicación y orden de entrega
     Long idLocation = deliveryLineRequest.getIdLocation();
     Long idDeliveryOrder = deliveryLineRequest.getIdDeliveryOrder();
+    Long idProduct = deliveryLineRequest.getIdProduct();
 
     if (idLocation == null){
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
@@ -71,15 +78,22 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
+    if (idProduct == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     Location location = locationRepository.findById(idLocation)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El pedido de entrega no existe"));
 
+    Product product = productRepository.findById(idProduct).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+
     deliveryLine.setLocation(location);
     deliveryLine.setDeliveryOrder(deliveryOrder);
-    
+    deliveryLine.setProduct(product);
     deliveryLineRepository.save(deliveryLine);
 
     // TODO: SI TODAS LAS ORDENES DE ENTREGA YA ESTAN MARCADAS COMO READY, ENTONCES LA ORDEN DE ENTRRGA DEBE MARCARSE COMO READY
@@ -152,6 +166,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
+    // NO SE ACTUALIZA LA CANTIDAD ORIGINAL
     deliveryLine.setRequiredQuantity(deliveryLineUpdateRequest.getRequiredQuantity());  
     deliveryLine.setLimitDate(deliveryLineUpdateRequest.getLimitDate());
     deliveryLine.setUpdatedByUser(username);
@@ -200,6 +215,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // TODO: PENDIENTE EL MANEJO DE LA FECHA LIMITE
+    // TODO: PENDIENTE EL MANEJO DEL MOVIMIENTO DE CANTIDAD
 
     deliveryLineRepository.save(deliveryLine);
   }
