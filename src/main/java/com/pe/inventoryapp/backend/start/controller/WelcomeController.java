@@ -1,17 +1,11 @@
 package com.pe.inventoryapp.backend.start.controller;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
-import com.pe.inventoryapp.backend.user.repository.UserRepository;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -22,8 +16,9 @@ public class WelcomeController {
   @Autowired
   private UserService userService;
 
-  @Autowired
-  private UserRepository userRepository;
+  // @Autowired
+  // private UserRepository userRepository;
+
   @GetMapping
   public String welcome() {
     return "Se ha inicializado el backend";
@@ -48,21 +43,27 @@ public class WelcomeController {
     }
   }
 
-  // PRUEBA DE STACK OVERFLOW
-  @GetMapping("/stackoverflow/{id}")
-  public ResponseEntity<?> stackOverflow(@PathVariable Long id) {
-    // Encontrar al usuario y traer la entidad relacionada como respuesta
-    User user = userRepository.findById(id).get();
+  // PRUEBA DE STACK OVERFLOW (NO ACTIVAR ESTE ENDPOINT)
+  // Encontrar al usuario y traer la entidad relacionada como respuesta
 
-    if (user != null) {
+  // @GetMapping("/stackoverflow/{id}")
+  // public ResponseEntity<?> stackOverflow(@PathVariable Long id) {
 
-      System.out.println("El usuario " + user.getFirstname()+ " se encuentra");
-      System.out.println(user);
-      System.out.println(user.getTokens());
-      return ResponseEntity.ok(user);
-    } else {
-      return ResponseEntity.ok("No se encuentra el usuario");
-    }
+  //   if (id == null) {
+  //     return ResponseEntity.ok("No se encuentra el usuario");
+  //   }
 
-  }
+  //   User user = userRepository.findById(id).orElseThrow(
+  //     () -> new RuntimeException("No se encuentra el usuario")
+  //   );
+
+  //   if (user != null) {
+  //     System.out.println("El usuario " + user.getFirstname()+ " se encuentra");
+  //     System.out.println(user);
+  //     System.out.println(user.getTokens());
+  //     return ResponseEntity.ok(user);
+  //   } else {
+  //     return ResponseEntity.ok("No se encuentra el usuario");
+  //   }
+  // }
 }
