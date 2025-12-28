@@ -50,8 +50,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponse> handleUserNotFound() {
 
     return buildCommonError(
-        ResponseStatusCodes.USER_NOT_FOUND,
-        "Usuario no encontrado");
+        ResponseStatusCodes.USER_NOT_FOUND, ResponseStatusCodes.USER_NOT_FOUND.getDefaultMessage());
   }
 
   @ExceptionHandler(RuntimeException.class)

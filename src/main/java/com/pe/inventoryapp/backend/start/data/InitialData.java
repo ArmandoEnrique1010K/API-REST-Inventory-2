@@ -78,6 +78,7 @@ public class InitialData {
     // El usuario por defecto (primer usuario de la app)
     if (userRepository.findById(1L).isEmpty()) {
 
+      // Agregamos todos los roles por orden de jerárquias
       List<Role> allRoles = new ArrayList<>();
       allRoles.add(roleUser);
       allRoles.add(roleOperator);
@@ -87,8 +88,8 @@ public class InitialData {
       System.out.println(allRoles);
 
       User user = new User();
-      user.setFirstname("Administrador");
-      user.setLastname("sin apellidos");
+      user.setFirstname("Primer usuario");
+      user.setLastname("del sistema");
       user.setDni(12345678);
       user.setEmail("correo@example.com");
       user.setPassword(passwordEncoder.encode("12345"));

@@ -58,7 +58,7 @@ public class UserController {
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Se ha creado el usuario"));
+            "Se ha registrado al usuario en el sistema"));
   }
 
   @GetMapping
@@ -112,6 +112,6 @@ public class UserController {
 
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Usuario eliminado"));
+            "Usuario eliminado definitivamente del sistema"));
   }
 }

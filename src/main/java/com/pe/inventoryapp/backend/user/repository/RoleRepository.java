@@ -8,4 +8,6 @@ import com.pe.inventoryapp.backend.user.model.entity.Role;
 
 public interface RoleRepository extends CrudRepository<Role, Long> {
   Optional<Role> findByName(String name);
+
+  boolean existsByName(String name);
 }

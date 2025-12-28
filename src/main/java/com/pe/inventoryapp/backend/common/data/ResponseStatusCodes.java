@@ -4,84 +4,84 @@ import org.springframework.http.HttpStatus;
 
 public enum ResponseStatusCodes {
 
-        // 200 - OK
-        SUCCESS_RESPONSE(HttpStatus.OK, "Se ha realizado la operación correctamente"),
+		// 200 - OK
+		SUCCESS_RESPONSE(HttpStatus.OK, "Se ha realizado la operación correctamente"),
 
-        // 400 - BAD_REQUEST
-        VALIDATION_ERROR(
-                        HttpStatus.BAD_REQUEST,
-                        "Error de validación"),
+		// 400 - BAD_REQUEST
+		VALIDATION_ERROR(
+										HttpStatus.BAD_REQUEST,
+										"Error de validación de campos"),
 
-        VALIDATION_INVALID_ID(
-                        HttpStatus.BAD_REQUEST,
-                        "ID inválido"),
+		VALIDATION_INVALID_ID(
+										HttpStatus.BAD_REQUEST,
+										"ID inválido"),
 
-        COMMON_ERROR(HttpStatus.BAD_REQUEST, "Ha ocurrido un error inesperado"), // BAD_REQUEST
+		COMMON_ERROR(HttpStatus.BAD_REQUEST, "Ha ocurrido un error inesperado"), // BAD_REQUEST
 
-        // 401 - UNAUTHORIZED
-        // Error en la autenticacion, correo o contraseña incorrecta
-        AUTH_INVALID_CREDENTIALS(
-                        HttpStatus.UNAUTHORIZED,
-                        "Credenciales inválidas"),
+		// 401 - UNAUTHORIZED
+		// Error en la autenticacion, correo o contraseña incorrecta
+		AUTH_INVALID_CREDENTIALS(
+										HttpStatus.UNAUTHORIZED,
+										"Las credenciales son inválidas, verifique su correo o contraseña"),
 
-        // Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
-        AUTH_TOKEN_EXPIRED(
-                        HttpStatus.UNAUTHORIZED,
-                        "Token inválido o expirado"),
-        
-        // Error de autenticación (401)
-        UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "No estas autorizado para acceder a este recurso"),
+		// Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
+		AUTH_TOKEN_EXPIRED(
+										HttpStatus.UNAUTHORIZED,
+										"El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token"),
+		
+		// Error de autenticación (401)
+		UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "No estas autorizado para acceder a este recurso"),
 
 
-        // 403 - FORBIDDEN
-        AUTH_FORBIDDEN(
-                        HttpStatus.FORBIDDEN,
-                        "No tiene permisos o roles suficientes para realizar esta acción con el recurso"),
+		// 403 - FORBIDDEN
+		AUTH_FORBIDDEN(
+										HttpStatus.FORBIDDEN,
+										"No tiene permisos o roles suficientes para realizar esta acción con el recurso"),
 
-        // 404 - NOT_FOUND
-        USER_NOT_FOUND(
-                        HttpStatus.NOT_FOUND,
-                        "Usuario no encontrado"),
+		// 404 - NOT_FOUND
+		USER_NOT_FOUND(
+										HttpStatus.NOT_FOUND,
+										"Ha ocurrido un error, el usuario no se encuentra en el sistema"),
 
-        ENTITY_NOT_FOUND(
-                        HttpStatus.NOT_FOUND,
-                        "Entidad no encontrada"),
+		ENTITY_NOT_FOUND(
+										HttpStatus.NOT_FOUND,
+										"Error, no se encuentra la entidad"),
 
-        // 409 - CONFLICT
-        // Recurso duplicado
-        RESOURCE_DUPLICATE(
-                        HttpStatus.CONFLICT,
-                        "El recurso ya existe"),
+		// 409 - CONFLICT
+		// Recurso duplicado
+		RESOURCE_DUPLICATE(
+										HttpStatus.CONFLICT,
+										"El recurso ya existe"),
 
-        DEFAULT_RESOURCE(
-                        HttpStatus.CONFLICT,
-                        "Este recurso no se puede eliminar"),
+		DEFAULT_RESOURCE(
+										HttpStatus.CONFLICT,
+										"Este recurso no se puede eliminar"),
 
-        // La contraseña no puede ser usada porque es la misma que la anterior
-        PASSWORD_REUSE_NOT_ALLOWED(
-                        HttpStatus.CONFLICT,
-                        "Contraseña no válida"),
+		// La contraseña no puede ser usada porque es la misma que la anterior
+		PASSWORD_REUSE_NOT_ALLOWED(
+										HttpStatus.CONFLICT,
+										"Contraseña no válida"),
 
-        DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Recurso duplicado"),
+		DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "Recurso duplicado"),
 
-        // 500 - INTERNAL_SERVER_ERROR
-        // Servidor interno
-        INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del sistema");
+		// 500 - INTERNAL_SERVER_ERROR
+		// Servidor interno
+		INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del sistema");
 
-        private final HttpStatus status;
-        private final String defaultMessage;
+		private final HttpStatus status;
+		private final String defaultMessage;
 
-        ResponseStatusCodes(HttpStatus status, String defaultMessage) {
-                this.status = status;
-                this.defaultMessage = defaultMessage;
-        }
+		ResponseStatusCodes(HttpStatus status, String defaultMessage) {
+						this.status = status;
+						this.defaultMessage = defaultMessage;
+		}
 
-        public HttpStatus getStatus() {
-                return status;
-        }
+		public HttpStatus getStatus() {
+						return status;
+		}
 
-        public String getDefaultMessage() {
-                return defaultMessage;
-        }
+		public String getDefaultMessage() {
+						return defaultMessage;
+		}
 
 }

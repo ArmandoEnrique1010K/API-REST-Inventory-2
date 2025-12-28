@@ -30,6 +30,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     // Esto se encuentra en el enum ResponseStatusCodes
         // UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "No estas autorizado para acceder a este recurso"),
     
+        // TODO: ESTO SE PODRIA TRANSFORMAR EN UNA RESPUESTA PERSONALIZADA
     HttpStatus extractHttpStatus = ResponseStatusCodes.UNAUTHORIZED.getStatus();
     String extractMessage = ResponseStatusCodes.UNAUTHORIZED.getDefaultMessage();
 

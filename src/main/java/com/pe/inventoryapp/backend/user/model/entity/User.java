@@ -16,14 +16,10 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 
@@ -32,15 +28,14 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
+@Data
+
 // CON ELLO SE EVITA EL PROBLEMA DE RECURSIVIDAD INFINITA
-
 // No utilizar @Data 
-// @Data
-
 // En su lugar utilizar @Getter y @Setter y @ToString
-@Getter
-@Setter
-@ToString(exclude = { "deliveryOrders", "movements", "tokens", "roles" })
+// @Getter
+// @Setter
+// @ToString(exclude = { "deliveryOrders", "movements", "tokens", "roles" })
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,15 +61,15 @@ public class User {
   // NOTA: USAR @JsonIgnore evita tener un error de recursividad (StackOverflow) al imprimir la entidad
   
   // Pero  cuando se trata de editar datos en el servicio, no ocurre una sobrecarga porque no se esta serializando la entidad
-  @JsonIgnore
+  // @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<UserToken> tokens;
   
-  @JsonIgnore
+  // @JsonIgnore
   @OneToMany(mappedBy = "user")
   private List<Movement> movements;
 
-  @JsonIgnore
+  // @JsonIgnore
   @OneToMany(mappedBy = "user")
   private List<DeliveryOrder> deliveryOrders;
 }

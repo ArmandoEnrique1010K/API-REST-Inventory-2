@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.user.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -51,7 +50,7 @@ public class UserServiceImpl implements UserService {
     user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
     user.setDni(registerRequest.getDni());
 
-    // Asigna los roles al usuario
+    // Asigna los roles al usuario en base a las opciones marcadas
     user.setRoles(getRoles(registerRequest.isAdmin(), registerRequest.isSecretary(), registerRequest.isOperator()));
 
     userRepository.save(user);
@@ -64,6 +63,7 @@ public class UserServiceImpl implements UserService {
       List<Long> roleIds, Pageable pageable) {
     Page<User> users = null;
 
+    // Si existe alguna busqueda por roles, debe asegurarse que busque por los roles seleccionados
     if (roleIds == null || roleIds.isEmpty()) {
       users = userRepository.findAllByName(name, pageable);
     } else {
@@ -77,7 +77,6 @@ public class UserServiceImpl implements UserService {
     return users.map(user -> UserMapper.builder()
         .setUser(user)
         .buildListUserResponse());
-
   }
 
   // Busca un usuario por su ID
@@ -92,7 +91,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "El usuario no existe"));
+            "El usuario no existe en el sistema"));
 
     return UserMapper.builder()
         .setUser(user)
@@ -111,7 +110,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "El usuario no existe"));
+            "El usuario no existe en el sistema"));
 
     // Obtener el correo del usuario actual y el nuevo
     String currentEmail = user.getEmail();
@@ -128,10 +127,9 @@ public class UserServiceImpl implements UserService {
     user.setDni(profileRequest.getDni());
 
     userRepository.save(user);
-
   }
 
-  // Actualizar los roles del usuario
+  // Cambiar los roles del usuario
   @Override
   public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
     if (id == null) {
@@ -139,18 +137,17 @@ public class UserServiceImpl implements UserService {
           ResponseStatusCodes.COMMON_ERROR);
     }
 
+    verifyUserByRoleAdminExist(rolesRequest.isAdmin(), id);
+
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "El usuario no existe"));
+            "El usuario no existe en el sistema"));
 
     List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
     user.setRoles(roles);
     userRepository.save(user);
   }
-
-  // Verifica si el email del usuario ya existe, de lo contrario lanza una
-  // excepcion
 
   // Elimina un usuario del sistema
   @Override
@@ -163,17 +160,19 @@ public class UserServiceImpl implements UserService {
     if (id == 1L) {
       throw new BusinessException(
           ResponseStatusCodes.DEFAULT_RESOURCE,
-          "Este usuario no se puede eliminar");
+          "Este usuario no se puede eliminar del sistema");
     }
+
 
     User user = userRepository.findById(id).orElseThrow(
         () -> new BusinessException(
             ResponseStatusCodes.ENTITY_NOT_FOUND,
-            "El usuario no existe"));
+            "El usuario no existe en el sistema"));
 
     if (user == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     } else {
+      verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id);
       userRepository.delete(user);
     }
   }
@@ -184,18 +183,18 @@ public class UserServiceImpl implements UserService {
     List<Role> roles = new ArrayList<>();
 
     // Rol base obligatorio
-    roles.add(getRoleOrThrow("ROLE_USER", "El rol usuario no existe"));
+    roles.add(getRoleOrThrow("ROLE_USER", "El rol de usuario no existe en el sistema"));
 
     if (isOperator) {
-      roles.add(getRoleOrThrow("ROLE_OPERATOR", "El rol operador no existe"));
+      roles.add(getRoleOrThrow("ROLE_OPERATOR", "El rol de operador no existe en el sistema"));
     }
 
     if (isSecretary) {
-      roles.add(getRoleOrThrow("ROLE_SECRETARY", "El rol secretario no existe"));
+      roles.add(getRoleOrThrow("ROLE_SECRETARY", "El rol de secretario no existe en el sistema"));
     }
 
     if (isAdmin) {
-      roles.add(getRoleOrThrow("ROLE_ADMIN", "El rol administrador no existe"));
+      roles.add(getRoleOrThrow("ROLE_ADMIN", "El rol de administrador no existe en el sistema"));
     }
 
     return roles;
@@ -207,9 +206,27 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.VALIDATION_ERROR, message));
   }
 
+  // Verifica si el email del usuario ya existe, de lo contrario lanza una excepcion
   private void verifyUserEmailExists(String email) {
     if (userRepository.findByEmail(email).isPresent()) {
       throw new FieldValidation("email", "El usuario con ese email ya existe");
+    }
+  }
+
+  // Verificar que haya al menos un usuario con el rol de administrador en el sistema, de lo contrario lanza una excepcion
+  private void verifyUserByRoleAdminExist(boolean admin, Long id) {
+    if (!roleRepository.existsByName("ROLE_ADMIN")) {
+      throw new BusinessException(
+          ResponseStatusCodes.ENTITY_NOT_FOUND,
+          "El rol de administrador no existe en el sistema");
+    }
+
+    boolean existsAnotherAdmin = userRepository.existsByRoleNameAndIdNot("ROLE_ADMIN", id);
+
+    if (!existsAnotherAdmin && !admin) {
+      throw new BusinessException(
+          ResponseStatusCodes.DEFAULT_RESOURCE,
+          "Debe existir al menos un administrador distinto a este usuario");
     }
   }
 }
