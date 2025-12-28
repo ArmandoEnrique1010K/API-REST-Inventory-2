@@ -8,4 +8,6 @@ public enum MovementType {
   LOSS,
   SALE,
   ALLOCATE,
+  RETURN_BY_DAMAGE, // Retorno por daño de producto
+  RETURN_BY_CHANGE, // Retorno por cambio de orden de entrega
 }

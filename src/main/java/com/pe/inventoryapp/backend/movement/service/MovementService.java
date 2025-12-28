@@ -4,6 +4,7 @@ import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequ
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementReturnRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 
@@ -18,5 +19,7 @@ public interface MovementService {
   // void saveMovementSale(MovementLossRequest movementExitRequest, Long id_user);
 
   void saveMovementAllocate(MovementAllocateRequest movementAllocateRequest, Long id_user);
+
+  void saveMovementReturn(MovementReturnRequest movementReturnRequest, Long id_user);
 
 }

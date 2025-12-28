@@ -1,5 +1,9 @@
 package com.pe.inventoryapp.backend.movement.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +19,7 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementReturnRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
@@ -27,7 +32,6 @@ import com.pe.inventoryapp.backend.stock.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
-// TODO: AUTOMATIZAR EL MOVIMIENTO
 @Service
 public class MovementServiceImpl implements MovementService {
 
@@ -342,9 +346,157 @@ public class MovementServiceImpl implements MovementService {
 
   }
 
+  @Override
+  @Transactional
+  public void saveMovementReturn(MovementReturnRequest movementReturnRequest, Long id_user) {
+    if (movementReturnRequest.getQuantity() <= 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+    }
+
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+    String username = user.getFirstname() + " " + user.getLastname();
+
+    // LINEA DE ENTREGA
+    Long id_delivery_line = movementReturnRequest.getIdDeliveryLine();
+    DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
+
+    // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA NO TENGA LOS ESTADOS MISSING NI CANCELED,
+    // PUEDE TENER LOS ESTADOS READY, INPROGRESS O DELIVERED
+    if (deliveryLine.getPreparationStatus() != PreparationStatus.READY
+        && deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS
+        && deliveryLine.getPreparationStatus() != PreparationStatus.DELIVERED) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
+          "La linea de entrega no tiene el estado 'listo' de entrega");
+    }
+
+    // Calculo de la nueva cantidad entregada
+    int newDelivered = deliveryLine.getDeliveredQuantity() - movementReturnRequest.getQuantity();
+    if (newDelivered < 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
+          "No se puede devolver esa cantidad porque excede a la cantidad entregada");
+    }
+
+    // SI SE HA COMPLETADO LA CANTIDAD REQUERIDA DE UNA LINEA DE ENTREGA, DEBE
+    // CAMBIAR SU STATUS
+    deliveryLine.setDeliveredQuantity(newDelivered);
+    // deliveryLine.setRequiredQuantity(newDelivered);
+
+    // Aqui se debe verificar si se trata de alterar la cantidad por devolución o por cambio en la orden de entrega del cliente
+
+    // // Si se trata de un retorno por cambio en la linea de entrega
+    // if (movementReturnRequest.isReturnByChange()){
+    //   // deliveryLine.setRequiredQuantity(newDelivered);
+
+    //   // No se cambia el estado porque se sobreentiende que ya tiene el estado Ready, al inicio hay una validación para aquello
+    //   // deliveryLine.setPreparationStatus(PreparationStatus.READY);
+
+    // } else {
+    //   // Pero si se trata de un retorno por daños en el producto, no altera la cantidad requerida
+    //   deliveryLine.setPendingQuantity(deliveryLine.getPendingQuantity() + movementReturnRequest.getQuantity());
+    //   deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    // }
+
+
+    // Si se trata de un movimiento de retorno por daños en el producto
+    if (!movementReturnRequest.isReturnByChange()){
+
+      // Verificar que la cantidad requerida no pase de la cantidad entregada
+      int newPending = deliveryLine.getPendingQuantity() + movementReturnRequest.getQuantity();
+
+      if (newPending > deliveryLine.getRequiredQuantity()) {
+        throw new BusinessException(
+            ResponseStatusCodes.DEFAULT_RESOURCE,
+            "La cantidad pendiente no puede superar la cantidad requerida");
+      }
+
+       deliveryLine.setPendingQuantity(deliveryLine.getPendingQuantity() + movementReturnRequest.getQuantity());
+       deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    }
+
+
+
+    // TODO: ¿SE DEBE ACTUALIZAR EL USUARIO?
+    deliveryLine.setUpdatedByUser(username);
+    deliveryLineRepository.save(deliveryLine);
+
+    Product product = deliveryLine.getProduct();
+
+    StockLot targetStockLot;
+
+    // Si no encuentra el stockLot del producto más reciente, debe crear uno
+    LocalDateTime limit = LocalDateTime.now().minusHours(24);
+    Optional<StockLot> optStockLot = stockLotRepository.findTopByProductIdAndCreatedAtAfterOrderByCreatedAtDesc(product.getId(), limit);
+
+    if (optStockLot.isEmpty()) {
+      // Si no lo encontro debe crear uno
+      // En este caso, debe crear un nuevo stockLot para guardar la cantidad que se va
+      // a devolver
+      targetStockLot = new StockLot();
+
+      if (movementReturnRequest.isReturnByChange()){
+        targetStockLot.setBatch("Devolución de la entrega por cambio " + deliveryLine.getId());
+      } else {
+        targetStockLot.setBatch("Devolución de la entrega por daños " + deliveryLine.getId());
+      }
+
+      targetStockLot.setQuantityAvailable(movementReturnRequest.getQuantity());
+      targetStockLot.setQuantityReceived(movementReturnRequest.getQuantity());
+      // + 1 dia desde el dia de hoy
+      // La fecha limite se debe establecer en un dia despues, porque se van a
+      // acumular las lineas de entregas devueltas
+      // stockLot.setCreatedAt(LocalDateTime.now());
+      targetStockLot.setProduct(product);
+      stockLotRepository.save(targetStockLot);
+
+    } else {
+      targetStockLot = optStockLot.get();
+      // Pero si hay uno, entonces debe actualizarlo
+      targetStockLot.setQuantityAvailable(targetStockLot.getQuantityAvailable() + movementReturnRequest.getQuantity());
+      targetStockLot.setQuantityReceived(targetStockLot.getQuantityReceived() + movementReturnRequest.getQuantity());
+
+      stockLotRepository.save(targetStockLot);
+    }
+
+    // UNA OPERACIÓN PARA CALCULAR EL NUEVO TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
+    // PRODUCTOS
+    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+
+    productRepository.save(product);
+
+    // MOVIMIENTO
+    Movement movement = new Movement();
+    movement.setUsername_snapshot(username);
+    movement.setComment(movementReturnRequest.getComment());
+    movement.setProduct(product);
+    movement.setUser(user);
+
+    if (movementReturnRequest.isReturnByChange()) {
+      movement.setMovementType(MovementType.RETURN_BY_CHANGE);
+    } else {
+      movement.setMovementType(MovementType.RETURN_BY_DAMAGE);
+    }
+
+    movement.setStockLot(targetStockLot);
+    movement.setQuantity(movementReturnRequest.getQuantity());
+    movement.setDeliveryLine(deliveryLine);
+    movementRepository.save(movement);
+  }
+
+
+  // DEFINIR METODOS PRIVADOS PARA
+  // 1. EXTRAER EL NOMBRE DEL USAURIO QUE HA INICIADO SESION
+  // 2. RECALCULAR EL TOTAL DEL STOCK
+  // 3.
+
+  // private String getUsernameExistence(Long id_user) {
+  //   User user = userRepository.findById(id_user).orElseThrow(
+  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+  //   String username = user.getFirstname() + " " + user.getLastname();
+
+  //   return username;
+  // };
 }
 
-// DEFINIR METODOS PRIVADOS PARA
-// 1. EXTRAER EL NOMBRE DEL USAURIO QUE HA INICIADO SESION
-// 2. RECALCULAR EL TOTAL DEL STOCK
-// 3. 
+
