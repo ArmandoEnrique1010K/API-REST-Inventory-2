@@ -2,14 +2,18 @@ package com.pe.inventoryapp.backend.movement.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
+import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
@@ -22,7 +26,6 @@ import com.pe.inventoryapp.backend.stock.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stock.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
-import com.pe.inventoryapp.backend.user.service.UserService;
 
 // TODO: AUTOMATIZAR EL MOVIMIENTO
 @Service
@@ -261,4 +264,87 @@ public class MovementServiceImpl implements MovementService {
 
   }
 
+  @Transactional
+  @Override
+  public void saveMovementAllocate(MovementAllocateRequest movementAllocateRequest, Long id_user) {
+
+    if (movementAllocateRequest.getQuantity() <= 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+    }
+
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+    String username = user.getFirstname() + " " + user.getLastname();
+
+    // LINEA DE ENTREGA
+    Long id_delivery_line = movementAllocateRequest.getIdDeliveryLine();
+    DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
+
+    // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA ESTE PENDIENTE
+    if (deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
+          "La linea de entrega no tiene el estado 'pendiente' de entrega");
+    }
+
+    // Calculo de la nueva cantidad pendiente
+    int newPending = deliveryLine.getPendingQuantity() - movementAllocateRequest.getQuantity();
+    if (newPending < 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
+          "No se puede entregar esa cantidad porque excede a la cantidad requerida");
+    }
+
+    // SI SE HA COMPLETADO LA CANTIDAD REQUERIDA DE UNA LINEA DE ENTREGA, DEBE
+    // CAMBIAR SU STATUS
+    deliveryLine.setPendingQuantity(newPending);
+    deliveryLine.setDeliveredQuantity(deliveryLine.getDeliveredQuantity() + movementAllocateRequest.getQuantity());
+
+    if (deliveryLine.getPendingQuantity() == 0) {
+      deliveryLine.setPreparationStatus(PreparationStatus.READY);
+    }
+
+    deliveryLineRepository.save(deliveryLine);
+
+    // LOTE DE STOCK
+    Long id_stock_lot = movementAllocateRequest.getIdStockLot();
+    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+
+    // Calcular la cantidad disponible
+    int newAvailableEmitter = stockLot.getQuantityAvailable() - movementAllocateRequest.getQuantity();
+    if (newAvailableEmitter < 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
+    }
+    stockLot.setQuantityAvailable(newAvailableEmitter);
+    stockLotRepository.save(stockLot);
+
+
+    // PRODUCTO DESDE EL STOCKLOT
+    Product product = stockLot.getProduct();
+
+    // UNA OPERACIÓN PARA CALCULAR EL NUEVO TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
+    // PRODUCTOS
+    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+
+    productRepository.save(product);
+
+    // MOVIMIENTO
+    Movement movement = new Movement();
+    movement.setUsername_snapshot(username);
+    movement.setComment(movementAllocateRequest.getComment());
+    movement.setProduct(product);
+    movement.setUser(user);
+    movement.setMovementType(MovementType.ALLOCATE);
+    movement.setStockLot(stockLot);
+    movement.setQuantity(movementAllocateRequest.getQuantity());
+    movement.setDeliveryLine(deliveryLine);
+    movementRepository.save(movement);
+
+  }
+
 }
+
+// DEFINIR METODOS PRIVADOS PARA
+// 1. EXTRAER EL NOMBRE DEL USAURIO QUE HA INICIADO SESION
+// 2. RECALCULAR EL TOTAL DEL STOCK
+// 3. 

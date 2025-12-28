@@ -12,6 +12,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
@@ -96,5 +97,17 @@ public class MovementController {
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha descontado el stock de un producto"));
   }
-  
+
+  @PostMapping("/allocate")
+  public ResponseEntity<CommonResponse> allocateDeliveryLine(Authentication authentication,
+      @Valid @RequestBody MovementAllocateRequest movementAllocateRequest,
+      BindingResult result) {
+    Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    validationService.validateFieldsAndThrowResponse(result);
+    movementService.saveMovementAllocate(movementAllocateRequest, id);
+
+    return ResponseEntity.status(201)
+        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+            "Se ha preparado una linea de entrega"));
+  }
 }

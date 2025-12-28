@@ -7,4 +7,5 @@ public enum MovementType {
   TRANSFER,
   LOSS,
   SALE,
+  ALLOCATE,
 }
