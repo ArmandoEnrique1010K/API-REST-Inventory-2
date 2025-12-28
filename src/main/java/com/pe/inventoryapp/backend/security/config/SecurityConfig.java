@@ -11,6 +11,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.pe.inventoryapp.backend.auth.service.AuthService;
+import com.pe.inventoryapp.backend.security.exception.CustomAccessDeniedHandler;
+import com.pe.inventoryapp.backend.security.exception.CustomAuthenticationEntryPoint;
 import com.pe.inventoryapp.backend.security.filter.JwtAuthenticationFilter;
 import com.pe.inventoryapp.backend.security.filter.JwtValidationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,12 +35,20 @@ public class SecurityConfig {
                 return authenticationConfiguration.getAuthenticationManager();
         }
 
+        @Autowired
+        private CustomAccessDeniedHandler customAccessDeniedHandler;
+        @Autowired
+        private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
                         throws Exception {
                 return http
                                 .csrf(csrf -> csrf.disable())
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .exceptionHandling(ex -> ex
+                                                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                                .accessDeniedHandler(customAccessDeniedHandler))
 
                                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth

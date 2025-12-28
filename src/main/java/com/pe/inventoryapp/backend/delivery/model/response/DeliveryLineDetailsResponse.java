@@ -24,4 +24,7 @@ public class DeliveryLineDetailsResponse {
   private PreparationStatus preparationStatus;
   private String location;
   private String region;
+
+  // TODO: PENDIENTE TRAER DATOS DEL PRODUCTO
+  // private Integer productId;
 }

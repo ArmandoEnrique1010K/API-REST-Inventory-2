@@ -28,11 +28,15 @@ public enum ResponseStatusCodes {
         AUTH_TOKEN_EXPIRED(
                         HttpStatus.UNAUTHORIZED,
                         "Token inválido o expirado"),
+        
+        // Error de autenticación (401)
+        UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "No estas autorizado para acceder a este recurso"),
+
 
         // 403 - FORBIDDEN
         AUTH_FORBIDDEN(
                         HttpStatus.FORBIDDEN,
-                        "No tiene permisos para realizar esta acción"),
+                        "No tiene permisos o roles suficientes para realizar esta acción con el recurso"),
 
         // 404 - NOT_FOUND
         USER_NOT_FOUND(
