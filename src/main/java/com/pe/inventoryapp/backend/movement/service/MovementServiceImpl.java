@@ -81,7 +81,7 @@ public class MovementServiceImpl implements MovementService {
     Product product = productRepository.findById(id_product)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
 
-    // TODO: UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
+    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
     product.setStock(stockLotRepository.sumAvailableByProductId(id_product));
 
     productRepository.save(product);
@@ -98,7 +98,9 @@ public class MovementServiceImpl implements MovementService {
     stockLot.setBatch(movementSendRequest.getBatch());
     stockLot.setQuantityReceived(movementSendRequest.getQuantity());
     stockLot.setQuantityAvailable(movementSendRequest.getQuantity());
+    // Logicamente el total entregado es 0 porque todavia no se ha entregado algo del stock
     stockLot.setDeliveredTotal(0);
+    
     stockLot.setProduct(product);
     stockLot.setCaducityDate(movementSendRequest.getCaducityDate());
     stockLot.setCompany(company);
@@ -113,6 +115,7 @@ public class MovementServiceImpl implements MovementService {
     movement.setProduct(product);
     movement.setStockLot(stockLot);
     movement.setUser(user);
+    // No se guarda el ID de deliveryLine porque no se trata de una linea entrega
     movement.setMovementType(MovementType.SEND);
 
     movementRepository.save(movement);

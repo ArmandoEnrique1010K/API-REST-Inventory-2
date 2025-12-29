@@ -17,5 +17,6 @@ public class MovementSendRequest {
   private String batch;
   private Long idProduct;
   private Long idCompany;
+  // TODO: Este campo podra ser opcional
   private LocalDate caducityDate;
 }

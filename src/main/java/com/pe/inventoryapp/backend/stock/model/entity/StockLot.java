@@ -39,6 +39,7 @@ public class StockLot {
   private Integer quantityReceived;
   private Integer quantityAvailable;
 
+  // TODO: Este campo se podria eliminar porque la fecha de caducidad de un stock es equivalente a la de un producto
   private LocalDate caducityDate;
 
   private Integer deliveredTotal;
