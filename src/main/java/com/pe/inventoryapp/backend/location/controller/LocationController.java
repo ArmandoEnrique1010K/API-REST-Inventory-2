@@ -27,7 +27,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 
 @RestController
-@RequestMapping("/api/location")
+@RequestMapping("/api/locations")
 public class LocationController {
   @Autowired
   private LocationService locationService;
@@ -46,7 +46,7 @@ public class LocationController {
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Se guardo la ubicación"));
+            "Se registro la ubicación en el sistema"));
   }
 
   @GetMapping
@@ -113,10 +113,10 @@ public class LocationController {
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
-        "Se actualizo la ubicación"));
+        "Se actualizo los datos de la ubicación"));
   }
 
-  @PatchMapping("/status/{id}")
+  @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> disableLocation(@PathVariable Long id) {
     locationService.changeStatusLocationById(id);
     return ResponseEntity.status(200)

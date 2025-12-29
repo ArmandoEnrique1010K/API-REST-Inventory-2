@@ -41,14 +41,15 @@ public class LocationServiceImpl implements LocationService {
         idRegion)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
 
+    String name = locationRequest.getName().trim();
+
     Location location = new Location();
-    location.setName(locationRequest.getName());
+    location.setName(name);
     location.setStatus(true);
     location.setRegion(region);
 
     locationRepository.save(location);
   }
-  // return"Se guardo la ubicación";
 
   @Override
   @Transactional(readOnly = true)
@@ -60,7 +61,7 @@ public class LocationServiceImpl implements LocationService {
     if (regionId != null && !regionRepository.existsById(regionId)) {
       throw new BusinessException(
           ResponseStatusCodes.ENTITY_NOT_FOUND,
-          "La región no existe");
+          "La región no existe en el sistema");
     }
     Page<Location> locations = locationRepository.findAllByParams(name, regionId, status, pageable);
 
@@ -74,7 +75,11 @@ public class LocationServiceImpl implements LocationService {
     }
 
     Location location = locationRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+
+    if (location.isStatus() == false) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
+    }
 
     return LocationMapper.builder().setLocation(location).buildLocationResponse();
   }
@@ -86,22 +91,26 @@ public class LocationServiceImpl implements LocationService {
     }
 
     Location location = locationRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
 
     if (location.isStatus() == false) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
     }
 
-    verifyLocationNameExist(locationRequest.getName().trim());
+    String newName = locationRequest.getName().trim();
+
+    verifyLocationNameExistById(newName, id);
 
     Long idRegion = locationRequest.getIdRegion();
+
     if (idRegion == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
     Region region = regionRepository.findById(idRegion)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
-    location.setName(locationRequest.getName().trim());
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+    
+    location.setName(newName);
     location.setRegion(region);
 
     locationRepository.save(location);
@@ -118,15 +127,23 @@ public class LocationServiceImpl implements LocationService {
     }
 
     Location location = locationRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
     location.setStatus(!location.isStatus());
     locationRepository.save(location);
   }
 
   // METODOS AUXILIARES
   private void verifyLocationNameExist(String name) {
-    if (locationRepository.findByName(name).isPresent()) {
-      throw new FieldValidation("name", "La ubicación con ese nombre ya existe, introduzca otra ubicación");
+    if (locationRepository.existsByName(name)) {
+      throw new FieldValidation("name", "La ubicación con ese nombre ya existe, introduzca otro nombre");
+    }
+  }
+
+  private void verifyLocationNameExistById(String name, Long id) {
+    if (locationRepository.existsByNameAndIdNot(name, id)) {
+      throw new FieldValidation(
+          "name",
+          "La ubicación con ese nombre ya existe, introduzca otro nombre");
     }
   }
 }

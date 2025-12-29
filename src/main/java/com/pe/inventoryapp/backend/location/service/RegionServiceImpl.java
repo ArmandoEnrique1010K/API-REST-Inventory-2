@@ -25,14 +25,15 @@ public class RegionServiceImpl implements RegionService {
   @Override
   @Transactional
   public void saveRegion(RegionRequest regionRequest) {
-    verifyRegionNameExist(regionRequest.getName());
+    String name = regionRequest.getName().trim();
+
+    verifyRegionNameExist(name);
 
     Region region = new Region();
-    region.setName(regionRequest.getName());
+    region.setName(name);
 
     regionRepository.save(region);
   }
-  // return"Se guardo la región";
 
   @Override
   @Transactional(readOnly = true)
@@ -46,13 +47,12 @@ public class RegionServiceImpl implements RegionService {
 
   @Override
   public RegionResponse findRegionById(Long id) {
-
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
 
     return RegionMapper.builder().setRegion(region).buildRegionResponse();
   }
@@ -68,20 +68,27 @@ public class RegionServiceImpl implements RegionService {
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
 
-    verifyRegionNameExist(regionRequest.getName().trim());
+    verifyRegionNameExistById(regionRequest.getName().trim(), id);
 
     region.setName(regionRequest.getName().trim());
 
     regionRepository.save(region);
   }
-  // return"Se actualizo la región";
 
-  // METODOS PRIVADOS
+  // METODOS AUXILIARES
   private void verifyRegionNameExist(String name) {
-    if (regionRepository.findByName(name).isPresent()) {
-      throw new FieldValidation("name", "La region con ese nombre ya existe, inserte otra region");
+    if (regionRepository.existsByName(name)) {
+      throw new FieldValidation("name", "La región con ese nombre ya existe, introduzca otro nombre");
+    }
+  }
+
+  private void verifyRegionNameExistById(String name, Long id) {
+    if (regionRepository.existsByNameAndIdNot(name, id)) {
+      throw new FieldValidation(
+          "name",
+          "La región con ese nombre ya existe, introduzca otro nombre");
     }
   }
 }

@@ -24,7 +24,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 
 @RestController
-@RequestMapping("/api/region")
+@RequestMapping("/api/regions")
 public class RegionController {
   @Autowired
   private RegionService regionService;
@@ -43,7 +43,7 @@ public class RegionController {
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Se guardo la región"));
+            "Se registro la región en el sistema"));
   }
 
   @GetMapping
@@ -59,14 +59,13 @@ public class RegionController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> updateRegion(@PathVariable Long id, @Valid @RequestBody RegionRequest regionRequest,
+  public ResponseEntity<CommonResponse> updateRegion(@PathVariable Long id, @Valid @RequestBody RegionRequest regionRequest,
       BindingResult result) {
-
     validationService.validateFieldsAndThrowResponse(result);
     regionService.updateRegionById(id, regionRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
-        "Se actualizo la región"));
+        "Se actualizo los datos de la región"));
   }
 }
