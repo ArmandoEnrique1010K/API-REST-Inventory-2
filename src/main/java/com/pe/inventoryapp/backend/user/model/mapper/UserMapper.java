@@ -36,15 +36,7 @@ public class UserMapper {
     // "ROLE_ADMIN".equals(r.getName()));
 
     List<String> roles = user.getRoles().stream()
-        .map(role -> {
-          return switch (role.getName()) {
-            case "ROLE_USER" -> "Usuario";
-            case "ROLE_OPERATOR" -> "Operador";
-            case "ROLE_SECRETARY" -> "Secretario";
-            case "ROLE_ADMIN" -> "Administrador";
-            default -> "Desconocido";
-          };
-        })
+        .map(role -> role.getLabel())
         .toList();
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados
@@ -65,15 +57,7 @@ public class UserMapper {
     }
 
     List<String> roles = user.getRoles().stream()
-        .map(role -> {
-          return switch (role.getName()) {
-            case "ROLE_USER" -> "Usuario";
-            case "ROLE_OPERATOR" -> "Operador";
-            case "ROLE_SECRETARY" -> "Secretario";
-            case "ROLE_ADMIN" -> "Administrador";
-            default -> "Desconocido";
-          };
-        })
+        .map(role -> role.getLabel())
         .toList();
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados

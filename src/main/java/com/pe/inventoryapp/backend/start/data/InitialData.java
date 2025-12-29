@@ -54,24 +54,28 @@ public class InitialData {
     Role roleUser = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
       Role newRole = new Role();
       newRole.setName("ROLE_USER");
+      newRole.setLabel("Usuario");
       return roleRepository.save(newRole);
     });
 
     Role roleOperator = roleRepository.findByName("ROLE_OPERATOR").orElseGet(() -> {
       Role newRole = new Role();
       newRole.setName("ROLE_OPERATOR");
+      newRole.setLabel("Operador");
       return roleRepository.save(newRole);
     });
 
     Role roleSecretary = roleRepository.findByName("ROLE_SECRETARY").orElseGet(() -> {
       Role newRole = new Role();
       newRole.setName("ROLE_SECRETARY");
+      newRole.setLabel("Secretario");
       return roleRepository.save(newRole);
     });
 
     Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").orElseGet(() -> {
       Role newRole = new Role();
       newRole.setName("ROLE_ADMIN");
+      newRole.setLabel("Administrador");
       return roleRepository.save(newRole);
     });
 
