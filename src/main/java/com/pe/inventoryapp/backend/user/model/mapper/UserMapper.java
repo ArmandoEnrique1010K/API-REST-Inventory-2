@@ -37,7 +37,7 @@ public class UserMapper {
 
     List<String> roles = user.getRoles().stream()
         .map(role -> role.getLabel())
-        .toList();
+        .toList().reversed();
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new ListUsersResponse(
@@ -58,7 +58,7 @@ public class UserMapper {
 
     List<String> roles = user.getRoles().stream()
         .map(role -> role.getLabel())
-        .toList();
+        .toList().reversed();
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new DetailUserResponse(

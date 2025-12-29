@@ -12,5 +12,5 @@ public interface RoleRepository extends CrudRepository<Role, Long> {
 
   boolean existsByName(String name);
 
-  List<Role> findAllByOrderByIdAsc();
+  List<Role> findAllByOrderByIdDesc();
 }

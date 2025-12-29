@@ -16,6 +16,6 @@ public class RoleController {
   
   @GetMapping
   public ResponseEntity<?> listAllRoles() {
-    return ResponseEntity.ok(roleService.findAllRoles());
+    return ResponseEntity.status(200).body(roleService.findAllRoles());
   }
 }

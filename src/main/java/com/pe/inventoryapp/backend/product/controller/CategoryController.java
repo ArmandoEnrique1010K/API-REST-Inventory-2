@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@RequestMapping("/api/category")
+@RequestMapping("/api/categories")
 public class CategoryController {
 
   @Autowired
@@ -76,7 +76,7 @@ public class CategoryController {
         "Se actualizo los datos de la categoria"));
   }
 
-  @PatchMapping("/status/{id}")
+  @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusCategory(@PathVariable Long id) {
     categoryService.changeStatusCategoryById(id);
 

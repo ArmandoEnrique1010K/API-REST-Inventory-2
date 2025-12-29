@@ -52,50 +52,58 @@ public class SecurityConfig {
 
                                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+                                                // TODO: ACTUALIZAR LOS ENDPOINTS
+
                                                 // AUTH
-                                                .requestMatchers("/api/auth/**").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/auth/forgot-password").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/auth/validate-token").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/auth/change-password/*").permitAll()
 
                                                 // USERS
-                                                .requestMatchers(HttpMethod.POST, "/api/user/register")
+                                                .requestMatchers(HttpMethod.POST, "/api/users/register")
                                                 .hasAnyAuthority("ROLE_ADMIN")
 
-                                                .requestMatchers(HttpMethod.GET, "/api/user")
+                                                .requestMatchers(HttpMethod.GET, "/api/users")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-                                                .requestMatchers(HttpMethod.GET, "/api/user/profile").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
 
-                                                .requestMatchers(HttpMethod.PUT, "/api/user/profile").authenticated()
-                                                .requestMatchers(HttpMethod.PUT, "/api/user/roles")
+                                                .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/users/roles")
                                                 .hasAnyAuthority("ROLE_ADMIN")
 
-                                                .requestMatchers(HttpMethod.DELETE, "/api/user/*")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/users/*")
                                                 .hasAnyAuthority("ROLE_ADMIN")
+
+                                                // ROLES
+                                                .requestMatchers(HttpMethod.GET, "/api/roles").hasAnyAuthority("ROLE_ADMIN")
 
                                                 // CATEGORY
-                                                .requestMatchers(HttpMethod.POST, "/api/category")
+                                                .requestMatchers(HttpMethod.POST, "/api/categories")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/category")
+                                                .requestMatchers(HttpMethod.GET, "/api/categories")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/category/active").authenticated()
-                                                .requestMatchers(HttpMethod.GET, "/api/category/*").authenticated()
-                                                .requestMatchers(HttpMethod.PUT, "/api/category/*")
+                                                .requestMatchers(HttpMethod.GET, "/api/categories/active").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/categories/*").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/categories/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.PATCH, "/api/category/status/*")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/categories/*/status")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
                                                 // PRODUCT
-                                                .requestMatchers(HttpMethod.POST, "/api/product")
+                                                .requestMatchers(HttpMethod.POST, "/api/products")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/product")
+                                                .requestMatchers(HttpMethod.GET, "/api/products")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/product/active").authenticated()
-                                                .requestMatchers(HttpMethod.GET, "/api/product/category/*")
+                                                .requestMatchers(HttpMethod.GET, "/api/products/active").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/products/category/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/product/active/category/*")
+                                                .requestMatchers(HttpMethod.GET, "/api/products/active/category/*")
                                                 .authenticated()
-                                                .requestMatchers(HttpMethod.GET, "/api/product/*").authenticated()
-                                                .requestMatchers(HttpMethod.PUT, "/api/product/*")
+                                                .requestMatchers(HttpMethod.GET, "/api/products/*").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/products/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.PATCH, "/api/product/status/*")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/products/*/status")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
                                                 // COMPANY
@@ -131,7 +139,7 @@ public class SecurityConfig {
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
                                                 // .requestMatchers("/api/category").permitAll()
-                                                .anyRequest().permitAll())
+                                                .anyRequest().denyAll())
                                 // .anyRequest().authenticated())
                                 .addFilter(new JwtAuthenticationFilter(
                                                 authenticationManager(), authService))

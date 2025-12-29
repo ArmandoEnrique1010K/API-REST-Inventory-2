@@ -100,6 +100,11 @@ public class ProductServiceImpl implements ProductService {
     Product product = productRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
+
+    if (product.isStatus() == false) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+    }
+
     return ProductMapper.builder().setProduct(product).buildProductDetailsResponse();
   }
 

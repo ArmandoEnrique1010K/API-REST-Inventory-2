@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @CrossOrigin(originPatterns = "*")
 public class UserController {
 
@@ -71,7 +71,7 @@ public class UserController {
 
     Page<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
 
-    return ResponseEntity.ok(users);
+    return ResponseEntity.status(200).body(users);
   }
 
   @GetMapping("/profile")

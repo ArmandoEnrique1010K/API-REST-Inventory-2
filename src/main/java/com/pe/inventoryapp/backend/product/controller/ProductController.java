@@ -27,7 +27,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 public class ProductController {
 
   @Autowired
@@ -134,7 +134,7 @@ public class ProductController {
         "Se actualizo los datos del producto"));
   }
 
-  @PatchMapping("/status/{id}")
+  @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusProduct(@PathVariable Long id) {
     productService.changeStatusProductById(id);
     
