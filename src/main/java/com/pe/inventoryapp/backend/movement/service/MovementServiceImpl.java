@@ -335,7 +335,7 @@ public class MovementServiceImpl implements MovementService {
     }
     stockLot.setQuantityAvailable(newAvailable);
     
-    // Actualizar la cantidad entregada
+    // Sumar la cantidad entregada
     stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity())
     stockLotRepository.save(stockLot);
 
@@ -363,6 +363,7 @@ public class MovementServiceImpl implements MovementService {
 
   }
 
+  // Movimiento de devolución de una linea de entrega con estado READY
   @Override
   @Transactional
   public void saveMovementReturn(MovementReturnRequest movementReturnRequest, Long id_user) {
@@ -411,7 +412,12 @@ public class MovementServiceImpl implements MovementService {
       }
 
       deliveryLine.setDeliveredQuantity(newDelivered);
-
+      
+      // TODO: Debe descontar cantidad entregada desde StockLot
+      
+      //TODO: Intentar relacionar las entidades StockLot y DeliveryLine en una relación uno a muchos para obtener el id asociado al StockLot del DeliveryOrder y asi poder descontar la cantidad entregada desde el StockLot asignado. 
+      
+      
       /*
        * ============================
        * CASO 2: CAMBIO EN LA ORDEN
