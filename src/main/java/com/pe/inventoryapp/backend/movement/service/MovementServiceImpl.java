@@ -283,6 +283,7 @@ public class MovementServiceImpl implements MovementService {
   @Override
   public void saveMovementAllocate(MovementAllocateRequest movementAllocateRequest, Long id_user) {
 
+    // Verifica si se ha introducido una cantidad 0 o negativa
     if (movementAllocateRequest.getQuantity() <= 0) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
     }
@@ -291,15 +292,15 @@ public class MovementServiceImpl implements MovementService {
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
-    // LINEA DE ENTREGA
+    // Obtiene la linea de entrega por ID
     Long id_delivery_line = movementAllocateRequest.getIdDeliveryLine();
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
-    // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA ESTE PENDIENTE
+    // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA TENGA EL ESTADO INPROGRESS
     if (deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
-          "La linea de entrega no tiene el estado 'pendiente' de entrega");
+          "La linea de entrega no tiene el estado 'en progreso' de entrega");
     }
 
     // Calculo de la nueva cantidad pendiente
@@ -322,17 +323,17 @@ public class MovementServiceImpl implements MovementService {
 
     deliveryLineRepository.save(deliveryLine);
 
-    // LOTE DE STOCK
+    // Obtiene el lote de stock por id
     Long id_stock_lot = movementAllocateRequest.getIdStockLot();
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
 
     // Calcular la cantidad disponible
-    int newAvailableEmitter = stockLot.getQuantityAvailable() - movementAllocateRequest.getQuantity();
-    if (newAvailableEmitter < 0) {
+    int newAvailable = stockLot.getQuantityAvailable() - movementAllocateRequest.getQuantity();
+    if (newAvailable < 0) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
     }
-    stockLot.setQuantityAvailable(newAvailableEmitter);
+    stockLot.setQuantityAvailable(newAvailable);
     
     // Actualizar la cantidad entregada
     stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity())
