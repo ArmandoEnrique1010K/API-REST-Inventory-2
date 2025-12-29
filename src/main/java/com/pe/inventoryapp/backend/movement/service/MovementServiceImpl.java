@@ -250,13 +250,13 @@ public class MovementServiceImpl implements MovementService {
     Long id_stock_lot = movementLossRequest.getIdStockLot();
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
-    int newAvailableEmitter = stockLot.getQuantityAvailable() - movementLossRequest.getQuantity();
+    int newStock = stockLot.getQuantityAvailable() - movementLossRequest.getQuantity();
 
-    if (newAvailableEmitter < 0) {
+    if (newStock < 0) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
     }
 
-    stockLot.setQuantityAvailable(newAvailableEmitter);
+    stockLot.setQuantityAvailable(newStock);
     stockLotRepository.save(stockLot);
 
     Product product = stockLot.getProduct();
@@ -317,6 +317,8 @@ public class MovementServiceImpl implements MovementService {
     if (deliveryLine.getPendingQuantity() == 0) {
       deliveryLine.setPreparationStatus(PreparationStatus.READY);
     }
+    
+    // Si la cantidad pendiente es mayor que 0, se sobreentiende que el PrepartionStatus queda en INPROGRESS
 
     deliveryLineRepository.save(deliveryLine);
 
@@ -331,6 +333,9 @@ public class MovementServiceImpl implements MovementService {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
     }
     stockLot.setQuantityAvailable(newAvailableEmitter);
+    
+    // Actualizar la cantidad entregada
+    stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity())
     stockLotRepository.save(stockLot);
 
 
@@ -379,7 +384,7 @@ public class MovementServiceImpl implements MovementService {
         && deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS
         && deliveryLine.getPreparationStatus() != PreparationStatus.DELIVERED) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
-          "La linea de entrega no tiene el estado 'listo' de entrega");
+          "La linea de entrega no tiene el estado 'listo', 'en progreso' o 'entregado' de entrega");
     }
 
     boolean isReturnByChange = movementReturnRequest.isReturnByChange();
@@ -413,6 +418,7 @@ public class MovementServiceImpl implements MovementService {
        */
     } else {
 
+     // NO SE ACEPTAN DEVOLUCIONES
       if (deliveryLine.getPreparationStatus() == PreparationStatus.DELIVERED) {
         throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
             "No se puede modificar una línea ya entregada");
@@ -460,6 +466,7 @@ public class MovementServiceImpl implements MovementService {
     StockLot targetStockLot = null;
     Product product = deliveryLine.getProduct();
 
+    // TODO: CORREGIR AQUI, DEBE CREAR UN NUEVO LOTE DE STOCK PARA ALMACENAR LA CANTIDAD DEVUELTA
     if (!isReturnByChange) {
 
       LocalDateTime limit = LocalDateTime.now().minusHours(24);
