@@ -131,11 +131,11 @@ public class SecurityConfig {
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
                                                 // COMPANY
-                                                .requestMatchers(HttpMethod.POST, "/api/company")
+                                                .requestMatchers(HttpMethod.POST, "/api/companies")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/company").authenticated()
-                                                .requestMatchers(HttpMethod.GET, "/api/company/*").authenticated()
-                                                .requestMatchers(HttpMethod.PUT, "/api/company/*")
+                                                .requestMatchers(HttpMethod.GET, "/api/companies").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/companies/*").authenticated()
+                                                .requestMatchers(HttpMethod.PUT, "/api/companies/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 

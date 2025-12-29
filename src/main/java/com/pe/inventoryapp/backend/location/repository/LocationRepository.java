@@ -12,9 +12,6 @@ import org.springframework.data.repository.query.Param;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 
 public interface LocationRepository extends JpaRepository<Location, Long> {
-
-  List<Location> findAllByStatusTrue();
-
   @Query("""
       SELECT l
       FROM Location l
@@ -28,11 +25,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
       @Param("status") Boolean status,
       Pageable pageable);
 
-  Optional<Location> findByName(String name);
-
   boolean existsByName(String name);
 
   boolean existsByNameAndIdNot(String name, Long id);
-
-  // List<Location> findByRegionId(Long regionId);
 }

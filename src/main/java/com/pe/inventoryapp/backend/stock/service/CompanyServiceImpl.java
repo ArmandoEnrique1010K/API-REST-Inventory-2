@@ -25,14 +25,15 @@ public class CompanyServiceImpl implements CompanyService {
   @Override
   @Transactional
   public void saveCompany(CompanyRequest companyRequest) {
-    verifyCompanyNameExist(companyRequest.getName());
+    String name = companyRequest.getName().trim();
+
+    verifyCompanyNameExist(name);
 
     Company company = new Company();
-    company.setName(companyRequest.getName());
+    company.setName(name);
 
     companyRepository.save(company);
   }
-  // return "Se guardo la empresa";
 
   @Override
   @Transactional(readOnly = true)
@@ -53,14 +54,13 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La empresa no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
 
     return CompanyMapper.builder().setCompany(company).buildCompanyResponse();
   }
 
   @Override
   public void updateCompanyById(Long id, CompanyRequest companyRequest) {
-
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -70,21 +70,30 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La empresa no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
 
-    verifyCompanyNameExist(companyRequest.getName().trim());
+    String newName = companyRequest.getName().trim();
 
-    company.setName(companyRequest.getName().trim());
+    verifyCompanyNameExistById(newName, id);
+
+    company.setName(newName);
 
     companyRepository.save(company);
   }
   // return "Se actualizo la empresa";
 
-  // METODOS PRIVADOS
+  // METODOS AUXILIARES
   private void verifyCompanyNameExist(String name) {
-    if (companyRepository.findByName(name).isPresent()) {
-      throw new FieldValidation("name", "La empresa con ese nombre ya existe, introduzca otra empresa");
+    if (companyRepository.existsByName(name)) {
+      throw new FieldValidation("name", "La empresa con ese nombre ya existe, introduzca otro nombre");
     }
   }
 
+  private void verifyCompanyNameExistById(String name, Long id) {
+    if (companyRepository.existsByNameAndIdNot(name, id)) {
+      throw new FieldValidation(
+          "name",
+          "La empresa con ese nombre ya existe, introduzca otro nombre");
+    }
+  }
 }

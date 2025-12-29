@@ -23,7 +23,7 @@ import com.pe.inventoryapp.backend.stock.service.CompanyService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/company")
+@RequestMapping("/api/companies")
 public class CompanyController {
 
   @Autowired
@@ -43,7 +43,7 @@ public class CompanyController {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Se guardo la empresa"));
+            "Se registro la empresa en el sistema"));
   }
 
   @GetMapping
@@ -65,6 +65,6 @@ public class CompanyController {
     companyService.updateCompanyById(id, companyRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE, "Se actualizo la empresa"));
+        ResponseStatusCodes.SUCCESS_RESPONSE, "Se actualizo los datos de la empresa"));
   }
 }

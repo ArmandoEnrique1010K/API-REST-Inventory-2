@@ -110,16 +110,15 @@ public class InitialData {
       categoryRepository.save(category);
     }
 
-    // TODO: CAMBIAR LOS METODOS FINDBYNAME POR EXISTSBYNAME
     // La región por defecto (representa "sin región")
-    if (regionRepository.findByName("Sin región").isEmpty()) {
+    if (!regionRepository.existsByName("Sin región")) {
       Region region = new Region();
       region.setName("Sin región");
       regionRepository.save(region);
     }
 
     // La ubicación por defecto (representa "sin ubicación")
-    if (locationRepository.findByName("Sin ubicación").isEmpty()) {
+    if (!locationRepository.existsByName("Sin ubicación")) {
       Location location = new Location();
       location.setName("Sin ubicación");
       location.setRegion(regionRepository.findByName("Sin región").get());
@@ -129,7 +128,7 @@ public class InitialData {
     }
 
     // Una empresa por defecto (representa "propia de la empresa")
-    if (companyRepository.findByName("Propia de la empresa").isEmpty()) {
+    if (!companyRepository.existsByName("Propia de la empresa")) {
       Company company = new Company();
       company.setName("Propia de la empresa");
       companyRepository.save(company);
