@@ -44,6 +44,8 @@ public class StockLot {
 
   private Integer deliveredTotal;
 
+  // TODO: Se podria definir un campo para verificar el estado del lote de stock
+
   @CreationTimestamp
   private LocalDateTime createdAt;
   @UpdateTimestamp

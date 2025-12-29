@@ -20,4 +20,6 @@ public interface StockLotService {
 
   StockLotDetailsResponse findStockLotById(Long stockLotId);
   // void sumAvailableQuantityByProductId(Long productId);
+  
+  // TODO: Definir un nuevo metodo para listar todos los loted de stocks que correspondan al mismo producto
 }

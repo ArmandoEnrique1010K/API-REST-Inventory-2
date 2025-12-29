@@ -201,10 +201,13 @@ public class MovementServiceImpl implements MovementService {
     int newAvailableEmitter = stockLotEmitter.getQuantityAvailable() - movementTransferRequest.getQuantity();
     int newAvailableReceiver = stockLotReceiver.getQuantityAvailable() + movementTransferRequest.getQuantity();
 
+    // TODO: Verificar el funcionamiento de esta excepción, parece que no toma productos cuyo ID sea null
+    
     // Verificar que ambos lotes correspondan al mismo producto
-    if (stockLotEmitter.getProduct().getId() != stockLotReceiver.getProduct().getId())
+    if (stockLotEmitter.getProduct().getId() != stockLotReceiver.getProduct().getId()) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Los lotes deben pertenecer al mismo producto");
-
+    }
+    
     if (newAvailableEmitter < 0) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
     }
@@ -214,6 +217,7 @@ public class MovementServiceImpl implements MovementService {
 
     // NOTA: NO SE RECALCULA EL TOTAL DE STOCK PORQUE ES UNA TRANSFERENCIA DE STOCK
 
+    // Guarda los cambios en la base de datos
     stockLotRepository.save(stockLotEmitter);
     stockLotRepository.save(stockLotReceiver);
 
@@ -222,7 +226,11 @@ public class MovementServiceImpl implements MovementService {
 
     Movement movement = new Movement();
     movement.setUsername_snapshot(username);
-    movement.setComment(movementTransferRequest.getComment());
+    
+    // TODO: El comentario se generara de forma automatica
+    movement.setComment("Se ha transferido stock desde el lote de stock con ID " + stockLotEmitter.getId);
+    
+    // movement.setComment(movementTransferRequest.getComment());
     movement.setProduct(product);
     movement.setUser(user);
     movement.setMovementType(MovementType.TRANSFER);
