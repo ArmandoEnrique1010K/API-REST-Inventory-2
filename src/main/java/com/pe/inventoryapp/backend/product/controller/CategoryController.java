@@ -44,7 +44,7 @@ public class CategoryController {
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Se guardo la categoria"));
+            "Se registro la categoria en el sistema"));
   }
 
   @GetMapping
@@ -66,14 +66,14 @@ public class CategoryController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest,
+  public ResponseEntity<CommonResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     categoryService.updateCategoryById(id, categoryRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
-        "Se actualizo la categoria"));
+        "Se actualizo los datos de la categoria"));
   }
 
   @PatchMapping("/status/{id}")

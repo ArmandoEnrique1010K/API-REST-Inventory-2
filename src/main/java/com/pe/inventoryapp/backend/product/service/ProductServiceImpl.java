@@ -43,10 +43,12 @@ public class ProductServiceImpl implements ProductService {
     // Buscar la categoria por su ID
     Category category = categoryRepository.findById(
         idCategory)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+
+    String name = productRequest.getName().trim();
 
     Product product = new Product();
-    product.setName(productRequest.getName());
+    product.setName(name);
 
     if (productRequest.getEntryDate() == null) {
       product.setEntryDate(LocalDate.now());
@@ -67,28 +69,23 @@ public class ProductServiceImpl implements ProductService {
     product.setCategory(category);
     productRepository.save(product);
   }
-  // DEBE TOMAR EL JWT DEL USUARIO AUTENTICADO PARA QUE OBTENGA SUS ROLES
-  // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-  // boolean isAdmin = auth.getAuthorities().stream()
-  // .anyMatch(a -> a.getAuthority().equals("ROLE_OPERATOR"));
 
-  // Conviene usar Boolean en lugar de boolean
   @Override
+  @Transactional(readOnly = true)
   public Page<ProductListResponse> searchAllProductsByParams(
       String name,
       Integer minStock,
       Integer maxStock,
-      Long categoryId,
       Boolean status,
+      Long categoryId,
       Pageable pageable) {
     if (categoryId != null && !categoryRepository.existsById(categoryId)) {
       throw new BusinessException(
           ResponseStatusCodes.ENTITY_NOT_FOUND,
-          "La categoria no existe");
+          "La categoria no existe en el sistema");
     }
 
-    Page<Product> products = productRepository.findAllByParams(name, minStock, maxStock, categoryId, status,
-        pageable);
+    Page<Product> products = productRepository.findAllByParams(name, minStock, maxStock, status, categoryId, pageable);
 
     return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
   }
@@ -101,7 +98,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
     return ProductMapper.builder().setProduct(product).buildProductDetailsResponse();
   }
@@ -114,13 +111,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
     if (product.isStatus() == false) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
     }
 
-    verifyProductNameExist(productRequest.getName().trim());
+    String newName = productRequest.getName().trim();
+
+    verifyProductNameExistById(newName, id);
 
     Long categoryId = productRequest.getIdCategory();
 
@@ -130,9 +129,9 @@ public class ProductServiceImpl implements ProductService {
 
     Category category = categoryRepository.findById(
         categoryId)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
 
-    product.setName(productRequest.getName().trim());
+    product.setName(newName);
     product.setEntryDate(productRequest.getEntryDate());
     product.setCaducityDate(productRequest.getCaducityDate());
     product.setLength(productRequest.getLength());
@@ -152,16 +151,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
     product.setStatus(!product.isStatus());
     productRepository.save(product);
   }
 
-  // METODOS PRIVADOS
+  // METODOS AUXILIARES
   private void verifyProductNameExist(String name) {
-    if (productRepository.findByName(name).isPresent()) {
-      throw new FieldValidation("name", "El producto con ese nombre ya existe, introduzca otro producto");
+    if (productRepository.existsByName(name)) {
+      throw new FieldValidation("name", "El producto con ese nombre ya existe, introduzca otro nombre");
+    }
+  }
+
+  private void verifyProductNameExistById(String name, Long id) {
+    if (productRepository.existsByNameAndIdNot(name, id)) {
+      throw new FieldValidation(
+          "name",
+          "El producto con ese nombre ya existe, introduzca otro nombre");
     }
   }
 }

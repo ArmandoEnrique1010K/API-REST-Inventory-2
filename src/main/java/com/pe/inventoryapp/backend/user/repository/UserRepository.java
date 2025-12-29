@@ -65,4 +65,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """)
     boolean existsByRoleNameAndIdNot(@Param("name") String name,
             @Param("id") Long id);
-    }
+
+    boolean existsByEmail(String email);
+
+}

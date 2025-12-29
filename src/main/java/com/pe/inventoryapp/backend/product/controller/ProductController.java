@@ -43,12 +43,11 @@ public class ProductController {
   public ResponseEntity<CommonResponse> registerProduct(@Valid @RequestBody ProductRequest productRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
-
     productService.saveProduct(productRequest);
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Se guardo el producto"));
+            "Se registro el producto en el sistema"));
   }
 
   @GetMapping
@@ -57,13 +56,14 @@ public class ProductController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Integer minStock,
       @RequestParam(required = false) Integer maxStock,
-      @RequestParam(required = false) Long categoryId,
-      @RequestParam(required = false) Boolean status) {
+      @RequestParam(required = false) Boolean status,
+      @RequestParam(required = false) Long categoryId
+    ) {
 
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, categoryId,
-        status,
+    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, 
+        status, categoryId,
         pageable);
 
     return ResponseEntity.status(200).body(products);
@@ -75,18 +75,18 @@ public class ProductController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Integer minStock,
       @RequestParam(required = false) Integer maxStock,
-      @RequestParam(required = false) Long categoryId) {
+      @RequestParam(required = false) Long categoryId
+    ) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
-        categoryId, true, pageable);
+    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, true, categoryId, pageable);
 
     return ResponseEntity.status(200).body(products);
   }
 
-  @GetMapping("/category/{id}")
+  @GetMapping("/category/{idCategory}")
   public ResponseEntity<?> listAllProductsByCategory(
-      @PathVariable Long id,
+      @PathVariable Long idCategory,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Integer minStock,
@@ -95,24 +95,24 @@ public class ProductController {
 
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, id,
-        status,
+    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, 
+        status, idCategory,
         pageable);
 
     return ResponseEntity.status(200).body(products);
   }
 
-  @GetMapping("/active/category/{id}")
+  @GetMapping("/active/category/{idCategory}")
   public ResponseEntity<?> listAllActiveProductsByCategory(
-      @PathVariable Long id,
+      @PathVariable Long idCategory,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Integer minStock,
       @RequestParam(required = false) Integer maxStock) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
-        id, true, pageable);
+    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, true,
+        idCategory, pageable);
 
     return ResponseEntity.status(200).body(products);
   }
@@ -124,21 +124,20 @@ public class ProductController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest,
+  public ResponseEntity<CommonResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest,
       BindingResult result) {
-
     validationService.validateFieldsAndThrowResponse(result);
-
     productService.updateProductById(id, productRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
-        "Se actualizo el producto"));
+        "Se actualizo los datos del producto"));
   }
 
   @PatchMapping("/status/{id}")
   public ResponseEntity<CommonResponse> changeStatusProduct(@PathVariable Long id) {
     productService.changeStatusProductById(id);
+    
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se ha cambiado el estado del producto"));

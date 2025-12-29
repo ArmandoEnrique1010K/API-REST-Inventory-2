@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
@@ -51,7 +52,7 @@ public class UserController {
   private AuthenticationContextService authenticationContextService;
 
   @PostMapping("/register")
-  public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest,
+  public ResponseEntity<CommonResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     userService.registerUser(registerRequest);
@@ -82,7 +83,7 @@ public class UserController {
   }
 
   @PutMapping("/profile")
-  public ResponseEntity<?> updateUserProfile(Authentication authentication,
+  public ResponseEntity<CommonResponse> updateUserProfile(Authentication authentication,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
     Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
@@ -94,7 +95,7 @@ public class UserController {
   }
 
   @PutMapping("/roles")
-  public ResponseEntity<?> updateUserRoles(Authentication authentication,
+  public ResponseEntity<CommonResponse> updateUserRoles(Authentication authentication,
       @Valid @RequestBody RolesRequest rolesRequest, BindingResult result) {
     Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
@@ -107,7 +108,7 @@ public class UserController {
 
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+  public ResponseEntity<CommonResponse> deleteUser(@PathVariable Long id) {
     userService.deleteUserById(id);
 
     return ResponseEntity.status(200)

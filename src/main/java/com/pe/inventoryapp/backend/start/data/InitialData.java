@@ -99,13 +99,14 @@ public class InitialData {
     }
 
     // La categoria por defecto (representa "sin categoria")
-    if (categoryRepository.findByName("Sin categoria").isEmpty()) {
+    if (!categoryRepository.existsByName("Sin categoria")) {
       Category category = new Category();
       category.setName("Sin categoria");
       category.setStatus(true);
       categoryRepository.save(category);
     }
 
+    // TODO: CAMBIAR LOS METODOS FINDBYNAME POR EXISTSBYNAME
     // La región por defecto (representa "sin región")
     if (regionRepository.findByName("Sin región").isEmpty()) {
       Region region = new Region();

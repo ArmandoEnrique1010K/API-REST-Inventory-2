@@ -14,8 +14,8 @@ public interface ProductService {
       String name,
       Integer minStock,
       Integer maxStock,
-      Long categoryId,
       Boolean status,
+      Long categoryId,
       Pageable pageable);
 
   ProductDetailsResponse findProductById(Long id);

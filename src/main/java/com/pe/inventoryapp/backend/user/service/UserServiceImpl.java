@@ -44,9 +44,9 @@ public class UserServiceImpl implements UserService {
     verifyUserEmailExists(registerRequest.getEmail());
 
     User user = new User();
-    user.setFirstname(registerRequest.getFirstname());
-    user.setLastname(registerRequest.getLastname());
-    user.setEmail(registerRequest.getEmail());
+    user.setFirstname(registerRequest.getFirstname().trim());
+    user.setLastname(registerRequest.getLastname().trim());
+    user.setEmail(registerRequest.getEmail().trim());
     user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
     user.setDni(registerRequest.getDni());
 
@@ -114,16 +114,16 @@ public class UserServiceImpl implements UserService {
 
     // Obtener el correo del usuario actual y el nuevo
     String currentEmail = user.getEmail();
-    String newEmail = profileRequest.getEmail();
+    String newEmail = profileRequest.getEmail().trim();
 
     // Verificar que el usuario haya modificado su email
     if (!currentEmail.equals(newEmail)) {
       verifyUserEmailExists(newEmail);
     }
 
-    user.setFirstname(profileRequest.getFirstname());
-    user.setLastname(profileRequest.getLastname());
-    user.setEmail(profileRequest.getEmail());
+    user.setFirstname(profileRequest.getFirstname().trim());
+    user.setLastname(profileRequest.getLastname().trim());
+    user.setEmail(newEmail);
     user.setDni(profileRequest.getDni());
 
     userRepository.save(user);
@@ -208,7 +208,7 @@ public class UserServiceImpl implements UserService {
 
   // Verifica si el email del usuario ya existe, de lo contrario lanza una excepcion
   private void verifyUserEmailExists(String email) {
-    if (userRepository.findByEmail(email).isPresent()) {
+    if (userRepository.existsByEmail(email)) {
       throw new FieldValidation("email", "El usuario con ese email ya existe");
     }
   }

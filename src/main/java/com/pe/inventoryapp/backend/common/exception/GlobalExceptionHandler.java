@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
 
   // Error de base de datos
   @ExceptionHandler(DataAccessException.class)
-  public ResponseEntity<?> handleDatabase(DataAccessException ex) {
+  public ResponseEntity<CommonResponse> handleDatabase(DataAccessException ex) {
 
     HttpStatus code = ResponseStatusCodes.INTERNAL_ERROR.getStatus();
 

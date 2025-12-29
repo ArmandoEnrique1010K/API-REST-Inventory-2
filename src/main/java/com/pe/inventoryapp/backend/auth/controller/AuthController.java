@@ -12,6 +12,7 @@ import com.pe.inventoryapp.backend.auth.model.request.ForgotPasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 
@@ -39,7 +40,7 @@ public class AuthController {
   // Nota: El endpoint POST "/" ya esta siendo manejado por Spring Security
 
   @PostMapping("/forgot-password")
-  public ResponseEntity<?> forgotUserPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
+  public ResponseEntity<CommonResponse> forgotUserPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     authService.processUserForgotPassword(forgotPasswordRequest.getEmail());
@@ -50,7 +51,7 @@ public class AuthController {
   }
 
   @PostMapping("/validate-token")
-  public ResponseEntity<?> validateUserToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
+  public ResponseEntity<CommonResponse> validateUserToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     authService.validateAndActivateResetToken(validateTokenRequest.getValue());
@@ -63,7 +64,7 @@ public class AuthController {
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
   // REQUIERE QUE EL TOKEN SEA VALIDADO
   @PutMapping("/change-password/{token}")
-  public ResponseEntity<?> updateUserPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+  public ResponseEntity<CommonResponse>updateUserPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
       BindingResult result,
       @PathVariable String token) {
 
