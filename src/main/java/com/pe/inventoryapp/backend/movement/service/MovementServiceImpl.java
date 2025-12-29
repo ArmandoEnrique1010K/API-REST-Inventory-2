@@ -134,19 +134,10 @@ public class MovementServiceImpl implements MovementService {
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe")
     );
-
-    int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
-
-
-    Product product = stockLot.getProduct();
-
-    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
-    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
-
-    productRepository.save(product);
-
-
+    
     // Se debe pasar la cantidad en la que se quiere incrementar o decrementar el stock
+    int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
+    
     if (newAvailable < 0)
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
 
@@ -155,9 +146,22 @@ public class MovementServiceImpl implements MovementService {
     if (movementAdjustmentRequest.isAlterQuantityReceived()) {
       stockLot.setQuantityReceived(stockLot.getQuantityReceived() + movementAdjustmentRequest.getQuantity());
     }
+    
     stockLot.setCaducityDate(movementAdjustmentRequest.getCaducityDate());
+    
+    // No se va a alterar el total entregado
     stockLotRepository.save(stockLot);
+    
+   // TODO: POSIBLE ERROR DE REFERENCIA CIRCULAR!!!
+  
+    Product product = stockLot.getProduct();
 
+    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
+    // Debe recalcular el total de la sumatoria de los stocks disponibles del producto
+    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+
+    productRepository.save(product);
+    
     Movement movement = new Movement();
     movement.setQuantity(movementAdjustmentRequest.getQuantity());
     movement.setUsername_snapshot(username);
@@ -176,10 +180,6 @@ public class MovementServiceImpl implements MovementService {
     movement.setStockLot(stockLot);
     movementRepository.save(movement);
   }
-  // // Obtener la linea de entrega por id
-  // DeliveryLine deliveryLine =
-  // deliveryLineRepository.findById(movementRequest.getIdDeliveryLine())
-  // .orElseThrow(() -> new RuntimeException("DeliveryLine no existe"));
 
   @Override
   public void saveMovementTransfer(MovementTransferRequest movementTransferRequest, Long id_user) {

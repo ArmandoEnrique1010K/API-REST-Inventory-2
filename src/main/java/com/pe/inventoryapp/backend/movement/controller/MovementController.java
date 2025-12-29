@@ -49,7 +49,6 @@ public class MovementController {
       Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
       validationService.validateFieldsAndThrowResponse(result);
       movementService.saveMovementSend(movementSendRequest, id);
-      // stockLotService.sumAvailableQuantityByProductId(movementSendRequest.getIdProduct());
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
@@ -63,9 +62,6 @@ public class MovementController {
       Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
       validationService.validateFieldsAndThrowResponse(result);
       movementService.saveMovementAdjustment(movementAdjustmentRequest, id);
-
-
-      // stockLotService.sumAvailableQuantityByProductId(movementAdjustmentRequest.getIdStockLot());
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
