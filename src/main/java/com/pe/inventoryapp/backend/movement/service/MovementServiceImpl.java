@@ -55,6 +55,9 @@ public class MovementServiceImpl implements MovementService {
   // MOVIMIENTO DE AGREGAR AL STOCK UN PRODUCTO
   @Override
   public void saveMovementSend(MovementSendRequest movementSendRequest, Long id_user) {
+    if (movementSendRequest.getQuantity() == 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+    }
 
     if (id_user == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
@@ -134,6 +137,10 @@ public class MovementServiceImpl implements MovementService {
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe")
     );
+    if (movementAdjustmentRequest.getQuantity() == 0){
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+    }
+
     
     // Se debe pasar la cantidad en la que se quiere incrementar o decrementar el stock
     int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
@@ -152,7 +159,7 @@ public class MovementServiceImpl implements MovementService {
     // No se va a alterar el total entregado
     stockLotRepository.save(stockLot);
     
-   // TODO: POSIBLE ERROR DE REFERENCIA CIRCULAR!!!
+   // NOTA: POSIBLE ERROR DE REFERENCIA CIRCULAR!!!
   
     Product product = stockLot.getProduct();
 
@@ -296,6 +303,9 @@ public class MovementServiceImpl implements MovementService {
 
   }
 
+
+  // TODO: HAY UN PROBLEMA EN LA RELACION DE ENTIDADES, DEBERIA SER DE MUCHOS A MUCHOS ENTRE STOCKLOT Y DELIVERYLINE PARA GUARDAR LOS IDS DE LOS LOTES DE STOCK EN LA LINEA DE ENTREGA
+
   @Transactional
   @Override
   public void saveMovementAllocate(MovementAllocateRequest movementAllocateRequest, Long id_user) {
@@ -322,6 +332,24 @@ public class MovementServiceImpl implements MovementService {
 
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+    // Obtiene la linea de entrega por ID
+
+    Long id_delivery_line = movementAllocateRequest.getIdDeliveryLine();
+
+    if (id_delivery_line == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
+    
+        // Verificar que corresponda al mismo producto
+        if (stockLot.getProduct().getId() != deliveryLine.getProduct().getId()) {
+          System.out.println("Lote de stock: " + stockLot.getProduct().getId() + " Linea de entrega: " + deliveryLine
+              .getProduct().getId());
+          throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"El lote de stock y la linea de entrega deben pertenecer al mismo producto");
+        }
+
 
     // Calcular la cantidad disponible
     int newAvailable = stockLot.getQuantityAvailable() - movementAllocateRequest.getQuantity();
@@ -334,15 +362,6 @@ public class MovementServiceImpl implements MovementService {
     stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity());
     stockLotRepository.save(stockLot);
 
-    // Obtiene la linea de entrega por ID
-    Long id_delivery_line = movementAllocateRequest.getIdDeliveryLine();
-
-    if (id_delivery_line == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-    }
-
-    DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
     // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA TENGA EL ESTADO INPROGRESS
     if (deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS) {

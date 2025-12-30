@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"password\": \"Dark267AA2\"\r\n}\r\n\r\n// {\r\n//     \"email\": \"enrique1010k@gmail.com\",\r\n//     \"password\": \"kingDark267\"\r\n// }\r\n",
+							"raw": "// {\r\n//     \"email\": \"enrique1010k@gmail.com\",\r\n//     \"password\": \"Dark267AA3\"\r\n// }\r\n\r\n{\r\n    \"email\": \"correo@example.com\",\r\n    \"password\": \"12345\"\r\n}\r\n\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -152,7 +152,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstname\": \"Armando\",\r\n    \"lastname\": \"Enrique\",\r\n    \"email\": \"usuari234o@gmail.com\",\r\n    \"dni\": \"73017920\",\r\n    \"password\": \"12345\",\r\n    \"operator\": true,\r\n    \"secretary\": false,\r\n    \"admin\": false\r\n\r\n    // \"rolesRequest\": {\r\n    //     \"operator\": true,\r\n    //     \"secretary\": false,\r\n    //     \"admin\": false\r\n    // }\r\n}",
+							"raw": "{\r\n    \"firstname\": \"El simple administrador\",\r\n    \"lastname\": \"de prueba\",\r\n    \"email\": \"admin@gmail.com\",\r\n    \"dni\": \"12345678\",\r\n    \"password\": \"12345\",\r\n    \"operator\": false,\r\n    \"secretary\": false,\r\n    \"admin\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -160,7 +160,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/user/register",
+							"raw": "http://localhost:8080/api/users/register",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -168,7 +168,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"user",
+								"users",
 								"register"
 							]
 						}
@@ -191,7 +191,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/user",
+							"raw": "http://localhost:8080/api/users",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -199,7 +199,27 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"user"
+								"users"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "prueba",
+									"description": "Nombre, apellido, dni o email del usuario",
+									"disabled": true
+								},
+								{
+									"key": "idRoles",
+									"value": "1,2",
+									"description": "Lista de roles separados por coma o un rol por ID",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "0",
+									"description": "Página actual",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -214,7 +234,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/user/profile",
+							"raw": "http://localhost:8080/api/users/profile",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -222,7 +242,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"user",
+								"users",
 								"profile"
 							]
 						}
@@ -239,7 +259,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstname\": \"Primer usuario\",\r\n    \"lastname\": \"De prueba\",\r\n    \"email\": \"correo2123@gmail.com\",\r\n    \"dni\": 11111111\r\n}",
+							"raw": "{\r\n    \"firstname\": \"Armando Enrique\",\r\n    \"lastname\": \"Kaneko Diaz\",\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"dni\": 73017920\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -247,7 +267,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/user/profile",
+							"raw": "http://localhost:8080/api/users/profile",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -255,7 +275,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"user",
+								"users",
 								"profile"
 							]
 						}
@@ -280,7 +300,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/user/roles",
+							"raw": "http://localhost:8080/api/users/roles",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -288,7 +308,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"user",
+								"users",
 								"roles"
 							]
 						}
@@ -310,17 +330,8 @@
 						},
 						"method": "DELETE",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "http://localhost:8080/api/user/6",
+							"raw": "http://localhost:8080/api/users/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -328,8 +339,33 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"user",
-								"6"
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ROLE",
+			"item": [
+				{
+					"name": "listAllRoles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/roles",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"roles"
 							]
 						}
 					},
@@ -355,7 +391,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/category",
+							"raw": "http://localhost:8080/api/categories",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -363,7 +399,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"category"
+								"categories"
 							]
 						}
 					},
@@ -375,7 +411,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/category",
+							"raw": "http://localhost:8080/api/categories",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -383,7 +419,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"category"
+								"categories"
 							]
 						}
 					},
@@ -395,7 +431,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/category/active",
+							"raw": "http://localhost:8080/api/categories/active",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -403,7 +439,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"category",
+								"categories",
 								"active"
 							]
 						}
@@ -416,7 +452,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/category/1",
+							"raw": "http://localhost:8080/api/categories/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -424,7 +460,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"category",
+								"categories",
 								"1"
 							]
 						}
@@ -438,7 +474,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Sin categoria\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Coca Kola\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -446,7 +482,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/category/1",
+							"raw": "http://localhost:8080/api/categories/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -454,8 +490,8 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"category",
-								"1"
+								"categories",
+								"2"
 							]
 						}
 					},
@@ -467,7 +503,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/category/status/2",
+							"raw": "http://localhost:8080/api/categories/2/status",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -475,9 +511,9 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"category",
-								"status",
-								"2"
+								"categories",
+								"2",
+								"status"
 							]
 						}
 					},
@@ -495,7 +531,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Cajas 21\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"30\",\r\n    \"width\": \"10.2\",\r\n    \"imageUrl\": \"\",\r\n    \"idCategory\": 3\r\n}",
+							"raw": "{\r\n    \"name\": \"Cajas 21\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"30\",\r\n    \"width\": \"10.2\",\r\n    \"imageUrl\": \"\",\r\n    \"idCategory\": 2\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -503,7 +539,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/product",
+							"raw": "http://localhost:8080/api/products",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -511,7 +547,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"product"
+								"products"
 							]
 						}
 					},
@@ -526,7 +562,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/product",
+							"raw": "http://localhost:8080/api/products",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -534,17 +570,17 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"product"
+								"products"
 							],
 							"query": [
 								{
 									"key": "page",
-									"value": "0",
+									"value": "1",
 									"disabled": true
 								},
 								{
 									"key": "name",
-									"value": "",
+									"value": " ",
 									"disabled": true
 								},
 								{
@@ -558,13 +594,13 @@
 									"disabled": true
 								},
 								{
-									"key": "categoryId",
-									"value": "1",
+									"key": "status",
+									"value": "",
 									"disabled": true
 								},
 								{
-									"key": "status",
-									"value": "",
+									"key": "categoryId",
+									"value": "1",
 									"disabled": true
 								}
 							]
@@ -733,7 +769,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/product/7",
+							"raw": "http://localhost:8080/api/products/7",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -741,7 +777,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"product",
+								"products",
 								"7"
 							]
 						}
@@ -755,7 +791,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"producto de prueba 1 2132\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"\",\r\n    \"length\": \"\",\r\n    \"width\": \"\",\r\n    \"imageUrl\": \"texto\",\r\n    \"idCategory\": 1\r\n}",
+							"raw": "{\r\n    \"name\": \"Primer producto\",\r\n    \"width\": \"10.2\",\r\n    \"length\": \"30\",\r\n    \"imageUrl\": \"https://cartonyestiba.com/wp-content/uploads/2020/02/CAJA-DE-CARTON-REGULAR.jpg\",\r\n    \"entryDate\": \"\",\r\n    \"caducityDate\": \"2026-03-11\",\r\n    \"idCategory\": 1\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -784,7 +820,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/product/status/2",
+							"raw": "http://localhost:8080/api/products/2/status",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -792,114 +828,9 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"product",
-								"status",
-								"2"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "COMPANY",
-			"item": [
-				{
-					"name": "save",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"NUEVA EMPRESA DESTINO\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:8080/api/company",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"company"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "listAll",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/company",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"company"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getById",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/api/company/2",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"company",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Segunda empresa \"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:8080/api/company/2",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"company",
-								"2"
+								"products",
+								"2",
+								"status"
 							]
 						}
 					},
@@ -917,7 +848,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"norte\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Norte\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -925,7 +856,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/region",
+							"raw": "http://localhost:8080/api/regions",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -933,7 +864,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"region"
+								"regions"
 							]
 						}
 					},
@@ -945,7 +876,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/region",
+							"raw": "http://localhost:8080/api/regions",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -953,7 +884,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"region"
+								"regions"
 							]
 						}
 					},
@@ -965,7 +896,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/region/2",
+							"raw": "http://localhost:8080/api/regions/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -973,7 +904,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"region",
+								"regions",
 								"2"
 							]
 						}
@@ -995,7 +926,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/region/2",
+							"raw": "http://localhost:8080/api/regions/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1003,7 +934,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"region",
+								"regions",
 								"2"
 							]
 						}
@@ -1022,7 +953,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Piura\",\r\n    \"idRegion\": 2\r\n}",
+							"raw": "{\r\n    \"name\": \"Huaraz\",\r\n    \"idRegion\": 2\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1030,7 +961,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/location",
+							"raw": "http://localhost:8080/api/locations",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1038,7 +969,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location"
+								"locations"
 							]
 						}
 					},
@@ -1050,7 +981,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location?page=0",
+							"raw": "http://localhost:8080/api/locations?page=0",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1058,7 +989,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location"
+								"locations"
 							],
 							"query": [
 								{
@@ -1076,7 +1007,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location/active",
+							"raw": "http://localhost:8080/api/locations/active",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1084,7 +1015,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location",
+								"locations",
 								"active"
 							]
 						}
@@ -1097,7 +1028,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location/region/1",
+							"raw": "http://localhost:8080/api/locations/region/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1105,9 +1036,9 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location",
+								"locations",
 								"region",
-								"1"
+								"2"
 							]
 						}
 					},
@@ -1119,7 +1050,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location/active/region/1",
+							"raw": "http://localhost:8080/api/locations/active/region/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1127,10 +1058,10 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location",
+								"locations",
 								"active",
 								"region",
-								"1"
+								"2"
 							]
 						}
 					},
@@ -1142,7 +1073,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location/1",
+							"raw": "http://localhost:8080/api/locations/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1150,7 +1081,7 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location",
+								"locations",
 								"1"
 							]
 						}
@@ -1172,7 +1103,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/api/location/2",
+							"raw": "http://localhost:8080/api/locations/3",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1180,8 +1111,8 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location",
-								"2"
+								"locations",
+								"3"
 							]
 						}
 					},
@@ -1193,7 +1124,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/location/status/2",
+							"raw": "http://localhost:8080/api/locations/3/status",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1201,8 +1132,113 @@
 							"port": "8080",
 							"path": [
 								"api",
-								"location",
-								"status",
+								"locations",
+								"3",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "COMPANY",
+			"item": [
+				{
+					"name": "save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"TERCERA EMPRESA DESTINO\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/companies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"companies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/companies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"companies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/companies/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"companies",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"NUEVA EMPRESA DESTINO\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/companies/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"companies",
 								"2"
 							]
 						}
@@ -1224,7 +1260,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"batch\": \"Tercera orden de entrega\"\r\n}\r\n\r\n// NO OLVIDAR EL TOKEN DEL USUARIO QUE HA INICIADO SESION",
+							"raw": "{\r\n    \"batch\": \"4 orden de entrega\"\r\n}\r\n\r\n// NO OLVIDAR EL TOKEN DEL USUARIO QUE HA INICIADO SESION",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1362,7 +1398,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/delivery-order/2/delivery-lines",
+							"raw": "http://localhost:8080/api/delivery-order/5/delivery-lines",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1371,7 +1407,7 @@
 							"path": [
 								"api",
 								"delivery-order",
-								"2",
+								"5",
 								"delivery-lines"
 							]
 						}
@@ -1472,7 +1508,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"requiredQuantity\": 5000,\r\n    \"idLocation\": 2,\r\n    \"idDeliveryOrder\": 1,\r\n    \"limitDate\": \"2025-12-01 23:59:59\"\r\n}",
+							"raw": "{\r\n    \"requiredQuantity\": 20000,\r\n    \"idLocation\": 1,\r\n    \"idDeliveryOrder\": 3,\r\n    \"limitDate\": \"2025-12-01 23:59:59\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1501,7 +1537,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/delivery-line/5",
+							"raw": "http://localhost:8080/api/delivery-line/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1510,7 +1546,7 @@
 							"path": [
 								"api",
 								"delivery-line",
-								"5"
+								"1"
 							]
 						}
 					},
@@ -1628,6 +1664,181 @@
 								"api",
 								"movement",
 								"receive"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "adjustmentStockLot",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\": -1,\r\n    \"comment\": \"Prueba de ajuste de cantidad recibida\",\r\n    \"idStockLot\": 8,\r\n    \"caducityDate\": \"2025-02-21\",\r\n    \"alterQuantityReceived\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movement/adjustment",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movement",
+								"adjustment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "transferStockLot",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\": 1000,\r\n    // \"comment\": \"Prueba de transferencia entre 2 stocks\",\r\n    \"idStockLotEmitter\": 1,\r\n    \"idStockLotReceiver\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movement/transfer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movement",
+								"transfer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "lossStockLot",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\": 10000,\r\n    \"comment\": \"Prueba de transferencia entre 2 stocks\",\r\n    \"idStockLotEmitter\": 6,\r\n    \"idStockLotReceiver\": 8\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movement/transfer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movement",
+								"transfer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "allocateDeliveryLine",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\": 10,\r\n    \"comment\": \"Prueba de preparación de stock\",\r\n    \"idDeliveryLine\": 2,\r\n    \"idStockLot\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movement/allocate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movement",
+								"allocate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "returnDeliveryLine",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"quantity\": 200,\r\n    \"comment\": \"Prueba de devolución de linea de entrega\",\r\n    \"idDeliveryLine\": 6,\r\n    \"returnByChange\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/movement/return",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"movement",
+								"return"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "STOCK_LOT",
+			"item": [
+				{
+					"name": "listAllStockLots",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/api/stock-lots",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"stock-lots"
 							]
 						}
 					},
