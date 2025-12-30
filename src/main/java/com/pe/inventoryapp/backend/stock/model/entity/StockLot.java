@@ -7,6 +7,7 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 
@@ -44,7 +45,8 @@ public class StockLot {
 
   private Integer deliveredTotal;
 
-  // TODO: Se podria definir un campo para verificar el estado del lote de stock
+  // Este campo representa si ya no hay stock en el lote
+  private boolean zeroStock;
 
   @CreationTimestamp
   private LocalDateTime createdAt;
@@ -57,6 +59,9 @@ public class StockLot {
 
   @OneToMany(mappedBy = "stockLot")
   private List<Movement> movements;
+
+  @OneToMany(mappedBy = "stockLot")
+  private List<DeliveryLine> deliveryLines;
 
   @ManyToOne
   @JoinColumn(name = "company_id")

@@ -1,9 +1,6 @@
 package com.pe.inventoryapp.backend.movement.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +10,6 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryLineRepository;
-import com.pe.inventoryapp.backend.delivery.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
@@ -44,8 +40,8 @@ public class MovementServiceImpl implements MovementService {
   @Autowired
   private StockLotRepository stockLotRepository;
 
-  @Autowired
-  private DeliveryOrderRepository deliveryOrderRepository;
+  // @Autowired
+  // private DeliveryOrderRepository deliveryOrderRepository;
 
   @Autowired
   private ProductRepository productRepository;
@@ -60,12 +56,9 @@ public class MovementServiceImpl implements MovementService {
   @Override
   public void saveMovementSend(MovementSendRequest movementSendRequest, Long id_user) {
 
-    // TODO: VERIFICAR SI ESTO CONVIENE USARLO  O NO
-    // DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-
-    // User user = userRepository.findById(id_user).orElseThrow(
-    //     () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe")
-    // );
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -123,12 +116,19 @@ public class MovementServiceImpl implements MovementService {
 
   @Override
   public void saveMovementAdjustment(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
+
+    if (id_stock_lot == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
     // Encontrar el producto por id de stockLot
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
@@ -183,12 +183,20 @@ public class MovementServiceImpl implements MovementService {
 
   @Override
   public void saveMovementTransfer(MovementTransferRequest movementTransferRequest, Long id_user) {
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot_emitter = movementTransferRequest.getIdStockLotEmitter();
     Long id_stock_lot_receiver = movementTransferRequest.getIdStockLotReceiver();
+
+    if (id_stock_lot_emitter == null || id_stock_lot_receiver == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
     // Encontrar el producto por id de stockLot
     StockLot stockLotEmitter = stockLotRepository.findById(id_stock_lot_emitter).orElseThrow(
@@ -227,8 +235,8 @@ public class MovementServiceImpl implements MovementService {
     Movement movement = new Movement();
     movement.setUsername_snapshot(username);
     
-    // TODO: El comentario se generara de forma automatica
-    movement.setComment("Se ha transferido stock desde el lote de stock con ID " + stockLotEmitter.getId);
+    // NOTA: El comentario se generara de forma automatica
+    movement.setComment("Se ha transferido stock desde el lote de stock con ID " + stockLotEmitter.getId() + " al lote de stock con ID " + stockLotReceiver.getId());
     
     // movement.setComment(movementTransferRequest.getComment());
     movement.setProduct(product);
@@ -243,11 +251,20 @@ public class MovementServiceImpl implements MovementService {
   // Movimiento de perdida del almacen
   @Override
   public void saveMovementLoss(MovementLossRequest movementLossRequest, Long id_user) {
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot = movementLossRequest.getIdStockLot();
+
+      if (id_stock_lot == null) {
+        throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      }
+
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
     int newStock = stockLot.getQuantityAvailable() - movementLossRequest.getQuantity();
@@ -288,12 +305,42 @@ public class MovementServiceImpl implements MovementService {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
     }
 
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
+    // Obtiene el lote de stock por id
+    Long id_stock_lot = movementAllocateRequest.getIdStockLot();
+
+    if (id_stock_lot == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+
+    // Calcular la cantidad disponible
+    int newAvailable = stockLot.getQuantityAvailable() - movementAllocateRequest.getQuantity();
+    if (newAvailable < 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
+    }
+    stockLot.setQuantityAvailable(newAvailable);
+
+    // Sumar la cantidad entregada
+    stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity());
+    stockLotRepository.save(stockLot);
+
     // Obtiene la linea de entrega por ID
     Long id_delivery_line = movementAllocateRequest.getIdDeliveryLine();
+
+    if (id_delivery_line == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
@@ -321,23 +368,10 @@ public class MovementServiceImpl implements MovementService {
     
     // Si la cantidad pendiente es mayor que 0, se sobreentiende que el PrepartionStatus queda en INPROGRESS
 
+    deliveryLine.setStockLot(stockLot);
+  
     deliveryLineRepository.save(deliveryLine);
 
-    // Obtiene el lote de stock por id
-    Long id_stock_lot = movementAllocateRequest.getIdStockLot();
-    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
-
-    // Calcular la cantidad disponible
-    int newAvailable = stockLot.getQuantityAvailable() - movementAllocateRequest.getQuantity();
-    if (newAvailable < 0) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
-    }
-    stockLot.setQuantityAvailable(newAvailable);
-    
-    // Sumar la cantidad entregada
-    stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity())
-    stockLotRepository.save(stockLot);
 
 
     // PRODUCTO DESDE EL STOCKLOT
@@ -370,6 +404,9 @@ public class MovementServiceImpl implements MovementService {
     if (movementReturnRequest.getQuantity() <= 0) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
     }
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El usuario no puede ser nulo");
+    }
 
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
@@ -377,6 +414,11 @@ public class MovementServiceImpl implements MovementService {
 
     // LINEA DE ENTREGA
     Long id_delivery_line = movementReturnRequest.getIdDeliveryLine();
+
+    if (id_delivery_line == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
@@ -392,12 +434,6 @@ public class MovementServiceImpl implements MovementService {
     boolean isReturnByChange = movementReturnRequest.isReturnByChange();
     int quantity = movementReturnRequest.getQuantity();
 
-    // Si hay un retorno por cambio en la linea de entrega y la linea de entrega ya fue entregada
-    // NO SE ACEPTAN DEVOLUCIONES
-    // if (movementReturnRequest.isReturnByChange()
-    //     && deliveryLine.getPreparationStatus() == PreparationStatus.DELIVERED) {
-    //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "No se puede devolver porque la linea de entrega ya fue entregada");
-    // }
     /*
      * =======================
      * CASO 1: RETORNO POR DAÑO
@@ -412,23 +448,20 @@ public class MovementServiceImpl implements MovementService {
       }
 
       deliveryLine.setDeliveredQuantity(newDelivered);
-      
-      // TODO: Debe descontar cantidad entregada desde StockLot
-      
-      //TODO: Intentar relacionar las entidades StockLot y DeliveryLine en una relación uno a muchos para obtener el id asociado al StockLot del DeliveryOrder y asi poder descontar la cantidad entregada desde el StockLot asignado. 
-      
-      
+
+      // Descuenta la cantidad entregada desde StockLot
+      deliveryLine.getStockLot().setDeliveredTotal(deliveryLine.getStockLot().getDeliveredTotal() - quantity);
+    } else {
       /*
        * ============================
        * CASO 2: CAMBIO EN LA ORDEN
        * ============================
        */
-    } else {
 
      // NO SE ACEPTAN DEVOLUCIONES
       if (deliveryLine.getPreparationStatus() == PreparationStatus.DELIVERED) {
         throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,
-            "No se puede modificar una línea ya entregada");
+            "No se puede devolver porque esta línea ya fue entregada");
       }
 
       int newRequired = deliveryLine.getRequiredQuantity() - quantity;

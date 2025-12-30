@@ -9,6 +9,7 @@ import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -67,4 +68,9 @@ public class DeliveryLine {
   @ManyToOne
   @JoinColumn(name = "delivery_order_id")
   private DeliveryOrder deliveryOrder;
+
+  @ManyToOne
+  @JoinColumn(name = "stock_lot_id")
+  private StockLot stockLot;
+
 }

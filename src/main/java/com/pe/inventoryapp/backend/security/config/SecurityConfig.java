@@ -140,8 +140,8 @@ public class SecurityConfig {
 
 
                                                 // .requestMatchers("/api/category").permitAll()
-                                                .anyRequest().denyAll())
-                                // .anyRequest().authenticated())
+                                                // .anyRequest().denyAll())
+                                .anyRequest().authenticated())
                                 .addFilter(new JwtAuthenticationFilter(
                                                 authenticationManager(), authService))
                                 .addFilter(new JwtValidationFilter(
