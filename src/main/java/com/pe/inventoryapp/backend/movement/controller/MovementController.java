@@ -19,7 +19,7 @@ import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.service.MovementService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
-import com.pe.inventoryapp.backend.stock.service.StockLotService;
+import com.pe.inventoryapp.backend.stocklot.service.StockLotService;
 
 import jakarta.validation.Valid;
 

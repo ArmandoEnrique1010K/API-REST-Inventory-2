@@ -1,18 +1,12 @@
-package com.pe.inventoryapp.backend.movement.model.entity;
+package com.pe.inventoryapp.backend.deliveryline.model.entity;
 
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
-import com.pe.inventoryapp.backend.movement.model.data.MovementType;
-import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
-import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,31 +23,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "movimientos")
-public class Movement {
+@Table(name = "lotes_de_stock_lineas_de_entrega")
+public class StockLot_DeliveryLine {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  
-  private Integer quantity;
+
+  private Integer quantityUsed;
 
   @CreationTimestamp
   private LocalDateTime createdAt;
-
-  // Guardar el nombre del usuario que realizó el movimiento
-  private String username_snapshot;
-
-  // Comentario adicional
-  private String comment;
-
-  // Tipo de movimiento
-  @Enumerated(EnumType.STRING)
-  private MovementType movementType;
-
-  // Relaciones
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
 
   @ManyToOne
   @JoinColumn(name = "stock_lot_id")
@@ -62,8 +42,4 @@ public class Movement {
   @ManyToOne
   @JoinColumn(name = "delivery_line_id")
   private DeliveryLine deliveryLine;
-
-  @ManyToOne
-  @JoinColumn(name = "product_id")
-  private Product product;
 }

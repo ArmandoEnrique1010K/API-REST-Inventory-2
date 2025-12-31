@@ -7,9 +7,10 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
-import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
+import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -66,11 +67,14 @@ public class Product {
     private Category category;
 
     @OneToMany(mappedBy = "product")
-    private List<StockLot> stockLots;
-    
+    private List<Product_DeliveryOrder> productDeliveryOrders;
+
+    @OneToMany(mappedBy = "product")
+    private List<Movement> movements;
+
     @OneToMany(mappedBy = "product")
     private List<DeliveryLine> deliveryLines;
 
     @OneToMany(mappedBy = "product")
-    private List<Movement> movements;
+    private List<StockLot> stockLots;
 }

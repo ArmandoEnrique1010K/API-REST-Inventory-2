@@ -10,8 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 
 public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long> {
 

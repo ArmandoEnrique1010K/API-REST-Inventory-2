@@ -2,7 +2,7 @@ package com.pe.inventoryapp.backend.delivery.model.response;
 
 import java.time.LocalDateTime;
 
-import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

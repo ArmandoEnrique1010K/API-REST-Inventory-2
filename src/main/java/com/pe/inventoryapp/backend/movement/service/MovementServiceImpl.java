@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.delivery.model.data.PreparationStatus;
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.delivery.repository.DeliveryLineRepository;
+import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
@@ -25,10 +25,10 @@ import com.pe.inventoryapp.backend.movement.model.request.MovementTransferReques
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
-import com.pe.inventoryapp.backend.stock.model.entity.Company;
-import com.pe.inventoryapp.backend.stock.model.entity.StockLot;
-import com.pe.inventoryapp.backend.stock.repository.CompanyRepository;
-import com.pe.inventoryapp.backend.stock.repository.StockLotRepository;
+import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
+import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
+import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
+import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -102,7 +102,6 @@ public class MovementServiceImpl implements MovementService {
     stockLot.setDeliveredTotal(0);
     
     stockLot.setProduct(product);
-    stockLot.setCaducityDate(movementSendRequest.getCaducityDate());
     stockLot.setCompany(company);
 
     stockLotRepository.save(stockLot);
@@ -158,7 +157,6 @@ public class MovementServiceImpl implements MovementService {
       stockLot.setQuantityReceived(stockLot.getQuantityReceived() + movementAdjustmentRequest.getQuantity());
     }
     
-    stockLot.setCaducityDate(movementAdjustmentRequest.getCaducityDate());
     
     // No se va a alterar el total entregado
     stockLotRepository.save(stockLot);
@@ -366,9 +364,9 @@ public class MovementServiceImpl implements MovementService {
     stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity());
 
     // TODO: NO FUNCIONO
-    List<DeliveryLine> deliveryLines = new ArrayList<>();
-    deliveryLines.add(deliveryLine);
-    stockLot.setDeliveryLines(deliveryLines);
+    // List<DeliveryLine> deliveryLines = new ArrayList<>();
+    // deliveryLines.add(deliveryLine);
+    // stockLot.setDeliveryLines(deliveryLines);
 
     stockLotRepository.save(stockLot);
 
@@ -399,9 +397,9 @@ public class MovementServiceImpl implements MovementService {
 
     // deliveryLine.setStockLot(stockLot);
 
-    List<StockLot> stockLots = new ArrayList<>();
-    stockLots.add(stockLot);
-    deliveryLine.setStockLots(stockLots);
+    // List<StockLot> stockLots = new ArrayList<>();
+    // stockLots.add(stockLot);
+    // deliveryLine.setStockLots(stockLots);
 
     deliveryLineRepository.save(deliveryLine);
 
@@ -486,7 +484,7 @@ public class MovementServiceImpl implements MovementService {
       // stockLots.add(stockLot);
       // deliveryLine.setStockLots(stockLots);
 
-       deliveryLine.getStockLots();
+      //  deliveryLine.getStockLots();
       // TODO: REPARAR LA RELACION ENTRE STOCKLOT Y DELIVERYLINE
 
       // Descuenta la cantidad entregada desde StockLot

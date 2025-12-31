@@ -1,8 +1,8 @@
 package com.pe.inventoryapp.backend.delivery.model.mapper;
 
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineDetailsResponse;
 import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
+import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 
 public class DeliveryLineMapper {
   private DeliveryLine deliveryLine;

@@ -2,7 +2,7 @@ package com.pe.inventoryapp.backend.location.model.entity;
 
 import java.util.List;
 
-import com.pe.inventoryapp.backend.delivery.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
