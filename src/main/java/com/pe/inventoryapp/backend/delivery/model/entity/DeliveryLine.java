@@ -18,6 +18,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -69,8 +70,6 @@ public class DeliveryLine {
   @JoinColumn(name = "delivery_order_id")
   private DeliveryOrder deliveryOrder;
 
-  @ManyToOne
-  @JoinColumn(name = "stock_lot_id")
-  private StockLot stockLot;
-
+  @ManyToMany(mappedBy = "deliveryLines")
+  private List<StockLot> stockLots;
 }

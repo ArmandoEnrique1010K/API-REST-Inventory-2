@@ -3,7 +3,6 @@ package com.pe.inventoryapp.backend.movement.service;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
-import com.pe.inventoryapp.backend.movement.model.request.MovementRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementReturnRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;

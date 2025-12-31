@@ -261,6 +261,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   // Busca si existe una linea de entrega que pertenezca a esa ubicación y tambien a esa misma orden de entrega
   private void existDeliveryLineByLocationId(Long idLocation, Long idDeliveryOrder) {
 
+    // TODO: TAMBIEN DEBE VERIFICAR SI EL MISMO PRODUCTO EXISTE EN ESA MISMA UBICACION
+    // TODO: SE PUEDE TENER MÁS DE UN PRODUCTO EN ESA MISMA UBICACION
     if (deliveryLineRepository
         .existsByLocationIdAndDeliveryOrderId(idLocation, idDeliveryOrder)) {
 

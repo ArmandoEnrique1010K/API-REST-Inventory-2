@@ -1,6 +1,10 @@
 package com.pe.inventoryapp.backend.movement.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -360,6 +364,12 @@ public class MovementServiceImpl implements MovementService {
 
     // Sumar la cantidad entregada
     stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity());
+
+    // TODO: NO FUNCIONO
+    List<DeliveryLine> deliveryLines = new ArrayList<>();
+    deliveryLines.add(deliveryLine);
+    stockLot.setDeliveryLines(deliveryLines);
+
     stockLotRepository.save(stockLot);
 
 
@@ -387,8 +397,12 @@ public class MovementServiceImpl implements MovementService {
     
     // Si la cantidad pendiente es mayor que 0, se sobreentiende que el PrepartionStatus queda en INPROGRESS
 
-    deliveryLine.setStockLot(stockLot);
-  
+    // deliveryLine.setStockLot(stockLot);
+
+    List<StockLot> stockLots = new ArrayList<>();
+    stockLots.add(stockLot);
+    deliveryLine.setStockLots(stockLots);
+
     deliveryLineRepository.save(deliveryLine);
 
 
@@ -467,9 +481,16 @@ public class MovementServiceImpl implements MovementService {
       }
 
       deliveryLine.setDeliveredQuantity(newDelivered);
+      
+      // List<StockLot> stockLots = new ArrayList<>();
+      // stockLots.add(stockLot);
+      // deliveryLine.setStockLots(stockLots);
+
+       deliveryLine.getStockLots();
+      // TODO: REPARAR LA RELACION ENTRE STOCKLOT Y DELIVERYLINE
 
       // Descuenta la cantidad entregada desde StockLot
-      deliveryLine.getStockLot().setDeliveredTotal(deliveryLine.getStockLot().getDeliveredTotal() - quantity);
+      // deliveryLine.getStockLot().setDeliveredTotal(deliveryLine.getStockLot().getDeliveredTotal() - quantity);
     } else {
       /*
        * ============================
