@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user_tokens")
+@Table(name = "tokens_de_usuarios")
 public class UserToken {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

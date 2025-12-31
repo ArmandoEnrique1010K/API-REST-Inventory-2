@@ -27,7 +27,7 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "usuarios")
 @Data
 
 // CON ELLO SE EVITA EL PROBLEMA DE RECURSIVIDAD INFINITA
@@ -53,7 +53,7 @@ public class User {
   private Integer dni;
 
   @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
+  @JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
       @UniqueConstraint(columnNames = { "user_id", "role_id" })
   })
   private List<Role> roles;
