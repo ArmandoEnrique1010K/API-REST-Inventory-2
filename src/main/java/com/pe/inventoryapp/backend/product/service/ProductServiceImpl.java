@@ -45,6 +45,10 @@ public class ProductServiceImpl implements ProductService {
         idCategory)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
 
+    if (category.isStatus() == false) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+    }
+    
     String name = productRequest.getName().trim();
 
     Product product = new Product();

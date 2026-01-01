@@ -21,8 +21,12 @@ public class ProductRequest {
   private String name;
 
   // Estos campos son opcionales
+
+  // Las medidas se expresan en centimetros
   private Double length;
   private Double width;
+
+  // URL absoluta de la imagen
   private String imageUrl;
 
   @JsonFormat(pattern = "yyyy-MM-dd")

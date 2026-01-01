@@ -10,6 +10,7 @@ import com.pe.inventoryapp.backend.product.model.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
+  // TODO: ESTO SE PODRIA ORDENAR DE FORMA DESCENDENTE SEGUN LA FECHA DE ULTIMA MODIFICACIÓN U DE OTRA FORMA
   // Query personalizado para buscar productos mediante parametros
   // Nota: Lista los productos cuya categoria este activa
   @Query("""

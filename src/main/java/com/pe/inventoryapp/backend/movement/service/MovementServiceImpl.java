@@ -1,9 +1,6 @@
 package com.pe.inventoryapp.backend.movement.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,7 +53,7 @@ public class MovementServiceImpl implements MovementService {
   @Autowired
   private CompanyRepository companyRepository;
 
-  // MOVIMIENTO DE AGREGAR AL STOCK UN PRODUCTO
+  // MOVIMIENTO DE AGREGAR STOCK A UN PRODUCTO EXISTENTE EN EL ALMACEN
   @Override
   public void saveMovementSend(MovementSendRequest movementSendRequest, Long id_user) {
     if (movementSendRequest.getQuantity() == 0) {
@@ -81,8 +78,11 @@ public class MovementServiceImpl implements MovementService {
     Product product = productRepository.findById(id_product)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
 
-    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
-    product.setStock(stockLotRepository.sumAvailableByProductId(id_product));
+
+    if (product.isStatus() == false) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+    }
+
 
     productRepository.save(product);
 
@@ -100,11 +100,27 @@ public class MovementServiceImpl implements MovementService {
     stockLot.setQuantityAvailable(movementSendRequest.getQuantity());
     // Logicamente el total entregado es 0 porque todavia no se ha entregado algo del stock
     stockLot.setDeliveredTotal(0);
+
+    // Este campo indica si el stock es cero
+    stockLot.setZeroStock(false);
     
     stockLot.setProduct(product);
     stockLot.setCompany(company);
 
     stockLotRepository.save(stockLot);
+
+
+    // NOTA: se vuelve a llamar al producto para actualizar el stock
+    Product findedProduct = productRepository.findById(id_product).get();
+    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
+    // PRODUCTOS
+    Integer sumatoryStock = stockLotRepository.sumAvailableByProductId(id_product);
+    System.out.println(sumatoryStock);
+
+    findedProduct.setStock(sumatoryStock);
+
+    productRepository.save(findedProduct);
+
 
     Movement movement = new Movement();
 
@@ -114,6 +130,9 @@ public class MovementServiceImpl implements MovementService {
     movement.setProduct(product);
     movement.setStockLot(stockLot);
     movement.setUser(user);
+
+    movement.setDeliveryLine(null);
+
     // No se guarda el ID de deliveryLine porque no se trata de una linea entrega
     movement.setMovementType(MovementType.SEND);
 

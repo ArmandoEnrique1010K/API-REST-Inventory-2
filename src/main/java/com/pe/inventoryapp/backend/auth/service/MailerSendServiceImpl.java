@@ -6,6 +6,8 @@ import com.mailersend.sdk.MailerSend;
 import com.mailersend.sdk.MailerSendResponse;
 import com.mailersend.sdk.emails.Email;
 import com.mailersend.sdk.exceptions.MailerSendException;
+import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -21,8 +23,8 @@ public class MailerSendServiceImpl implements MailerSendService {
     String apiKey = dotenv.get("MAILERSEND_API_TOKEN");
     String testDomain = dotenv.get("MAILERSEND_TEST_DOMAIN");
 
-    System.out.println(apiKey);
-    System.out.println(testDomain);
+    // System.out.println(apiKey);
+    // System.out.println(testDomain);
 
     ms.setToken(apiKey);
 
@@ -43,7 +45,9 @@ public class MailerSendServiceImpl implements MailerSendService {
       MailerSendResponse resp = ms.emails().send(email);
       System.out.println("Email enviado, messageId: " + resp.messageId);
     } catch (MailerSendException e) {
-      e.printStackTrace();
+      // TODO: PARECE QUE HAY UN PROBLEMA CON LA GESTIÓN DE VARIABLES DE ENTORNO, PORQUE VEO QUE SE ALMACENAN EN MEMORIA CUANDO LA VARIABLE DE ENTORNO EN .env, NO EXISTE O SE ENCUENTRA COMENTADA
+      // e.printStackTrace();
+      throw new BusinessException(ResponseStatusCodes.INTERNAL_ERROR, "El servicio de envio de emails no ha respondido");
     }
   }
 
