@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.delivery.controller;
+package com.pe.inventoryapp.backend.deliveryline.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +18,11 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineRequest;
-import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineUpdateRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineDetailsResponse;
-import com.pe.inventoryapp.backend.delivery.service.DeliveryLineService;
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdateRequest;
+import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
+import com.pe.inventoryapp.backend.deliveryline.service.DeliveryLineService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 
 import jakarta.validation.Valid;

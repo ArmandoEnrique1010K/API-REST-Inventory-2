@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.delivery.service;
+package com.pe.inventoryapp.backend.deliveryorder.service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
-import com.pe.inventoryapp.backend.delivery.model.mapper.DeliveryOrderMapper;
-import com.pe.inventoryapp.backend.delivery.model.request.DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
-import com.pe.inventoryapp.backend.delivery.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
+import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
+import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -57,35 +57,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     deliveryOrder.setUser(userEntity);
     deliveryOrderRepository.save(deliveryOrder);
   }
-  // Guardar el pedido de entrega en la base de datos
-  // return "Pedido de entrega guardado correctamente";
-
-  // @Override
-  // public List<DeliveryOrderDetailsResponse> findAll() {
-  // List<DeliveryOrder> deliveryOrders = (List<DeliveryOrder>)
-  // deliveryOrderRepository.findAll();
-
-  // return deliveryOrders.stream()
-  // .map(
-  // deliveryOrder ->
-  // DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse())
-  // .collect(Collectors.toList());
-  // }
-
-  // @Override
-  // public List<DeliveryOrderDetailsResponse>
-  // findAllByPreparationStatus(PreparationStatus status) {
-
-  // List<DeliveryOrder> deliveryOrders = (List<DeliveryOrder>)
-  // deliveryOrderRepository.findByPreparationStatus(status);
-
-  // return deliveryOrders.stream()
-  // .map(
-  // deliveryOrder ->
-  // DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderResponse())
-  // .collect(Collectors.toList());
-
-  // }
 
   @Override
   public Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
@@ -170,6 +141,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
+
+    // TODO: LISTAR LOS ESTADOS NO PERMITIDOS
+    // EVITAR QUE EL USUARIO HAYA INTRODUCIDO UN ESTADO NO PERMITIDO
+    if (preparationStatus == PreparationStatus.INPROGRESS) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El estado de la orden de entrega no puede ser INPROGRESS");
+    }
+
+
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
 

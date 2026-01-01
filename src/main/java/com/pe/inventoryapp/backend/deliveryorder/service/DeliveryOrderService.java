@@ -1,14 +1,14 @@
-package com.pe.inventoryapp.backend.delivery.service;
+package com.pe.inventoryapp.backend.deliveryorder.service;
 
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.pe.inventoryapp.backend.delivery.model.request.DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 
 public interface DeliveryOrderService {
 

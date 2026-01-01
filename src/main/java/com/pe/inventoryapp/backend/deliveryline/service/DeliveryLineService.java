@@ -1,15 +1,15 @@
-package com.pe.inventoryapp.backend.delivery.service;
+package com.pe.inventoryapp.backend.deliveryline.service;
 
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineRequest;
-import com.pe.inventoryapp.backend.delivery.model.request.DeliveryLineUpdateRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineDetailsResponse;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdateRequest;
+import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
+import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
 
 public interface DeliveryLineService {
 

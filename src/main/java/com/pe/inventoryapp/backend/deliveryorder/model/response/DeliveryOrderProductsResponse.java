@@ -1,6 +1,9 @@
-package com.pe.inventoryapp.backend.delivery.model.response;
+package com.pe.inventoryapp.backend.deliveryorder.model.response;
 
 import java.util.List;
+
+import com.pe.inventoryapp.backend.deliveryline.model.response.ProductZoneQuantityResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

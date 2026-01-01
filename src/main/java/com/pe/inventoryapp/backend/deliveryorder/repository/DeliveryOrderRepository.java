@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.delivery.repository;
+package com.pe.inventoryapp.backend.deliveryorder.repository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

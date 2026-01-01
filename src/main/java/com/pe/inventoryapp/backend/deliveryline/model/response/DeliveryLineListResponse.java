@@ -1,5 +1,6 @@
-package com.pe.inventoryapp.backend.delivery.model.response;
+package com.pe.inventoryapp.backend.deliveryline.model.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
@@ -13,18 +14,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeliveryLineDetailsResponse {
+public class DeliveryLineListResponse {
   private Long id;
   private Integer requiredQuantity;
   private Integer deliveredQuantity;
   private Integer pendingQuantity;
-  private LocalDateTime updatedAt;
   private LocalDateTime limitDate;
-  private String updatedByUser;
   private PreparationStatus preparationStatus;
   private String location;
   private String region;
-
-  // TODO: PENDIENTE TRAER DATOS DEL PRODUCTO
-  // private Integer productId;
 }

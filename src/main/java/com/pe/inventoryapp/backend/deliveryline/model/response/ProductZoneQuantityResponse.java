@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.delivery.model.response;
+package com.pe.inventoryapp.backend.deliveryline.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

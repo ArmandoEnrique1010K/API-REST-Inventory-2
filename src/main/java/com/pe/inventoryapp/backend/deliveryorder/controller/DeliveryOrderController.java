@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.delivery.controller;
+package com.pe.inventoryapp.backend.deliveryorder.controller;
 
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +16,13 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.delivery.model.request.DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryLineListResponse;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderDetailsResponse;
-import com.pe.inventoryapp.backend.delivery.model.response.DeliveryOrderListResponse;
-import com.pe.inventoryapp.backend.delivery.service.DeliveryLineService;
-import com.pe.inventoryapp.backend.delivery.service.DeliveryOrderService;
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
+import com.pe.inventoryapp.backend.deliveryline.service.DeliveryLineService;
+import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
+import com.pe.inventoryapp.backend.deliveryorder.service.DeliveryOrderService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 
 import jakarta.validation.Valid;
@@ -68,26 +68,6 @@ public class DeliveryOrderController {
             "Se ha creado la orden de entrega"));
     }
 
-    // TODO: USAR AUTHENTICATIONCONTEXTSERVICEIMPL
-  //   Long id_user = jwtService.extractUserIdFromClaims(header);
-
-  //   if (id_user == null) {
-  //     return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-  //         .body(responseService.generateCommonResponse("error", "El usuario no ha iniciado sesión"));
-  //   }
-
-  //   deliveryOrderService.verifyBatchExist(deliveryOrderRequest.getBatch());
-
-  //   var deliveryOrder = deliveryOrderService.save(deliveryOrderRequest, id_user);
-
-  //   if (deliveryOrder == null) {
-  //     return ResponseEntity.status(HttpStatus.CREATED)
-  //         .body(responseService.generateCommonResponse("error", "Error al registrar el pedido de entrega"));
-  //   }
-  //   return ResponseEntity.status(HttpStatus.CREATED)
-  //       .body(responseService.generateCommonResponse("success", deliveryOrder));
-  // }
-
   @GetMapping
   public ResponseEntity<?> listAllDeliveryOrder(
       @RequestParam(defaultValue = "0") Integer page,
@@ -99,7 +79,6 @@ public class DeliveryOrderController {
     Pageable pageable = PageRequest.of(page, 20);
 
     Page<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllDeliveryOrdersByParams(preparationStatus, createdByUser, batch, startDate, endDate, pageable);
-
 
     return ResponseEntity.status(200).body(deliveryOrders);
   }
@@ -120,22 +99,6 @@ public class DeliveryOrderController {
 
     return ResponseEntity.status(200).body(deliveryOrders);
   }
-
-  // @GetMapping("/search")
-  // public Page<DeliveryOrderListResponse> findAllByParams(@RequestParam(defaultValue = "0") Integer page,
-  //     @RequestParam(required = false) PreparationStatus status,
-  //     @RequestParam(required = false) String createdByUser,
-  //     @RequestParam(required = false) String batch,
-  //     @RequestParam(required = false) Integer minQuantity,
-  //     @RequestParam(required = false) Integer maxQuantity,
-  //     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-  //     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-
-  //   Pageable pageable = PageRequest.of(page, 10);
-
-  //   return deliveryOrderService.findAllDeliveryOrdersByParams(pageable, status, createdByUser, batch, minQuantity,
-  //       maxQuantity, startDate, endDate);
-  // }
 
 
   @GetMapping("/{id}/delivery-lines")
@@ -172,24 +135,14 @@ public class DeliveryOrderController {
     validationService.validateFieldsAndThrowResponse(result);
     deliveryOrderService.updateDeliveryOrderById(id, deliveryOrderRequest, id_user);
 
-    // String newBatch = deliveryOrderRequest.getBatch();
 
-    // if (optionalDeliveryOrderResponse.isEmpty()) {
-    //   return ResponseEntity.status(400).body(responseService.generateCommonResponse("error", "La orden no existe"));
-    // }
-
-    // if (!optionalDeliveryOrderResponse.get().getBatch().equals(newBatch)) {
-    //   deliveryOrderService.verifyBatchExist(newBatch);
-    // }
-
-    // String message = deliveryOrderService.update(id, deliveryOrderRequest);
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
         "Se actualizo la orden de entrega"));
 
   }
 
-  @PatchMapping("/{preparationStatus}/{id}")
+  @PatchMapping("/{id}/{preparationStatus}")
   public ResponseEntity<CommonResponse> changePreparationStatusDeliveryOrder(Authentication authentication, @PathVariable Long id,
       @PathVariable PreparationStatus preparationStatus) {
 
@@ -199,5 +152,4 @@ public class DeliveryOrderController {
         ResponseStatusCodes.SUCCESS_RESPONSE,
         "Se ha cambiado el estado del pedido de entrega"));
   }
-
 }
