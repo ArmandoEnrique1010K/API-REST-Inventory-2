@@ -1,12 +1,17 @@
 package com.pe.inventoryapp.backend.deliveryorder.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.request.Product_DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -24,35 +29,51 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
   @Autowired
   private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
 
-  // Método para relacionar un producto con una orden de entrega
+  // Método para relacionar varios productos con una orden de entrega
+  @Transactional
   @Override
-  public void saveProduct_DeliveryOrder(Long idProduct, Long idDeliveryOrder) {
+  public void saveProduct_DeliveryOrder(Product_DeliveryOrderRequest product_DeliveryOrderRequest, Long idDeliveryOrder) {
 
-    if (idProduct == null || idDeliveryOrder == null) {
+    List<Long> idProducts = product_DeliveryOrderRequest.getIdProducts();
+
+    if (idProducts == null || idProducts.isEmpty() || idDeliveryOrder == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
-
-    // Buscar producto y orden de entrega
-    Product product = productRepository.findById(idProduct).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema")
-    );
-    
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe en el sistema")
-    );
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND,
+            "La orden de entrega no existe en el sistema"));
 
-    // Verificar si el producto esta activo
-    if (product.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+    List<Product_DeliveryOrder> relations = new ArrayList<>();
+    // Buscar producto y orden de entrega
+    for (Long productId : idProducts) {
+
+        if (productId == null) {
+            throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+        }
+
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new BusinessException(
+                ResponseStatusCodes.ENTITY_NOT_FOUND,
+                "El producto con el id " + productId + " no existe en el sistema"
+            ));
+
+        if (!product.isStatus()) {
+            throw new BusinessException(
+                ResponseStatusCodes.DEFAULT_RESOURCE,
+                "El producto con el id " + productId + " se encuentra desactivado"
+            );
+        }
+
+        Product_DeliveryOrder pdo = new Product_DeliveryOrder();
+        pdo.setProduct(product);
+        pdo.setDeliveryOrder(deliveryOrder);
+        pdo.setQuantityTotal(0);
+
+        relations.add(pdo);
+        // product_DeliveryOrderRepository.save(pdo);
     }
 
-    // GUARDAR LOS CAMBIOS EN LA BASE DE DATOS
-    Product_DeliveryOrder product_DeliveryOrder = new Product_DeliveryOrder();
-    product_DeliveryOrder.setProduct(product);
-    product_DeliveryOrder.setDeliveryOrder(deliveryOrder);
-    product_DeliveryOrder.setQuantityTotal(0);
-
-    product_DeliveryOrderRepository.save(product_DeliveryOrder);
-  }
-  
+    // NOTA: SOLO SE EJECUTA SI CADA UNO DE LOS REGISTROS FUE VALIDADO
+    product_DeliveryOrderRepository.saveAll(relations);
+  }  
 }

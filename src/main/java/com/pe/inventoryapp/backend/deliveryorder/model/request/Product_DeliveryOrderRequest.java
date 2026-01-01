@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.deliveryorder.model.request;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +12,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product_DeliveryOrderRequest {
-  private Long productId;
-  private Long deliveryOrderId;
+  private List<Long> idProducts;
 }
