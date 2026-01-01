@@ -16,7 +16,6 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
   // Page<DeliveryOrder> findByPreparationStatus(PreparationStatus status);
 
   // Busca todas las ordenes que estan activas (estado Ready e InProgress)
-  // TODO: CORREGIR EL QUERY
   @Query("""
         SELECT d
         FROM DeliveryOrder d

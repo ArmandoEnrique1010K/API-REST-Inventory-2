@@ -17,7 +17,6 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
