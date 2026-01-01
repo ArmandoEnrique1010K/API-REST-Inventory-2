@@ -17,8 +17,6 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
-import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
-import com.pe.inventoryapp.backend.deliveryline.service.DeliveryLineService;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
@@ -30,7 +28,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -48,8 +45,6 @@ public class DeliveryOrderController {
   @Autowired
   private DeliveryOrderService deliveryOrderService;
 
-  @Autowired
-  private DeliveryLineService deliveryLineService;
 
   @Autowired
   private AuthenticationContextService authenticationContextService;
@@ -101,24 +96,6 @@ public class DeliveryOrderController {
   }
 
 
-  @GetMapping("/{id}/delivery-lines")
-  public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
-      @PathVariable Long id, 
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) Integer minRequiredQuantity,
-      @RequestParam(required = false) Integer maxRequiredQuantity,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime minLimitDate,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime maxLimitDate,
-      @RequestParam(required = false) PreparationStatus preparationStatus,
-      @RequestParam(required = false) String location    
-    ) {
-    Pageable pageable = PageRequest.of(page, 20);
-
-    Page<DeliveryLineListResponse> deliveryOrder = deliveryLineService.findAllDeliveryLinesByDeliveryOrderIdPageable(id, 
-        minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, preparationStatus, location, pageable);
-
-    return ResponseEntity.status(200).body(deliveryOrder);
-  }
 
 
   @GetMapping("/{id}")
@@ -142,14 +119,14 @@ public class DeliveryOrderController {
 
   }
 
-  @PatchMapping("/{id}/{preparationStatus}")
-  public ResponseEntity<CommonResponse> changePreparationStatusDeliveryOrder(Authentication authentication, @PathVariable Long id,
-      @PathVariable PreparationStatus preparationStatus) {
+  // @PatchMapping("/{id}/{preparationStatus}")
+  // public ResponseEntity<CommonResponse> changePreparationStatusDeliveryOrder(Authentication authentication, @PathVariable Long id,
+  //     @PathVariable PreparationStatus preparationStatus) {
 
-        Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    deliveryOrderService.changePreparationStatusDeliveryOrderById(id, preparationStatus, id_user);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
-        "Se ha cambiado el estado del pedido de entrega"));
-  }
+  //       Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+  //   deliveryOrderService.changePreparationStatusDeliveryOrderById(id, preparationStatus, id_user);
+  //   return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
+  //       ResponseStatusCodes.SUCCESS_RESPONSE,
+  //       "Se ha cambiado el estado del pedido de entrega"));
+  // }
 }

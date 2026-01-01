@@ -29,7 +29,7 @@ public class Product_DeliveryOrder {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private Integer quantityTotal;
+  private Integer requiredQuantityTotal;
 
   @ManyToOne
   @JoinColumn(name = "delivery_order_id")

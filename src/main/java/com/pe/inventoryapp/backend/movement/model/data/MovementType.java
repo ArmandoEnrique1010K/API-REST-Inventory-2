@@ -7,6 +7,7 @@ public enum MovementType {
   LOSS, // Perdida de stock
   RECOVERY, // Recuperación de stock dañado del almacen
   
+  ALTER, // Alteración de la cantidad requerida de entrega
 
   TRANSFER, // Transferencia entre stocks del mismo producto
   SALE, // TODO: ELIMINAR ESTE DATO

@@ -1,6 +1,12 @@
 package com.pe.inventoryapp.backend.deliveryline.controller;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -12,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
@@ -22,6 +29,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdateRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
+import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.deliveryline.service.DeliveryLineService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 
@@ -41,41 +49,42 @@ public class DeliveryLineController {
 
   @Autowired
   private AuthenticationContextService authenticationContextService;
-  @PostMapping("/delivery-order")
+  @PostMapping("/product-delivery-order/{idProduct_DeliveryOrder}")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
       Authentication authentication,
+      @PathVariable Long idProduct_DeliveryOrder,
       @Valid @RequestBody DeliveryLineRequest deliveryOrderRequest,
       BindingResult result) {
 
         Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.saveDeliveryLine(deliveryOrderRequest, id_user);
+    deliveryLineService.saveDeliveryLine(deliveryOrderRequest,idProduct_DeliveryOrder, id_user);
 
     return ResponseEntity.status(201).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
         "Nueva orden pendiente"));
   }
 
-  // TODO: BORRAR ESTE ENDPOINT
-  // @GetMapping("/delivery-order/{id}")
-  // public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
-  //     @PathVariable Long id, 
-  //     @RequestParam(defaultValue = "0") Integer page,
-  //     @RequestParam(required = false) Integer minRequiredQuantity,
-  //     @RequestParam(required = false) Integer maxRequiredQuantity,
-  //     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate minLimitDate,
-  //     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate maxLimitDate,
-  //     @RequestParam(required = false) PreparationStatus preparationStatus,
-  //     @RequestParam(required = false) String location    
-  //   ) {
-  //   Pageable pageable = PageRequest.of(0, 20);
 
-  //   Page<DeliveryLineListResponse> deliveryOrder = deliveryLineService.findAllDeliveryLinesByDeliveryOrderIdPageable(id, 
-  //       minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, preparationStatus, location, pageable);
+  @GetMapping("/delivery-order/{id}")
+  public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
+      @PathVariable Long id, 
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) Integer minRequiredQuantity,
+      @RequestParam(required = false) Integer maxRequiredQuantity,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime minLimitDate,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime maxLimitDate,
+      @RequestParam(required = false) PreparationStatus preparationStatus,
+      @RequestParam(required = false) String location    
+    ) {
+    Pageable pageable = PageRequest.of(page, 20);
 
-  //   return ResponseEntity.status(200).body(deliveryOrder);
-  // }
+    Page<DeliveryLineListResponse> deliveryOrder = deliveryLineService.findAllDeliveryLinesByDeliveryOrderIdPageable(id, 
+        minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, preparationStatus, location, pageable);
+
+    return ResponseEntity.status(200).body(deliveryOrder);
+  }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getDeliveryLine(@PathVariable Long id) {
@@ -97,17 +106,44 @@ public class DeliveryLineController {
         "Se actualizo la linea de entrega"));
   }
 
-  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA
-  @PatchMapping("/{id}/{preparationStatus}")
-  public ResponseEntity<CommonResponse> changePreparationStatusDeliveryLine(Authentication authentication,
-      @PathVariable Long id,
-      @PathVariable PreparationStatus preparationStatus) {
+  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE ENTREGADO
+  // Solamente si tiene el estado READY
+  @PatchMapping("/{id}/delivered")
+  public ResponseEntity<CommonResponse> changeDeliveredStatusDeliveryLine(Authentication authentication,
+      @PathVariable Long id) {
 
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    deliveryLineService.changePreparationStatusDeliveryLineById(id, preparationStatus, id_user);
+    deliveryLineService.changeDeliveredStatusDeliveryLineById(id, id_user);
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
         ResponseStatusCodes.SUCCESS_RESPONSE,
-        "Se ha cambiado el estado de la orden de entrega"));
+        "La linea de entrega tiene el estado entregado"));
+  }
+
+
+  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE CANCELADO
+  // Solamente si tiene los estados INPROGRESS o READY
+  @PatchMapping("/{id}/canceled")
+  public ResponseEntity<CommonResponse> changeCanceledStatusDeliveryLine(Authentication authentication,
+      @PathVariable Long id) {
+
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    deliveryLineService.changeCanceledStatusDeliveryLineById(id, id_user);
+    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
+        ResponseStatusCodes.SUCCESS_RESPONSE,
+        "La linea de entrega tiene el estado cancelado"));
+  }
+
+  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE PERDIDO
+  // Solamente si tiene el estado DELIVERED
+  @PatchMapping("/{id}/missing")
+  public ResponseEntity<CommonResponse> changeMissingStatusDeliveryLine(Authentication authentication,
+      @PathVariable Long id) {
+
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    deliveryLineService.changeMissingStatusDeliveryLineById(id, id_user);
+    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
+        ResponseStatusCodes.SUCCESS_RESPONSE,
+        "La linea de entrega tiene el estado perdido"));
   }
 
   // RECORDAR QUE SOLAMENTE PODRA BORRAR UNA LINEA DE ENTREGA SI NO HAY CANTIDAD ENTREGADA
@@ -119,5 +155,4 @@ public class DeliveryLineController {
         ResponseStatusCodes.SUCCESS_RESPONSE,
         "Se elimino la linea de entrega"));
   }
-
 }

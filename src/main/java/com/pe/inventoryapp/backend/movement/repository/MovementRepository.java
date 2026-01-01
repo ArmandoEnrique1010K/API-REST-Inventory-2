@@ -15,7 +15,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
 
   // Query personalizado para buscar movimientos mediante parametros
 
-
+  // TODO: ORDENAR ESTOS DATOS OBTENIDOS POR FECHA DE CREACION DE FORMA DESCENDENTE
   @Query("""
       SELECT m
       FROM Movement m

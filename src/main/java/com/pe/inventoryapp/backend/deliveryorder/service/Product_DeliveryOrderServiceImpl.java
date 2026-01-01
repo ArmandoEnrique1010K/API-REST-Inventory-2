@@ -70,7 +70,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
         Product_DeliveryOrder pdo = new Product_DeliveryOrder();
         pdo.setProduct(product);
         pdo.setDeliveryOrder(deliveryOrder);
-        pdo.setQuantityTotal(0);
+        pdo.setRequiredQuantityTotal(0);
 
         relations.add(pdo);
         // product_DeliveryOrderRepository.save(pdo);

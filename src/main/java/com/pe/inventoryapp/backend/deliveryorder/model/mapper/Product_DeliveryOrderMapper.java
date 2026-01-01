@@ -26,7 +26,7 @@ public class Product_DeliveryOrderMapper {
         product_DeliveryOrder.getId(),
         product_DeliveryOrder.getProduct().getId(),
         product_DeliveryOrder.getProduct().getName(),
-        product_DeliveryOrder.getQuantityTotal()
+        product_DeliveryOrder.getRequiredQuantityTotal()
       );
     }
   }

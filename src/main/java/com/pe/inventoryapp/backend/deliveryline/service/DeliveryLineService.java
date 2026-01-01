@@ -34,7 +34,12 @@ public interface DeliveryLineService {
 
   void deleteDeliveryLineById(Long id);
 
-  void changePreparationStatusDeliveryLineById(Long id, PreparationStatus preparationStatus, Long id_user);
+  void changeDeliveredStatusDeliveryLineById(Long id, Long id_user);
+
+  void changeCanceledStatusDeliveryLineById(Long id, Long id_user);
+  void changeMissingStatusDeliveryLineById(Long id, Long id_user);
+
+  // void changePreparationStatusDeliveryLineById(Long id, PreparationStatus preparationStatus, Long id_user);
 
   // TODO: INVENTAR UN METODO QUE PERMITA AÑADIR VARIAS LINEAS A UNA MISMA ORDEN
   // void saveAll(DeliveryLineRequest deliveryLineRequest, Long id_user);

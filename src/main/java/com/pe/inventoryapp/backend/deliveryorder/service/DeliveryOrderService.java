@@ -35,5 +35,5 @@ public interface DeliveryOrderService {
 
   void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
-  void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus status, Long id_user);
+  // void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus status, Long id_user);
 }
