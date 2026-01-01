@@ -3,6 +3,8 @@ package com.pe.inventoryapp.backend.movement.service;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,11 +15,13 @@ import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
+import com.pe.inventoryapp.backend.movement.model.mapper.MovementMapper;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementReturnRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementReceiveRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
+import com.pe.inventoryapp.backend.movement.model.response.MovementListResponse;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
@@ -266,10 +270,44 @@ public class MovementServiceImpl implements MovementService {
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
 
-    // DEBE HACER UNA COMPARACION PARA SABER SI LA SUMA DE LA CANTIDAD DISPONIBLE Y EL TOTAL ENTREGADO NO ES IGUAL A LA CANTIDAD RECIBIDA
-    if (stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity() != stockLot.getQuantityReceived()) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "No hubo una perdida en este lote de stock");
+    // IMPLEMENTAR UNA LOGICA PARA OBTENER EL ULTIMO MOVIMIENTO DE TIPO LOSS DE UN PRODUCTO
+
+    // 1° DEBE OBTENER TODOS LOS MOVIMIENTOS DE TIPO LOSS DEL PRODUCTO POR SU ID
+    // 2° CALCULAR LA SUMATORIA DEL CAMPO QUANTITY DE LOS MOVIMIENTOS DE TIPO LOSS DE ESE PRODUCTO
+    // 3° ESE VALOR RESULTANTE DEBE SER MENOR O IGUAL QUE LA CANTIDAD INTRODUCIDA PARA EL MOVIMIENTO DE TIPO RECOVERY
+    Integer totalLoss = movementRepository.sumQuantityByProductAndType(
+        stockLot.getProduct().getId(),
+        MovementType.LOSS);
+
+    System.out.println(totalLoss);
+
+    // TODO: IMPLEMENTAR TAMBIEN LOS DE TIPO DAMAGE
+    Integer totalRecovery = movementRepository.sumQuantityByProductAndType(
+        stockLot.getProduct().getId(),
+        MovementType.RECOVERY // o RETURN BY DAMAGE
+    );
+
+    System.out.println(totalRecovery);
+
+    if (totalLoss == 0) {
+      throw new BusinessException(
+          ResponseStatusCodes.DEFAULT_RESOURCE,
+          "No existen pérdidas registradas para este producto");
     }
+
+    int maxRecoverable = totalLoss - totalRecovery;
+
+    if (movementAdjustmentRequest.getQuantity() > maxRecoverable) {
+      throw new BusinessException(
+          ResponseStatusCodes.DEFAULT_RESOURCE,
+          "No se puede recuperar más stock del que ha sido reportado como pérdida");
+    }
+
+
+
+
+
+
 
     // La nueva cantidad de stock se aumenta
     int newStock = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
@@ -289,6 +327,7 @@ public class MovementServiceImpl implements MovementService {
     // PRODUCTOS
     product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
 
+
     productRepository.save(product);
 
     Movement movement = new Movement();
@@ -302,77 +341,6 @@ public class MovementServiceImpl implements MovementService {
     movementRepository.save(movement);
 
   }
-
-
-  // @Override
-  // public void saveMovementAdjustment(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
-  //   if (id_user == null) {
-  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-  //   }
-
-  //   User user = userRepository.findById(id_user).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
-  //   String username = user.getFirstname() + " " + user.getLastname();
-
-  //   Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
-
-  //   if (id_stock_lot == null) {
-  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-  //   }
-
-  //   // Encontrar el producto por id de stockLot
-  //   StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe")
-  //   );
-  //   if (movementAdjustmentRequest.getQuantity() == 0){
-  //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
-  //   }
-
-    
-  //   // Se debe pasar la cantidad en la que se quiere incrementar o decrementar el stock
-  //   int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
-    
-  //   if (newAvailable < 0)
-  //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
-
-  //   stockLot.setQuantityAvailable(newAvailable);
-
-  //   if (movementAdjustmentRequest.isAlterQuantityReceived()) {
-  //     stockLot.setQuantityReceived(stockLot.getQuantityReceived() + movementAdjustmentRequest.getQuantity());
-  //   }
-    
-    
-  //   // No se va a alterar el total entregado
-  //   stockLotRepository.save(stockLot);
-    
-  //  // NOTA: POSIBLE ERROR DE REFERENCIA CIRCULAR!!!
-  
-  //   Product product = stockLot.getProduct();
-
-  //   // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
-  //   // Debe recalcular el total de la sumatoria de los stocks disponibles del producto
-  //   product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
-
-  //   productRepository.save(product);
-    
-  //   Movement movement = new Movement();
-  //   movement.setQuantity(movementAdjustmentRequest.getQuantity());
-  //   movement.setUsername_snapshot(username);
-  //   movement.setComment(movementAdjustmentRequest.getComment());
-  //   movement.setUser(user);
-  //   movement.setProduct(product);
-
-  //   // ESTE CAMPO SE PODRIA MODIFICAR SI SE TRATA DE ALTERAR LA CANTIDAD RECIBIDA
-  //   if (movementAdjustmentRequest.isAlterQuantityReceived()) {
-  //     movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_RECEIVED);
-  //   } else {
-  //     movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_AVAILABLE);
-  //   }
-
-
-  //   movement.setStockLot(stockLot);
-  //   movementRepository.save(movement);
-  // }
 
   @Override
   public void saveMovementTransfer(MovementTransferRequest movementTransferRequest, Long id_user) {
@@ -426,6 +394,8 @@ public class MovementServiceImpl implements MovementService {
     stockLotEmitter.setZeroStock(
         stockLotEmitter.getQuantityAvailable() == 0);
 
+    stockLotReceiver.setZeroStock(
+      stockLotReceiver.getQuantityAvailable() == 0);
     // NOTA: NO SE RECALCULA EL TOTAL DE STOCK PORQUE ES UNA TRANSFERENCIA DE STOCK
 
     // Guarda los cambios en la base de datos
@@ -451,56 +421,7 @@ public class MovementServiceImpl implements MovementService {
     movementRepository.save(movement);
   }
 
-  // Movimiento de perdida del almacen
-  // @Override
-  // public void saveMovementLoss(MovementLossRequest movementLossRequest, Long id_user) {
-  //   if (id_user == null) {
-  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-  //   }
-
-  //   User user = userRepository.findById(id_user).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
-  //   String username = user.getFirstname() + " " + user.getLastname();
-
-  //   Long id_stock_lot = movementLossRequest.getIdStockLot();
-
-  //     if (id_stock_lot == null) {
-  //       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-  //     }
-
-  //   StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
-  //   int newStock = stockLot.getQuantityAvailable() - movementLossRequest.getQuantity();
-
-  //   if (newStock < 0) {
-  //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
-  //   }
-
-  //   stockLot.setQuantityAvailable(newStock);
-  //   stockLotRepository.save(stockLot);
-
-  //   Product product = stockLot.getProduct();
-
-  //   // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
-  //   // PRODUCTOS
-  //   product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
-
-  //   productRepository.save(product);
-
-  //   Movement movement = new Movement();
-  //   movement.setUsername_snapshot(username);
-  //   movement.setComment(movementLossRequest.getComment());
-  //   movement.setProduct(product);
-  //   movement.setUser(user);
-  //   movement.setMovementType(MovementType.LOSS);
-  //   movement.setStockLot(stockLot);
-  //   movement.setQuantity(movementLossRequest.getQuantity());
-  //   movementRepository.save(movement);
-
-  // }
-
-
-  // TODO: HAY UN PROBLEMA EN LA RELACION DE ENTIDADES, DEBERIA SER DE MUCHOS A MUCHOS ENTRE STOCKLOT Y DELIVERYLINE PARA GUARDAR LOS IDS DE LOS LOTES DE STOCK EN LA LINEA DE ENTREGA
+ 
 
   @Transactional
   @Override
@@ -813,6 +734,17 @@ public class MovementServiceImpl implements MovementService {
             : MovementType.RETURN_BY_DAMAGE);
 
     movementRepository.save(movement);
+  }
+
+  @Override
+  public Page<MovementListResponse> findAllMovements(Integer minQuantity, Integer maxQuantity,
+      LocalDateTime minCreatedAt, LocalDateTime maxCreatedAt, MovementType movementType, String username,
+      String productName, Pageable pageable) {
+
+      Page<Movement> movements = movementRepository.findAllByParams(minQuantity, maxQuantity, minCreatedAt,
+          maxCreatedAt, movementType, username, productName, pageable); 
+      
+      return movements.map(movement -> MovementMapper.builder().setMovement(movement).buildMovementListResponse());
   }
 
 

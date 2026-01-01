@@ -1,6 +1,12 @@
 package com.pe.inventoryapp.backend.movement.controller;
 
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -11,17 +17,23 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementReturnRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementReceiveRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
+import com.pe.inventoryapp.backend.movement.model.response.MovementListResponse;
 import com.pe.inventoryapp.backend.movement.service.MovementService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -131,4 +143,25 @@ public class MovementController {
                       "Se ha devuelto una linea de entrega"));
   }
   
+
+  @GetMapping
+  public ResponseEntity<?> listAllMovements(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) Integer minQuantity,
+      @RequestParam(required = false) Integer maxQuantity,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
+        @RequestParam(required = false) MovementType movementType,
+        @RequestParam(required = false) String username,
+        @RequestParam(required = false) String productName
+    ) {
+
+    Pageable pageable = PageRequest.of(page, 20);
+
+    Page<MovementListResponse> movements = movementService.findAllMovements(minQuantity, maxQuantity, minCreatedAt, maxCreatedAt, movementType, username, productName, pageable);
+
+    return ResponseEntity.status(200).body(movements);
+  }
+  
+
 }

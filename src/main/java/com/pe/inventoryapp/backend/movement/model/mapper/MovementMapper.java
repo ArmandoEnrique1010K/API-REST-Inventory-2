@@ -1,7 +1,7 @@
 package com.pe.inventoryapp.backend.movement.model.mapper;
 
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
-import com.pe.inventoryapp.backend.movement.model.response.MovementResponse;
+import com.pe.inventoryapp.backend.movement.model.response.MovementListResponse;
 
 public class MovementMapper {
   private Movement movement;
@@ -18,21 +18,17 @@ public class MovementMapper {
     return this;
   }
 
-  public MovementResponse buildMovementResponse() {
+  public MovementListResponse buildMovementListResponse() {
     if (movement == null) {
       throw new RuntimeException("Debe pasar la entidad movement");
     }
-    return new MovementResponse(
+    return new MovementListResponse(
         movement.getId(),
-        // movement.getQuantity(),
+        movement.getQuantity(),
         movement.getCreatedAt(),
-        movement.getUsername_snapshot() // ,
-    // movement.getComment(),
-    // movement.getUser().getId(),
-    // movement.getStockLot().getId(),
-    // movement.getDeliveryLine().getId(),
-    // movement.getReason(),
-    // movement.getMovementType()
+        movement.getMovementType(),
+        movement.getUsername_snapshot(),
+        movement.getProduct().getName()
     );
   }
 }
