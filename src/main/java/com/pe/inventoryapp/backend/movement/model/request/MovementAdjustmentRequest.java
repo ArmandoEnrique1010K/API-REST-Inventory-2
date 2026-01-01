@@ -1,22 +1,20 @@
 package com.pe.inventoryapp.backend.movement.model.request;
 
-import java.time.LocalDate;
-
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// DTO para ajustar manualmente el stock de un lote, hay 3 casos:
+// Se produce cuando se quiere aumentar el stock de un lote (nuevo ingreso al mismo lote)
+// Se produce cuando se quiere disminuir el stock de un lote (perdida)
+// Se produce cuando se quiere aumentar el stock de un lote (recuperación de stock dañado considerado como perdida)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
-// AJUSTE MANUAL DEL STOCK
 public class MovementAdjustmentRequest {
-  
-  // Introduce la cantidad en que se va a aumentar o disminuir si es un número negativo
   @NotNull
   private Integer quantity;
 
@@ -24,9 +22,4 @@ public class MovementAdjustmentRequest {
   
   @NotNull
   private Long idStockLot;
-
-  // Campo opcional
-  private LocalDate caducityDate;
-
-  private boolean alterQuantityReceived;
 }

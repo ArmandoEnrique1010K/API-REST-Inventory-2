@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 // TRANSFERIR STOCK ENTRE DOS LOTES DEL MISMO PRODUCTO
 public class MovementTransferRequest {
   private Integer quantity;
-  // private String comment;
+  private String comment;
   
   // IDs de los lotes de stocks de emisor y receptor
   @NotNull

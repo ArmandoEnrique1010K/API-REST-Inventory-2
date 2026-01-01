@@ -59,6 +59,11 @@ public class Movement {
   @JoinColumn(name = "stock_lot_id")
   private StockLot stockLot;
 
+  // Segunda relación hacia StockLot, almacena un StockLot emisor que se crea cuando se hace una transferencia
+  @ManyToOne
+  @JoinColumn(name = "stock_lot_emitter_id")
+  private StockLot stockLotEmitter;
+
   @ManyToOne
   @JoinColumn(name = "delivery_line_id")
   private DeliveryLine deliveryLine;

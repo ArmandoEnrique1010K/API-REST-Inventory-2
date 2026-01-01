@@ -15,9 +15,8 @@ import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAdjustmentRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementAllocateRequest;
-import com.pe.inventoryapp.backend.movement.model.request.MovementLossRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementReturnRequest;
-import com.pe.inventoryapp.backend.movement.model.request.MovementSendRequest;
+import com.pe.inventoryapp.backend.movement.model.request.MovementReceiveRequest;
 import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -55,8 +54,8 @@ public class MovementServiceImpl implements MovementService {
 
   // MOVIMIENTO DE AGREGAR STOCK A UN PRODUCTO EXISTENTE EN EL ALMACEN
   @Override
-  public void saveMovementSend(MovementSendRequest movementSendRequest, Long id_user) {
-    if (movementSendRequest.getQuantity() == 0) {
+  public void saveMovementReceive(MovementReceiveRequest movementReceiveRequest, Long id_user) {
+    if (movementReceiveRequest.getQuantity() <= 0) {
       throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
     }
 
@@ -70,7 +69,7 @@ public class MovementServiceImpl implements MovementService {
 
     String username = user.getFirstname() + " " + user.getLastname();
 
-    Long id_product = movementSendRequest.getIdProduct();
+    Long id_product = movementReceiveRequest.getIdProduct();
 
     if (id_product == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
@@ -86,7 +85,7 @@ public class MovementServiceImpl implements MovementService {
 
     productRepository.save(product);
 
-    Long id_company = movementSendRequest.getIdCompany();
+    Long id_company = movementReceiveRequest.getIdCompany();
     if (id_company == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -95,9 +94,9 @@ public class MovementServiceImpl implements MovementService {
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El nombre de la empresa no existe"));
 
     StockLot stockLot = new StockLot();
-    stockLot.setBatch(movementSendRequest.getBatch());
-    stockLot.setQuantityReceived(movementSendRequest.getQuantity());
-    stockLot.setQuantityAvailable(movementSendRequest.getQuantity());
+    stockLot.setBatch(movementReceiveRequest.getBatch());
+    stockLot.setQuantityReceived(movementReceiveRequest.getQuantity());
+    stockLot.setQuantityAvailable(movementReceiveRequest.getQuantity());
     // Logicamente el total entregado es 0 porque todavia no se ha entregado algo del stock
     stockLot.setDeliveredTotal(0);
 
@@ -124,9 +123,9 @@ public class MovementServiceImpl implements MovementService {
 
     Movement movement = new Movement();
 
-    movement.setQuantity(movementSendRequest.getQuantity());
+    movement.setQuantity(movementReceiveRequest.getQuantity());
     movement.setUsername_snapshot(username);
-    movement.setComment(movementSendRequest.getComment());
+    movement.setComment(movementReceiveRequest.getComment());
     movement.setProduct(product);
     movement.setStockLot(stockLot);
     movement.setUser(user);
@@ -134,13 +133,17 @@ public class MovementServiceImpl implements MovementService {
     movement.setDeliveryLine(null);
 
     // No se guarda el ID de deliveryLine porque no se trata de una linea entrega
-    movement.setMovementType(MovementType.SEND);
+    movement.setMovementType(MovementType.RECEIVE);
 
     movementRepository.save(movement);
   }
 
   @Override
-  public void saveMovementAdjustment(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
+  public void saveMovementAdjustmentIncrease(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
+    if (movementAdjustmentRequest.getQuantity() <= 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+    }
+
     if (id_user == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -157,57 +160,219 @@ public class MovementServiceImpl implements MovementService {
 
     // Encontrar el producto por id de stockLot
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe")
-    );
-    if (movementAdjustmentRequest.getQuantity() == 0){
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
-    }
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe"));
 
-    
-    // Se debe pasar la cantidad en la que se quiere incrementar o decrementar el stock
+    // Se debe pasar la cantidad en la que se quiere incrementar el stock
     int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
-    
-    if (newAvailable < 0)
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
 
     stockLot.setQuantityAvailable(newAvailable);
-
-    if (movementAdjustmentRequest.isAlterQuantityReceived()) {
-      stockLot.setQuantityReceived(stockLot.getQuantityReceived() + movementAdjustmentRequest.getQuantity());
-    }
-    
-    
-    // No se va a alterar el total entregado
+    stockLot.setQuantityReceived(stockLot.getQuantityReceived() + movementAdjustmentRequest.getQuantity());
     stockLotRepository.save(stockLot);
-    
-   // NOTA: POSIBLE ERROR DE REFERENCIA CIRCULAR!!!
-  
+
     Product product = stockLot.getProduct();
-
-    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
-    // Debe recalcular el total de la sumatoria de los stocks disponibles del producto
     product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
-
     productRepository.save(product);
-    
+
     Movement movement = new Movement();
     movement.setQuantity(movementAdjustmentRequest.getQuantity());
     movement.setUsername_snapshot(username);
     movement.setComment(movementAdjustmentRequest.getComment());
     movement.setUser(user);
     movement.setProduct(product);
-
-    // ESTE CAMPO SE PODRIA MODIFICAR SI SE TRATA DE ALTERAR LA CANTIDAD RECIBIDA
-    if (movementAdjustmentRequest.isAlterQuantityReceived()) {
-      movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_RECEIVED);
-    } else {
-      movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_AVAILABLE);
-    }
-
+    movement.setMovementType(MovementType.ADD);
 
     movement.setStockLot(stockLot);
     movementRepository.save(movement);
   }
+
+  @Override
+  public void saveMovementAdjustmentLoss(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
+    if (movementAdjustmentRequest.getQuantity() <= 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+    }
+
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+    String username = user.getFirstname() + " " + user.getLastname();
+
+    Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
+
+    if (id_stock_lot == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+
+    // La nueva cantidad de stock se resta
+    int newStock = stockLot.getQuantityAvailable() - movementAdjustmentRequest.getQuantity();
+
+    if (newStock < 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
+    }
+
+    // La cantidad disponible se actualiza
+    stockLot.setQuantityAvailable(newStock);
+
+    if (newStock == 0){
+      stockLot.setZeroStock(true);
+    }
+
+    stockLotRepository.save(stockLot);
+
+    Product product = stockLot.getProduct();
+
+    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
+    // PRODUCTOS
+    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+
+    productRepository.save(product);
+
+    Movement movement = new Movement();
+    movement.setUsername_snapshot(username);
+    movement.setComment(movementAdjustmentRequest.getComment());
+    movement.setProduct(product);
+    movement.setUser(user);
+    movement.setMovementType(MovementType.LOSS);
+    movement.setStockLot(stockLot);
+    movement.setQuantity(movementAdjustmentRequest.getQuantity());
+    movementRepository.save(movement);
+  }
+
+  @Override
+  public void saveMovementAdjustmentRecovery(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
+    if (movementAdjustmentRequest.getQuantity() <= 0) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+    }
+
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+    String username = user.getFirstname() + " " + user.getLastname();
+
+    Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
+
+    if (id_stock_lot == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+
+    // DEBE HACER UNA COMPARACION PARA SABER SI LA SUMA DE LA CANTIDAD DISPONIBLE Y EL TOTAL ENTREGADO NO ES IGUAL A LA CANTIDAD RECIBIDA
+    if (stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity() != stockLot.getQuantityReceived()) {
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "No hubo una perdida en este lote de stock");
+    }
+
+    // La nueva cantidad de stock se aumenta
+    int newStock = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
+
+    // La cantidad disponible se actualiza
+    stockLot.setQuantityAvailable(newStock);
+
+    if (newStock != 0) {
+      stockLot.setZeroStock(false);
+    }
+
+    stockLotRepository.save(stockLot);
+
+    Product product = stockLot.getProduct();
+
+    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
+    // PRODUCTOS
+    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+
+    productRepository.save(product);
+
+    Movement movement = new Movement();
+    movement.setUsername_snapshot(username);
+    movement.setComment(movementAdjustmentRequest.getComment());
+    movement.setProduct(product);
+    movement.setUser(user);
+    movement.setMovementType(MovementType.RECOVERY);
+    movement.setStockLot(stockLot);
+    movement.setQuantity(movementAdjustmentRequest.getQuantity());
+    movementRepository.save(movement);
+
+  }
+
+
+  // @Override
+  // public void saveMovementAdjustment(MovementAdjustmentRequest movementAdjustmentRequest, Long id_user) {
+  //   if (id_user == null) {
+  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+  //   }
+
+  //   User user = userRepository.findById(id_user).orElseThrow(
+  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+  //   String username = user.getFirstname() + " " + user.getLastname();
+
+  //   Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
+
+  //   if (id_stock_lot == null) {
+  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+  //   }
+
+  //   // Encontrar el producto por id de stockLot
+  //   StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe")
+  //   );
+  //   if (movementAdjustmentRequest.getQuantity() == 0){
+  //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La cantidad debe ser mayor a 0");
+  //   }
+
+    
+  //   // Se debe pasar la cantidad en la que se quiere incrementar o decrementar el stock
+  //   int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
+    
+  //   if (newAvailable < 0)
+  //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
+
+  //   stockLot.setQuantityAvailable(newAvailable);
+
+  //   if (movementAdjustmentRequest.isAlterQuantityReceived()) {
+  //     stockLot.setQuantityReceived(stockLot.getQuantityReceived() + movementAdjustmentRequest.getQuantity());
+  //   }
+    
+    
+  //   // No se va a alterar el total entregado
+  //   stockLotRepository.save(stockLot);
+    
+  //  // NOTA: POSIBLE ERROR DE REFERENCIA CIRCULAR!!!
+  
+  //   Product product = stockLot.getProduct();
+
+  //   // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS PRODUCTOS
+  //   // Debe recalcular el total de la sumatoria de los stocks disponibles del producto
+  //   product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+
+  //   productRepository.save(product);
+    
+  //   Movement movement = new Movement();
+  //   movement.setQuantity(movementAdjustmentRequest.getQuantity());
+  //   movement.setUsername_snapshot(username);
+  //   movement.setComment(movementAdjustmentRequest.getComment());
+  //   movement.setUser(user);
+  //   movement.setProduct(product);
+
+  //   // ESTE CAMPO SE PODRIA MODIFICAR SI SE TRATA DE ALTERAR LA CANTIDAD RECIBIDA
+  //   if (movementAdjustmentRequest.isAlterQuantityReceived()) {
+  //     movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_RECEIVED);
+  //   } else {
+  //     movement.setMovementType(MovementType.ADJUSTMENT_QUANTITY_AVAILABLE);
+  //   }
+
+
+  //   movement.setStockLot(stockLot);
+  //   movementRepository.save(movement);
+  // }
 
   @Override
   public void saveMovementTransfer(MovementTransferRequest movementTransferRequest, Long id_user) {
@@ -237,19 +402,29 @@ public class MovementServiceImpl implements MovementService {
     int newAvailableEmitter = stockLotEmitter.getQuantityAvailable() - movementTransferRequest.getQuantity();
     int newAvailableReceiver = stockLotReceiver.getQuantityAvailable() + movementTransferRequest.getQuantity();
 
-    // TODO: Verificar el funcionamiento de esta excepción, parece que no toma productos cuyo ID sea null
-    
     // Verificar que ambos lotes correspondan al mismo producto
-    if (stockLotEmitter.getProduct().getId() != stockLotReceiver.getProduct().getId()) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Los lotes deben pertenecer al mismo producto");
+    if (!stockLotEmitter.getProduct().getId()
+        .equals(stockLotReceiver.getProduct().getId())) {
+      throw new BusinessException(
+          ResponseStatusCodes.DEFAULT_RESOURCE,
+          "Los lotes deben pertenecer al mismo producto");
     }
-    
+
     if (newAvailableEmitter < 0) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente");
+      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE,"Stock insuficiente del lote de stock emisor");
     }
 
     stockLotEmitter.setQuantityAvailable(newAvailableEmitter);
     stockLotReceiver.setQuantityAvailable(newAvailableReceiver);
+    // if (stockLotEmitter.getQuantityAvailable() == 0) {
+    //   stockLotEmitter.setZeroStock(true);
+    // } 
+    
+    // if (stockLotEmitter.getQuantityAvailable() > 0){
+    //   stockLotEmitter.setZeroStock(false);
+    // }
+    stockLotEmitter.setZeroStock(
+        stockLotEmitter.getQuantityAvailable() == 0);
 
     // NOTA: NO SE RECALCULA EL TOTAL DE STOCK PORQUE ES UNA TRANSFERENCIA DE STOCK
 
@@ -263,8 +438,7 @@ public class MovementServiceImpl implements MovementService {
     Movement movement = new Movement();
     movement.setUsername_snapshot(username);
     
-    // NOTA: El comentario se generara de forma automatica
-    movement.setComment("Se ha transferido stock desde el lote de stock con ID " + stockLotEmitter.getId() + " al lote de stock con ID " + stockLotReceiver.getId());
+    movement.setComment(movementTransferRequest.getComment());
     
     // movement.setComment(movementTransferRequest.getComment());
     movement.setProduct(product);
@@ -272,57 +446,58 @@ public class MovementServiceImpl implements MovementService {
     movement.setMovementType(MovementType.TRANSFER);
     // NOTA: SE TOMA EL STOCKLOT DEL RECEPTOR
     movement.setStockLot(stockLotReceiver);
+    movement.setStockLotEmitter(stockLotEmitter);
     movement.setQuantity(movementTransferRequest.getQuantity());
     movementRepository.save(movement);
   }
 
   // Movimiento de perdida del almacen
-  @Override
-  public void saveMovementLoss(MovementLossRequest movementLossRequest, Long id_user) {
-    if (id_user == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-    }
+  // @Override
+  // public void saveMovementLoss(MovementLossRequest movementLossRequest, Long id_user) {
+  //   if (id_user == null) {
+  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+  //   }
 
-    User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
-    String username = user.getFirstname() + " " + user.getLastname();
+  //   User user = userRepository.findById(id_user).orElseThrow(
+  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+  //   String username = user.getFirstname() + " " + user.getLastname();
 
-    Long id_stock_lot = movementLossRequest.getIdStockLot();
+  //   Long id_stock_lot = movementLossRequest.getIdStockLot();
 
-      if (id_stock_lot == null) {
-        throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-      }
+  //     if (id_stock_lot == null) {
+  //       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+  //     }
 
-    StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
-    int newStock = stockLot.getQuantityAvailable() - movementLossRequest.getQuantity();
+  //   StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
+  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+  //   int newStock = stockLot.getQuantityAvailable() - movementLossRequest.getQuantity();
 
-    if (newStock < 0) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
-    }
+  //   if (newStock < 0) {
+  //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Stock insuficiente");
+  //   }
 
-    stockLot.setQuantityAvailable(newStock);
-    stockLotRepository.save(stockLot);
+  //   stockLot.setQuantityAvailable(newStock);
+  //   stockLotRepository.save(stockLot);
 
-    Product product = stockLot.getProduct();
+  //   Product product = stockLot.getProduct();
 
-    // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
-    // PRODUCTOS
-    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+  //   // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
+  //   // PRODUCTOS
+  //   product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
 
-    productRepository.save(product);
+  //   productRepository.save(product);
 
-    Movement movement = new Movement();
-    movement.setUsername_snapshot(username);
-    movement.setComment(movementLossRequest.getComment());
-    movement.setProduct(product);
-    movement.setUser(user);
-    movement.setMovementType(MovementType.LOSS);
-    movement.setStockLot(stockLot);
-    movement.setQuantity(movementLossRequest.getQuantity());
-    movementRepository.save(movement);
+  //   Movement movement = new Movement();
+  //   movement.setUsername_snapshot(username);
+  //   movement.setComment(movementLossRequest.getComment());
+  //   movement.setProduct(product);
+  //   movement.setUser(user);
+  //   movement.setMovementType(MovementType.LOSS);
+  //   movement.setStockLot(stockLot);
+  //   movement.setQuantity(movementLossRequest.getQuantity());
+  //   movementRepository.save(movement);
 
-  }
+  // }
 
 
   // TODO: HAY UN PROBLEMA EN LA RELACION DE ENTIDADES, DEBERIA SER DE MUCHOS A MUCHOS ENTRE STOCKLOT Y DELIVERYLINE PARA GUARDAR LOS IDS DE LOS LOTES DE STOCK EN LA LINEA DE ENTREGA
@@ -639,6 +814,8 @@ public class MovementServiceImpl implements MovementService {
 
     movementRepository.save(movement);
   }
+
+
 
 
   // DEFINIR METODOS PRIVADOS PARA

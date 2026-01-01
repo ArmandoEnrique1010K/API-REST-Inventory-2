@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MovementSendRequest {
+public class MovementReceiveRequest {
   @NotNull
   private Integer quantity;
   private String comment;
