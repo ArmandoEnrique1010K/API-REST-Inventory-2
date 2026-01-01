@@ -19,7 +19,9 @@ import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetai
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -38,20 +40,34 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Autowired
   private DeliveryOrderRepository deliveryOrderRepository;
 
+
   @Autowired
   private ProductRepository productRepository;
+
+  @Autowired
+  private Product_DeliveryOrderRepository product_deliveryOrderRepository;
 
   @Autowired
   private UserService userService;
 
   @Override
-  public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_user) {
+  public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_product_deliveryOrder, Long id_user) {
+
     // SI SE HA GUARDADO EL PEDIDO DE ENTREGA, CUYA UBICACIÓN YA EXISTE EN LA
     // MISMA ORDEN DE ENTREGA, NO SE TIENE QUE AGREGAR LA LINEA DE ENTREGA
-    existDeliveryLineByLocationId(deliveryLineRequest.getIdLocation(), deliveryLineRequest.getIdDeliveryOrder());
+    existDeliveryLineByProduct_DeliveryOrder(deliveryLineRequest.getIdLocation(), id_product_deliveryOrder);
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
     DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
     String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
+    if (id_product_deliveryOrder == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
+    // Obtener el producto y orden de entrega desde Product_DeliveryOrder
+    Product_DeliveryOrder product_DeliveryOrder = product_deliveryOrderRepository.findById(id_product_deliveryOrder).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+
 
     DeliveryLine deliveryLine = new DeliveryLine();
 
@@ -66,33 +82,26 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Buscar el id de la ubicación y orden de entrega
     Long idLocation = deliveryLineRequest.getIdLocation();
-    Long idDeliveryOrder = deliveryLineRequest.getIdDeliveryOrder();
-    Long idProduct = deliveryLineRequest.getIdProduct();
+    Long idDeliveryOrder = product_DeliveryOrder.getDeliveryOrder().getId();
+    Long idProduct = product_DeliveryOrder.getProduct().getId();
 
-    if (idLocation == null){
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-    }
-
-    if (idDeliveryOrder == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-    }
-
-    if (idProduct == null) {
+    if (idLocation == null || idDeliveryOrder == null || idProduct == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
     Location location = locationRepository.findById(idLocation)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El pedido de entrega no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El pedido de entrega no existe en el sistema"));
 
     Product product = productRepository.findById(idProduct).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
     deliveryLine.setLocation(location);
     deliveryLine.setDeliveryOrder(deliveryOrder);
     deliveryLine.setProduct(product);
+    deliveryLine.setProductDeliveryOrder(product_DeliveryOrder);
     deliveryLineRepository.save(deliveryLine);
 
     // TODO: SI TODAS LAS ORDENES DE ENTREGA YA ESTAN MARCADAS COMO READY, ENTONCES LA ORDEN DE ENTRRGA DEBE MARCARSE COMO READY
@@ -102,15 +111,20 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // 1° actualizar la fecha limite de deliveryOrder comparando todas las lineas de entrega y tomar el valor con la fecha más cercana que no haya sido entregada
     deliveryOrder.setLimitDate(getClosestLimitDate(idDeliveryOrder));
 
-    // 2° actualizar la cantidad de deliveryOrder sumando todos los totales lineas de entrega
-    // deliveryOrder.setQuantityTotal(deliveryLineRepository.sumRequiredQuantityByDeliveryOrderId(idDeliveryOrder));
-    // deliveryOrder.setQuantityTotal(1000);
+
+    // 2° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE ENTREGA POR ORDEN DE ENTREGA
+      product_DeliveryOrder.setQuantityTotal(deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(id_product_deliveryOrder));
+
+
+    
 
     // 3° actualizar el estado a INPROGRESS cada vez que se guarde una nueva linea de entrega
     deliveryOrder.setPreparationStatus(PreparationStatus.INPROGRESS);
 
     deliveryOrderRepository.save(deliveryOrder);
   }
+
+
   // Repository → devuelve Optional
   // Service → trabaja con entidades reales
   // Nunca uses .get()
@@ -258,12 +272,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   // Metodo auxiliar
   // Busca si existe una linea de entrega que pertenezca a esa ubicación y tambien a esa misma orden de entrega
-  private void existDeliveryLineByLocationId(Long idLocation, Long idDeliveryOrder) {
+  private void existDeliveryLineByProduct_DeliveryOrder(Long idLocation, Long idProduct_DeliveryOrder) {
 
     // TODO: TAMBIEN DEBE VERIFICAR SI EL MISMO PRODUCTO EXISTE EN ESA MISMA UBICACION
     // TODO: SE PUEDE TENER MÁS DE UN PRODUCTO EN ESA MISMA UBICACION
     if (deliveryLineRepository
-        .existsByLocationIdAndDeliveryOrderId(idLocation, idDeliveryOrder)) {
+        .existsByLocationIdAndProduct_DeliveryOrderId(idLocation, idProduct_DeliveryOrder)) {
 
       throw new FieldValidation(
           "idLocation",

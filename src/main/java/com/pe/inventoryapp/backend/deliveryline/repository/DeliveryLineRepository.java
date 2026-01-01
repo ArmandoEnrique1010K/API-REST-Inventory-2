@@ -57,7 +57,16 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       """)
   Optional<LocalDateTime> findClosestLimitDate(Long id);
 
-  boolean existsByLocationIdAndDeliveryOrderId(Long locationId, Long deliveryOrderId);
+
+
+  @Query("""
+          SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+          FROM DeliveryLine dl
+          WHERE dl.productDeliveryOrder.id = :product_DeliveryOrderId
+      """)
+  Integer sumRequiredQuantityByProduct_DeliveryOrder(Long product_DeliveryOrderId);
+
+  boolean existsByLocationIdAndProduct_DeliveryOrderId(Long locationId, Long product_DeliveryOrderId);
 
   @Query("""
           SELECT COALESCE(SUM(dl.requiredQuantity), 0)

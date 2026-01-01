@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.deliveryorder.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,9 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.mapper.Product_DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.Product_DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -75,5 +78,13 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
 
     // NOTA: SOLO SE EJECUTA SI CADA UNO DE LOS REGISTROS FUE VALIDADO
     product_DeliveryOrderRepository.saveAll(relations);
+  }
+
+  @Override
+  public List<Product_DeliveryOrderListResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
+
+    List<Product_DeliveryOrder> product_DeliveryOrders = product_DeliveryOrderRepository.findAllByDeliveryOrderId(idDeliveryOrder);
+
+    return product_DeliveryOrders.stream().map(deliveryOrder -> Product_DeliveryOrderMapper.builder().setProduct_DeliveryOrder(deliveryOrder).buildProduct_DeliveryOrderListResponse()).collect(Collectors.toList());
   }  
 }

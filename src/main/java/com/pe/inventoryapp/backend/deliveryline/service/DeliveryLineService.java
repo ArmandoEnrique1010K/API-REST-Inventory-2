@@ -14,7 +14,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListR
 public interface DeliveryLineService {
 
   // Guardar una linea de entrega
-  void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_user);
+  void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_product_deliveryOrder, Long id_user);
 
   // Busca todas las lineas de una orden de entrega
   Page<DeliveryLineListResponse> findAllDeliveryLinesByDeliveryOrderIdPageable(

@@ -8,11 +8,11 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.Product_DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.service.Product_DeliveryOrderService;
-import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
-import com.pe.inventoryapp.backend.product.service.ProductService;
-
 import jakarta.validation.Valid;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +20,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -36,12 +39,17 @@ public class Product_DeliveryOrderController {
 
   @PostMapping("/{idDeliveryOrder}")
   public ResponseEntity<CommonResponse> relationManyProductsToDeliveryOrder(@PathVariable Long idDeliveryOrder, @Valid @RequestBody Product_DeliveryOrderRequest product_DeliveryOrderRequest, BindingResult result) {
-
     validationService.validateFieldsAndThrowResponse(result);
     product_DeliveryOrderService.saveProduct_DeliveryOrder(product_DeliveryOrderRequest, idDeliveryOrder);
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
             "Se han agregado productos a la orden de entrega"));
+  }
+
+  @GetMapping("/{idDeliveryOrder}")
+  public ResponseEntity<?> listAllProductsByDeliveryOrder(@PathVariable Long idDeliveryOrder) {
+    List<Product_DeliveryOrderListResponse> product_DeliveryOrderListResponses = product_DeliveryOrderService.findAllByDeliveryOrderId(idDeliveryOrder);
+    return ResponseEntity.status(200).body(product_DeliveryOrderListResponses);
   }
 }
