@@ -134,33 +134,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     deliveryOrderRepository.save(deliveryOrder);
   }
-  // return "Pedido de entrega actualizado correctamente";
-
-  // @Override
-  // public void changePreparationStatusDeliveryOrderById(Long id, PreparationStatus preparationStatus, Long id_user) {
-  //   if (id == null) {
-  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-  //   }
-
-  //   // TODO: LISTAR LOS ESTADOS NO PERMITIDOS
-  //   // EVITAR QUE EL USUARIO HAYA INTRODUCIDO UN ESTADO NO PERMITIDO
-  //   if (preparationStatus == PreparationStatus.INPROGRESS) {
-  //     throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El estado de la orden de entrega no puede ser INPROGRESS");
-  //   }
-
-
-  //   DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
-
-  //   // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-  //   DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-  //   String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
-
-
-  //   deliveryOrder.setPreparationStatus(preparationStatus);
-  //   deliveryOrder.setUpdatedByUser(username);
-  //   deliveryOrderRepository.save(deliveryOrder);
-  // }
 
   private void verifyBatchExist(String batch) {
     if (deliveryOrderRepository.findByBatch(batch).isPresent()) {

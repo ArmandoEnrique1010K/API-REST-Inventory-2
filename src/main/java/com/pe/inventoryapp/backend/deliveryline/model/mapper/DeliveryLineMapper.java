@@ -33,7 +33,11 @@ public class DeliveryLineMapper {
           deliveryLine.getUpdatedByUser(),
           deliveryLine.getPreparationStatus(),
           deliveryLine.getLocation().getName(),
-          deliveryLine.getLocation().getRegion().getName());
+          deliveryLine.getLocation().getRegion().getName(),
+          deliveryLine.getProduct().getId(),
+          deliveryLine.getProduct().getName(),
+          deliveryLine.getProduct().getImageUrl()
+          );
     }
   }
 

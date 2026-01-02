@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.model.mapper.StockLotMapper;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotDetailsResponse;

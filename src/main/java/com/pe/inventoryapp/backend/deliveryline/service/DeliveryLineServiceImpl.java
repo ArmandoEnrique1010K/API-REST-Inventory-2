@@ -170,6 +170,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
+    if (deliveryLine == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     return  DeliveryLineMapper.builder().setDeliveryLine(deliveryLine).buildDeliveryLineDetailsResponse();
   }
 

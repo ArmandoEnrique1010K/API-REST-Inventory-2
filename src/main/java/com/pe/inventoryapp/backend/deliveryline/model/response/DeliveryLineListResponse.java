@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.deliveryline.model.response;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
