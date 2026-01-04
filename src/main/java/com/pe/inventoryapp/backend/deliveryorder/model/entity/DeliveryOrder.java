@@ -62,8 +62,4 @@ public class DeliveryOrder {
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User user;
-
-  @OneToMany(mappedBy = "deliveryOrder")
-  private List<DeliveryOrderRegionSummary> deliveryOrderRegionSummaries;
-
 }

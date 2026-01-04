@@ -133,7 +133,7 @@ public class DeliveryLineController {
         "La linea de entrega tiene el estado cancelado"));
   }
 
-  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE PERDIDO
+  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE PERDIDO (TENDRA EL DERECHO DE REPONER EL PEDIDO EXTRAVIADO)
   // Solamente si tiene el estado DELIVERED
   @PatchMapping("/{id}/missing")
   public ResponseEntity<CommonResponse> changeMissingStatusDeliveryLine(Authentication authentication,

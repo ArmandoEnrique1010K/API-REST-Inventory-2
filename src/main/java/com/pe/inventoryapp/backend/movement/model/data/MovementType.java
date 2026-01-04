@@ -14,4 +14,7 @@ public enum MovementType {
   ALLOCATE, // Preparar entrega
   RETURN_BY_DAMAGE, // Retorno por daño de producto
   RETURN_BY_CHANGE, // Retorno por cambio de orden de entrega
+
+  CANCELLED, // Cancelado una linea de entrega
+  MISSING, // Perdido una linea de entrega, se necesita reponer
 }

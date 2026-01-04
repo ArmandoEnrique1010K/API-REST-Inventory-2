@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.deliveryline.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,10 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
+import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
+import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
+import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
+import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -52,13 +57,20 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   private ProductRepository productRepository;
 
   @Autowired
-  private Product_DeliveryOrderRepository product_deliveryOrderRepository;
+  private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
+
 
   @Autowired
   private UserService userService;
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private CompanyRepository companyRepository;
+
+  @Autowired
+  private StockLotRepository stockLotRepository;
 
   @Override
   public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_product_deliveryOrder, Long id_user) {
@@ -75,7 +87,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // Obtener el producto y orden de entrega desde Product_DeliveryOrder
-    Product_DeliveryOrder product_DeliveryOrder = product_deliveryOrderRepository.findById(id_product_deliveryOrder).orElseThrow(
+    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(id_product_deliveryOrder).orElseThrow(
         () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
 
 
@@ -111,7 +123,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setLocation(location);
     deliveryLine.setDeliveryOrder(deliveryOrder);
     deliveryLine.setProduct(product);
-    deliveryLine.setProductDeliveryOrder(product_DeliveryOrder);
+    deliveryLine.setProduct_DeliveryOrder(product_DeliveryOrder);
     deliveryLineRepository.save(deliveryLine);
 
     // TODO: EN EL MODULO DE MOVEMENT, SI TODAS LAS ORDENES DE ENTREGA YA ESTAN MARCADAS COMO READY, ENTONCES LA ORDEN DE ENTRRGA DEBE MARCARSE COMO READY
@@ -219,12 +231,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
 
     // DEBE BUSCAR LA RELACION PRODUCTOS - ORDENES DE ENTREGA PARA ACTUALIZAR LA SUMATORIA DE LA CANTIDAD REQUERIDA
-    Product_DeliveryOrder product_DeliveryOrder = deliveryLine.getProductDeliveryOrder();
+    Product_DeliveryOrder product_DeliveryOrder = deliveryLine.getProduct_DeliveryOrder();
     if (product_DeliveryOrder == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    Long product_DeliveryOrder_id = deliveryLine.getProductDeliveryOrder().getId();
+    Long product_DeliveryOrder_id = deliveryLine.getProduct_DeliveryOrder().getId();
 
     if (product_DeliveryOrder_id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
@@ -289,7 +301,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     product_DeliveryOrder.setRequiredQuantityTotal(
         deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(product_DeliveryOrder_id));
 
-    product_deliveryOrderRepository.save(product_DeliveryOrder);
+    product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
 
     // ESTO REPRESENTA UN NUEVO MOVIMIENTO DE CANTIDAD
@@ -339,7 +351,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    Product_DeliveryOrder product_DeliveryOrder = product_deliveryOrderRepository.findById(
+    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
         deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 
     if (deliveryLine == null || product_DeliveryOrder == null || deliveryOrder == null) {
@@ -424,7 +436,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // VERIFICA SI EL MISMO PRODUCTO EXISTE EN ESA MISMA UBICACION
     // SE PUEDE TENER MÁS DE UN PRODUCTO EN ESA MISMA UBICACION
     if (deliveryLineRepository
-        .existsByLocationIdAndProductDeliveryOrderId(idLocation, idProduct_DeliveryOrder)) {
+        .existsByLocationAndProductDeliveryOrder(idLocation, idProduct_DeliveryOrder)) {
 
       throw new FieldValidation(
           "idLocation",
@@ -444,6 +456,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
 
+    // ESTO ES UN MOVIMIENTO DE CANCELACIÓN
   @Override
   public void changeCanceledStatusDeliveryLineById(Long id, Long id_user) {
     if (id == null) {
@@ -458,15 +471,82 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           "La linea de entrega no puede ser cancelada porque tiene el estado " + deliveryLine.getPreparationStatus());
     }
 
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
 
-    // TODO: FALTA IMPLEMENTAR UNA LOGICA PARA REALIZAR ALGO CON LA CANTIDAD REQUERIDA
+    String username = user.getFirstname() + " " + user.getLastname();
 
+    // IMPLEMENTAR UNA LOGICA PARA REALIZAR ALGO CON LA CANTIDAD REQUERIDA
+
+    // Si una linea de entrega fue cancelada
+    // 1° debe descontar la cantidad entregada de la cantidad requerida
+    Integer deliveredQuantity = deliveryLine.getDeliveredQuantity();
+
+    deliveryLine.setRequiredQuantity(0);
+    deliveryLine.setDeliveredQuantity(0);
+    deliveryLine.setPendingQuantity(0);
+
+    // La fecha limite de la linea de entrega debe ser la fecha actual
+    deliveryLine.setLimitDate(LocalDateTime.now());
+
+    // 2° debe cambiar el estado de la linea de entrega a CANCELADO, además del
+    // usuario que la cancela
     deliveryLine.setPreparationStatus(PreparationStatus.CANCELED);
     deliveryLine.setUpdatedByUser(username);
+
+    // TODO: Probar esta logica para ver si se actualiza el total de la cantidad requerida
+
+    Integer totalRequiredQuantity = deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(id);
+
+
     deliveryLineRepository.save(deliveryLine);
+
+    Long deliveryOrderId = deliveryLine.getProduct_DeliveryOrder().getId();
+
+    if (deliveryOrderId == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+  
+      Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(deliveryOrderId).orElseThrow(
+          () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El product_delivery_order no existe"));
+
+      product_DeliveryOrder.setRequiredQuantityTotal(totalRequiredQuantity);
+      product_DeliveryOrderRepository.save(product_DeliveryOrder);
+
+    // 3° podria crear una nuevo StockLot con la cantidad que quedo en la linea de
+    // entrega
+    StockLot stockLot = new StockLot();
+    stockLot.setQuantityReceived(deliveredQuantity);
+    stockLot.setQuantityAvailable(deliveredQuantity);
+    stockLot.setBatch("Linea de entrega con ID: "  + deliveryLine.getId() + " cancelada");
+    stockLot.setProduct(deliveryLine.getProduct());
+    stockLot.setZeroStock(false);
+
+    // NOTA: POR DEFECTO EL STOCK QUE SE VA A DEVOLVER VA A PERTENECER A LA MISMA EMPRESA 
+    Company firstCompany = companyRepository.findById(1L).orElseThrow(() -> new RuntimeException("No se encontro la empresa"));
+
+    stockLot.setCompany(firstCompany);
+    stockLot.setDeliveredTotal(0);
+    stockLotRepository.save(stockLot);
+
+
+        // 4° REGISTRARLO COMO MOVIMIENTO
+    Movement movement = new Movement();
+    movement.setMovementType(MovementType.CANCELLED);
+    movement.setQuantity(deliveredQuantity);
+    movement.setStockLot(stockLot);
+    movement.setComment("Linea de entrega con ID: " + deliveryLine.getId() + " cancelada");
+    movement.setUsername_snapshot(username);
+    movement.setUser(user);
+    movement.setDeliveryLine(deliveryLine);
+    movementRepository.save(movement);
+
+
   }
 
 
@@ -485,12 +565,57 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           "La linea de entrega no puede ser cancelada porque tiene el estado " + deliveryLine.getPreparationStatus());
     }
 
-    // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
 
-    // TODO: FALTA IMPLEMENTAR UNA LOGICA PARA REALIZAR ALGO CON LA CANTIDAD
-    // REQUERIDA
+    // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
+    User user = userRepository.findById(id_user).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+
+    String username = user.getFirstname() + " " + user.getLastname();
+    // IMPLEMENTAR UNA LOGICA PARA REALIZAR ALGO CON LA CANTIDAD REQUERIDA
+
+
+    // EN ESTE CASO, DEBE CREAR UNA NUEVA LINEA DE ENTREGA CON LA CANTIDAD REQUERIDA
+    DeliveryLine newDeliveryLine = new DeliveryLine();
+    newDeliveryLine.setProduct(deliveryLine.getProduct());
+    newDeliveryLine.setProduct_DeliveryOrder(deliveryLine.getProduct_DeliveryOrder());
+    newDeliveryLine.setRequiredQuantity(deliveryLine.getRequiredQuantity());
+    newDeliveryLine.setDeliveredQuantity(0);
+    newDeliveryLine.setPendingQuantity(0);
+    newDeliveryLine.setLimitDate(deliveryLine.getLimitDate());
+    newDeliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    newDeliveryLine.setUpdatedByUser(username);
+    deliveryLineRepository.save(newDeliveryLine);
+
+      Long id_product_deliveryOrder = newDeliveryLine.getProduct_DeliveryOrder().getId();
+      if (id_product_deliveryOrder == null) {
+        throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      } 
+
+
+    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(id_product_deliveryOrder).orElseThrow(
+        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El product_delivery_order no existe"));
+    
+    Integer totalRequiredQuantity = deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(id);
+
+    product_DeliveryOrder.setRequiredQuantityTotal(totalRequiredQuantity);
+    product_DeliveryOrderRepository.save(product_DeliveryOrder);
+
+
+    // 4° REGISTRARLO COMO MOVIMIENTO
+    Movement movement = new Movement();
+    movement.setMovementType(MovementType.MISSING);
+    movement.setQuantity(deliveryLine.getRequiredQuantity());
+    movement.setStockLot(null);
+    movement.setComment("Linea de entrega con ID: " + deliveryLine.getId() + " perdida");
+    movement.setUsername_snapshot(username);
+    movement.setUser(user);
+    movement.setDeliveryLine(deliveryLine);
+    movementRepository.save(movement);
+
+
 
     deliveryLine.setPreparationStatus(PreparationStatus.MISSING);
     deliveryLine.setUpdatedByUser(username);

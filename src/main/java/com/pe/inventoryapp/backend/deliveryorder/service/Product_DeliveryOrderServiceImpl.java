@@ -14,7 +14,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.Product_DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.Product_DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderListResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.ProductDeliveryOrderResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -81,7 +81,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
   }
 
   @Override
-  public List<Product_DeliveryOrderListResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
+  public List<ProductDeliveryOrderResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
 
     List<Product_DeliveryOrder> product_DeliveryOrders = product_DeliveryOrderRepository.findAllByDeliveryOrderId(idDeliveryOrder);
 

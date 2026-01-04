@@ -1,7 +1,7 @@
 package com.pe.inventoryapp.backend.deliveryorder.model.mapper;
 
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderListResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.ProductDeliveryOrderResponse;
 
 public class Product_DeliveryOrderMapper {
     private Product_DeliveryOrder product_DeliveryOrder;
@@ -18,11 +18,11 @@ public class Product_DeliveryOrderMapper {
     return this;
   }
 
-  public Product_DeliveryOrderListResponse buildProduct_DeliveryOrderListResponse() {
+  public ProductDeliveryOrderResponse buildProduct_DeliveryOrderListResponse() {
     if (product_DeliveryOrder == null) {
       throw new RuntimeException("Debe pasar la entidad DeliveryOrder");
     } else {
-      return new Product_DeliveryOrderListResponse(
+      return new ProductDeliveryOrderResponse(
         product_DeliveryOrder.getId(),
         product_DeliveryOrder.getProduct().getId(),
         product_DeliveryOrder.getProduct().getName(),

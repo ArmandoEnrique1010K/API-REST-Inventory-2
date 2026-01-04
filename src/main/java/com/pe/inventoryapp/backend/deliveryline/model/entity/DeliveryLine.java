@@ -68,7 +68,7 @@ public class DeliveryLine {
 
   @ManyToOne
   @JoinColumn(name = "product_delivery_order_id")
-  private Product_DeliveryOrder productDeliveryOrder;
+  private Product_DeliveryOrder product_DeliveryOrder;
 
   @ManyToOne
   @JoinColumn(name = "delivery_order_id")

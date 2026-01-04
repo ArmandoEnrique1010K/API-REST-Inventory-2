@@ -59,21 +59,55 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
 
 
 
-  @Query("""
-          SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-          FROM DeliveryLine dl
-          WHERE dl.productDeliveryOrder.id = :product_DeliveryOrderId
-      """)
-  Integer sumRequiredQuantityByProduct_DeliveryOrder(Long product_DeliveryOrderId);
-
-  boolean existsByLocationIdAndProductDeliveryOrderId(Long locationId, Long product_DeliveryOrderId);
+  // @Query("""
+  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+  //         FROM DeliveryLine dl
+  //         WHERE dl.productDeliveryOrder.id = :product_DeliveryOrderId
+  //     """)
+  // Integer sumRequiredQuantityByProduct_DeliveryOrder(Long product_DeliveryOrderId);
 
   @Query("""
           SELECT COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
-          WHERE dl.deliveryOrder.id = :deliveryOrderId
+          JOIN dl.product p
+          JOIN p.productDeliveryOrders pdo
+          WHERE pdo.id = :productDeliveryOrderId
       """)
-  Integer sumRequiredQuantityByDeliveryOrderId(Long deliveryOrderId);
+  Integer sumRequiredQuantityByProduct_DeliveryOrder(
+      @Param("productDeliveryOrderId") Long productDeliveryOrderId);
+
+  // TODO: VERIFICAR ESTE METODO
+  @Query("""
+          SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
+          FROM DeliveryLine dl
+          JOIN dl.product p
+          JOIN p.productDeliveryOrders pdo
+          WHERE dl.location.id = :locationId
+            AND pdo.id = :orderId
+      """)
+  boolean existsByLocationAndProductDeliveryOrder(
+      @Param("locationId") Long locationId,
+      @Param("orderId") Long orderId);
+
+  // @Query("""
+  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+  //         FROM DeliveryLine dl
+  //         WHERE dl.deliveryOrder.id = :deliveryOrderId
+  //     """)
+  // Integer sumRequiredQuantityByDeliveryOrderId(Long deliveryOrderId);
+
+  // TODO: MEJORAR ESTE METODO
+  // @Query("""
+  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+  //         FROM DeliveryLine dl
+  //         JOIN dl.product p
+  //         JOIN p.productDeliveryOrders pdo
+  //         WHERE pdo.id = :productDeliveryOrderId
+  //     """)
+  // Long sumRequiredQuantityByProductDeliveryOrder(
+  //     @Param("productDeliveryOrderId") Long productDeliveryOrderId);
+
+
 
   @Query("""
       SELECT COUNT(dl) = 0
@@ -82,4 +116,17 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND dl.preparationStatus <> 'READY'
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
+
+
+  // @Query("""
+  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+  //         FROM DeliveryLine dl
+  //         JOIN dl.product p
+  //         JOIN p.productDeliveryOrders pdo
+  //         WHERE pdo.id = :productDeliveryOrderId
+  //     """)
+  // Long sumRequiredQuantityByProductDeliveryOrder(
+  //     @Param("productDeliveryOrderId") Long productDeliveryOrderId);
+
 }
+

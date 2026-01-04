@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrderRegionSummary;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,6 +35,6 @@ public class Region {
     private List<Location> locations;
 
     @OneToMany(mappedBy = "region")
-    private List<DeliveryOrderRegionSummary> deliveryOrderRegionSummaries;
+    private List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions;
 
 }

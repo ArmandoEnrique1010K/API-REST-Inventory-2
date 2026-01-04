@@ -39,6 +39,10 @@ public class Product_DeliveryOrder {
   @JoinColumn(name = "product_id")
   private Product product;
 
-  @OneToMany(mappedBy = "productDeliveryOrder")
+  @OneToMany(mappedBy = "product_DeliveryOrder")
   private List<DeliveryLine> deliveryLines;
+
+  @OneToMany(mappedBy = "product_DeliveryOrder")
+  private List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions;
+
 }

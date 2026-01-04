@@ -8,7 +8,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.Product_DeliveryOrderRequest;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderListResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.ProductDeliveryOrderResponse;
 import com.pe.inventoryapp.backend.deliveryorder.service.Product_DeliveryOrderService;
 import jakarta.validation.Valid;
 
@@ -48,7 +48,7 @@ public class Product_DeliveryOrderController {
 
   @GetMapping("/{idDeliveryOrder}")
   public ResponseEntity<?> listAllProductsByDeliveryOrder(@PathVariable Long idDeliveryOrder) {
-    List<Product_DeliveryOrderListResponse> product_DeliveryOrderListResponses = product_DeliveryOrderService.findAllByDeliveryOrderId(idDeliveryOrder);
+    List<ProductDeliveryOrderResponse> product_DeliveryOrderListResponses = product_DeliveryOrderService.findAllByDeliveryOrderId(idDeliveryOrder);
     return ResponseEntity.status(200).body(product_DeliveryOrderListResponses);
   }
 }
