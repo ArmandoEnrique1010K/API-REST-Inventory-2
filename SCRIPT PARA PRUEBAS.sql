@@ -1,7 +1,7 @@
 
 
 # Las contraseñas tienen el mismo valor: 12345
-INSERT INTO `db_inventory_app_backend`.`users` (`dni`, `email`, `firstname`, `lastname`, `password`) VALUES 
+INSERT INTO `db_inventory_app_backend`.`usuarios` (`dni`, `email`, `firstname`, `lastname`, `password`) VALUES 
 ('55726207', 'kcarillo0@hexun.com', 'Kaitlyn', 'Darker', '$2a$12$xTcQQboh9TC8yNiGo3WWXOTCwBJgaZzjJMAj7iiQwJneO09YI5lWS'), 
 ('65808829', 'dcasin1@diigo.com', 'Dodi', 'Tyas', '$2a$12$xTcQQboh9TC8yNiGo3WWXOTCwBJgaZzjJMAj7iiQwJneO09YI5lWS'),
 ('84561619', 'kguilder2@mysql.com', 'Kevyn', 'Gorce', '$2a$12$xTcQQboh9TC8yNiGo3WWXOTCwBJgaZzjJMAj7iiQwJneO09YI5lWS'),
@@ -13,7 +13,7 @@ INSERT INTO `db_inventory_app_backend`.`users` (`dni`, `email`, `firstname`, `la
 ('74586241', 'ggillow3@auda.org.au', 'Grazia', 'Allabarton', '$2a$12$xTcQQboh9TC8yNiGo3WWXOTCwBJgaZzjJMAj7iiQwJneO09YI5lWS'),
 ('78652879', 'ijako4@sfgate.com', 'Isidore', 'Filchakov', '$2a$12$xTcQQboh9TC8yNiGo3WWXOTCwBJgaZzjJMAj7iiQwJneO09YI5lWS');
 
-INSERT INTO `db_inventory_app_backend`.`users_roles` (`user_id`, `role_id`) VALUES 
+INSERT INTO `db_inventory_app_backend`.`usuarios_roles` (`user_id`, `role_id`) VALUES 
 ('2', '1'),
 ('2', '2'),
 ('3', '1'),
@@ -47,7 +47,7 @@ INSERT INTO `db_inventory_app_backend`.`categorias` (`name`, `status`) VALUES
 ('Clothing - Shirts', true),
 ('Food - Vegetables', true);
 
-INSERT INTO `db_inventory_app_backend`.`products` (`caducity_date`, `created_at`, `entry_date`, `image_url`, `length`, `name`, `status`, `stock`, `updated_at`, `width`, `category_id`) VALUES 
+INSERT INTO `db_inventory_app_backend`.`productos` (`caducity_date`, `created_at`, `entry_date`, `image_url`, `length`, `name`, `status`, `stock`, `updated_at`, `width`, `category_id`) VALUES 
 ('2025-09-05','2025-04-25','2025-06-18','http://dummyimage.com/158x100.png/cc0000/ffffff',8.95,'Gaming Headset',true,980,'2025-05-20',6.69,8),
 ('2025-08-30','2025-06-24','2025-06-13','http://dummyimage.com/185x100.png/dddddd/000000',6.87,'Fashionable Fanny Pack',true,2730,'2025-02-11',27.27,4),
 ('2025-07-26','2025-08-04','2025-09-21','http://dummyimage.com/222x100.png/5fa2dd/ffffff',22.82,'Blueberry Chia Jam',true,7103,'2025-11-02',2.67,1),

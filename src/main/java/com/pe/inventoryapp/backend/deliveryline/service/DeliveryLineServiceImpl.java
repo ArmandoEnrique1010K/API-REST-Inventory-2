@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.deliveryline.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -340,16 +339,18 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
 
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
-        deliveryLineId).orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
-    if (deliveryOrder == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
-    }
-    Long deliveryOrderId = deliveryOrder.getId();
+    Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
 
     if (deliveryOrderId == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
+
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
+        deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+    if (deliveryOrder == null) {
+      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+    }
+
 
     Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
         deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La relacion producto-orden de entrega no existe"));
@@ -361,6 +362,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       if (deliveryLine.getDeliveredQuantity() > 0) {
         throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "No se puede eliminar porque ya hay una cantidad a entregar");
       }
+
+      // TODO: EN SISTEMAS QUE ALMACENAN DATOS HISTORICOS NO SE DEBEN ELIMINAR LOS DATOS
       deliveryLineRepository.delete(deliveryLine);
       // RECALCULAR EL TOTAL DE CANTIDAD PENDIENTE
       // 1° actualizar la fecha limite de deliveryOrder comparando todas las lineas de

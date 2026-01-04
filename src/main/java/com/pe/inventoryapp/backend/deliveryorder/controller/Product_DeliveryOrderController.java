@@ -51,4 +51,11 @@ public class Product_DeliveryOrderController {
     List<ProductDeliveryOrderResponse> product_DeliveryOrderListResponses = product_DeliveryOrderService.findAllByDeliveryOrderId(idDeliveryOrder);
     return ResponseEntity.status(200).body(product_DeliveryOrderListResponses);
   }
+
+  // TODO: AÑADIR OTROS METODOS PARA EL CONTROLADOR
+  // ACTUALIZAR LA LISTA DE RELACIONES DE PRODUCTOS Y ORDENES DE ENTREGA POR SU ID
+
+  // VERIFICAR QUE EL PRODUCTO AGREGADO TENGA UNA SUMATORIA DE CANTIDAD PENDIENTE A 0 DE CANTIDADES PENDIENTES EN LA ORDEN DE ENTREGA PARA QUE SE PUEDA ELIMINAR DE LA RELACIÓN
+
+  
 }

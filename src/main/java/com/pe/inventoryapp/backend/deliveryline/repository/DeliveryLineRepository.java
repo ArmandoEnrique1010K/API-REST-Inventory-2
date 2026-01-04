@@ -66,6 +66,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   //     """)
   // Integer sumRequiredQuantityByProduct_DeliveryOrder(Long product_DeliveryOrderId);
 
+
   @Query("""
           SELECT COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
@@ -89,23 +90,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       @Param("locationId") Long locationId,
       @Param("orderId") Long orderId);
 
-  // @Query("""
-  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-  //         FROM DeliveryLine dl
-  //         WHERE dl.deliveryOrder.id = :deliveryOrderId
-  //     """)
-  // Integer sumRequiredQuantityByDeliveryOrderId(Long deliveryOrderId);
-
-  // TODO: MEJORAR ESTE METODO
-  // @Query("""
-  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-  //         FROM DeliveryLine dl
-  //         JOIN dl.product p
-  //         JOIN p.productDeliveryOrders pdo
-  //         WHERE pdo.id = :productDeliveryOrderId
-  //     """)
-  // Long sumRequiredQuantityByProductDeliveryOrder(
-  //     @Param("productDeliveryOrderId") Long productDeliveryOrderId);
 
 
 
@@ -117,16 +101,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
 
-
-  // @Query("""
-  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-  //         FROM DeliveryLine dl
-  //         JOIN dl.product p
-  //         JOIN p.productDeliveryOrders pdo
-  //         WHERE pdo.id = :productDeliveryOrderId
-  //     """)
-  // Long sumRequiredQuantityByProductDeliveryOrder(
-  //     @Param("productDeliveryOrderId") Long productDeliveryOrderId);
 
 }
 
