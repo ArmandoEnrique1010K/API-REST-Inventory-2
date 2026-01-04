@@ -59,7 +59,7 @@ public class CategoryServiceImpl implements CategoryService {
   public CategoryResponse findCategoryById(Long id) {
 
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Category category = categoryRepository.findById(id)
@@ -75,7 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   public void updateCategoryById(Long id, CategoryRequest categoryRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     if (id == 1L) {
@@ -102,7 +102,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   public void changeStatusCategoryById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     if (id == 1L) {

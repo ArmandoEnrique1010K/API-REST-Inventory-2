@@ -50,7 +50,7 @@ public class CompanyServiceImpl implements CompanyService {
   public CompanyResponse findCompanyById(Long id) {
 
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Company company = companyRepository.findById(id)
@@ -62,7 +62,7 @@ public class CompanyServiceImpl implements CompanyService {
   @Override
   public void updateCompanyById(Long id, CompanyRequest companyRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     if (id == 1L) {

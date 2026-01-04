@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
   public DetailUserResponse findUserById(Long id) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatus.COMMON_ERROR);
+          ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id)
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
   public void updateUserProfileById(Long id, ProfileRequest profileRequest) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatus.COMMON_ERROR);
+          ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id)
@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
   public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatus.COMMON_ERROR);
+          ResponseStatus.INTERNAL_ERROR);
     }
 
     verifyUserByRoleAdminExist(rolesRequest.isAdmin(), id);
@@ -154,7 +154,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void changeStatusUserById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     if (id == 1L) {
@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
             "El usuario no existe en el sistema"));
 
     if (user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     } else {
       // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
       // Luego cambia el estado del usuario

@@ -40,8 +40,6 @@ public enum ResponseStatus {
 			"Este recurso no se puede ser modificado del sistema"),
 
 
-		COMMON_ERROR(HttpStatus.BAD_REQUEST, "Ha ocurrido un error inesperado"), // BAD_REQUEST
-
 
 	// 500 - INTERNAL_SERVER_ERROR
 	// Servidor interno

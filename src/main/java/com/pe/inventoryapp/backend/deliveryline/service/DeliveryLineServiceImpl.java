@@ -82,7 +82,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
 
     if (id_product_deliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     // Obtener el producto y orden de entrega desde Product_DeliveryOrder
@@ -107,7 +107,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Long idProduct = product_DeliveryOrder.getProduct().getId();
 
     if (idLocation == null || idDeliveryOrder == null || idProduct == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Location location = locationRepository.findById(idLocation)
@@ -175,14 +175,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   public DeliveryLineDetailsResponse findDeliveryLineById(Long id) {
 
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     return  DeliveryLineMapper.builder().setDeliveryLine(deliveryLine).buildDeliveryLineDetailsResponse();
@@ -196,16 +196,16 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id_user)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.COMMON_ERROR));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.INTERNAL_ERROR));
 
     String username = user.getFirstname() + " " + user.getLastname();
 
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
@@ -214,13 +214,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Long deliveryLine_id = deliveryLine.getId();
 
     if (deliveryLine_id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Long deliveryOrder_id = deliveryLine.getDeliveryOrder().getId();
 
     if (deliveryOrder_id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
@@ -232,18 +232,18 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // DEBE BUSCAR LA RELACION PRODUCTOS - ORDENES DE ENTREGA PARA ACTUALIZAR LA SUMATORIA DE LA CANTIDAD REQUERIDA
     Product_DeliveryOrder product_DeliveryOrder = deliveryLine.getProduct_DeliveryOrder();
     if (product_DeliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Long product_DeliveryOrder_id = deliveryLine.getProduct_DeliveryOrder().getId();
 
     if (product_DeliveryOrder_id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Product product = product_DeliveryOrder.getProduct();
     if (product == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
 
@@ -323,32 +323,32 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Override
   public void deleteDeliveryLineById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Long deliveryLineId = deliveryLine.getId();
 
     if (deliveryLineId == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
 
     if (deliveryOrderId == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
         deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
     if (deliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
 
@@ -356,7 +356,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 
     if (deliveryLine == null || product_DeliveryOrder == null || deliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     } else {
       // SI HAY CANTIDAD ENTREGADA, ENTONCES YA NO SE PODRA ELIMINAR ESTE CAMPO
       if (deliveryLine.getDeliveredQuantity() > 0) {
@@ -391,7 +391,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   // @Override
   // public void changePreparationStatusDeliveryLineById(Long id, PreparationStatus preparationStatus, Long id_user){
   //   if (id == null) {
-  //     throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+  //     throw new BusinessException(ResponseStatusCodes.INTERNAL_ERROR);
   //   }
 
 
@@ -411,7 +411,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   public void changeDeliveredStatusDeliveryLineById(Long id, Long id_user) {
     
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
@@ -463,7 +463,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Override
   public void changeCanceledStatusDeliveryLineById(Long id, Long id_user) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
@@ -475,7 +475,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
@@ -512,7 +512,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Long deliveryOrderId = deliveryLine.getProduct_DeliveryOrder().getId();
 
     if (deliveryOrderId == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
   
       Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(deliveryOrderId).orElseThrow(
@@ -556,7 +556,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Override
   public void changeMissingStatusDeliveryLineById(Long id, Long id_user) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
@@ -569,7 +569,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
@@ -594,7 +594,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
       Long id_product_deliveryOrder = newDeliveryLine.getProduct_DeliveryOrder().getId();
       if (id_product_deliveryOrder == null) {
-        throw new BusinessException(ResponseStatus.COMMON_ERROR);
+        throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
       } 
 
 

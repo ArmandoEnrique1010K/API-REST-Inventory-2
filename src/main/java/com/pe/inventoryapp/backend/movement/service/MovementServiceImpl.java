@@ -64,7 +64,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
 
@@ -76,7 +76,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_product = movementReceiveRequest.getIdProduct();
 
     if (id_product == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
     Product product = productRepository.findById(id_product)
         .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe"));
@@ -91,7 +91,7 @@ public class MovementServiceImpl implements MovementService {
 
     Long id_company = movementReceiveRequest.getIdCompany();
     if (id_company == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Company company = companyRepository.findById(id_company)
@@ -149,7 +149,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -159,7 +159,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
 
     if (id_stock_lot == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     // Encontrar el producto por id de stockLot
@@ -196,7 +196,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -206,7 +206,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
 
     if (id_stock_lot == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
@@ -254,7 +254,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -264,7 +264,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
 
     if (id_stock_lot == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
@@ -345,7 +345,7 @@ public class MovementServiceImpl implements MovementService {
   @Override
   public void saveMovementTransfer(MovementTransferRequest movementTransferRequest, Long id_user) {
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -356,7 +356,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_stock_lot_receiver = movementTransferRequest.getIdStockLotReceiver();
 
     if (id_stock_lot_emitter == null || id_stock_lot_receiver == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     // Encontrar el producto por id de stockLot
@@ -433,7 +433,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -444,7 +444,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_stock_lot = movementAllocateRequest.getIdStockLot();
 
     if (id_stock_lot == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
@@ -454,7 +454,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_delivery_line = movementAllocateRequest.getIdDeliveryLine();
 
     if (id_delivery_line == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
@@ -562,7 +562,7 @@ public class MovementServiceImpl implements MovementService {
     Long id_delivery_line = movementReturnRequest.getIdDeliveryLine();
 
     if (id_delivery_line == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(

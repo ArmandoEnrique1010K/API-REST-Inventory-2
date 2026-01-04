@@ -57,9 +57,9 @@ public class UserController {
     validationService.validateFieldsAndThrowResponse(result);
     userService.registerUser(registerRequest);
 
-    return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
-            "Se ha registrado al usuario en el sistema"));
+    // NOTA: NUEVA FORMA DE DEVOLVER UNA RESPUESTA
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS_RESPONSE, "Se ha registrado al usuario en el sistema");
+    return ResponseEntity.status(response.getStatus()).body(response);
   }
 
   @GetMapping

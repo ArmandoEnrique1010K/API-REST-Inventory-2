@@ -41,7 +41,7 @@ public class StockLotServiceImpl implements StockLotService{
   @Transactional(readOnly = true)
   public StockLotDetailsResponse findStockLotById(Long stockLotId) {
     if (stockLotId == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     StockLot stockLot = stockLotRepository.findById(stockLotId)

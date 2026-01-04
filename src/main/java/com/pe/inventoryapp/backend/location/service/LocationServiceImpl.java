@@ -34,7 +34,7 @@ public class LocationServiceImpl implements LocationService {
     Long idRegion = locationRequest.getIdRegion();
 
     if (idRegion == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Region region = regionRepository.findById(
@@ -71,7 +71,7 @@ public class LocationServiceImpl implements LocationService {
   @Override
   public LocationResponse findLocationById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Location location = locationRepository.findById(id)
@@ -87,7 +87,7 @@ public class LocationServiceImpl implements LocationService {
   @Override
   public void updateLocationById(Long id, LocationRequest locationRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Location location = locationRepository.findById(id)
@@ -104,7 +104,7 @@ public class LocationServiceImpl implements LocationService {
     Long idRegion = locationRequest.getIdRegion();
 
     if (idRegion == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     Region region = regionRepository.findById(idRegion)
@@ -119,7 +119,7 @@ public class LocationServiceImpl implements LocationService {
   @Override
   public void changeStatusLocationById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     if (id == 1L) {

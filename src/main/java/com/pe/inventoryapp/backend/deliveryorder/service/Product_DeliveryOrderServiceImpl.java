@@ -40,7 +40,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
     List<Long> idProducts = product_DeliveryOrderRequest.getIdProducts();
 
     if (idProducts == null || idProducts.isEmpty() || idDeliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
         () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND,
@@ -51,7 +51,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
     for (Long productId : idProducts) {
 
         if (productId == null) {
-            throw new BusinessException(ResponseStatus.COMMON_ERROR);
+            throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
         }
 
         Product product = productRepository.findById(productId)

@@ -93,7 +93,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
@@ -107,7 +107,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
     // TAMBIEN DEBE ACTUALIZAR EL USUARIO QUE HA ACTUALIZADO LA ORDEN (EL QUE
