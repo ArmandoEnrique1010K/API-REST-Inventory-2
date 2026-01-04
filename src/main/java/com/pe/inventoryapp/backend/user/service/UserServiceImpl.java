@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ResponseStatus.ENTITY_NOT_FOUND,
+            ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
 
     return UserMapper.builder()
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ResponseStatus.ENTITY_NOT_FOUND,
+            ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
 
     // Obtener el correo del usuario actual y el nuevo
@@ -141,7 +141,7 @@ public class UserServiceImpl implements UserService {
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ResponseStatus.ENTITY_NOT_FOUND,
+            ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
 
     List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
@@ -152,32 +152,40 @@ public class UserServiceImpl implements UserService {
   // Elimina un usuario del sistema
   @Override
   @Transactional
-  public void changeStatusUserById(Long id) {
-    if (id == null) {
+  public void changeStatusUserById(Long id_user, Long id_authenticated_user) {
+    if (id_user == null || id_authenticated_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
-    if (id == 1L) {
+    if (id_user == 1L) {
       throw new BusinessException(
           ResponseStatus.DEFAULT_RESOURCE,
           "Este usuario no se puede bloquear del sistema");
     }
 
-
-    User user = userRepository.findById(id).orElseThrow(
+    User user = userRepository.findById(
+        id_user).orElseThrow(
         () -> new BusinessException(
-            ResponseStatus.ENTITY_NOT_FOUND,
+            ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
 
-    if (user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
-    } else {
-      // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
-      // Luego cambia el estado del usuario
-      verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id);
-      user.setStatus(!user.isStatus());
-      userRepository.save(user);
+    User userLogged = userRepository.findById(
+        id_authenticated_user).orElseThrow(
+        () -> new BusinessException(
+            ResponseStatus.NOT_FOUND,
+            "El usuario no existe en el sistema"));
+    
+    if (user.equals(userLogged)){
+      throw new BusinessException(
+        ResponseStatus.CONFLICT, "No puedes desactivar tu propia cuenta"
+      );
     }
+
+    // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
+    // Luego cambia el estado del usuario
+    verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id_user);
+    user.setStatus(!user.isStatus());
+    userRepository.save(user);
   }
 
   // MÉTODOS AUXILIARES
@@ -220,8 +228,8 @@ public class UserServiceImpl implements UserService {
   private void verifyUserByRoleAdminExist(boolean admin, Long id) {
     if (!roleRepository.existsByName("ROLE_ADMIN")) {
       throw new BusinessException(
-          ResponseStatus.ENTITY_NOT_FOUND,
-          "El rol de administrador no existe en el sistema");
+          ResponseStatus.NOT_FOUND,
+          " El rol de administrador no existe en el sistema");
     }
 
     boolean existsAnotherAdmin = userRepository.existsByRoleNameAndIdNot("ROLE_ADMIN", id);

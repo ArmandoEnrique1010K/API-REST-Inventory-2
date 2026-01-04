@@ -43,7 +43,7 @@ public class CategoryController {
     categoryService.saveCategory(categoryRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se registro la categoria en el sistema"));
   }
 
@@ -72,7 +72,7 @@ public class CategoryController {
     categoryService.updateCategoryById(id, categoryRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS,
         "Se actualizo los datos de la categoria"));
   }
 
@@ -81,7 +81,7 @@ public class CategoryController {
     categoryService.changeStatusCategoryById(id);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS,
         "Se ha cambiado el estado de la categoria"));
   }
 }

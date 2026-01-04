@@ -69,7 +69,7 @@ public class MovementServiceImpl implements MovementService {
 
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
     String username = user.getFirstname() + " " + user.getLastname();
 
@@ -79,7 +79,7 @@ public class MovementServiceImpl implements MovementService {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
     Product product = productRepository.findById(id_product)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
 
 
     if (product.isStatus() == false) {
@@ -95,7 +95,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     Company company = companyRepository.findById(id_company)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El nombre de la empresa no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El nombre de la empresa no existe"));
 
     StockLot stockLot = new StockLot();
     stockLot.setBatch(movementReceiveRequest.getBatch());
@@ -153,7 +153,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
@@ -164,7 +164,7 @@ public class MovementServiceImpl implements MovementService {
 
     // Encontrar el producto por id de stockLot
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
     // Se debe pasar la cantidad en la que se quiere incrementar el stock
     int newAvailable = stockLot.getQuantityAvailable() + movementAdjustmentRequest.getQuantity();
@@ -200,7 +200,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
@@ -210,7 +210,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock emisor no existe"));
 
     // La nueva cantidad de stock se resta
     int newStock = stockLot.getQuantityAvailable() - movementAdjustmentRequest.getQuantity();
@@ -258,7 +258,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
@@ -268,7 +268,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock emisor no existe"));
 
     // IMPLEMENTAR UNA LOGICA PARA OBTENER EL ULTIMO MOVIMIENTO DE TIPO LOSS DE UN PRODUCTO
 
@@ -349,7 +349,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot_emitter = movementTransferRequest.getIdStockLotEmitter();
@@ -361,10 +361,10 @@ public class MovementServiceImpl implements MovementService {
 
     // Encontrar el producto por id de stockLot
     StockLot stockLotEmitter = stockLotRepository.findById(id_stock_lot_emitter).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock emisor no existe")
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock emisor no existe")
     );
     StockLot stockLotReceiver = stockLotRepository.findById(id_stock_lot_receiver).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock receptor no existe")
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock receptor no existe")
     );
 
     int newAvailableEmitter = stockLotEmitter.getQuantityAvailable() - movementTransferRequest.getQuantity();
@@ -437,7 +437,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     // Obtiene el lote de stock por id
@@ -448,7 +448,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     StockLot stockLot = stockLotRepository.findById(id_stock_lot).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock emisor no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock emisor no existe"));
     // Obtiene la linea de entrega por ID
 
     Long id_delivery_line = movementAllocateRequest.getIdDeliveryLine();
@@ -458,7 +458,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
     
         // Verificar que corresponda al mismo producto
         if (stockLot.getProduct().getId() != deliveryLine.getProduct().getId()) {
@@ -555,7 +555,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
     String username = user.getFirstname() + " " + user.getLastname();
 
     // LINEA DE ENTREGA
@@ -566,7 +566,7 @@ public class MovementServiceImpl implements MovementService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id_delivery_line).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA NO TENGA LOS ESTADOS MISSING NI CANCELED,
     // PUEDE TENER LOS ESTADOS READY, INPROGRESS O DELIVERED
@@ -757,7 +757,7 @@ public class MovementServiceImpl implements MovementService {
 
   // private String getUsernameExistence(Long id_user) {
   //   User user = userRepository.findById(id_user).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+  //       () -> new BusinessException(ResponseStatusCodes.NOT_FOUND, "El usuario no existe"));
   //   String username = user.getFirstname() + " " + user.getLastname();
 
   //   return username;

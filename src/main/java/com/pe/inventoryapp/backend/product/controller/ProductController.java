@@ -46,7 +46,7 @@ public class ProductController {
     productService.saveProduct(productRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se registro el producto en el sistema"));
   }
 
@@ -130,7 +130,7 @@ public class ProductController {
     productService.updateProductById(id, productRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS,
         "Se actualizo los datos del producto"));
   }
 
@@ -139,7 +139,7 @@ public class ProductController {
     productService.changeStatusProductById(id);
     
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se ha cambiado el estado del producto"));
   }
 }

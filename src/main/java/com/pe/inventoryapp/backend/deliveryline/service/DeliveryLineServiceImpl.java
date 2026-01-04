@@ -87,7 +87,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Obtener el producto y orden de entrega desde Product_DeliveryOrder
     Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(id_product_deliveryOrder).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
 
     DeliveryLine deliveryLine = new DeliveryLine();
@@ -111,13 +111,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     Location location = locationRepository.findById(idLocation)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe en el sistema"));
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El pedido de entrega no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El pedido de entrega no existe en el sistema"));
 
     Product product = productRepository.findById(idProduct).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
 
     deliveryLine.setLocation(location);
     deliveryLine.setDeliveryOrder(deliveryOrder);
@@ -160,7 +160,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       Pageable pageable) {
     if (deliveryOrderId != null && !deliveryOrderRepository.existsById(deliveryOrderId)) {
       throw new BusinessException(
-          ResponseStatus.ENTITY_NOT_FOUND,
+          ResponseStatus.NOT_FOUND,
           "La orden de entrega no existe");
     }
 
@@ -179,7 +179,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
@@ -209,7 +209,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La linea de entrega no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe en el sistema"));
 
     Long deliveryLine_id = deliveryLine.getId();
 
@@ -226,7 +226,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
         deliveryOrder_id)
         .orElseThrow(
-            () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El pedido de entrega no existe"));
+            () -> new BusinessException(ResponseStatus.NOT_FOUND, "El pedido de entrega no existe"));
 
 
     // DEBE BUSCAR LA RELACION PRODUCTOS - ORDENES DE ENTREGA PARA ACTUALIZAR LA SUMATORIA DE LA CANTIDAD REQUERIDA
@@ -327,7 +327,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La linea de entrega no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
@@ -346,14 +346,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
-        deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+        deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
     if (deliveryOrder == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
 
     Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
-        deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La relacion producto-orden de entrega no existe"));
+        deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 
     if (deliveryLine == null || product_DeliveryOrder == null || deliveryOrder == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
@@ -396,7 +396,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
 
   //   DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+  //       () -> new BusinessException(ResponseStatusCodes.NOT_FOUND, "La orden de entrega no existe"));
 
   //   // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
   //   DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
@@ -415,7 +415,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
 
     if (deliveryLine.getPreparationStatus() != PreparationStatus.READY) {
@@ -467,7 +467,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     if (deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS || deliveryLine.getPreparationStatus() != PreparationStatus.READY) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
@@ -480,7 +480,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
     String username = user.getFirstname() + " " + user.getLastname();
 
@@ -516,7 +516,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
   
       Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(deliveryOrderId).orElseThrow(
-          () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El product_delivery_order no existe"));
+          () -> new BusinessException(ResponseStatus.NOT_FOUND, "El product_delivery_order no existe"));
 
       product_DeliveryOrder.setRequiredQuantityTotal(totalRequiredQuantity);
       product_DeliveryOrderRepository.save(product_DeliveryOrder);
@@ -560,7 +560,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     // Solamente podra declarar perdida si la linea de entrega se encuentra entregada
     if (deliveryLine.getPreparationStatus() != PreparationStatus.DELIVERED) {
@@ -574,7 +574,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
     User user = userRepository.findById(id_user).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
     String username = user.getFirstname() + " " + user.getLastname();
     // IMPLEMENTAR UNA LOGICA PARA REALIZAR ALGO CON LA CANTIDAD REQUERIDA
@@ -599,7 +599,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
 
     Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(id_product_deliveryOrder).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El product_delivery_order no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El product_delivery_order no existe"));
     
     Integer totalRequiredQuantity = deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(id);
 

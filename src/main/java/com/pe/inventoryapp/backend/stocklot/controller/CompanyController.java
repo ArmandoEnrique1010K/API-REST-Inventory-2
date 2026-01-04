@@ -42,7 +42,7 @@ public class CompanyController {
     companyService.saveCompany(companyRequest);
 
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se registro la empresa en el sistema"));
   }
 
@@ -65,6 +65,6 @@ public class CompanyController {
     companyService.updateCompanyById(id, companyRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS_RESPONSE, "Se actualizo los datos de la empresa"));
+        ResponseStatus.SUCCESS, "Se actualizo los datos de la empresa"));
   }
 }

@@ -54,7 +54,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La empresa no existe en el sistema"));
 
     return CompanyMapper.builder().setCompany(company).buildCompanyResponse();
   }
@@ -70,7 +70,7 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La empresa no existe en el sistema"));
 
     String newName = companyRequest.getName().trim();
 

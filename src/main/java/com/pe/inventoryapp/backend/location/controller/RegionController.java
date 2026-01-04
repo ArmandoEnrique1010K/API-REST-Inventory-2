@@ -42,7 +42,7 @@ public class RegionController {
     regionService.saveRegion(regionRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se registro la región en el sistema"));
   }
 
@@ -65,7 +65,7 @@ public class RegionController {
     regionService.updateRegionById(id, regionRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS,
         "Se actualizo los datos de la región"));
   }
 }

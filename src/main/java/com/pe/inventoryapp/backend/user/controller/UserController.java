@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
@@ -58,7 +59,7 @@ public class UserController {
     userService.registerUser(registerRequest);
 
     // NOTA: NUEVA FORMA DE DEVOLVER UNA RESPUESTA
-    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS_RESPONSE, "Se ha registrado al usuario en el sistema");
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se ha registrado al usuario en el sistema");
     return ResponseEntity.status(response.getStatus()).body(response);
   }
 
@@ -70,8 +71,8 @@ public class UserController {
     Pageable pageable = PageRequest.of(page, 20);
 
     Page<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
-
-    return ResponseEntity.status(200).body(users);
+    DataResponse response = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
+    return ResponseEntity.status(response.getStatus()).body(response.getData());
   }
 
   @GetMapping("/profile")
@@ -79,7 +80,8 @@ public class UserController {
     Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
     DetailUserResponse user = userService.findUserById(username);
 
-    return ResponseEntity.status(200).body(user);
+    DataResponse response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+    return ResponseEntity.status(response.getStatus()).body(response.getData());
   }
 
   @PutMapping("/profile")
@@ -89,9 +91,9 @@ public class UserController {
     validationService.validateFieldsAndThrowResponse(result);
     userService.updateUserProfileById(userId, profileRequest);
 
-    return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
-            "Su perfil ha sido actualizado"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Su perfil ha sido actualizado correctamente");
+    return ResponseEntity.status(response.getStatus()).body(response);
   }
 
   @PutMapping("/roles")
@@ -101,18 +103,19 @@ public class UserController {
     validationService.validateFieldsAndThrowResponse(result);
     userService.updateUserRolesById(id, rolesRequest);
 
-    return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
-            "Se han cambiado los roles del usuario"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se han modificado los roles del usuario");
+    return ResponseEntity.status(response.getStatus()).body(response);
   }
 
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
   @PatchMapping("/{id}")
-  public ResponseEntity<CommonResponse> changeStatusUser(@PathVariable Long id) {
-    userService.changeStatusUserById(id);
+  public ResponseEntity<CommonResponse> changeStatusUser(Authentication authentication, @PathVariable Long id_user) {
+    Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    userService.changeStatusUserById(id_user, id_authenticated_user);
 
-    return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
-            "Se cambio el estado del usuario"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha cambiado el estado del usuario en el sistema");
+    return ResponseEntity.status(response.getStatus()).body(response);
   }
 }

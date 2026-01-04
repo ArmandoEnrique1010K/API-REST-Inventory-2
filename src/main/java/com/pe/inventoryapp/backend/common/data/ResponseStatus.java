@@ -5,11 +5,15 @@ import org.springframework.http.HttpStatus;
 public enum ResponseStatus {
 
 		// 200 - OK
-		SUCCESS_RESPONSE(HttpStatus.OK, "Se ha realizado la operación correctamente"),
+		SUCCESS(HttpStatus.OK, "Se ha realizado la operación correctamente"),
+		// 201 - CREATED
+		CREATED(HttpStatus.CREATED, "Se ha creado el recurso correctamente"),
+
 	// 401 - UNAUTHORIZED
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "No estas autorizado para acceder a este recurso"),
+
 	// Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
-	AUTH_TOKEN_EXPIRED(
+	TOKEN_EXPIRED(
 			HttpStatus.UNAUTHORIZED,
 			"El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token"),
 
@@ -26,7 +30,7 @@ public enum ResponseStatus {
 			"No tiene permisos necesarios para realizar esta acción"),
 
 	// 404 - NOT_FOUND
-	ENTITY_NOT_FOUND(
+	NOT_FOUND(
 			HttpStatus.NOT_FOUND,
 			"No se ha encontrado el recurso solicitado en el sistema"),
 
@@ -43,15 +47,9 @@ public enum ResponseStatus {
 
 	// 500 - INTERNAL_SERVER_ERROR
 	// Servidor interno
-	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor"),
+	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");
 
 
-
-
-		// La contraseña no puede ser usada porque es la misma que la anterior
-		PASSWORD_REUSE_NOT_ALLOWED(
-										HttpStatus.CONFLICT,
-										"Contraseña no válida");
 
 
 

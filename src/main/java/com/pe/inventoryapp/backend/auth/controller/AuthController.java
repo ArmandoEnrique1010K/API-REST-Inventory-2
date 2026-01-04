@@ -16,6 +16,7 @@ import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,9 +46,9 @@ public class AuthController {
     validationService.validateFieldsAndThrowResponse(result);
     authService.processUserForgotPassword(forgotPasswordRequest.getEmail());
 
-    return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
-            "Se le ha enviado un código de recuperación a su correo"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS, 
+      "Se le ha enviado un código de recuperación a su correo");
+    return ResponseEntity.status(response.getStatus()).body(response);
   }
 
   @PostMapping("/validate-token")
@@ -56,9 +57,9 @@ public class AuthController {
     validationService.validateFieldsAndThrowResponse(result);
     authService.validateAndActivateResetToken(validateTokenRequest.getValue());
 
-    return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
-            "El token es válido, puede cambiar su contraseña"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "El token es válido, puede cambiar su contraseña");
+    return ResponseEntity.status(response.getStatus()).body(response);
   }
 
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
@@ -71,10 +72,21 @@ public class AuthController {
     validationService.validateFieldsAndThrowResponse(result);
     authService.updateUserPassword(token, changePasswordRequest);
 
-    return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
-            "La contraseña fue cambiada correctamente"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Su contraseña ha sido modificada correctamente");
+    return ResponseEntity.status(response.getStatus()).body(response);
   }
+
+  @PostMapping("/logout")
+  public ResponseEntity<CommonResponse> logoutUser(HttpServletResponse httpServletResponse) {
+
+    authService.logout(httpServletResponse);
+    
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Ha cerrado sesión correctamente");
+    return ResponseEntity.status(response.getStatus()).body(response);
+  }
+  
 
   // TODO: CREAR UN ENDPOINT PARA CERRAR SESIÓN Y BORRAR EL TOKEN DE LAS COOKIES
 }

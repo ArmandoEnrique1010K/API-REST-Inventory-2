@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
@@ -83,7 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
@@ -110,7 +110,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     Category category = categoryRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
 
     // Cambia el estado de la categoria a false y lo guarda
     category.setStatus(!category.isStatus());

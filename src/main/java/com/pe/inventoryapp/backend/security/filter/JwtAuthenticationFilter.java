@@ -103,7 +103,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     response.addCookie(jwtCookie);
 
     // Respuesta de autenticación exitosa
-    CommonResponse res = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS_RESPONSE, "Has iniciado sesión con éxito");
+    CommonResponse res = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS, "Has iniciado sesión con éxito");
     response.setStatus(res.getStatus());
     response.setContentType("application/json");
     response.getWriter().write(new ObjectMapper().writeValueAsString(res));

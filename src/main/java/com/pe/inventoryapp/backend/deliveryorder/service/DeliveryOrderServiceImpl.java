@@ -51,7 +51,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     // BUSCAR AL USUARIO POR SU ID
     Optional<User> userEmail = userRepository.findByEmail(detailsUserResponse.getEmail());
-    User userEntity = userEmail.orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND,
+    User userEntity = userEmail.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND,
         "El usuario no existe"));
 
     deliveryOrder.setUser(userEntity);
@@ -98,7 +98,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
         .orElseThrow(
-            () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+            () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
         .buildDeliveryOrderDetailsResponse();
@@ -121,11 +121,11 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     // Optional<User> userEmail =
     // userRepository.findByEmail(detailsUserResponse.getEmail());
     // User userEntity = userEmail.orElseThrow(() -> new
-    // BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND,
+    // BusinessException(ResponseStatusCodes.NOT_FOUND,
     // "El usuario no existe"));
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     verifyBatchExist(deliveryOrderRequest.getBatch());
 

@@ -45,7 +45,7 @@ public class LocationController {
     locationService.saveLocation(locationRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se registro la ubicación en el sistema"));
   }
 
@@ -112,7 +112,7 @@ public class LocationController {
     locationService.updateLocationById(id, locationRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS,
         "Se actualizo los datos de la ubicación"));
   }
 
@@ -120,7 +120,7 @@ public class LocationController {
   public ResponseEntity<CommonResponse> disableLocation(@PathVariable Long id) {
     locationService.changeStatusLocationById(id);
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se ha cambiado el estado de la ubicación"));
   }
 }

@@ -52,7 +52,7 @@ public class RegionServiceImpl implements RegionService {
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe en el sistema"));
 
     return RegionMapper.builder().setRegion(region).buildRegionResponse();
   }
@@ -68,7 +68,7 @@ public class RegionServiceImpl implements RegionService {
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe en el sistema"));
 
     verifyRegionNameExistById(regionRequest.getName().trim(), id);
 

@@ -59,7 +59,7 @@ public class DeliveryOrderController {
     deliveryOrderService.saveDeliveryOrder(deliveryOrderRequest, id);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se ha creado la orden de entrega"));
     }
 
@@ -114,7 +114,7 @@ public class DeliveryOrderController {
 
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS,
         "Se actualizo la orden de entrega"));
 
   }
@@ -126,7 +126,7 @@ public class DeliveryOrderController {
   //       Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
   //   deliveryOrderService.changePreparationStatusDeliveryOrderById(id, preparationStatus, id_user);
   //   return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-  //       ResponseStatusCodes.SUCCESS_RESPONSE,
+  //       ResponseStatusCodes.SUCCESS,
   //       "Se ha cambiado el estado del pedido de entrega"));
   // }
 }

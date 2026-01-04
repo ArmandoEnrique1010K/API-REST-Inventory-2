@@ -43,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
     // Buscar la categoria por su ID
     Category category = categoryRepository.findById(
         idCategory)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
@@ -85,7 +85,7 @@ public class ProductServiceImpl implements ProductService {
       Pageable pageable) {
     if (categoryId != null && !categoryRepository.existsById(categoryId)) {
       throw new BusinessException(
-          ResponseStatus.ENTITY_NOT_FOUND,
+          ResponseStatus.NOT_FOUND,
           "La categoria no existe en el sistema");
     }
 
@@ -102,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
 
 
     if (product.isStatus() == false) {
@@ -120,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
 
     if (product.isStatus() == false) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
@@ -138,7 +138,7 @@ public class ProductServiceImpl implements ProductService {
 
     Category category = categoryRepository.findById(
         categoryId)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
 
     product.setName(newName);
     product.setEntryDate(productRequest.getEntryDate());
@@ -160,7 +160,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
 
     product.setStatus(!product.isStatus());
     productRepository.save(product);

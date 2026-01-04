@@ -22,5 +22,5 @@ public interface UserService {
 
   void updateUserRolesById(Long id, RolesRequest rolesRequest);
 
-  void changeStatusUserById(Long id);
+  void changeStatusUserById(Long id_user, Long id_authenticated_user);
 }

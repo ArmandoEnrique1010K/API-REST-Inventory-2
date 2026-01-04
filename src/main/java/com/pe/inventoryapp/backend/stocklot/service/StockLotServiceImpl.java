@@ -45,7 +45,7 @@ public class StockLotServiceImpl implements StockLotService{
     }
 
     StockLot stockLot = stockLotRepository.findById(stockLotId)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe en el sistema"));
 
     return StockLotMapper.builder().setStockLot(stockLot).buildStockLotDetailsResponse();
   }
@@ -55,7 +55,7 @@ public class StockLotServiceImpl implements StockLotService{
   // public void sumAvailableQuantityByProductId(Long productId) {
 
   //   Product product = productRepository.findById(productId).orElseThrow(
-  //       () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe"));
+  //       () -> new BusinessException(ResponseStatusCodes.NOT_FOUND, "El producto no existe"));
 
   //   int totalStock = stockLotRepository.sumAvailableByProductId(productId);
   //   product.setStock(totalStock);

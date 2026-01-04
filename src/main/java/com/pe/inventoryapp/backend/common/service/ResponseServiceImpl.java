@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.response.DataResponse;
 import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
 
 @Service
@@ -29,7 +30,8 @@ public class ResponseServiceImpl implements ResponseService {
     sucessfulResponse.setStatus(code.getStatus().value());
 
     // Aqui debe mostrar la respuesta por defecto o el que se le pase
-    if (message == null) {
+    // Normalmente si el mensaje es null o vacio, se muestra el mensaje por defecto
+    if (message.isEmpty() || message == null || message.isBlank()) {
       message = code.getDefaultMessage();
     }
 
@@ -61,7 +63,6 @@ public class ResponseServiceImpl implements ResponseService {
     errorWithFieldsResponse.setType("error");
     errorWithFieldsResponse.setStatus(code.getStatus().value());
 
-    // Normalmente si el mensaje es null o vacio, se muestra el mensaje por defecto
     if (message.isEmpty() || message == null || message.isBlank()) {
       message = code.getDefaultMessage();
     }
@@ -69,5 +70,14 @@ public class ResponseServiceImpl implements ResponseService {
     errorWithFieldsResponse.setMessage(message);
     errorWithFieldsResponse.setFields(fields);
     return errorWithFieldsResponse;
+  }
+
+  @Override
+  public DataResponse generateDataResponse(ResponseStatus code, Object data) {
+    DataResponse dataResponse = new DataResponse();
+    dataResponse.setType("success");
+    dataResponse.setStatus(code.getStatus().value());
+    dataResponse.setData(data);
+    return dataResponse;
   }
 }

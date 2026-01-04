@@ -43,7 +43,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND,
+        () -> new BusinessException(ResponseStatus.NOT_FOUND,
             "La orden de entrega no existe en el sistema"));
 
     List<Product_DeliveryOrder> relations = new ArrayList<>();
@@ -56,7 +56,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
 
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new BusinessException(
-                ResponseStatus.ENTITY_NOT_FOUND,
+                ResponseStatus.NOT_FOUND,
                 "El producto con el id " + productId + " no existe en el sistema"
             ));
 

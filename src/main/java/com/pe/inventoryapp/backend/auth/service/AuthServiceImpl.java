@@ -16,6 +16,9 @@ import com.pe.inventoryapp.backend.user.model.entity.UserToken;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 import com.pe.inventoryapp.backend.user.repository.UserTokenRepository;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -37,18 +40,17 @@ public class AuthServiceImpl implements AuthService {
   public Long findUserIdByEmail(String email) {
     return userRepository.findByEmail(email)
         .map(User::getId)
-        .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("No se encuentra un usuario con email: " + email + " en el sistema"));
   }
 
   // Envia un correo al usuario con un token de 6 digitos
   @Override
   @Transactional
   public void processUserForgotPassword(String email) {
-
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe en el sistema"));
 
-    // invalidar tokens previos
+    // Eliminar tokens previos
     userTokenRepository.deleteByUser(user);
 
     String token = createResetToken(user);
@@ -58,16 +60,16 @@ public class AuthServiceImpl implements AuthService {
   // Verifica si el token de 6 digitos es valido
   @Transactional
   public void validateAndActivateResetToken(String token) {
-
     UserToken userToken = userTokenRepository.findByToken(token)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.TOKEN_EXPIRED));
 
     if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-      throw new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatus.TOKEN_EXPIRED);
     }
 
-    if (userToken.isActive()) {
-      return; // idempotente, no hace nada si ya está activo
+    // Da un error si ya está activo el token
+    if (userToken.isActive()) { 
+      throw new BusinessException(ResponseStatus.CONFLICT, "Este token de 6 digitos ya fue activado");
     }
 
     userToken.setActive(true);
@@ -83,16 +85,15 @@ public class AuthServiceImpl implements AuthService {
     User user = userToken.getUser();
 
     if (userToken.isActive() == false) {
-      throw new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED,
-          "El token de 6 digitos ha expirado, vuelva a solicitar un nuevo token");
+      throw new BusinessException(ResponseStatus.TOKEN_EXPIRED);
     }
 
     if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword())) {
-      throw new BusinessException(ResponseStatus.VALIDATION_ERROR, "Las contraseñas no coinciden");
+      throw new BusinessException(ResponseStatus.VALIDATION_ERROR, "Las contraseñas introducidas no coinciden");
     }
 
     if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
-      throw new BusinessException(ResponseStatus.PASSWORD_REUSE_NOT_ALLOWED);
+      throw new BusinessException(ResponseStatus.VALIDATION_ERROR, "No puedes utilizar esta contraseña");
     }
 
     user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
@@ -100,7 +101,6 @@ public class AuthServiceImpl implements AuthService {
 
     // invalidar token
     userTokenRepository.delete(userToken);
-
   }
 
   // =======================
@@ -109,7 +109,6 @@ public class AuthServiceImpl implements AuthService {
 
   // Crea un token de 6 digitos de "corta vida" para el usuario por su email
   private String createResetToken(User user) {
-
     String token = String.format("%06d", (int) (Math.random() * 1_000_000));
 
     UserToken userToken = new UserToken();
@@ -124,17 +123,26 @@ public class AuthServiceImpl implements AuthService {
 
   // Verifica si el token de 6 digitos es valido y si no ha expirado
   private UserToken getValidUserTokenOrThrow(String token) {
-
     UserToken userToken = userTokenRepository.findByToken(token)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.TOKEN_EXPIRED));
 
     if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-      throw new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatus.TOKEN_EXPIRED);
     }
 
     userToken.setActive(true);
     userTokenRepository.save(userToken);
-
     return userToken;
+  }
+
+  @Override
+  public void logout(HttpServletResponse response) {
+    Cookie cookie = new Cookie("ACCESS_TOKEN", null);
+    cookie.setHttpOnly(true);
+    cookie.setSecure(true); // true en producción HTTPS
+    cookie.setPath("/");
+    cookie.setMaxAge(0); // elimina la cookie
+
+    response.addCookie(cookie);
   }
 }

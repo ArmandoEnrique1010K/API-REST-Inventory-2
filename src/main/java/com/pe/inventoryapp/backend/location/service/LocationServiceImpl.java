@@ -39,7 +39,7 @@ public class LocationServiceImpl implements LocationService {
 
     Region region = regionRepository.findById(
         idRegion)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
 
     String name = locationRequest.getName().trim();
 
@@ -60,7 +60,7 @@ public class LocationServiceImpl implements LocationService {
       Pageable pageable) {
     if (regionId != null && !regionRepository.existsById(regionId)) {
       throw new BusinessException(
-          ResponseStatus.ENTITY_NOT_FOUND,
+          ResponseStatus.NOT_FOUND,
           "La región no existe en el sistema");
     }
     Page<Location> locations = locationRepository.findAllByParams(name, regionId, status, pageable);
@@ -75,7 +75,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     Location location = locationRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe en el sistema"));
 
     if (location.isStatus() == false) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
@@ -91,7 +91,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     Location location = locationRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe en el sistema"));
 
     if (location.isStatus() == false) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
@@ -108,7 +108,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     Region region = regionRepository.findById(idRegion)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe en el sistema"));
     
     location.setName(newName);
     location.setRegion(region);
@@ -127,7 +127,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     Location location = locationRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe en el sistema"));
     location.setStatus(!location.isStatus());
     locationRepository.save(location);
   }

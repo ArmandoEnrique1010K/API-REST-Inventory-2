@@ -42,7 +42,7 @@ public class Product_DeliveryOrderController {
     product_DeliveryOrderService.saveProduct_DeliveryOrder(product_DeliveryOrderRequest, idDeliveryOrder);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
             "Se han agregado productos a la orden de entrega"));
   }
 
