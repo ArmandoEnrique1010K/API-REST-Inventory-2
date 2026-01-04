@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.pe.inventoryapp.backend.auth.service.AuthService;
+import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.security.exception.CustomAccessDeniedHandler;
 import com.pe.inventoryapp.backend.security.exception.CustomAuthenticationEntryPoint;
 import com.pe.inventoryapp.backend.security.filter.JwtAuthenticationFilter;
@@ -29,6 +30,9 @@ public class SecurityConfig {
 
         @Autowired
         private AuthService authService;
+
+        @Autowired
+        private ResponseService responseService;
 
         @Bean
         AuthenticationManager authenticationManager() throws Exception {
@@ -143,9 +147,9 @@ public class SecurityConfig {
                                                 // .anyRequest().denyAll())
                                 .anyRequest().authenticated())
                                 .addFilter(new JwtAuthenticationFilter(
-                                                authenticationManager(), authService))
+                                                authenticationManager(), authService, responseService))
                                 .addFilter(new JwtValidationFilter(
-                                                authenticationManager))
+                                                authenticationManager, responseService))
                                 .build();
         }
 

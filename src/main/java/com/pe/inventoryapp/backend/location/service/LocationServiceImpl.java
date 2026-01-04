@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
@@ -34,12 +34,12 @@ public class LocationServiceImpl implements LocationService {
     Long idRegion = locationRequest.getIdRegion();
 
     if (idRegion == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Region region = regionRepository.findById(
         idRegion)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe"));
 
     String name = locationRequest.getName().trim();
 
@@ -60,7 +60,7 @@ public class LocationServiceImpl implements LocationService {
       Pageable pageable) {
     if (regionId != null && !regionRepository.existsById(regionId)) {
       throw new BusinessException(
-          ResponseStatusCodes.ENTITY_NOT_FOUND,
+          ResponseStatus.ENTITY_NOT_FOUND,
           "La región no existe en el sistema");
     }
     Page<Location> locations = locationRepository.findAllByParams(name, regionId, status, pageable);
@@ -71,14 +71,14 @@ public class LocationServiceImpl implements LocationService {
   @Override
   public LocationResponse findLocationById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Location location = locationRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
 
     if (location.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
     }
 
     return LocationMapper.builder().setLocation(location).buildLocationResponse();
@@ -87,14 +87,14 @@ public class LocationServiceImpl implements LocationService {
   @Override
   public void updateLocationById(Long id, LocationRequest locationRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Location location = locationRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
 
     if (location.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La ubicación se encuentra desactivada");
     }
 
     String newName = locationRequest.getName().trim();
@@ -104,11 +104,11 @@ public class LocationServiceImpl implements LocationService {
     Long idRegion = locationRequest.getIdRegion();
 
     if (idRegion == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Region region = regionRepository.findById(idRegion)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
     
     location.setName(newName);
     location.setRegion(region);
@@ -119,15 +119,15 @@ public class LocationServiceImpl implements LocationService {
   @Override
   public void changeStatusLocationById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta ubicación no se puede inhabilitar");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "Esta ubicación no se puede inhabilitar");
     }
 
     Location location = locationRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La ubicación no existe en el sistema"));
     location.setStatus(!location.isStatus());
     locationRepository.save(location);
   }

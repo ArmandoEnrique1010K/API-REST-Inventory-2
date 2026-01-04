@@ -11,7 +11,7 @@ import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ForgotPasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -46,7 +46,7 @@ public class AuthController {
     authService.processUserForgotPassword(forgotPasswordRequest.getEmail());
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se le ha enviado un código de recuperación a su correo"));
   }
 
@@ -57,7 +57,7 @@ public class AuthController {
     authService.validateAndActivateResetToken(validateTokenRequest.getValue());
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "El token es válido, puede cambiar su contraseña"));
   }
 
@@ -72,7 +72,7 @@ public class AuthController {
     authService.updateUserPassword(token, changePasswordRequest);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "La contraseña fue cambiada correctamente"));
   }
 

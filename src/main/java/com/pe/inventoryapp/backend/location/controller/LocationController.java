@@ -24,7 +24,7 @@ import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 
 @RestController
 @RequestMapping("/api/locations")
@@ -45,7 +45,7 @@ public class LocationController {
     locationService.saveLocation(locationRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se registro la ubicación en el sistema"));
   }
 
@@ -112,7 +112,7 @@ public class LocationController {
     locationService.updateLocationById(id, locationRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Se actualizo los datos de la ubicación"));
   }
 
@@ -120,7 +120,7 @@ public class LocationController {
   public ResponseEntity<CommonResponse> disableLocation(@PathVariable Long id) {
     locationService.changeStatusLocationById(id);
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se ha cambiado el estado de la ubicación"));
   }
 }

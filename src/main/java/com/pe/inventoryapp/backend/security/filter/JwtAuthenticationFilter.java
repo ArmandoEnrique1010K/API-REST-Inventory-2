@@ -7,26 +7,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.auth.model.request.LoginRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.service.ResponseService;
+
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,59 +31,57 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-  Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-
+  // No se utiliza @Autowired, ya que es un constructor
   private final AuthenticationManager authenticationManager;
   private final AuthService authService;
+  private final ResponseService responseService;
 
-  public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthService authService) {
+  public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthService authService, ResponseService responseService) {
     this.authenticationManager = authenticationManager;
     this.authService = authService;
+    this.responseService = responseService;
     setFilterProcessesUrl("/api/auth/login");
   }
 
+  // Método de autenticación
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
       throws AuthenticationException {
     try {
-      LoginRequest login = new ObjectMapper()
-          .readValue(request.getInputStream(), LoginRequest.class);
+      LoginRequest login = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
+
       UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
           login.getEmail(),
           login.getPassword());
 
       return authenticationManager.authenticate(authToken);
-    // } catch (StreamReadException e) {
-    //   e.printStackTrace();
-    // } catch (DatabindException e) {
-    //   e.printStackTrace();
     } catch (IOException e) {
-      // e.printStackTrace();
-        throw new AuthenticationServiceException("Error leyendo credenciales", e);
-
+        throw new AuthenticationServiceException("Ha ocurrido un error inesperado al leer credenciales");
     }
-
-    // return null;
   }
 
+  // Metodo de autenticación exitosa
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
       Authentication authResult) throws IOException, ServletException {
 
+    // Origen de extracción del username, toma el ID del usuario (no cambia en el
+    // tiempo)
     String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
         .getUsername();
 
-    // AQUI SE ENCUENTRA EL ORIGEN DE EXTRACCIÓN DEL USERNAME
-    // OBTENER EL ID DEL USUARIO
     Long id_user = authService.findUserIdByEmail(username);
 
+    // Generación de claims
     Map<String, Object> claims = new HashMap<>();
+
     claims.put("authorities", authResult.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
         .toList());
 
     claims.put("id", id_user);
 
+    // Generación del token
     String token = Jwts.builder()
         .subject(
             id_user.toString())
@@ -97,62 +91,45 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         .signWith(SECRET_KEY)
         .compact();
 
+    // TODO: HABILITAR LAS COOKIES EN EL FRONTEND
     // Configuración de cookies
     Cookie jwtCookie = new Cookie("ACCESS_TOKEN", token);
     jwtCookie.setHttpOnly(true); // NO accesible por JS
     jwtCookie.setSecure(true); // HTTPS (false solo en local)
     jwtCookie.setPath("/");
-    jwtCookie.setMaxAge(60 * 60 * 24); // 1 dia
+    jwtCookie.setMaxAge(TOKEN_EXPIRATION); 
     jwtCookie.setAttribute("SameSite", "Strict");
 
     response.addCookie(jwtCookie);
 
-    CommonResponse commonResponse = new CommonResponse();
-    commonResponse.setType("success");
-    commonResponse.setCode(ResponseStatusCodes.SUCCESS_RESPONSE.name());
-    commonResponse.setMessage("Has iniciado sesión con éxito");
-
-    response.setStatus(HttpServletResponse.SC_OK);
+    // Respuesta de autenticación exitosa
+    CommonResponse res = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS_RESPONSE, "Has iniciado sesión con éxito");
+    response.setStatus(res.getStatus());
     response.setContentType("application/json");
-    response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
+    response.getWriter().write(new ObjectMapper().writeValueAsString(res));
   }
 
+  // Metodo de autenticación fallida
   @Override
   protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       AuthenticationException failed) throws IOException, ServletException {
+    // Declara una variable de respuesta
+    CommonResponse commonResponse;
 
-    // Aqui no se puede utilizar excepciones, ya que se va a devolver un json
-    CommonResponse commonResponse = new CommonResponse();
-    commonResponse.setType("error");
-
-    // commonResponse.setCode(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.name());
-    // commonResponse.setMessage(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
-
-    // response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
-    // response.setStatus(401);
-    // response.setContentType("application/json");
-
-      // Nota: No es DisabledException, sino LockedException
+    // Validar cada tipo de excepción de autenticación
+    // No es DisabledException, sino LockedException
     if (failed instanceof LockedException) {
-      commonResponse.setCode(ResponseStatusCodes.AUTH_USER_DISABLED.name());
-      commonResponse.setMessage("El usuario ha sido bloqueado por el administrador");
-      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-
+      commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "El usuario ha sido bloqueado por el administrador");
     } else if (failed instanceof BadCredentialsException) {
-      commonResponse.setCode(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.name());
-      commonResponse.setMessage(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
+      commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "Las credenciales son inválidas, verifique su correo o contraseña");
     } else {
-      commonResponse.setCode(ResponseStatusCodes.AUTH_ERROR.name());
-      commonResponse.setMessage("Error desconocido");
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "");
     }
 
-  response.setContentType("application/json");
-  response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
-
-
+    // Respuesta de autenticación fallida
+    response.setStatus(commonResponse.getStatus());
+    response.setContentType("application/json");
+    response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
   }
 
 }

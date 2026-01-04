@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
@@ -50,11 +50,11 @@ public class CompanyServiceImpl implements CompanyService {
   public CompanyResponse findCompanyById(Long id) {
 
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
 
     return CompanyMapper.builder().setCompany(company).buildCompanyResponse();
   }
@@ -62,15 +62,15 @@ public class CompanyServiceImpl implements CompanyService {
   @Override
   public void updateCompanyById(Long id, CompanyRequest companyRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta empresa no se puede editar");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "Esta empresa no se puede editar");
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La empresa no existe en el sistema"));
 
     String newName = companyRequest.getName().trim();
 

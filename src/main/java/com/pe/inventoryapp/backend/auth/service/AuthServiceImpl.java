@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.entity.UserToken;
@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
   public void processUserForgotPassword(String email) {
 
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El usuario no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El usuario no existe"));
 
     // invalidar tokens previos
     userTokenRepository.deleteByUser(user);
@@ -60,10 +60,10 @@ public class AuthServiceImpl implements AuthService {
   public void validateAndActivateResetToken(String token) {
 
     UserToken userToken = userTokenRepository.findByToken(token)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED));
 
     if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED);
     }
 
     if (userToken.isActive()) {
@@ -83,16 +83,16 @@ public class AuthServiceImpl implements AuthService {
     User user = userToken.getUser();
 
     if (userToken.isActive() == false) {
-      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED,
+      throw new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED,
           "El token de 6 digitos ha expirado, vuelva a solicitar un nuevo token");
     }
 
     if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword())) {
-      throw new BusinessException(ResponseStatusCodes.VALIDATION_ERROR, "Las contraseñas no coinciden");
+      throw new BusinessException(ResponseStatus.VALIDATION_ERROR, "Las contraseñas no coinciden");
     }
 
     if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
-      throw new BusinessException(ResponseStatusCodes.PASSWORD_REUSE_NOT_ALLOWED);
+      throw new BusinessException(ResponseStatus.PASSWORD_REUSE_NOT_ALLOWED);
     }
 
     user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
@@ -126,10 +126,10 @@ public class AuthServiceImpl implements AuthService {
   private UserToken getValidUserTokenOrThrow(String token) {
 
     UserToken userToken = userTokenRepository.findByToken(token)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED));
 
     if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-      throw new BusinessException(ResponseStatusCodes.AUTH_TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatus.AUTH_TOKEN_EXPIRED);
     }
 
     userToken.setActive(true);

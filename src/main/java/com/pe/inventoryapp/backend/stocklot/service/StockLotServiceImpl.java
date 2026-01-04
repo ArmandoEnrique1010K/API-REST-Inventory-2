@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.model.mapper.StockLotMapper;
@@ -41,11 +41,11 @@ public class StockLotServiceImpl implements StockLotService{
   @Transactional(readOnly = true)
   public StockLotDetailsResponse findStockLotById(Long stockLotId) {
     if (stockLotId == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     StockLot stockLot = stockLotRepository.findById(stockLotId)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El lote de stock no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El lote de stock no existe en el sistema"));
 
     return StockLotMapper.builder().setStockLot(stockLot).buildStockLotDetailsResponse();
   }

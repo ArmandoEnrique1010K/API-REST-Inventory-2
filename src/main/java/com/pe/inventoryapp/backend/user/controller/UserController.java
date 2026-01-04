@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -58,7 +58,7 @@ public class UserController {
     userService.registerUser(registerRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se ha registrado al usuario en el sistema"));
   }
 
@@ -90,7 +90,7 @@ public class UserController {
     userService.updateUserProfileById(userId, profileRequest);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Su perfil ha sido actualizado"));
   }
 
@@ -102,7 +102,7 @@ public class UserController {
     userService.updateUserRolesById(id, rolesRequest);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se han cambiado los roles del usuario"));
   }
 
@@ -112,7 +112,7 @@ public class UserController {
     userService.changeStatusUserById(id);
 
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se cambio el estado del usuario"));
   }
 }

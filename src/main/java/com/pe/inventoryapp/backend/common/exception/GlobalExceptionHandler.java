@@ -1,153 +1,127 @@
 package com.pe.inventoryapp.backend.common.exception;
 
 import java.util.Map;
+import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException.Forbidden;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.service.ResponseService;
+
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+  
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+  @Autowired
+  private ResponseService responseService;
+
+  // Errores de validación de campo en el body de la petición
   @ExceptionHandler(RequestValidation.class)
   public ResponseEntity<ErrorWithFieldsResponse> handleValidationException(RequestValidation ex) {
-
+    // Por defecto se va a tomar el mensaje de error que se encuentra en ResponseStatus
     return buildFieldError(
-        ResponseStatusCodes.VALIDATION_ERROR,
+        ResponseStatus.VALIDATION_ERROR,
         "Complete los campos faltantes",
         ex.getErrors());
-
   }
 
+  // Error de duplicación de registro en el body de la petición
   @ExceptionHandler(FieldValidation.class)
   public ResponseEntity<ErrorWithFieldsResponse> handleDuplicate(FieldValidation ex) {
     Map<String, String> errors = Map.of(ex.getFieldName(), ex.getMessage());
 
     return buildFieldError(
-        ResponseStatusCodes.DUPLICATE_RESOURCE,
-        "Error de duplicación al guardar los datos",
+        ResponseStatus.CONFLICT,
+        "El recurso ya existe en la base de datos",
         errors);
   }
 
+  // Error de ID inválido
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-  public ResponseEntity<CommonResponse> handleTypeMismatch() {
-
+  public ResponseEntity<CommonResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
     return buildCommonError(
-        ResponseStatusCodes.VALIDATION_INVALID_ID,
-        "ID inválido, debe ser un número");
+        ResponseStatus.BAD_REQUEST,
+        "El identificador único es invalido, debe ser un número entero");
   }
 
-  @ExceptionHandler(UsernameNotFoundException.class)
-  public ResponseEntity<CommonResponse> handleUserNotFound() {
-
-    return buildCommonError(
-        ResponseStatusCodes.USER_NOT_FOUND, ResponseStatusCodes.USER_NOT_FOUND.getDefaultMessage());
-  }
-
+  // Error de entidad no encontrada
   @ExceptionHandler(RuntimeException.class)
-  public ResponseEntity<CommonResponse> handleRuntime() {
+  public ResponseEntity<CommonResponse> handleRuntime(RuntimeException ex) {
+    log.error("Error en tiempo de ejecución : ", ex);
 
     return buildCommonError(
-        ResponseStatusCodes.ENTITY_NOT_FOUND,
-        "Ha ocurrido un error, la entidad no ha sido encontrada");
+        ResponseStatus.INTERNAL_ERROR,
+        "Error interno del servidor, por favor vuelva a intentarlo");
   }
 
-  @ExceptionHandler(Forbidden.class)
-  public ResponseEntity<CommonResponse> handleForbidden403() {
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<CommonResponse> handleException(Exception ex) {
+    log.error("Error no controlado: ", ex);
 
     return buildCommonError(
-        ResponseStatusCodes.ENTITY_NOT_FOUND,
-        "Ha ocurrido un error, la entidad no ha sido encontrada");
+        ResponseStatus.INTERNAL_ERROR,
+        "Error interno del servidor, por favor vuelva a intentarlo");
   }
 
+  // Error de negocio personalizado
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<CommonResponse> handleBusiness(BusinessException ex) {
 
-    ResponseStatusCodes code = ex.getResponseStatusCodes();
+    ResponseStatus responseStatus = ex.getResponseStatusCodes();
+    CommonResponse response = responseService.generateErrorResponse(responseStatus, ex.getMessage());
+    HttpStatusCode status = Objects.requireNonNull(
+        responseStatus.getStatus(),
+        "HttpStatus no puede ser null");
 
-    CommonResponse response = new CommonResponse();
-    response.setType("error");
-    response.setCode(code.name());
-    response.setMessage(ex.getMessage());
-
-    HttpStatus status = code.getStatus();
-
-    if (status != null) {
       return ResponseEntity.status(status).body(response);
-    } else {
-      status = ResponseStatusCodes.COMMON_ERROR.getStatus();
-      response.setCode(ResponseStatusCodes.COMMON_ERROR.name());
-      response.setMessage(ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
-      return ResponseEntity.status(status.value()).body(response);
-    }
   }
 
   // Error de base de datos
   @ExceptionHandler(DataAccessException.class)
   public ResponseEntity<CommonResponse> handleDatabase(DataAccessException ex) {
+    ResponseStatus responseStatus = ResponseStatus.CONFLICT;
+    CommonResponse response = responseService.generateErrorResponse(responseStatus, "Se ha producido un error en la base de datos");
+    HttpStatusCode status = Objects.requireNonNull(
+        responseStatus.getStatus(),
+        "HttpStatus no puede ser null");
 
-    HttpStatus code = ResponseStatusCodes.INTERNAL_ERROR.getStatus();
-
-    CommonResponse response = new CommonResponse();
-    response.setType("error");
-    response.setCode(code.name());
-    response.setMessage("Se ha producido un error en la base de datos");
-
-    return ResponseEntity.status(code).body(response);
+      return ResponseEntity.status(status).body(response);
   }
 
-  // Helpers auxiliares
-
+  // MÉTODOS AUXILIARES
   private ResponseEntity<ErrorWithFieldsResponse> buildFieldError(
-      ResponseStatusCodes code,
+      ResponseStatus responseStatus,
       String message,
       Map<String, String> fields) {
+    ErrorWithFieldsResponse response = responseService.generateErrorWithFieldsResponse(responseStatus, message, fields);
+    HttpStatusCode status = Objects.requireNonNull(
+        responseStatus.getStatus(),
+        "HttpStatus no puede ser null");
 
-    ErrorWithFieldsResponse response = new ErrorWithFieldsResponse();
-    response.setType("error");
-    response.setCode(code.name());
-    response.setMessage(message);
-    response.setFields(fields);
-
-    HttpStatus status = code.getStatus();
-
-    if (status != null) {
       return ResponseEntity.status(status).body(response);
-    } else {
-      status = ResponseStatusCodes.COMMON_ERROR.getStatus();
-      response.setCode(ResponseStatusCodes.COMMON_ERROR.name());
-      response.setMessage(ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
-      return ResponseEntity.status(status.value()).body(response);
-    }
   }
 
   private ResponseEntity<CommonResponse> buildCommonError(
-      ResponseStatusCodes code,
+      ResponseStatus responseStatus,
       String message) {
+    CommonResponse response = responseService.generateErrorResponse(responseStatus, message);
+    HttpStatusCode status = Objects.requireNonNull(
+        responseStatus.getStatus(),
+        "HttpStatus no puede ser null");
 
-    CommonResponse response = new CommonResponse();
-    response.setType("error");
-    response.setCode(code.name());
-    response.setMessage(message);
-
-    HttpStatus status = code.getStatus();
-
-    if (status != null) {
       return ResponseEntity.status(status).body(response);
-    } else {
-      status = ResponseStatusCodes.COMMON_ERROR.getStatus();
-      response.setCode(ResponseStatusCodes.COMMON_ERROR.name());
-      response.setMessage(ResponseStatusCodes.COMMON_ERROR.getDefaultMessage());
-      return ResponseEntity.status(status.value()).body(response);
-    }
   }
+
 }

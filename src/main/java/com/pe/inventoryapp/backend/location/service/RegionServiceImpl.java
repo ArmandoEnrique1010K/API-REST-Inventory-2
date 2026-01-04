@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.location.model.entity.Region;
@@ -48,11 +48,11 @@ public class RegionServiceImpl implements RegionService {
   @Override
   public RegionResponse findRegionById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
 
     return RegionMapper.builder().setRegion(region).buildRegionResponse();
   }
@@ -60,15 +60,15 @@ public class RegionServiceImpl implements RegionService {
   @Override
   public void updateRegionById(Long id, RegionRequest regionRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta región no se puede editar");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "Esta región no se puede editar");
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La región no existe en el sistema"));
 
     verifyRegionNameExistById(regionRequest.getName().trim(), id);
 

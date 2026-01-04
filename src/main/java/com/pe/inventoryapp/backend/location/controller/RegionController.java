@@ -21,7 +21,7 @@ import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 
 @RestController
 @RequestMapping("/api/regions")
@@ -42,7 +42,7 @@ public class RegionController {
     regionService.saveRegion(regionRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se registro la región en el sistema"));
   }
 
@@ -65,7 +65,7 @@ public class RegionController {
     regionService.updateRegionById(id, regionRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Se actualizo los datos de la región"));
   }
 }

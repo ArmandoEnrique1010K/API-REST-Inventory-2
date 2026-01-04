@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -62,7 +62,7 @@ public class DeliveryLineController {
     deliveryLineService.saveDeliveryLine(deliveryOrderRequest,idProduct_DeliveryOrder, id_user);
 
     return ResponseEntity.status(201).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Nueva orden pendiente"));
   }
 
@@ -102,7 +102,7 @@ public class DeliveryLineController {
     deliveryLineService.updateDeliveryLineById(id, deliveryLineUpdateRequest, id_user);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Se actualizo la linea de entrega"));
   }
 
@@ -115,7 +115,7 @@ public class DeliveryLineController {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
     deliveryLineService.changeDeliveredStatusDeliveryLineById(id, id_user);
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "La linea de entrega tiene el estado entregado"));
   }
 
@@ -129,7 +129,7 @@ public class DeliveryLineController {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
     deliveryLineService.changeCanceledStatusDeliveryLineById(id, id_user);
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "La linea de entrega tiene el estado cancelado"));
   }
 
@@ -142,7 +142,7 @@ public class DeliveryLineController {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
     deliveryLineService.changeMissingStatusDeliveryLineById(id, id_user);
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "La linea de entrega tiene el estado perdido"));
   }
 
@@ -152,7 +152,7 @@ public class DeliveryLineController {
     deliveryLineService.deleteDeliveryLineById(id);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Se elimino la linea de entrega"));
   }
 }

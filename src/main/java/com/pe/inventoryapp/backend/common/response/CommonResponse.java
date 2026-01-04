@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 // respuestas exitosas como para respuestas erroneas
 public class CommonResponse {
   private String type;
-  private String code;
+  private Integer status;
   private String message;
 }

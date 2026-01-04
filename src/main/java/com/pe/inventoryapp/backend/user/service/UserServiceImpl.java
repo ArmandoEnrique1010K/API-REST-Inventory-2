@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
@@ -85,12 +85,12 @@ public class UserServiceImpl implements UserService {
   public DetailUserResponse findUserById(Long id) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatusCodes.COMMON_ERROR);
+          ResponseStatus.COMMON_ERROR);
     }
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            ResponseStatus.ENTITY_NOT_FOUND,
             "El usuario no existe en el sistema"));
 
     return UserMapper.builder()
@@ -104,12 +104,12 @@ public class UserServiceImpl implements UserService {
   public void updateUserProfileById(Long id, ProfileRequest profileRequest) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatusCodes.COMMON_ERROR);
+          ResponseStatus.COMMON_ERROR);
     }
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            ResponseStatus.ENTITY_NOT_FOUND,
             "El usuario no existe en el sistema"));
 
     // Obtener el correo del usuario actual y el nuevo
@@ -134,14 +134,14 @@ public class UserServiceImpl implements UserService {
   public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatusCodes.COMMON_ERROR);
+          ResponseStatus.COMMON_ERROR);
     }
 
     verifyUserByRoleAdminExist(rolesRequest.isAdmin(), id);
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            ResponseStatus.ENTITY_NOT_FOUND,
             "El usuario no existe en el sistema"));
 
     List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
@@ -154,23 +154,23 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void changeStatusUserById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     if (id == 1L) {
       throw new BusinessException(
-          ResponseStatusCodes.DEFAULT_RESOURCE,
+          ResponseStatus.DEFAULT_RESOURCE,
           "Este usuario no se puede bloquear del sistema");
     }
 
 
     User user = userRepository.findById(id).orElseThrow(
         () -> new BusinessException(
-            ResponseStatusCodes.ENTITY_NOT_FOUND,
+            ResponseStatus.ENTITY_NOT_FOUND,
             "El usuario no existe en el sistema"));
 
     if (user == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     } else {
       // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
       // Luego cambia el estado del usuario
@@ -206,7 +206,7 @@ public class UserServiceImpl implements UserService {
   // Busca un rol por su nombre, de lo contrario lanza una excepcion
   private Role getRoleOrThrow(String roleName, String message) {
     return roleRepository.findByName(roleName)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.VALIDATION_ERROR, message));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.VALIDATION_ERROR, message));
   }
 
   // Verifica si el email del usuario ya existe, de lo contrario lanza una excepcion
@@ -220,7 +220,7 @@ public class UserServiceImpl implements UserService {
   private void verifyUserByRoleAdminExist(boolean admin, Long id) {
     if (!roleRepository.existsByName("ROLE_ADMIN")) {
       throw new BusinessException(
-          ResponseStatusCodes.ENTITY_NOT_FOUND,
+          ResponseStatus.ENTITY_NOT_FOUND,
           "El rol de administrador no existe en el sistema");
     }
 
@@ -228,7 +228,7 @@ public class UserServiceImpl implements UserService {
 
     if (!existsAnotherAdmin && !admin) {
       throw new BusinessException(
-          ResponseStatusCodes.DEFAULT_RESOURCE,
+          ResponseStatus.DEFAULT_RESOURCE,
           "Debe existir al menos un administrador distinto a este usuario");
     }
   }

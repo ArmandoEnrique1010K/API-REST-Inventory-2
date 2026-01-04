@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
@@ -59,14 +59,14 @@ public class CategoryServiceImpl implements CategoryService {
   public CategoryResponse findCategoryById(Long id) {
 
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
     }
 
     return CategoryMapper.builder().setCategory(category).buildCategoriesResponse();
@@ -75,18 +75,18 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   public void updateCategoryById(Long id, CategoryRequest categoryRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "Esta categoria no se puede editar");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "Esta categoria no se puede editar");
     }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
     }
 
     String newName = categoryRequest.getName().trim();
@@ -102,15 +102,15 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   public void changeStatusCategoryById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "No se puede cambiar el estado de esta categoria");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "No se puede cambiar el estado de esta categoria");
     }
 
     Category category = categoryRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
 
     // Cambia el estado de la categoria a false y lo guarda
     category.setStatus(!category.isStatus());

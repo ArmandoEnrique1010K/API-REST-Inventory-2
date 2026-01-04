@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -46,7 +46,7 @@ public class ProductController {
     productService.saveProduct(productRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se registro el producto en el sistema"));
   }
 
@@ -130,7 +130,7 @@ public class ProductController {
     productService.updateProductById(id, productRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Se actualizo los datos del producto"));
   }
 
@@ -139,7 +139,7 @@ public class ProductController {
     productService.changeStatusProductById(id);
     
     return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se ha cambiado el estado del producto"));
   }
 }

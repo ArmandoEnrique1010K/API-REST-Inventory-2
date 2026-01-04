@@ -1,21 +1,73 @@
 package com.pe.inventoryapp.backend.common.service;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
 
   @Override
-  public CommonResponse generateCommonResponse(String type, ResponseStatusCodes code, String message) {
-    CommonResponse successfulResponse = new CommonResponse();
-    successfulResponse.setType(type);
-    successfulResponse.setCode(code.name());
-    successfulResponse.setMessage(message);
+  public CommonResponse generateCommonResponse(String type, ResponseStatus code, String message) {
+    CommonResponse commonResponse = new CommonResponse();
+    commonResponse.setType(type);
+    commonResponse.setMessage(message);
 
-    return successfulResponse;
+    return commonResponse;
   }
 
+  @Override
+  public CommonResponse generateSucessfullResponse(ResponseStatus code, String message) {
+    CommonResponse sucessfulResponse = new CommonResponse();
+
+    // Tipo - Codigo HTTP - Tipo de respuesta - Mensaje
+    sucessfulResponse.setType("success");
+    sucessfulResponse.setStatus(code.getStatus().value());
+
+    // Aqui debe mostrar la respuesta por defecto o el que se le pase
+    if (message == null) {
+      message = code.getDefaultMessage();
+    }
+
+    sucessfulResponse.setMessage(message);
+
+    return sucessfulResponse;
+  }
+
+  @Override
+  public CommonResponse generateErrorResponse(ResponseStatus code, String message) {
+    CommonResponse sucessfulResponse = new CommonResponse();
+    sucessfulResponse.setType("error");
+    sucessfulResponse.setStatus(code.getStatus().value());
+
+    // Normalmente si el mensaje es null o vacio, se muestra el mensaje por defecto
+    if (message.isEmpty() || message == null || message.isBlank()) {
+      message = code.getDefaultMessage();
+    }
+
+    sucessfulResponse.setMessage(message);
+
+    return sucessfulResponse;
+  }
+
+  @Override
+  public ErrorWithFieldsResponse generateErrorWithFieldsResponse(ResponseStatus code, String message,
+      Map<String, String> fields) {
+    ErrorWithFieldsResponse errorWithFieldsResponse = new ErrorWithFieldsResponse();
+    errorWithFieldsResponse.setType("error");
+    errorWithFieldsResponse.setStatus(code.getStatus().value());
+
+    // Normalmente si el mensaje es null o vacio, se muestra el mensaje por defecto
+    if (message.isEmpty() || message == null || message.isBlank()) {
+      message = code.getDefaultMessage();
+    }
+
+    errorWithFieldsResponse.setMessage(message);
+    errorWithFieldsResponse.setFields(fields);
+    return errorWithFieldsResponse;
+  }
 }

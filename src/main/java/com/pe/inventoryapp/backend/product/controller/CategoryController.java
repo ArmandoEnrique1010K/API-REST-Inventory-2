@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -43,7 +43,7 @@ public class CategoryController {
     categoryService.saveCategory(categoryRequest);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se registro la categoria en el sistema"));
   }
 
@@ -72,7 +72,7 @@ public class CategoryController {
     categoryService.updateCategoryById(id, categoryRequest);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Se actualizo los datos de la categoria"));
   }
 
@@ -81,7 +81,7 @@ public class CategoryController {
     categoryService.changeStatusCategoryById(id);
 
     return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatusCodes.SUCCESS_RESPONSE,
+        ResponseStatus.SUCCESS_RESPONSE,
         "Se ha cambiado el estado de la categoria"));
   }
 }

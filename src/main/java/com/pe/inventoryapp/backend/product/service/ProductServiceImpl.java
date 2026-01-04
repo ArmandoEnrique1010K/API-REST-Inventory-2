@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
@@ -37,16 +37,16 @@ public class ProductServiceImpl implements ProductService {
     Long idCategory = productRequest.getIdCategory();
 
      if (idCategory == null) {
-       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+       throw new BusinessException(ResponseStatus.COMMON_ERROR);
      }
 
     // Buscar la categoria por su ID
     Category category = categoryRepository.findById(
         idCategory)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
     }
     
     String name = productRequest.getName().trim();
@@ -85,7 +85,7 @@ public class ProductServiceImpl implements ProductService {
       Pageable pageable) {
     if (categoryId != null && !categoryRepository.existsById(categoryId)) {
       throw new BusinessException(
-          ResponseStatusCodes.ENTITY_NOT_FOUND,
+          ResponseStatus.ENTITY_NOT_FOUND,
           "La categoria no existe en el sistema");
     }
 
@@ -98,15 +98,15 @@ public class ProductServiceImpl implements ProductService {
   @Transactional(readOnly = true)
   public ProductDetailsResponse findProductById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
 
     if (product.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
     }
 
     return ProductMapper.builder().setProduct(product).buildProductDetailsResponse();
@@ -116,14 +116,14 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public void updateProductById(Long id, ProductRequest productRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
     if (product.isStatus() == false) {
-      throw new BusinessException(ResponseStatusCodes.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
     }
 
     String newName = productRequest.getName().trim();
@@ -133,12 +133,12 @@ public class ProductServiceImpl implements ProductService {
     Long categoryId = productRequest.getIdCategory();
 
     if (categoryId == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Category category = categoryRepository.findById(
         categoryId)
-        .orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La categoria no existe en el sistema"));
 
     product.setName(newName);
     product.setEntryDate(productRequest.getEntryDate());
@@ -156,11 +156,11 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public void changeStatusProductById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     Product product = productRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "El producto no existe en el sistema"));
 
     product.setStatus(!product.isStatus());
     productRepository.save(product);

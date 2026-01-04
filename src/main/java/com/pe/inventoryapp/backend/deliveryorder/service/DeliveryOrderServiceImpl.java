@@ -7,7 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
@@ -51,7 +51,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     // BUSCAR AL USUARIO POR SU ID
     Optional<User> userEmail = userRepository.findByEmail(detailsUserResponse.getEmail());
-    User userEntity = userEmail.orElseThrow(() -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND,
+    User userEntity = userEmail.orElseThrow(() -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND,
         "El usuario no existe"));
 
     deliveryOrder.setUser(userEntity);
@@ -93,12 +93,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
         .orElseThrow(
-            () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+            () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
 
     return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
         .buildDeliveryOrderDetailsResponse();
@@ -107,7 +107,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
     if (id == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
 
     // TAMBIEN DEBE ACTUALIZAR EL USUARIO QUE HA ACTUALIZADO LA ORDEN (EL QUE
@@ -125,7 +125,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     // "El usuario no existe"));
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND, "La orden de entrega no existe"));
 
     verifyBatchExist(deliveryOrderRequest.getBatch());
 

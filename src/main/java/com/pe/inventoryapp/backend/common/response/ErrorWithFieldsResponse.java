@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 // representan los campos en donde se generaron los errores
 public class ErrorWithFieldsResponse {
   private String type;
-  private String code;
+  private Integer status;
   private String message;
   private Map<String, String> fields;
 }

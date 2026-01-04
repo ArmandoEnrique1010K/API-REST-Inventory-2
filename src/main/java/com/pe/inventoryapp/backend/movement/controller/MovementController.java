@@ -13,7 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -57,7 +57,7 @@ public class MovementController {
       movementService.saveMovementReceive(movementReceiveRequest, id);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se ha agregado contenido al stock"));
   }
 
@@ -70,7 +70,7 @@ public class MovementController {
       movementService.saveMovementAdjustmentIncrease(movementAdjustmentRequest, id);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se ha aumentado manualmente el stock del producto"));
   }
 
@@ -84,7 +84,7 @@ public class MovementController {
       movementService.saveMovementAdjustmentLoss(movementAdjustmentRequest, id);
 
       return ResponseEntity.status(201)
-              .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+              .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
                       "Se ha descontado manualmente el stock de un producto"));
   }
 
@@ -97,7 +97,7 @@ public class MovementController {
       movementService.saveMovementAdjustmentRecovery(movementAdjustmentRequest, id);
 
       return ResponseEntity.status(201)
-              .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+              .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
                       "Se ha recuperado el stock dañado de un producto"));
   }
 
@@ -111,7 +111,7 @@ public class MovementController {
     movementService.saveMovementTransfer(movementTransferRequest, id);
       
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se ha realizado una transferencia entre 2 stocks"));
   }
 
@@ -125,7 +125,7 @@ public class MovementController {
     movementService.saveMovementAllocate(movementAllocateRequest, id);
 
     return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
             "Se ha preparado una linea de entrega"));
   }
 
@@ -138,7 +138,7 @@ public class MovementController {
       movementService.saveMovementReturn(movementReturnRequest, id);
 
       return ResponseEntity.status(201)
-              .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
+              .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS_RESPONSE,
                       "Se ha devuelto una linea de entrega"));
   }
   

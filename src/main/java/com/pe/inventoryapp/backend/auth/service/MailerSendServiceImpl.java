@@ -6,7 +6,7 @@ import com.mailersend.sdk.MailerSend;
 import com.mailersend.sdk.MailerSendResponse;
 import com.mailersend.sdk.emails.Email;
 import com.mailersend.sdk.exceptions.MailerSendException;
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -47,7 +47,7 @@ public class MailerSendServiceImpl implements MailerSendService {
     } catch (MailerSendException e) {
       // TODO: PARECE QUE HAY UN PROBLEMA CON LA GESTIÓN DE VARIABLES DE ENTORNO, PORQUE VEO QUE SE ALMACENAN EN MEMORIA CUANDO LA VARIABLE DE ENTORNO EN .env, NO EXISTE O SE ENCUENTRA COMENTADA
       // e.printStackTrace();
-      throw new BusinessException(ResponseStatusCodes.INTERNAL_ERROR, "El servicio de envio de emails no ha respondido");
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR, "El servicio de envio de emails no ha respondido");
     }
   }
 

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
@@ -40,10 +40,10 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
     List<Long> idProducts = product_DeliveryOrderRequest.getIdProducts();
 
     if (idProducts == null || idProducts.isEmpty() || idDeliveryOrder == null) {
-      throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+      throw new BusinessException(ResponseStatus.COMMON_ERROR);
     }
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
-        () -> new BusinessException(ResponseStatusCodes.ENTITY_NOT_FOUND,
+        () -> new BusinessException(ResponseStatus.ENTITY_NOT_FOUND,
             "La orden de entrega no existe en el sistema"));
 
     List<Product_DeliveryOrder> relations = new ArrayList<>();
@@ -51,18 +51,18 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
     for (Long productId : idProducts) {
 
         if (productId == null) {
-            throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
+            throw new BusinessException(ResponseStatus.COMMON_ERROR);
         }
 
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new BusinessException(
-                ResponseStatusCodes.ENTITY_NOT_FOUND,
+                ResponseStatus.ENTITY_NOT_FOUND,
                 "El producto con el id " + productId + " no existe en el sistema"
             ));
 
         if (!product.isStatus()) {
             throw new BusinessException(
-                ResponseStatusCodes.DEFAULT_RESOURCE,
+                ResponseStatus.DEFAULT_RESOURCE,
                 "El producto con el id " + productId + " se encuentra desactivado"
             );
         }

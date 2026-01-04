@@ -1,23 +1,23 @@
 package com.pe.inventoryapp.backend.common.exception;
 
-import com.pe.inventoryapp.backend.common.data.ResponseStatusCodes;
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 
 public class BusinessException extends RuntimeException {
-  private final ResponseStatusCodes ResponseStatusCodes;
+  private final ResponseStatus ResponseStatusCodes;
 
   // Constructor para un mensaje predeterminado
-  public BusinessException(ResponseStatusCodes ResponseStatusCodes) {
+  public BusinessException(ResponseStatus ResponseStatusCodes) {
     super(ResponseStatusCodes.getDefaultMessage());
     this.ResponseStatusCodes = ResponseStatusCodes;
   }
 
   // Constructor para un mensaje personalizado
-  public BusinessException(ResponseStatusCodes ResponseStatusCodes, String customMessage) {
+  public BusinessException(ResponseStatus ResponseStatusCodes, String customMessage) {
     super(customMessage);
     this.ResponseStatusCodes = ResponseStatusCodes;
   }
 
-  public ResponseStatusCodes getResponseStatusCodes() {
+  public ResponseStatus getResponseStatusCodes() {
     return ResponseStatusCodes;
   }
 }
