@@ -20,8 +20,11 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
+import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -36,10 +39,12 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtValidationFilter extends BasicAuthenticationFilter {
 
   private final ResponseService responseService;
+  private final UserRepository userRepository;
 
-  public JwtValidationFilter(AuthenticationManager authenticationManager, ResponseService responseService) {
+  public JwtValidationFilter(AuthenticationManager authenticationManager, ResponseService responseService, UserRepository userRepository) {
     super(authenticationManager);
     this.responseService = responseService;
+    this.userRepository = userRepository;
   }
 
   private String getTokenFromCookie(HttpServletRequest request) {
@@ -91,19 +96,32 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
         throw new JwtException("El token no contiene roles válidos");
       }
 
+
+      // 3.5 Extraer el usuario
+        User user = userRepository.findById(Long.parseLong(userId))
+          .orElseThrow(() -> new BusinessException(ResponseStatus.UNAUTHORIZED, "El usuario no existe en el sistema"));
+
+        // Si el usuario no esta activo, se eliminara la sesion
+        if (!user.isEnabled()) {
+          SecurityContextHolder.clearContext();
+
+          Cookie cookie = new Cookie("ACCESS_TOKEN", null);
+          cookie.setMaxAge(0);
+          cookie.setHttpOnly(true);
+          cookie.setPath("/");
+
+          response.addCookie(cookie);
+          // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "El usuario no esta activo en el sistema");
+
+          return;
+        }
+
       // 4. Convertir roles a GrantedAuthority
       Collection<? extends GrantedAuthority> authorities = roles.stream()
           .map(SimpleGrantedAuthority::new)
           .toList();
 
       // 5. Crear el objeto de autenticación y establecerlo en el contexto de
-      // seguridad
-      // UserPrincipal principal = new UserPrincipal(userId, username);
-
-      // UsernamePasswordAuthenticationToken authentication = new
-      // UsernamePasswordAuthenticationToken(principal, null,
-      // authorities);
-
       // username es el email
       UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
           userId, null,
@@ -126,7 +144,5 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
       response.setContentType("application/json");
       response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
     }
-
   }
-
 }

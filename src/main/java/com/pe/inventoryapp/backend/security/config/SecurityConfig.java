@@ -16,6 +16,8 @@ import com.pe.inventoryapp.backend.security.exception.CustomAccessDeniedHandler;
 import com.pe.inventoryapp.backend.security.exception.CustomAuthenticationEntryPoint;
 import com.pe.inventoryapp.backend.security.filter.JwtAuthenticationFilter;
 import com.pe.inventoryapp.backend.security.filter.JwtValidationFilter;
+import com.pe.inventoryapp.backend.user.repository.UserRepository;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,6 +30,8 @@ public class SecurityConfig {
         @Autowired
         private AuthenticationConfiguration authenticationConfiguration;
 
+        @Autowired
+        private UserRepository userRepository;
         @Autowired
         private AuthService authService;
 
@@ -150,7 +154,7 @@ public class SecurityConfig {
                                 .addFilter(new JwtAuthenticationFilter(
                                                 authenticationManager(), authService, responseService))
                                 .addFilter(new JwtValidationFilter(
-                                                authenticationManager, responseService))
+                                                authenticationManager, responseService, userRepository))
                                 .build();
         }
 

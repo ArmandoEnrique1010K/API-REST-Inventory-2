@@ -123,7 +123,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     } else if (failed instanceof BadCredentialsException) {
       commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "Las credenciales son inválidas, verifique su correo o contraseña");
     } else {
-      commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "");
+      // TODO: CORREGIR
+      commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "GRAVE ERROR");
     }
 
     // Respuesta de autenticación fallida

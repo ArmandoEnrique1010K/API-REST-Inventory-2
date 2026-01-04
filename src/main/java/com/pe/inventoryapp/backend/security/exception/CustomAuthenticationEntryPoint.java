@@ -24,11 +24,13 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  // Excepcion personalizada cuando el usuario no esta autenticado o cuando el usuario esta deshabilitado y realiza una acción inmediatamente luego que fue deshabilitado por el administrador
   @Override
   public void commence(
       HttpServletRequest request,
       HttpServletResponse response,
       AuthenticationException ex) throws IOException {
+        // Mensaje por defecto: No estas autorizado para acceder a este recurso
     CommonResponse commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "");
     response.setStatus(commonResponse.getStatus());
     response.setContentType("application/json");

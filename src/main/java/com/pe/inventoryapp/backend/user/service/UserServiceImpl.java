@@ -53,6 +53,8 @@ public class UserServiceImpl implements UserService {
     // Asigna los roles al usuario en base a las opciones marcadas
     user.setRoles(getRoles(registerRequest.isAdmin(), registerRequest.isSecretary(), registerRequest.isOperator()));
 
+    user.setStatus(true);
+
     userRepository.save(user);
   }
 

@@ -9,12 +9,13 @@ public enum ResponseStatus {
 		// 201 - CREATED
 		CREATED(HttpStatus.CREATED, "Se ha creado el recurso correctamente"),
 
+		// TODO: CADA VEZ QUE SE DEVUELVA UN 401, DEBERA CERRAR SESION DE FORMA AUTOMATICA EN EL FRONTEND
 	// 401 - UNAUTHORIZED
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "No estas autorizado para acceder a este recurso"),
 
 	// Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
 	TOKEN_EXPIRED(
-			HttpStatus.UNAUTHORIZED,
+			HttpStatus.BAD_REQUEST,
 			"El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token"),
 
 		// 400 - BAD_REQUEST
