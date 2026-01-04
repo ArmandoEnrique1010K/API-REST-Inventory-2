@@ -47,7 +47,8 @@ public class UserMapper {
         user.getLastname()
             .trim(),
         user.getDni(),
-        roles);
+        roles,
+        user.isStatus());
   }
 
   public DetailUserResponse buildDetailUserResponse() {
@@ -69,7 +70,8 @@ public class UserMapper {
         user.getEmail()
             .trim(),
         user.getDni(),
-        roles);
+        roles,
+        user.isStatus());
 
   }
 

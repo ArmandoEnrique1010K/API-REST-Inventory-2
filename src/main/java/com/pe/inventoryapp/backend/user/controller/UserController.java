@@ -27,8 +27,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -107,12 +107,12 @@ public class UserController {
   }
 
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
-  @DeleteMapping("/{id}")
-  public ResponseEntity<CommonResponse> deleteUser(@PathVariable Long id) {
-    userService.deleteUserById(id);
+  @PatchMapping("/{id}")
+  public ResponseEntity<CommonResponse> changeStatusUser(@PathVariable Long id) {
+    userService.changeStatusUserById(id);
 
     return ResponseEntity.status(200)
         .body(responseService.generateCommonResponse("success", ResponseStatusCodes.SUCCESS_RESPONSE,
-            "Usuario eliminado definitivamente del sistema"));
+            "Se cambio el estado del usuario"));
   }
 }

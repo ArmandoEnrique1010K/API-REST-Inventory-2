@@ -152,7 +152,7 @@ public class UserServiceImpl implements UserService {
   // Elimina un usuario del sistema
   @Override
   @Transactional
-  public void deleteUserById(Long id) {
+  public void changeStatusUserById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     }
@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
     if (id == 1L) {
       throw new BusinessException(
           ResponseStatusCodes.DEFAULT_RESOURCE,
-          "Este usuario no se puede eliminar del sistema");
+          "Este usuario no se puede bloquear del sistema");
     }
 
 
@@ -172,8 +172,11 @@ public class UserServiceImpl implements UserService {
     if (user == null) {
       throw new BusinessException(ResponseStatusCodes.COMMON_ERROR);
     } else {
+      // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
+      // Luego cambia el estado del usuario
       verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id);
-      userRepository.delete(user);
+      user.setStatus(!user.isStatus());
+      userRepository.save(user);
     }
   }
 

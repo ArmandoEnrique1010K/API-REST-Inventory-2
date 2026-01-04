@@ -18,7 +18,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
@@ -36,7 +42,7 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 // @Getter
 // @Setter
 // @ToString(exclude = { "deliveryOrders", "movements", "tokens", "roles" })
-public class User {
+public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -58,6 +64,8 @@ public class User {
   })
   private List<Role> roles;
 
+  private boolean status;
+
   // NOTA: USAR @JsonIgnore evita tener un error de recursividad (StackOverflow) al imprimir la entidad
   
   // Pero  cuando se trata de editar datos en el servicio, no ocurre una sobrecarga porque no se esta serializando la entidad
@@ -72,4 +80,38 @@ public class User {
   // @JsonIgnore
   @OneToMany(mappedBy = "user")
   private List<DeliveryOrder> deliveryOrders;
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+
+    List<GrantedAuthority> authorities = roles.stream()
+        .map(r -> new SimpleGrantedAuthority(r.getName())).collect(Collectors.toList());
+
+    return authorities;
+  }
+
+  @Override
+  public String getUsername() {
+    return email;
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return this.status;
+  }
+
+  @Override
+  public boolean isAccountNonLocked() {
+    return status;
+  }
+
+  @Override
+  public boolean isAccountNonExpired() {
+    return status;
+  }
+
+  @Override
+  public boolean isCredentialsNonExpired() {
+    return status;
+  }
 }

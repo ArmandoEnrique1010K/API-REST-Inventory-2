@@ -32,6 +32,8 @@ public enum ResponseStatusCodes {
 		// Error de autenticación (401)
 		UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "No estas autorizado para acceder a este recurso"),
 
+		AUTH_USER_DISABLED(HttpStatus.UNAUTHORIZED, "El usuario ha sido bloqueado por el administrador"),
+		AUTH_ERROR(HttpStatus.UNAUTHORIZED, "Error de autenticación"),
 
 		// 403 - FORBIDDEN
 		AUTH_FORBIDDEN(

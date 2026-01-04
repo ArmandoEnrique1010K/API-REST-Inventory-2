@@ -22,5 +22,5 @@ public interface UserService {
 
   void updateUserRolesById(Long id, RolesRequest rolesRequest);
 
-  void deleteUserById(Long id);
+  void changeStatusUserById(Long id);
 }

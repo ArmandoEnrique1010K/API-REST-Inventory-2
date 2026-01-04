@@ -10,6 +10,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -52,15 +57,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
           login.getPassword());
 
       return authenticationManager.authenticate(authToken);
-    } catch (StreamReadException e) {
-      e.printStackTrace();
-    } catch (DatabindException e) {
-      e.printStackTrace();
+    // } catch (StreamReadException e) {
+    //   e.printStackTrace();
+    // } catch (DatabindException e) {
+    //   e.printStackTrace();
     } catch (IOException e) {
-      e.printStackTrace();
+      // e.printStackTrace();
+        throw new AuthenticationServiceException("Error leyendo credenciales", e);
+
     }
 
-    return null;
+    // return null;
   }
 
   @Override
@@ -117,12 +124,35 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // Aqui no se puede utilizar excepciones, ya que se va a devolver un json
     CommonResponse commonResponse = new CommonResponse();
     commonResponse.setType("error");
-    commonResponse.setCode(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.name());
-    commonResponse.setMessage(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
 
-    response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
-    response.setStatus(401);
-    response.setContentType("application/json");
+    // commonResponse.setCode(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.name());
+    // commonResponse.setMessage(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
+
+    // response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
+    // response.setStatus(401);
+    // response.setContentType("application/json");
+
+      // Nota: No es DisabledException, sino LockedException
+    if (failed instanceof LockedException) {
+      commonResponse.setCode(ResponseStatusCodes.AUTH_USER_DISABLED.name());
+      commonResponse.setMessage("El usuario ha sido bloqueado por el administrador");
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+    } else if (failed instanceof BadCredentialsException) {
+      commonResponse.setCode(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.name());
+      commonResponse.setMessage(ResponseStatusCodes.AUTH_INVALID_CREDENTIALS.getDefaultMessage());
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+    } else {
+      commonResponse.setCode(ResponseStatusCodes.AUTH_ERROR.name());
+      commonResponse.setMessage("Error desconocido");
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+
+  response.setContentType("application/json");
+  response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
+
+
   }
 
 }

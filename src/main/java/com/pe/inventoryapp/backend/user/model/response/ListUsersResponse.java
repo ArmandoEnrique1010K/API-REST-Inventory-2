@@ -17,4 +17,5 @@ public class ListUsersResponse {
   private String lastname;
   private Integer dni;
   private List<String> roles;
+  private boolean status;
 }
