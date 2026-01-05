@@ -70,8 +70,7 @@ public class UserMapper {
         user.getEmail()
             .trim(),
         user.getDni(),
-        roles,
-        user.isActive());
+        roles );
 
   }
 

@@ -17,5 +17,4 @@ public class DetailUserResponse {
   private String email;
   private Integer dni;
   private List<String> roles;
-  private boolean status;
 }

@@ -37,7 +37,7 @@ public class ProductServiceImpl implements ProductService {
     Long idCategory = productRequest.getIdCategory();
 
      if (idCategory == null) {
-       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
      }
 
     // Buscar la categoria por su ID
@@ -98,7 +98,7 @@ public class ProductServiceImpl implements ProductService {
   @Transactional(readOnly = true)
   public ProductDetailsResponse findProductById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     Product product = productRepository.findById(id)
@@ -116,7 +116,7 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public void updateProductById(Long id, ProductRequest productRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     Product product = productRepository.findById(id)
@@ -133,7 +133,7 @@ public class ProductServiceImpl implements ProductService {
     Long categoryId = productRequest.getIdCategory();
 
     if (categoryId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     Category category = categoryRepository.findById(
@@ -156,7 +156,7 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public void changeStatusProductById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     Product product = productRepository.findById(id).orElseThrow(

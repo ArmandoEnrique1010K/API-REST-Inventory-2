@@ -48,7 +48,7 @@ public enum ResponseStatus {
 
 	// 500 - INTERNAL_SERVER_ERROR
 	// Servidor interno
-	INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");
+	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor");
 
 
 

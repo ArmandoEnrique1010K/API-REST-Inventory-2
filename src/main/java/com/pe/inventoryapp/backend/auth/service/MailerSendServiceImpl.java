@@ -47,7 +47,7 @@ public class MailerSendServiceImpl implements MailerSendService {
     } catch (MailerSendException e) {
       // TODO: PARECE QUE HAY UN PROBLEMA CON LA GESTIÓN DE VARIABLES DE ENTORNO, PORQUE VEO QUE SE ALMACENAN EN MEMORIA CUANDO LA VARIABLE DE ENTORNO EN .env, NO EXISTE O SE ENCUENTRA COMENTADA
       // e.printStackTrace();
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR, "El servicio de envio de emails no ha respondido");
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR, "El servicio de envio de emails no ha respondido");
     }
   }
 

@@ -96,6 +96,7 @@ public class InitialData {
       user.setLastname("del sistema");
       user.setDni(12345678);
       user.setEmail("correo@example.com");
+      user.setActive(true);
       user.setPassword(passwordEncoder.encode("12345"));
       user.setRoles(allRoles);
 

@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
     log.error("Error en tiempo de ejecución : ", ex);
 
     return buildCommonError(
-        ResponseStatus.INTERNAL_ERROR,
+        ResponseStatus.INTERNAL_SERVER_ERROR,
         "Error interno del servidor, por favor vuelva a intentarlo");
   }
 
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
     log.error("Error no controlado: ", ex);
 
     return buildCommonError(
-        ResponseStatus.INTERNAL_ERROR,
+        ResponseStatus.INTERNAL_SERVER_ERROR,
         "Error interno del servidor, por favor vuelva a intentarlo");
   }
 

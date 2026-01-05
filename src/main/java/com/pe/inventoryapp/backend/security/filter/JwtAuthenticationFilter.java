@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -20,8 +22,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.auth.model.request.LoginRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
+import com.pe.inventoryapp.backend.common.exception.GlobalExceptionHandler;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
@@ -31,6 +35,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
   // No se utiliza @Autowired, ya que es un constructor
   private final AuthenticationManager authenticationManager;
   private final AuthService authService;
@@ -67,7 +74,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // Origen de extracción del username, toma el ID del usuario (no cambia en el
     // tiempo)
-    String username = ((org.springframework.security.core.userdetails.User) authResult.getPrincipal())
+
+    // Se utiliza la entidad UserPrincipal en lugar de User de
+    // org.springframework.security.core.userdetails.User
+    String username = ((UserPrincipal) authResult.getPrincipal())
         .getUsername();
 
     Long id_user = authService.findUserIdByEmail(username);
@@ -121,10 +131,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     if (failed instanceof LockedException) {
       commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "El usuario ha sido bloqueado por el administrador");
     } else if (failed instanceof BadCredentialsException) {
-      commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "Las credenciales son inválidas, verifique su correo o contraseña");
+      commonResponse = responseService.generateErrorResponse(ResponseStatus.BAD_REQUEST, "Las credenciales son inválidas, verifique su correo o contraseña");
     } else {
-      // TODO: CORREGIR
-      commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "GRAVE ERROR");
+      commonResponse = responseService.generateErrorResponse(ResponseStatus.INTERNAL_SERVER_ERROR, "Ha ocurrido un error desconocido");
+      log.error("Ha ocurrido un error desconocido", failed);
     }
 
     // Respuesta de autenticación fallida

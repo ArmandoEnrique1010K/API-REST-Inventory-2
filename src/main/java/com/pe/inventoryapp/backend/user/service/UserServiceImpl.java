@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
   public DetailUserResponse findUserById(Long id) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatus.INTERNAL_ERROR);
+          ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     User user = userRepository.findById(id)
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
   public void updateUserProfileById(Long id, ProfileRequest profileRequest) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatus.INTERNAL_ERROR);
+          ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     User user = userRepository.findById(id)
@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
   public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
     if (id == null) {
       throw new BusinessException(
-          ResponseStatus.INTERNAL_ERROR);
+          ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     verifyUserByRoleAdminExist(rolesRequest.isAdmin(), id);
@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void changeStatusUserById(Long id_user, Long id_authenticated_user) {
     if (id_user == null || id_authenticated_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     if (id_user == 1L) {

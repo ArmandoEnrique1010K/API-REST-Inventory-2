@@ -39,7 +39,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     verifyBatchExist(deliveryOrderRequest.getBatch());
 
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
@@ -90,7 +90,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
@@ -104,7 +104,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
     if (id == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     // TAMBIEN DEBE ACTUALIZAR EL USUARIO QUE HA ACTUALIZADO LA ORDEN (EL QUE

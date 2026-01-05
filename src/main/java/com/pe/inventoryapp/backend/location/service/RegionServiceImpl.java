@@ -48,7 +48,7 @@ public class RegionServiceImpl implements RegionService {
   @Override
   public RegionResponse findRegionById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     Region region = regionRepository.findById(id)
@@ -60,7 +60,7 @@ public class RegionServiceImpl implements RegionService {
   @Override
   public void updateRegionById(Long id, RegionRequest regionRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     if (id == 1L) {
