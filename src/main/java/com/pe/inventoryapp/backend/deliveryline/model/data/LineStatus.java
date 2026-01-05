@@ -1,9 +1,9 @@
 package com.pe.inventoryapp.backend.deliveryline.model.data;
 
-public enum PreparationStatus {
+public enum LineStatus {
   MISSING, // Perdido
   READY,  // Listo
-  INPROGRESS, // En proceso
+  PENDING, // Pendiente
   DELIVERED, // Entregado
   CANCELED // Cancelado
 }

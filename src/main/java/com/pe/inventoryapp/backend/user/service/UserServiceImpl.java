@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
     // Asigna los roles al usuario en base a las opciones marcadas
     user.setRoles(getRoles(registerRequest.isAdmin(), registerRequest.isSecretary(), registerRequest.isOperator()));
 
-    user.setStatus(true);
+    user.setActive(true);
 
     userRepository.save(user);
   }
@@ -186,7 +186,7 @@ public class UserServiceImpl implements UserService {
     // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
     // Luego cambia el estado del usuario
     verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id_user);
-    user.setStatus(!user.isStatus());
+    user.setActive(!user.isActive());
     userRepository.save(user);
   }
 

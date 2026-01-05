@@ -29,7 +29,7 @@ public class ProductMapper {
     return new ProductListResponse(
         product.getId(),
         product.getName().trim(),
-        product.getStock(),
+        product.getTotalQuantityAvailable(),
         product.getImageUrl().trim(),
         product.getCategory().getName().trim(),
         product.isStatus());
@@ -48,7 +48,7 @@ public class ProductMapper {
         product.getCaducityDate(),
         product.getLength(),
         product.getWidth(),
-        product.getStock(),
+        product.getTotalQuantityAvailable(),
         product.getImageUrl().trim(),
         product.isStatus(),
         product.getCategory().getName().trim());

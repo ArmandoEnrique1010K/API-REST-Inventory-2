@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
@@ -15,7 +15,7 @@ public interface DeliveryOrderService {
   void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user);
 
   Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
-      PreparationStatus status,
+      OrderStatus status,
       String createdByUser,
       String batch,
       LocalDateTime startDate,

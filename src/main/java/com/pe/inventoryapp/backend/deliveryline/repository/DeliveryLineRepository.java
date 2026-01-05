@@ -10,12 +10,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 
 public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long> {
-
-  // Page<DeliveryLine> findAllByDeliveryOrder(Pageable pageable, DeliveryOrder deliveryOrder);
 
   // Busqueda con filtros 
   @Query("""
@@ -26,7 +24,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND (:maxRequiredQuantity IS NULL OR d.requiredQuantity <= :maxRequiredQuantity)
         AND (:minLimitDate IS NULL OR d.limitDate >= :minLimitDate)
         AND (:maxLimitDate IS NULL OR d.limitDate <= :maxLimitDate)
-        AND (:preparationStatus IS NULL OR d.preparationStatus = :preparationStatus)
+        AND (:lineStatus IS NULL OR d.lineStatus = :lineStatus)
         AND (:location IS NULL OR LOWER(d.location.name) LIKE LOWER(CONCAT('%', :location, '%')))
       """)
   Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
@@ -35,7 +33,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
     Integer maxRequiredQuantity,
     LocalDateTime minLimitDate, 
     LocalDateTime maxLimitDate, 
-    PreparationStatus preparationStatus, 
+    LineStatus lineStatus, 
     String location, 
     Pageable pageable);
 
@@ -44,27 +42,14 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
 
   List<DeliveryLine> findAllByDeliveryOrderId(Long idDeliveryOrder);
 
-  // Optional<LocalDateTime> findFirstByDeliveryOrderIdAndPreparationStatusOrderByLimitDateAsc(
-  //   Long deliveryOrderId,
-  //   PreparationStatus preparationStatus);
-
   @Query("""
         SELECT MIN(dl.limitDate)
         FROM DeliveryLine dl
         WHERE dl.deliveryOrder.id = :id
-          AND dl.preparationStatus = 'INPROGRESS'
+          AND dl.lineStatus = 'PENDING'
         ORDER BY dl.limitDate ASC
       """)
   Optional<LocalDateTime> findClosestLimitDate(Long id);
-
-
-
-  // @Query("""
-  //         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-  //         FROM DeliveryLine dl
-  //         WHERE dl.productDeliveryOrder.id = :product_DeliveryOrderId
-  //     """)
-  // Integer sumRequiredQuantityByProduct_DeliveryOrder(Long product_DeliveryOrderId);
 
 
   @Query("""
@@ -89,9 +74,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   boolean existsByLocationAndProductDeliveryOrder(
       @Param("locationId") Long locationId,
       @Param("orderId") Long orderId);
-
-
-
 
   @Query("""
       SELECT COUNT(dl) = 0

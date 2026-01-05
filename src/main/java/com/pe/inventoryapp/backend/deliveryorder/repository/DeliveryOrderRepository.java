@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 
 public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Long> {
@@ -49,7 +49,7 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
       """)
   Page<DeliveryOrder> findAllByParams(
       Pageable pageable,
-      @Param("status") PreparationStatus status,
+      @Param("status") OrderStatus status,
       @Param("createdByUser") String createdByUser,
       @Param("batch") String batch,
       @Param("startDate") LocalDateTime startDate,

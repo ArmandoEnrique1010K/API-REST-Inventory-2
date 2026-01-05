@@ -2,7 +2,7 @@ package com.pe.inventoryapp.backend.deliveryline.model.response;
 
 import java.time.LocalDateTime;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,7 @@ public class DeliveryLineDetailsResponse {
   private LocalDateTime updatedAt;
   private LocalDateTime limitDate;
   private String updatedByUser;
-  private PreparationStatus preparationStatus;
+  private LineStatus lineStatus;
   private String location;
   private String region;
   private Long productId;

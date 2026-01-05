@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +26,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "lotes_de_stock_lineas_de_entrega")
 public class StockLot_DeliveryLine {
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -37,9 +37,11 @@ public class StockLot_DeliveryLine {
 
   @ManyToOne
   @JoinColumn(name = "stock_lot_id")
+  @NotNull
   private StockLot stockLot;
 
   @ManyToOne
   @JoinColumn(name = "delivery_line_id")
+  @NotNull
   private DeliveryLine deliveryLine;
 }

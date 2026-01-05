@@ -48,7 +48,7 @@ public class UserMapper {
             .trim(),
         user.getDni(),
         roles,
-        user.isStatus());
+        user.isActive());
   }
 
   public DetailUserResponse buildDetailUserResponse() {
@@ -71,7 +71,7 @@ public class UserMapper {
             .trim(),
         user.getDni(),
         roles,
-        user.isStatus());
+        user.isActive());
 
   }
 

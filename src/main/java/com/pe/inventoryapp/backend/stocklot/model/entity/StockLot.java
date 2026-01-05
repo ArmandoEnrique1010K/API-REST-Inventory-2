@@ -10,6 +10,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.StockLot_DeliveryLi
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +19,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,45 +36,36 @@ public class StockLot {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(unique = true, nullable = false)
   private String batch;
 
   private Integer quantityReceived;
-  private Integer quantityAvailable;
 
-  // Este campo se podria eliminar porque la fecha de caducidad de un stock es equivalente a la de un producto
-  // private LocalDate caducityDate;
+  private Integer quantityAvailable;
 
   private Integer deliveredTotal;
 
-  // Este campo representa si ya no hay stock en el lote
   private boolean zeroStock;
 
   @CreationTimestamp
   private LocalDateTime createdAt;
+
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
   @ManyToOne
   @JoinColumn(name = "product_id")
+  @NotNull
   private Product product;
 
   @OneToMany(mappedBy = "stockLot")
   private List<Movement> movements;
 
-  @ManyToOne
-  @JoinColumn(name = "company_id")
-  private Company company;
-
-
   @OneToMany(mappedBy = "stockLot")
   private List<StockLot_DeliveryLine> stockLotDeliveryLines;
 
-  // @ManyToMany(fetch = FetchType.EAGER)
-  // @JoinTable(name = "stockLots_deliveryLines", 
-  // joinColumns = @JoinColumn(name = "stock_lot_id"), 
-  // inverseJoinColumns = @JoinColumn(name = "delivery_line_id"), 
-  // uniqueConstraints = {
-  //     @UniqueConstraint(columnNames = { "stock_lot_id", "delivery_line_id" })
-  // })
-  // private List<DeliveryLine> deliveryLines;
+  @ManyToOne
+  @JoinColumn(name = "company_id")
+  @NotNull
+  private Company company;
 }

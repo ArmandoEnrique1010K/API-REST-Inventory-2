@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
 @Service
@@ -23,10 +24,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException(
             "El usuario con el correo " + email + " no existe en el sistema"));
 
-    return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), user.isEnabled(),
-        user.isAccountNonExpired(),
-        user.isCredentialsNonExpired(),
-        user.isAccountNonLocked(),
-        user.getAuthorities());
+    return new UserPrincipal(user);
+
+    // return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), user.isActive(),
+    //     user.isAccountNonExpired(),
+    //     user.isCredentialsNonExpired(),
+    //     user.isAccountNonLocked(),
+    //     user.getAuthorities());
   }
 }

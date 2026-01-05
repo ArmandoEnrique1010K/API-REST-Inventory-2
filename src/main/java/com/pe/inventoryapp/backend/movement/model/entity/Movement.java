@@ -10,6 +10,7 @@ import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -19,6 +20,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,38 +39,40 @@ public class Movement {
   
   private Integer quantity;
 
+  private String comment;
+
   @CreationTimestamp
   private LocalDateTime createdAt;
 
-  // Guardar el nombre del usuario que realizó el movimiento
-  private String username_snapshot;
-
-  // Comentario adicional
-  private String comment;
-
-  // Tipo de movimiento
   @Enumerated(EnumType.STRING)
   private MovementType movementType;
 
   // Relaciones
   @ManyToOne
   @JoinColumn(name = "user_id")
+  @NotNull
   private User user;
 
+  // Primera relacion hacia stockLot, almacena un StockLot receptor
   @ManyToOne
-  @JoinColumn(name = "stock_lot_id")
-  private StockLot stockLot;
+  @JoinColumn(name = "stock_lot_receiver_id")
+  @NotNull
+  private StockLot stockLotReceiver;
 
   // Segunda relación hacia StockLot, almacena un StockLot emisor que se crea cuando se hace una transferencia
+  // NOTA: ESTO ES OPCIONAL
   @ManyToOne
   @JoinColumn(name = "stock_lot_emitter_id")
+  @Nullable
   private StockLot stockLotEmitter;
 
   @ManyToOne
   @JoinColumn(name = "delivery_line_id")
+  @NotNull
   private DeliveryLine deliveryLine;
 
   @ManyToOne
   @JoinColumn(name = "product_id")
+  @NotNull
   private Product product;
 }

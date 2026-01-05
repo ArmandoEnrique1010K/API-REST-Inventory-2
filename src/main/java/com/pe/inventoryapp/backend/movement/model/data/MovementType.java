@@ -1,20 +1,26 @@
 package com.pe.inventoryapp.backend.movement.model.data;
 
 public enum MovementType {
-  SEND, // TODO: ELIMINAR ESTE DATO
-  RECEIVE, // Envio de stock al almacen
-  ADD, // Ajuste manual de la cantidad de stock
-  LOSS, // Perdida de stock
-  RECOVERY, // Recuperación de stock dañado del almacen
-  
-  ALTER, // Alteración de la cantidad requerida de entrega
+  // Relacionados a lotes de stock
+  RECEIVE, // Recibir un lote
+  ADD, // Agregar cantidad a un lote
+  LOSS, // Quitar cantidad de un lote y repotarlo como perdida
+  RECOVERY, // Recuperar cantidad de un lote perdido
+  TRANSFER, // Transferir cantidad entre 2 lotes de stocks del mismo producto
 
-  TRANSFER, // Transferencia entre stocks del mismo producto
-  SALE, // TODO: ELIMINAR ESTE DATO
-  ALLOCATE, // Preparar entrega
-  RETURN_BY_DAMAGE, // Retorno por daño de producto
-  RETURN_BY_CHANGE, // Retorno por cambio de orden de entrega
+  // Relacionados a la linea de entrega
+  ALLOCATE, // Entregar parte de un lote de stock a una linea de entrega
+  ALTER, // Alterar la cantidad requerida de una linea de entrega
+  RETURN, // Devolver una linea de entrega que fue entregada
+  CHANGE, // Modificar la cantidad de una linea de entrega que fue reportada como READY
+  CANCELED, // Cancelar una linea de entrega
+  MISSING, // Marcar una linea de entrega como perdida (con la posibilidad de volver a
+           // entregarlo)
 
-  CANCELLED, // Cancelado una linea de entrega
-  MISSING, // Perdido una linea de entrega, se necesita reponer
+  // Relacionados a un lote de stock y linea de entrega a la vez
+  SIMULTANEOUS // Crea un lote de stock y asigna la cantidad total de ese lote a un linea de
+               // entrega
+  // Si el movimiento SIMULTANEOUS se hace más de una vez antes de que pase 24
+  // horas, se podra incrementar la cantidad total y seguir entregando de esa
+  // cantidad
 }

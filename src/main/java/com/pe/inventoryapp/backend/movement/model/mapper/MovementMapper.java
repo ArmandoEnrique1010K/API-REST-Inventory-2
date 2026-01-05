@@ -27,7 +27,7 @@ public class MovementMapper {
         movement.getQuantity(),
         movement.getCreatedAt(),
         movement.getMovementType(),
-        movement.getUsername_snapshot(),
+        movement.getUser().getFirstname() + " " + movement.getUser().getLastname(),
         movement.getProduct().getName()
     );
   }

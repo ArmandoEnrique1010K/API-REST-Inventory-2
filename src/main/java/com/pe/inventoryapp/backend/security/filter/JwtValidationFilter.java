@@ -102,7 +102,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
           .orElseThrow(() -> new BusinessException(ResponseStatus.UNAUTHORIZED, "El usuario no existe en el sistema"));
 
         // Si el usuario no esta activo, se eliminara la sesion
-        if (!user.isEnabled()) {
+        if (!user.isActive()) {
           SecurityContextHolder.clearContext();
 
           Cookie cookie = new Cookie("ACCESS_TOKEN", null);

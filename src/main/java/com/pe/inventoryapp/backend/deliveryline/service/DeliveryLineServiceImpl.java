@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.model.mapper.DeliveryLineMapper;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
@@ -18,6 +18,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdate
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
@@ -78,8 +79,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // MISMA ORDEN DE ENTREGA, NO SE TIENE QUE AGREGAR LA LINEA DE ENTREGA
     existDeliveryLineByProduct_DeliveryOrder(deliveryLineRequest.getIdLocation(), id_product_deliveryOrder);
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
+    User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
     if (id_product_deliveryOrder == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
@@ -98,8 +99,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setPendingQuantity(deliveryLineRequest.getRequiredQuantity());
     // Automaticamente se actualiza la fecha de actualización porque hay una anotacion en la entidad
     deliveryLine.setLimitDate(deliveryLineRequest.getLimitDate());
-    deliveryLine.setUpdatedByUser(username);
-    deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+    deliveryLine.setUserCreator(user);
+    deliveryLine.setUserUpdater(user);
+    deliveryLine.setLineStatus(LineStatus.PENDING);
 
     // Buscar el id de la ubicación y orden de entrega
     Long idLocation = deliveryLineRequest.getIdLocation();
@@ -136,8 +138,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // 2° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE ENTREGA POR ORDEN DE ENTREGA
     product_DeliveryOrder.setRequiredQuantityTotal(deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(id_product_deliveryOrder));
 
-    // 3° actualizar el estado a INPROGRESS cada vez que se guarde una nueva linea de entrega
-    deliveryOrder.setPreparationStatus(PreparationStatus.INPROGRESS);
+    // 3° actualizar el estado a PENDING cada vez que se guarde una nueva linea de entrega
+    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
 
     deliveryOrderRepository.save(deliveryOrder);
   }
@@ -155,7 +157,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       Integer maxRequiredQuantity,
       LocalDateTime minLimitDate,
       LocalDateTime maxLimitDate,
-      PreparationStatus preparationStatus,
+      LineStatus lineStatus,
       String location,
       Pageable pageable) {
     if (deliveryOrderId != null && !deliveryOrderRepository.existsById(deliveryOrderId)) {
@@ -166,7 +168,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     Page<DeliveryLine> deliveryLines = deliveryLineRepository.searchAllByDeliveryOrderIdAndParams(
         deliveryOrderId, minRequiredQuantity, maxRequiredQuantity, minLimitDate, 
-        maxLimitDate, preparationStatus, location, pageable);
+        maxLimitDate, lineStatus, location, pageable);
 
     return deliveryLines.map(deliveryLine -> DeliveryLineMapper.builder().setDeliveryLine(deliveryLine).buildDeliveryLineListResponse());
   }
@@ -202,7 +204,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     User user = userRepository.findById(id_user)
         .orElseThrow(() -> new BusinessException(ResponseStatus.INTERNAL_ERROR));
 
-    String username = user.getFirstname() + " " + user.getLastname();
 
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
@@ -253,7 +254,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // NO SE ACTUALIZA LA CANTIDAD ORIGINAL
     deliveryLine.setRequiredQuantity(deliveryLineUpdateRequest.getRequiredQuantity());  
     deliveryLine.setLimitDate(deliveryLineUpdateRequest.getLimitDate());
-    deliveryLine.setUpdatedByUser(username);
+    deliveryLine.setUserUpdater(user);
 
     // SI SE ACTUALIZA UNA LINEA DE ENTREGA
 
@@ -271,7 +272,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     if (requiredQuantity > deliveredQuantity) {
       // Calcular el nuevo total que hace falta entregar
       deliveryLine.setPendingQuantity(requiredQuantity - deliveredQuantity);
-      deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+      deliveryLine.setLineStatus(LineStatus.PENDING);
     }
 
     // SI LA CANTIDAD REQUERIDA CAMBIA Y LA CANTIDAD ENTREGADA ES MENOR QUE LA
@@ -282,13 +283,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
       // Se tendria un numero negativo como cantidad pendiente
       deliveryLine.setPendingQuantity(requiredQuantity - deliveredQuantity);
-      deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+      deliveryLine.setLineStatus(LineStatus.PENDING);
     }
 
     // SI LA CANTIDAD REQUERIDA CAMBIA Y LA CANTIDAD ENTREGADA SON IGUALES
     if (requiredQuantity == deliveredQuantity){
       deliveryLine.setPendingQuantity(0);
-      deliveryLine.setPreparationStatus(PreparationStatus.READY);
+      deliveryLine.setLineStatus(LineStatus.READY);
     }
     deliveryLineRepository.save(deliveryLine);
 
@@ -306,13 +307,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ESTO REPRESENTA UN NUEVO MOVIMIENTO DE CANTIDAD
     Movement  movement = new Movement();
     movement.setQuantity(deliveryLineUpdateRequest.getRequiredQuantity());
-    movement.setUsername_snapshot(username);
     movement.setMovementType(MovementType.ALTER);
     movement.setComment("Se actualizo la cantidad de la linea de entrega con ID: " + deliveryLine_id);
 
     movement.setDeliveryLine(deliveryLine);
     movement.setProduct(product);
-    movement.setStockLot(null);
+    movement.setStockLotReceiver(null);
     movement.setUser(user);
     movement.setStockLotEmitter(null);
 
@@ -379,9 +379,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       
       // Operacion para verificar si todas las lineas de entrega de una orden de entrega han sido entregadas, es decir si todas tiene el estado READY
       if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
-        deliveryOrder.setPreparationStatus(PreparationStatus.READY);
+        deliveryOrder.setOrderStatus(OrderStatus.READY);
       } else {
-        deliveryOrder.setPreparationStatus(PreparationStatus.INPROGRESS);
+        deliveryOrder.setOrderStatus(OrderStatus.PENDING);
       }
 
       deliveryOrderRepository.save(deliveryOrder);
@@ -410,7 +410,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Override
   public void changeDeliveredStatusDeliveryLineById(Long id, Long id_user) {
     
-    if (id == null) {
+    if (id == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
@@ -418,16 +418,18 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
 
-    if (deliveryLine.getPreparationStatus() != PreparationStatus.READY) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega no puede ser entregada porque tiene el estado " + deliveryLine.getPreparationStatus());
+    if (deliveryLine.getLineStatus() != LineStatus.READY) {
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega no puede ser entregada porque tiene el estado " + deliveryLine.getLineStatus());
     }
     
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+    // DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
+    // String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
 
-    deliveryLine.setPreparationStatus(PreparationStatus.DELIVERED);
-    deliveryLine.setUpdatedByUser(username);
+    User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+    deliveryLine.setLineStatus(LineStatus.DELIVERED);
+    deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
   }
 
@@ -469,9 +471,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-    if (deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS || deliveryLine.getPreparationStatus() != PreparationStatus.READY) {
+    if (deliveryLine.getLineStatus() != LineStatus.PENDING || deliveryLine.getLineStatus() != LineStatus.READY) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
-          "La linea de entrega no puede ser cancelada porque tiene el estado " + deliveryLine.getPreparationStatus());
+          "La linea de entrega no puede ser cancelada porque tiene el estado " + deliveryLine.getLineStatus());
     }
 
     if (id_user == null) {
@@ -499,8 +501,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // 2° debe cambiar el estado de la linea de entrega a CANCELADO, además del
     // usuario que la cancela
-    deliveryLine.setPreparationStatus(PreparationStatus.CANCELED);
-    deliveryLine.setUpdatedByUser(username);
+    deliveryLine.setLineStatus(LineStatus.CANCELED);
+    deliveryLine.setUserUpdater(user);
 
     // TODO: Probar esta logica para ver si se actualiza el total de la cantidad requerida
 
@@ -540,11 +542,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
         // 4° REGISTRARLO COMO MOVIMIENTO
     Movement movement = new Movement();
-    movement.setMovementType(MovementType.CANCELLED);
+    movement.setMovementType(MovementType.CANCELED);
     movement.setQuantity(deliveredQuantity);
-    movement.setStockLot(stockLot);
+    movement.setStockLotReceiver(stockLot);
     movement.setComment("Linea de entrega con ID: " + deliveryLine.getId() + " cancelada");
-    movement.setUsername_snapshot(username);
     movement.setUser(user);
     movement.setDeliveryLine(deliveryLine);
     movementRepository.save(movement);
@@ -563,9 +564,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     // Solamente podra declarar perdida si la linea de entrega se encuentra entregada
-    if (deliveryLine.getPreparationStatus() != PreparationStatus.DELIVERED) {
+    if (deliveryLine.getLineStatus() != LineStatus.DELIVERED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
-          "La linea de entrega no puede ser cancelada porque tiene el estado " + deliveryLine.getPreparationStatus());
+          "La linea de entrega no puede ser cancelada porque tiene el estado " + deliveryLine.getLineStatus());
     }
 
     if (id_user == null) {
@@ -588,8 +589,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     newDeliveryLine.setDeliveredQuantity(0);
     newDeliveryLine.setPendingQuantity(0);
     newDeliveryLine.setLimitDate(deliveryLine.getLimitDate());
-    newDeliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
-    newDeliveryLine.setUpdatedByUser(username);
+    newDeliveryLine.setLineStatus(LineStatus.PENDING);
+    newDeliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(newDeliveryLine);
 
       Long id_product_deliveryOrder = newDeliveryLine.getProduct_DeliveryOrder().getId();
@@ -611,17 +612,16 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Movement movement = new Movement();
     movement.setMovementType(MovementType.MISSING);
     movement.setQuantity(deliveryLine.getRequiredQuantity());
-    movement.setStockLot(null);
+    movement.setStockLotReceiver(null);
     movement.setComment("Linea de entrega con ID: " + deliveryLine.getId() + " perdida");
-    movement.setUsername_snapshot(username);
     movement.setUser(user);
     movement.setDeliveryLine(deliveryLine);
     movementRepository.save(movement);
 
 
 
-    deliveryLine.setPreparationStatus(PreparationStatus.MISSING);
-    deliveryLine.setUpdatedByUser(username);
+    deliveryLine.setLineStatus(LineStatus.MISSING);
+    deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
   }
 }

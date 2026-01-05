@@ -16,7 +16,7 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
@@ -66,14 +66,15 @@ public class DeliveryOrderController {
   @GetMapping
   public ResponseEntity<?> listAllDeliveryOrder(
       @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) PreparationStatus preparationStatus,
+      @RequestParam(required = false) OrderStatus orderStatus,
       @RequestParam(required = false) String createdByUser,
       @RequestParam(required = false) String batch,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllDeliveryOrdersByParams(preparationStatus, createdByUser, batch, startDate, endDate, pageable);
+    Page<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllDeliveryOrdersByParams(
+        orderStatus, createdByUser, batch, startDate, endDate, pageable);
 
     return ResponseEntity.status(200).body(deliveryOrders);
   }

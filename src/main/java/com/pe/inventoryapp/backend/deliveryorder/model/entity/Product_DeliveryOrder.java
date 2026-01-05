@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,10 +34,12 @@ public class Product_DeliveryOrder {
 
   @ManyToOne
   @JoinColumn(name = "delivery_order_id")
+  @NotNull
   private DeliveryOrder deliveryOrder;
 
   @ManyToOne
   @JoinColumn(name = "product_id")
+  @NotNull
   private Product product;
 
   @OneToMany(mappedBy = "product_DeliveryOrder")
@@ -44,5 +47,4 @@ public class Product_DeliveryOrder {
 
   @OneToMany(mappedBy = "product_DeliveryOrder")
   private List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions;
-
 }

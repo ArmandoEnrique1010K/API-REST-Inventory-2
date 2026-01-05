@@ -30,8 +30,8 @@ public class DeliveryLineMapper {
           deliveryLine.getPendingQuantity(),
           deliveryLine.getUpdatedAt(),
           deliveryLine.getLimitDate(),
-          deliveryLine.getUpdatedByUser(),
-          deliveryLine.getPreparationStatus(),
+          deliveryLine.getUserUpdater().getFirstname() + " " + deliveryLine.getUserUpdater().getLastname(),
+          deliveryLine.getLineStatus(),
           deliveryLine.getLocation().getName(),
           deliveryLine.getLocation().getRegion().getName(),
           deliveryLine.getProduct().getId(),
@@ -51,7 +51,7 @@ public class DeliveryLineMapper {
           deliveryLine.getDeliveredQuantity(),
           deliveryLine.getPendingQuantity(),
           deliveryLine.getLimitDate(),
-          deliveryLine.getPreparationStatus(),
+          deliveryLine.getLineStatus(),
           deliveryLine.getLocation().getName(),
           deliveryLine.getLocation().getRegion().getName());
     }

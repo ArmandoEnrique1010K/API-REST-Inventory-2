@@ -21,6 +21,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,7 +34,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "productos")
 public class Product {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,15 +42,11 @@ public class Product {
     private String name;
 
     private Double width;
+
     private Double length;
-    // private Double height;
 
     private String imageUrl;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
     private boolean status;
 
     // Fecha de entrada del producto
@@ -60,10 +56,17 @@ public class Product {
     private LocalDate caducityDate;
 
     // Sumatoria del stock total
-    private Integer stock;
+    private Integer totalQuantityAvailable;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @NotNull
     private Category category;
 
     @OneToMany(mappedBy = "product")

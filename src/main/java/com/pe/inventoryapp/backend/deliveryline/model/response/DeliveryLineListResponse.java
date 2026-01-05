@@ -2,7 +2,7 @@ package com.pe.inventoryapp.backend.deliveryline.model.response;
 
 import java.time.LocalDateTime;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +19,7 @@ public class DeliveryLineListResponse {
   private Integer deliveredQuantity;
   private Integer pendingQuantity;
   private LocalDateTime limitDate;
-  private PreparationStatus preparationStatus;
+  private LineStatus lineStatus;
   private String location;
   private String region;
 }

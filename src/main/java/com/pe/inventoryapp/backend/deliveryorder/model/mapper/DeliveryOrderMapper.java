@@ -27,8 +27,8 @@ public class DeliveryOrderMapper {
           deliveryOrder.getId(),
           deliveryOrder.getBatch(),
           deliveryOrder.getLimitDate(),
-          deliveryOrder.getCreatedByUser(),
-          deliveryOrder.getPreparationStatus());
+          deliveryOrder.getUserCreator().getFirstname() + " " + deliveryOrder.getUserCreator().getLastname(),
+          deliveryOrder.getOrderStatus());
     }
   }
 
@@ -38,16 +38,16 @@ public class DeliveryOrderMapper {
     } else {
 
       // En el caso de que no se guarde el valor del enum en la base de datos
-      String status = deliveryOrder.getPreparationStatus() != null
-          ? deliveryOrder.getPreparationStatus().name()
+      String status = deliveryOrder.getOrderStatus() != null
+          ? deliveryOrder.getOrderStatus().name()
           : "UNKNOWN";
 
       return new DeliveryOrderDetailsResponse(
           deliveryOrder.getId(),
           deliveryOrder.getBatch(),
           deliveryOrder.getLimitDate(),
-          deliveryOrder.getCreatedByUser(),
-          deliveryOrder.getUpdatedByUser(),
+          deliveryOrder.getUserCreator().getFirstname() + " " + deliveryOrder.getUserCreator().getLastname(),
+          deliveryOrder.getUserUpdater().getFirstname() + " " + deliveryOrder.getUserUpdater().getLastname(),
           deliveryOrder.getCreatedAt(),
           deliveryOrder.getUpdatedAt(),
           status);

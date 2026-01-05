@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,10 +36,12 @@ public class Product_DeliveryOrder_Region {
   private LocalDateTime updatedAt;
 
   @ManyToOne
-    @JoinColumn(name = "region_id")
+  @JoinColumn(name = "region_id")
+  @NotNull
   private Region region;
 
   @ManyToOne
   @JoinColumn(name= "product_delivery_order_id")
+  @NotNull
   private Product_DeliveryOrder product_DeliveryOrder;
 }

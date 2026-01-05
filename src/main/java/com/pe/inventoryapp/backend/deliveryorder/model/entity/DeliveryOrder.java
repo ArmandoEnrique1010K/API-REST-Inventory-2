@@ -6,10 +6,11 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,6 +21,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,8 +38,8 @@ public class DeliveryOrder {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(unique = true, nullable = false)
   private String batch;
-
 
   private LocalDateTime limitDate;
 
@@ -47,19 +49,23 @@ public class DeliveryOrder {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  private String createdByUser;
-  private String updatedByUser;
 
   @Enumerated(EnumType.STRING)
-  private PreparationStatus preparationStatus;
+  private OrderStatus orderStatus;
+
+  @ManyToOne
+  @JoinColumn(name = "user_creator_id")
+  @NotNull
+  private User userCreator;
+
+  @ManyToOne
+  @JoinColumn(name = "user_updater_id")
+  @NotNull
+  private User userUpdater;
 
   @OneToMany(mappedBy = "deliveryOrder")
   private List<DeliveryLine> deliveryLines;
 
   @OneToMany(mappedBy = "deliveryOrder")
   private List<Product_DeliveryOrder> product_DeliveryOrders;
-
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
 }

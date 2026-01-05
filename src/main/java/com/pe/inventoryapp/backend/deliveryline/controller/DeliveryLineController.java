@@ -25,7 +25,7 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdateRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
@@ -75,13 +75,13 @@ public class DeliveryLineController {
       @RequestParam(required = false) Integer maxRequiredQuantity,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime minLimitDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime maxLimitDate,
-      @RequestParam(required = false) PreparationStatus preparationStatus,
+      @RequestParam(required = false) LineStatus lineStatus,
       @RequestParam(required = false) String location    
     ) {
     Pageable pageable = PageRequest.of(page, 20);
 
     Page<DeliveryLineListResponse> deliveryOrder = deliveryLineService.findAllDeliveryLinesByDeliveryOrderIdPageable(id, 
-        minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, preparationStatus, location, pageable);
+        minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, pageable);
 
     return ResponseEntity.status(200).body(deliveryOrder);
   }

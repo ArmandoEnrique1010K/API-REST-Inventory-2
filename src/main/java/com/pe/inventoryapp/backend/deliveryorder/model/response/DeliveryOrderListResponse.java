@@ -2,7 +2,7 @@ package com.pe.inventoryapp.backend.deliveryorder.model.response;
 
 import java.time.LocalDateTime;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,5 +18,5 @@ public class DeliveryOrderListResponse {
   private String batch;
   private LocalDateTime limitDate;
   private String createdByUser;
-  private PreparationStatus status;
+  private OrderStatus status;
 }

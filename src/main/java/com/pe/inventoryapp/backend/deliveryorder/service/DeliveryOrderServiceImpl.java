@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
@@ -37,30 +37,27 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   @Override
   public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
     verifyBatchExist(deliveryOrderRequest.getBatch());
-    // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
+    if (id_user == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
+    }
+
+    User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
     // TODO: SUGERENCIA DE QUE EL BATCH SE PUEDA GENERAR AUTOMATICAMENTE CON CADA ORDEN DE ENTREGA
     DeliveryOrder deliveryOrder = new DeliveryOrder();
     deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
-    deliveryOrder.setCreatedByUser(username);
-    deliveryOrder.setUpdatedByUser(username);
+    deliveryOrder.setUserCreator(user);
+    deliveryOrder.setUserUpdater(user);
     deliveryOrder.setLimitDate(null);
-    deliveryOrder.setPreparationStatus(PreparationStatus.INPROGRESS);
+    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
 
-    // BUSCAR AL USUARIO POR SU ID
-    Optional<User> userEmail = userRepository.findByEmail(detailsUserResponse.getEmail());
-    User userEntity = userEmail.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND,
-        "El usuario no existe"));
-
-    deliveryOrder.setUser(userEntity);
     deliveryOrderRepository.save(deliveryOrder);
   }
 
   @Override
   public Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
-      PreparationStatus status,
+      OrderStatus status,
       String createdByUser,
       String batch,
       LocalDateTime startDate,
@@ -106,7 +103,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
   @Override
   public void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
-    if (id == null) {
+    if (id == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
@@ -114,8 +111,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     // HA INICIADO SESION)
 
     // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-    DetailUserResponse detailsUserResponse = userService.findUserById(id_user);
-    String username = detailsUserResponse.getFirstname() + " " + detailsUserResponse.getLastname();
+
+    User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
     // BUSCAR AL USUARIO POR SU ID
     // Optional<User> userEmail =
@@ -130,7 +127,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     verifyBatchExist(deliveryOrderRequest.getBatch());
 
     deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
-    deliveryOrder.setUpdatedByUser(username);
+    deliveryOrder.setUserUpdater(user);
 
     deliveryOrderRepository.save(deliveryOrder);
   }

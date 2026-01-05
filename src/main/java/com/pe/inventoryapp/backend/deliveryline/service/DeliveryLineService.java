@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdateRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
@@ -23,7 +23,7 @@ public interface DeliveryLineService {
     Integer maxRequiredQuantity,
     LocalDateTime minLimitDate, 
       LocalDateTime maxLimitDate, 
-    PreparationStatus preparationStatus, 
+    LineStatus lineStatus, 
     String location, 
     Pageable pageable);
 

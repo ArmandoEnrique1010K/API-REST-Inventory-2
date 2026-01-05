@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.deliveryline.model.data.PreparationStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
@@ -67,11 +67,9 @@ public class MovementServiceImpl implements MovementService {
       throw new BusinessException(ResponseStatus.INTERNAL_ERROR);
     }
 
-
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
-    String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_product = movementReceiveRequest.getIdProduct();
 
@@ -120,7 +118,7 @@ public class MovementServiceImpl implements MovementService {
     Integer sumatoryStock = stockLotRepository.sumAvailableByProductId(id_product);
     System.out.println(sumatoryStock);
 
-    findedProduct.setStock(sumatoryStock);
+    findedProduct.setTotalQuantityAvailable(sumatoryStock);
 
     productRepository.save(findedProduct);
 
@@ -128,10 +126,9 @@ public class MovementServiceImpl implements MovementService {
     Movement movement = new Movement();
 
     movement.setQuantity(movementReceiveRequest.getQuantity());
-    movement.setUsername_snapshot(username);
     movement.setComment(movementReceiveRequest.getComment());
     movement.setProduct(product);
-    movement.setStockLot(stockLot);
+    movement.setStockLotReceiver(stockLot);
     movement.setUser(user);
 
     movement.setDeliveryLine(null);
@@ -154,7 +151,6 @@ public class MovementServiceImpl implements MovementService {
 
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-    String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
 
@@ -174,18 +170,17 @@ public class MovementServiceImpl implements MovementService {
     stockLotRepository.save(stockLot);
 
     Product product = stockLot.getProduct();
-    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+    product.setTotalQuantityAvailable(stockLotRepository.sumAvailableByProductId(product.getId()));
     productRepository.save(product);
 
     Movement movement = new Movement();
     movement.setQuantity(movementAdjustmentRequest.getQuantity());
-    movement.setUsername_snapshot(username);
     movement.setComment(movementAdjustmentRequest.getComment());
     movement.setUser(user);
     movement.setProduct(product);
     movement.setMovementType(MovementType.ADD);
 
-    movement.setStockLot(stockLot);
+    movement.setStockLotReceiver(stockLot);
     movementRepository.save(movement);
   }
 
@@ -201,7 +196,6 @@ public class MovementServiceImpl implements MovementService {
 
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-    String username = user.getFirstname() + " " + user.getLastname();
 
     Long id_stock_lot = movementAdjustmentRequest.getIdStockLot();
 
@@ -232,17 +226,16 @@ public class MovementServiceImpl implements MovementService {
 
     // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
     // PRODUCTOS
-    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+    product.setTotalQuantityAvailable(stockLotRepository.sumAvailableByProductId(product.getId()));
 
     productRepository.save(product);
 
     Movement movement = new Movement();
-    movement.setUsername_snapshot(username);
     movement.setComment(movementAdjustmentRequest.getComment());
     movement.setProduct(product);
     movement.setUser(user);
     movement.setMovementType(MovementType.LOSS);
-    movement.setStockLot(stockLot);
+    movement.setStockLotReceiver(stockLot);
     movement.setQuantity(movementAdjustmentRequest.getQuantity());
     movementRepository.save(movement);
   }
@@ -325,18 +318,17 @@ public class MovementServiceImpl implements MovementService {
 
     // UNA OPERACIÓN PARA CALCULAR EL TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
     // PRODUCTOS
-    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+    product.setTotalQuantityAvailable(stockLotRepository.sumAvailableByProductId(product.getId()));
 
 
     productRepository.save(product);
 
     Movement movement = new Movement();
-    movement.setUsername_snapshot(username);
     movement.setComment(movementAdjustmentRequest.getComment());
     movement.setProduct(product);
     movement.setUser(user);
     movement.setMovementType(MovementType.RECOVERY);
-    movement.setStockLot(stockLot);
+    movement.setStockLotReceiver(stockLot);
     movement.setQuantity(movementAdjustmentRequest.getQuantity());
     movementRepository.save(movement);
 
@@ -406,7 +398,6 @@ public class MovementServiceImpl implements MovementService {
     Product product = stockLotEmitter.getProduct();
 
     Movement movement = new Movement();
-    movement.setUsername_snapshot(username);
     
     movement.setComment(movementTransferRequest.getComment());
     
@@ -415,7 +406,7 @@ public class MovementServiceImpl implements MovementService {
     movement.setUser(user);
     movement.setMovementType(MovementType.TRANSFER);
     // NOTA: SE TOMA EL STOCKLOT DEL RECEPTOR
-    movement.setStockLot(stockLotReceiver);
+    movement.setStockLotReceiver(stockLotReceiver);
     movement.setStockLotEmitter(stockLotEmitter);
     movement.setQuantity(movementTransferRequest.getQuantity());
     movementRepository.save(movement);
@@ -486,8 +477,8 @@ public class MovementServiceImpl implements MovementService {
     stockLotRepository.save(stockLot);
 
 
-    // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA TENGA EL ESTADO INPROGRESS
-    if (deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS) {
+    // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA TENGA EL ESTADO PENDING
+    if (deliveryLine.getLineStatus() != LineStatus.PENDING) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
           "La linea de entrega no tiene el estado 'en progreso' de entrega");
     }
@@ -505,7 +496,7 @@ public class MovementServiceImpl implements MovementService {
     deliveryLine.setDeliveredQuantity(deliveryLine.getDeliveredQuantity() + movementAllocateRequest.getQuantity());
 
     if (deliveryLine.getPendingQuantity() == 0) {
-      deliveryLine.setPreparationStatus(PreparationStatus.READY);
+      deliveryLine.setLineStatus(LineStatus.READY);
     }
     
     // Si la cantidad pendiente es mayor que 0, se sobreentiende que el PrepartionStatus queda en INPROGRESS
@@ -525,18 +516,17 @@ public class MovementServiceImpl implements MovementService {
 
     // UNA OPERACIÓN PARA CALCULAR EL NUEVO TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
     // PRODUCTOS
-    product.setStock(stockLotRepository.sumAvailableByProductId(product.getId()));
+    product.setTotalQuantityAvailable(stockLotRepository.sumAvailableByProductId(product.getId()));
 
     productRepository.save(product);
 
     // MOVIMIENTO
     Movement movement = new Movement();
-    movement.setUsername_snapshot(username);
     movement.setComment(movementAllocateRequest.getComment());
     movement.setProduct(product);
     movement.setUser(user);
     movement.setMovementType(MovementType.ALLOCATE);
-    movement.setStockLot(stockLot);
+    movement.setStockLotReceiver(stockLot);
     movement.setQuantity(movementAllocateRequest.getQuantity());
     movement.setDeliveryLine(deliveryLine);
     movementRepository.save(movement);
@@ -556,7 +546,6 @@ public class MovementServiceImpl implements MovementService {
 
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-    String username = user.getFirstname() + " " + user.getLastname();
 
     // LINEA DE ENTREGA
     Long id_delivery_line = movementReturnRequest.getIdDeliveryLine();
@@ -569,10 +558,10 @@ public class MovementServiceImpl implements MovementService {
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     // DEBE VERIFICARSE QUE LA LINEA DE ENTREGA NO TENGA LOS ESTADOS MISSING NI CANCELED,
-    // PUEDE TENER LOS ESTADOS READY, INPROGRESS O DELIVERED
-    if (deliveryLine.getPreparationStatus() != PreparationStatus.READY
-        && deliveryLine.getPreparationStatus() != PreparationStatus.INPROGRESS
-        && deliveryLine.getPreparationStatus() != PreparationStatus.DELIVERED) {
+    // PUEDE TENER LOS ESTADOS READY, PENDING O DELIVERED
+    if (deliveryLine.getLineStatus() != LineStatus.READY
+        && deliveryLine.getLineStatus() != LineStatus.PENDING
+        && deliveryLine.getLineStatus() != LineStatus.DELIVERED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
           "La linea de entrega no tiene el estado 'listo', 'en progreso' o 'entregado' de entrega");
     }
@@ -612,7 +601,7 @@ public class MovementServiceImpl implements MovementService {
        */
 
      // NO SE ACEPTAN DEVOLUCIONES
-      if (deliveryLine.getPreparationStatus() == PreparationStatus.DELIVERED) {
+      if (deliveryLine.getLineStatus() == LineStatus.DELIVERED) {
         throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
             "No se puede devolver porque esta línea ya fue entregada");
       }
@@ -643,12 +632,12 @@ public class MovementServiceImpl implements MovementService {
      * =======================
      */
     if (deliveryLine.getDeliveredQuantity() >= deliveryLine.getRequiredQuantity()) {
-      deliveryLine.setPreparationStatus(PreparationStatus.DELIVERED);
+      deliveryLine.setLineStatus(LineStatus.DELIVERED);
     } else {
-      deliveryLine.setPreparationStatus(PreparationStatus.INPROGRESS);
+      deliveryLine.setLineStatus(LineStatus.PENDING);
     }
 
-    deliveryLine.setUpdatedByUser(username);
+    deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
     /*
@@ -683,7 +672,7 @@ public class MovementServiceImpl implements MovementService {
 
       stockLotRepository.save(targetStockLot);
 
-      product.setStock(
+      product.setTotalQuantityAvailable(
           stockLotRepository.sumAvailableByProductId(product.getId()));
       productRepository.save(product);
     } else {
@@ -709,7 +698,7 @@ public class MovementServiceImpl implements MovementService {
 
       stockLotRepository.save(targetStockLot);
 
-      product.setStock(
+      product.setTotalQuantityAvailable(
           stockLotRepository.sumAvailableByProductId(product.getId()));
       productRepository.save(product);
 
@@ -721,17 +710,16 @@ public class MovementServiceImpl implements MovementService {
      * =======================
      */
     Movement movement = new Movement();
-    movement.setUsername_snapshot(username);
     movement.setComment(movementReturnRequest.getComment());
     movement.setProduct(product);
     movement.setUser(user);
     movement.setQuantity(quantity);
     movement.setDeliveryLine(deliveryLine);
-    movement.setStockLot(targetStockLot);
+    movement.setStockLotReceiver(targetStockLot);
     movement.setMovementType(
         isReturnByChange
-            ? MovementType.RETURN_BY_CHANGE
-            : MovementType.RETURN_BY_DAMAGE);
+            ? MovementType.RETURN
+            : MovementType.CHANGE);
 
     movementRepository.save(movement);
   }
