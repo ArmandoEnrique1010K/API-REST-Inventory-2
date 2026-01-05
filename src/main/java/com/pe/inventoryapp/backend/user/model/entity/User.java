@@ -59,9 +59,9 @@ public class User  {
   @OneToMany(mappedBy = "user")
   private List<Movement> movements;
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "userCreator")
   private List<DeliveryOrder> deliveryOrders;
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "userCreator")
   private List<DeliveryLine> deliveryLines;
 }

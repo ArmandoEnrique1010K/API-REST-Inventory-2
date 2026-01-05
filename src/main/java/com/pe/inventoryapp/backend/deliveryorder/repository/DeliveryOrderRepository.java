@@ -19,8 +19,8 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
   @Query("""
         SELECT d
         FROM DeliveryOrder d
-        WHERE (d.preparationStatus = 'READY' OR d.preparationStatus = 'INPROGRESS')
-          AND (:createdByUser IS NULL OR d.createdByUser LIKE CONCAT('%', :createdByUser, '%'))
+        WHERE (d.orderStatus = 'READY' OR d.orderStatus = 'PENDING')
+          AND (:createdByUser IS NULL OR d.userCreator.firstname LIKE CONCAT('%', :createdByUser, '%'))
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
           AND (
               (:startDate IS NULL OR :endDate IS NULL)
@@ -35,11 +35,12 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
       @Param("endDate") LocalDateTime endDate);
 
   // Busca todas las ordenes por los siguientes parametros:
+  // TODO: BUSCAR POR NOMBRE Y APELLIDO DEL USUARIO
   @Query("""
         SELECT d
         FROM DeliveryOrder d
-        WHERE (:status IS NULL OR d.preparationStatus = :status)
-          AND (:createdByUser IS NULL OR d.createdByUser LIKE CONCAT('%', :createdByUser, '%'))
+        WHERE (:status IS NULL OR d.orderStatus = :status)
+          AND (:createdByUser IS NULL OR d.userCreator.firstname LIKE CONCAT('%', :createdByUser, '%'))
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
           AND (
               (:startDate IS NULL OR :endDate IS NULL)

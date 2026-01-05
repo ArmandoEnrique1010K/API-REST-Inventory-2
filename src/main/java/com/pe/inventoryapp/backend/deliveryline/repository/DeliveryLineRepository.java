@@ -79,7 +79,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       SELECT COUNT(dl) = 0
       FROM DeliveryLine dl
       WHERE dl.deliveryOrder.id = :deliveryOrderId
-        AND dl.preparationStatus <> 'READY'
+        AND dl.lineStatus <> 'READY'
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
 

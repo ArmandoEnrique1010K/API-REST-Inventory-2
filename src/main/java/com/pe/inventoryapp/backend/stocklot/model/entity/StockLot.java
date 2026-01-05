@@ -58,7 +58,7 @@ public class StockLot {
   @NotNull
   private Product product;
 
-  @OneToMany(mappedBy = "stockLot")
+  @OneToMany(mappedBy = "stockLotReceiver")
   private List<Movement> movements;
 
   @OneToMany(mappedBy = "stockLot")

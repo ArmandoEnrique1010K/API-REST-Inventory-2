@@ -17,8 +17,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
       SELECT p 
       FROM Product p
       WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
-        AND (:minStock IS NULL OR p.stock >= :minStock)
-        AND (:maxStock IS NULL OR p.stock <= :maxStock)
+        AND (:minStock IS NULL OR p.totalQuantityAvailable >= :minStock)
+        AND (:maxStock IS NULL OR p.totalQuantityAvailable <= :maxStock)
         AND (:status IS NULL OR p.status = :status)
         AND (:categoryId IS NULL OR p.category.id = :categoryId)
         AND p.category.status = true

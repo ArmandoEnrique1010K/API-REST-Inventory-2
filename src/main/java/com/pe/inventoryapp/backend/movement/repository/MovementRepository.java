@@ -24,7 +24,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       AND (:minCreatedAt IS NULL OR m.createdAt >= :minCreatedAt)
       AND (:maxCreatedAt IS NULL OR m.createdAt <= :maxCreatedAt)
       AND (:movementType IS NULL OR m.movementType = :movementType)
-      AND (:username IS NULL OR LOWER(m.username_snapshot) LIKE LOWER(CONCAT('%', :username, '%')))
+      AND (:username IS NULL OR LOWER(m.user) LIKE LOWER(CONCAT('%', :username, '%')))
       AND (:productName IS NULL OR LOWER(m.product.name) LIKE LOWER(CONCAT('%', :productName, '%')))
       """)
   Page<Movement> findAllByParams(
