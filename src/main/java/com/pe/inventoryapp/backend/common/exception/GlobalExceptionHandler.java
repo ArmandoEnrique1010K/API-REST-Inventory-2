@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorWithFieldsResponse> handleValidationException(RequestValidation ex) {
     // Por defecto se va a tomar el mensaje de error que se encuentra en ResponseStatus
     return buildFieldError(
-        ResponseStatus.VALIDATION_ERROR,
+        ResponseStatus.BAD_REQUEST,
         "Complete los campos faltantes",
         ex.getErrors());
   }
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
 
     return buildFieldError(
         ResponseStatus.CONFLICT,
-        "El recurso ya existe en la base de datos",
+        "Uno o más datos ya están registrados",
         errors);
   }
 
@@ -74,6 +74,20 @@ public class GlobalExceptionHandler {
         ResponseStatus.INTERNAL_SERVER_ERROR,
         "Error interno del servidor, por favor vuelva a intentarlo");
   }
+
+  // NOTA: Error falso de usuario encontrado en el sistema
+  // Siempre debe devolver un 200 OK, a pesar de que no existe el usuario
+  @ExceptionHandler(CustomUserNotFoundException.class)
+  public ResponseEntity<CommonResponse> handleFoundUser(CustomUserNotFoundException ex) {
+    ResponseStatus responseStatus = ResponseStatus.CREATED; // AQUI
+    CommonResponse response = responseService.generateCommonResponse("success", responseStatus, ex.getMessage());
+    HttpStatusCode status = Objects.requireNonNull(
+        responseStatus.getStatus(),
+        "HttpStatus no puede ser null");
+
+    return ResponseEntity.status(status).body(response);
+  }
+
 
   // Error de negocio personalizado
   @ExceptionHandler(BusinessException.class)

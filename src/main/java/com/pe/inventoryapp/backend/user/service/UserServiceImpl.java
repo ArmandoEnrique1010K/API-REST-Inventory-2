@@ -139,14 +139,15 @@ public class UserServiceImpl implements UserService {
           ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    verifyUserByRoleAdminExist(rolesRequest.isAdmin(), id);
+
+    verifyUserByRoleAdminExist(rolesRequest.getAdmin(), id);
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
 
-    List<Role> roles = getRoles(rolesRequest.isAdmin(), rolesRequest.isSecretary(), rolesRequest.isOperator());
+    List<Role> roles = getRoles(rolesRequest.getAdmin(), rolesRequest.getSecretary(), rolesRequest.getOperator());
     user.setRoles(roles);
     userRepository.save(user);
   }
@@ -177,15 +178,16 @@ public class UserServiceImpl implements UserService {
             ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
     
-    if (user.equals(userLogged)){
-      throw new BusinessException(
-        ResponseStatus.CONFLICT, "No puedes desactivar tu propia cuenta"
-      );
-    }
 
     // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
     // Luego cambia el estado del usuario
     verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id_user);
+
+    if (user.equals(userLogged)) {
+      throw new BusinessException(
+          ResponseStatus.CONFLICT, "No puedes desactivar tu propia cuenta");
+    }
+
     user.setActive(!user.isActive());
     userRepository.save(user);
   }
@@ -216,13 +218,13 @@ public class UserServiceImpl implements UserService {
   // Busca un rol por su nombre, de lo contrario lanza una excepcion
   private Role getRoleOrThrow(String roleName, String message) {
     return roleRepository.findByName(roleName)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.VALIDATION_ERROR, message));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.BAD_REQUEST, message));
   }
 
   // Verifica si el email del usuario ya existe, de lo contrario lanza una excepcion
   private void verifyUserEmailExists(String email) {
     if (userRepository.existsByEmail(email)) {
-      throw new FieldValidation("email", "El usuario con ese email ya existe");
+      throw new FieldValidation("email", "Este correo ya está en uso");
     }
   }
 

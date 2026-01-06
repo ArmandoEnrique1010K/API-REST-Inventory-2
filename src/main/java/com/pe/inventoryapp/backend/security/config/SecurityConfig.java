@@ -72,21 +72,21 @@ public class SecurityConfig {
                                                 // USERS
                                                 .requestMatchers(HttpMethod.POST, "/api/users/register")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-
                                                 .requestMatchers(HttpMethod.GET, "/api/users")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-                                                .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
 
+                                                .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
+
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/roles")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-
-                                                .requestMatchers(HttpMethod.DELETE, "/api/users/*")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/users/*")
                                                 .hasAnyAuthority("ROLE_ADMIN")
 
                                                 // ROLES
                                                 .requestMatchers(HttpMethod.GET, "/api/roles").hasAnyAuthority("ROLE_ADMIN")
 
+                                                // TODO: CONTINUAR AQUI
                                                 // CATEGORY
                                                 .requestMatchers(HttpMethod.POST, "/api/categories")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")

@@ -47,7 +47,7 @@ public class AuthController {
     authService.processUserForgotPassword(forgotPasswordRequest.getEmail());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS, 
-      "Se le ha enviado un código de recuperación a su correo");
+      "Si el correo existe, se le enviará un código de verificación al correo");
     return ResponseEntity.status(response.getStatus()).body(response);
   }
 

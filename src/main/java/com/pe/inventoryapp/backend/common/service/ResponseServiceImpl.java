@@ -16,6 +16,12 @@ public class ResponseServiceImpl implements ResponseService {
   public CommonResponse generateCommonResponse(String type, ResponseStatus code, String message) {
     CommonResponse commonResponse = new CommonResponse();
     commonResponse.setType(type);
+    commonResponse.setStatus(code.getStatus().value());
+    
+    if (message.isEmpty() || message == null || message.isBlank()) {
+      message = code.getDefaultMessage();
+    }
+
     commonResponse.setMessage(message);
 
     return commonResponse;

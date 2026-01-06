@@ -14,9 +14,9 @@ public class RolesRequest {
   // Recomendado utilizar boolean en lugar de Boolean
   // No definir nombres de campos que empiezan con "is" o "has"
   @NotNull
-  private boolean operator;
+  private Boolean operator;
   @NotNull
-  private boolean secretary;
+  private Boolean secretary;
   @NotNull
-  private boolean admin;
+  private Boolean admin;
 }

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
+import com.pe.inventoryapp.backend.common.exception.CustomUserNotFoundException;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.entity.UserToken;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -40,15 +41,20 @@ public class AuthServiceImpl implements AuthService {
   public Long findUserIdByEmail(String email) {
     return userRepository.findByEmail(email)
         .map(User::getId)
-        .orElseThrow(() -> new UsernameNotFoundException("No se encuentra un usuario con email: " + email + " en el sistema"));
+        .orElseThrow(() -> new UsernameNotFoundException(
+          // "No se encuentra un usuario con email: " + email + " en el sistema"
+          "Ha ocurrido un error desconocido en el sistema"
+        ));
   }
 
   // Envia un correo al usuario con un token de 6 digitos
   @Override
   @Transactional
   public void processUserForgotPassword(String email) {
+
+    // DEVUELVE UN ERROR FALSO, SE VE COMO SI EL USUARIO EXISTE
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe en el sistema"));
+        .orElseThrow(() -> new CustomUserNotFoundException(ResponseStatus.NOT_FOUND, "Si el correo existe, se le enviará un código de verificación al correo"));
 
     // Eliminar tokens previos
     userTokenRepository.deleteByUser(user);
@@ -61,10 +67,10 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public void validateAndActivateResetToken(String token) {
     UserToken userToken = userTokenRepository.findByToken(token)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.TOKEN_EXPIRED));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.UNAUTHORIZED, "El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token"));
 
     if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-      throw new BusinessException(ResponseStatus.TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatus.UNAUTHORIZED, "El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token");
     }
 
     // Da un error si ya está activo el token
@@ -85,15 +91,15 @@ public class AuthServiceImpl implements AuthService {
     User user = userToken.getUser();
 
     if (userToken.isActive() == false) {
-      throw new BusinessException(ResponseStatus.TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatus.UNAUTHORIZED, "El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token");
     }
 
     if (!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmNewPassword())) {
-      throw new BusinessException(ResponseStatus.VALIDATION_ERROR, "Las contraseñas introducidas no coinciden");
+      throw new BusinessException(ResponseStatus.BAD_REQUEST, "Las contraseñas introducidas no coinciden");
     }
 
     if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
-      throw new BusinessException(ResponseStatus.VALIDATION_ERROR, "No puedes utilizar esta contraseña");
+      throw new BusinessException(ResponseStatus.CONFLICT, "No puedes utilizar esta contraseña");
     }
 
     user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));

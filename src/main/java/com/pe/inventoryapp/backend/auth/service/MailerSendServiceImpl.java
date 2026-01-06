@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.auth.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.mailersend.sdk.MailerSend;
@@ -14,15 +16,19 @@ import io.github.cdimascio.dotenv.Dotenv;
 @Service
 public class MailerSendServiceImpl implements MailerSendService {
 
+  private static final Logger log = LoggerFactory.getLogger(MailerSendServiceImpl.class);
+
   @Override
   public void sendResetPasswordToken(String toEmail, String token) {
     // Configuración de MailerSend
     MailerSend ms = new MailerSend();
-
+    
     Dotenv dotenv = Dotenv.load();
+
     String apiKey = dotenv.get("MAILERSEND_API_TOKEN");
     String testDomain = dotenv.get("MAILERSEND_TEST_DOMAIN");
 
+    // Comprueba el contenido de las variables de entorno
     // System.out.println(apiKey);
     // System.out.println(testDomain);
 
@@ -45,8 +51,11 @@ public class MailerSendServiceImpl implements MailerSendService {
       MailerSendResponse resp = ms.emails().send(email);
       System.out.println("Email enviado, messageId: " + resp.messageId);
     } catch (MailerSendException e) {
-      // TODO: PARECE QUE HAY UN PROBLEMA CON LA GESTIÓN DE VARIABLES DE ENTORNO, PORQUE VEO QUE SE ALMACENAN EN MEMORIA CUANDO LA VARIABLE DE ENTORNO EN .env, NO EXISTE O SE ENCUENTRA COMENTADA
-      // e.printStackTrace();
+      // Hay un problema con la asignación de variables de entorno:
+      // Se almacenan en memoria el ultimo valor asignado en el archivo .env, aunque no exista
+      // Ejemplo: Si comentas o eliminas una variable de entorno, se queda con el ultimo valor asignado
+      // La unica solución es reasignar el valor de la variable de entorno
+      log.error("Error al enviar el correo: " + e.getMessage());
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR, "El servicio de envio de emails no ha respondido");
     }
   }

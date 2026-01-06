@@ -110,9 +110,12 @@ public class UserController {
 
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
   @PatchMapping("/{id}")
-  public ResponseEntity<CommonResponse> changeStatusUser(Authentication authentication, @PathVariable Long id_user) {
+  public ResponseEntity<CommonResponse> changeStatusUser(Authentication authentication, @PathVariable Long id) {
     Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    userService.changeStatusUserById(id_user, id_authenticated_user);
+    System.out.println(id_authenticated_user);
+    System.out.println(id);;
+
+    userService.changeStatusUserById(id, id_authenticated_user);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cambiado el estado del usuario en el sistema");
