@@ -1,6 +1,10 @@
 package com.pe.inventoryapp.backend.start.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +46,16 @@ public class WelcomeController {
       return "La base de datos no funciona correctamente";
     }
   }
+
+  // Configuracion de CSRF (OBLIGATORIO)
+  @GetMapping("/csrf")
+public ResponseEntity<?> csrf(CsrfToken token) {
+    return ResponseEntity.ok(Map.of(
+        "token", token.getToken(),
+        "header", token.getHeaderName(),
+        "parameter", token.getParameterName()
+    ));
+}
 
   // PRUEBA DE STACK OVERFLOW (NO ACTIVAR ESTE ENDPOINT)
   // Encontrar al usuario y traer la entidad relacionada como respuesta

@@ -9,6 +9,9 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
@@ -43,6 +46,11 @@ public class SecurityConfig {
                 return authenticationConfiguration.getAuthenticationManager();
         }
 
+        @Bean
+        public CsrfTokenRequestHandler csrfTokenRequestHandler() {
+        return new CsrfTokenRequestAttributeHandler();
+        }
+
         @Autowired
         private CustomAccessDeniedHandler customAccessDeniedHandler;
         @Autowired
@@ -52,7 +60,7 @@ public class SecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
                         throws Exception {
                 return http
-                                .csrf(csrf -> csrf.disable())
+                                // Configuracion de CORS
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                                 .exceptionHandling(ex -> ex
                                                 .authenticationEntryPoint(customAuthenticationEntryPoint)
@@ -148,6 +156,10 @@ public class SecurityConfig {
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 
+
+                                                // OTHERS
+                                                .requestMatchers(HttpMethod.GET, "/csrf").permitAll()
+                                                .requestMatchers(HttpMethod.GET, "/api").permitAll()
                                                 // .requestMatchers("/api/category").permitAll()
                                                 // .anyRequest().denyAll())
                                 .anyRequest().authenticated())
@@ -155,14 +167,28 @@ public class SecurityConfig {
                                                 authenticationManager(), authService, responseService))
                                 .addFilter(new JwtValidationFilter(
                                                 authenticationManager, responseService, userRepository))
+
+                                // Configuracion de CSRF
+                                .csrf(csrf -> csrf.disable())
+
+                                // ACTIVAR ESTO
+                                // .csrf(csrf -> csrf
+                                //                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                //                 .csrfTokenRequestHandler(csrfTokenRequestHandler())
+                                //                 .ignoringRequestMatchers(
+                                //                                 "/api/auth/login",
+                                //                                 "/api/auth/forgot-password",
+                                //                                 "/api/auth/validate-token",
+                                //                                 "/api/auth/change-password/**"))
+
                                 .build();
         }
 
         @Bean
         CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+                config.setAllowedOrigins(Arrays.asList("http://localhost:5173", "*"));
+                config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE"));
                 // config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
                 config.setAllowedHeaders(Arrays.asList("*"));
 
