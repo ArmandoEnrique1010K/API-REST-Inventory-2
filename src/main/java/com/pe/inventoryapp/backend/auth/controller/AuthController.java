@@ -48,7 +48,7 @@ public class AuthController {
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS, 
       "Si el correo existe, se le enviará un código de verificación al correo");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PostMapping("/validate-token")
@@ -59,7 +59,7 @@ public class AuthController {
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "El token es válido, puede cambiar su contraseña");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
@@ -74,18 +74,17 @@ public class AuthController {
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Su contraseña ha sido modificada correctamente");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   // CERRAR SESION, BORRA LAS COOKIES EN EL CUAL ESTA ALMACENADO EL JWT
   @PostMapping("/logout")
   public ResponseEntity<CommonResponse> logoutUser(HttpServletResponse httpServletResponse) {
-
     authService.logout(httpServletResponse);
     
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Ha cerrado sesión correctamente");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 }
 

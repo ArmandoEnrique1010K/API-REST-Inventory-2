@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.user.model.response.RoleResponse;
 import com.pe.inventoryapp.backend.user.service.RoleService;
@@ -25,6 +26,7 @@ public class RoleController {
   @GetMapping
   public ResponseEntity<?> listAllRoles() {
     List<RoleResponse> roles = roleService.findAllRoles();
-    return ResponseEntity.ok(responseService.generateDataResponse(ResponseStatus.SUCCESS, roles));
+    DataResponse<List<RoleResponse>> response = responseService.generateDataResponse(ResponseStatus.CREATED, roles);
+    return ResponseEntity.status(response.status()).body(response);
   }
 }

@@ -32,7 +32,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
       AuthenticationException ex) throws IOException {
         // Mensaje por defecto: No estas autorizado para acceder a este recurso
     CommonResponse commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, "");
-    response.setStatus(commonResponse.getStatus());
+    response.setStatus(commonResponse.status());
     response.setContentType("application/json");
     response.getWriter().write(objectMapper.writeValueAsString(commonResponse));
   }

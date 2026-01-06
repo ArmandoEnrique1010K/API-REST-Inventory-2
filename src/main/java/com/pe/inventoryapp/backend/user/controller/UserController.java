@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
@@ -58,7 +59,7 @@ public class UserController {
     userService.registerUser(registerRequest);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se ha registrado al usuario en el sistema");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @GetMapping
@@ -69,8 +70,8 @@ public class UserController {
     Pageable pageable = PageRequest.of(page, 20);
 
     PageResponse<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
-    return ResponseEntity.ok(
-        responseService.generateDataResponse(ResponseStatus.SUCCESS, users));
+    DataResponse<PageResponse<ListUsersResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/profile")
@@ -78,11 +79,8 @@ public class UserController {
     Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
     DetailUserResponse user = userService.findUserById(username);
     
-    // DataResponse response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
-    // return ResponseEntity.status(response.status()).body(response.data());
-    return ResponseEntity.ok(
-      responseService.generateDataResponse(ResponseStatus.SUCCESS, user)
-    );
+    DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PutMapping("/profile")
@@ -94,7 +92,7 @@ public class UserController {
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Su perfil ha sido actualizado correctamente");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PutMapping("/{id}/roles")
@@ -105,7 +103,7 @@ public class UserController {
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se han modificado los roles del usuario");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
@@ -116,6 +114,6 @@ public class UserController {
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cambiado el estado del usuario en el sistema");
-    return ResponseEntity.status(response.getStatus()).body(response);
+    return ResponseEntity.status(response.status()).body(response);
   }
 }

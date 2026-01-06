@@ -114,7 +114,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // Respuesta de autenticación exitosa
     CommonResponse res = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS, "Has iniciado sesión con éxito");
-    response.setStatus(res.getStatus());
+    response.setStatus(res.status());
     response.setContentType("application/json");
     response.getWriter().write(new ObjectMapper().writeValueAsString(res));
   }
@@ -138,7 +138,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     // Respuesta de autenticación fallida
-    response.setStatus(commonResponse.getStatus());
+    response.setStatus(commonResponse.status());
     response.setContentType("application/json");
     response.getWriter().write(new ObjectMapper().writeValueAsString(commonResponse));
   }

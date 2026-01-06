@@ -30,7 +30,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler{
   public void handle(HttpServletRequest request, HttpServletResponse response,
       AccessDeniedException accessDeniedException) throws IOException, ServletException {
     CommonResponse commonResponse = responseService.generateErrorResponse(ResponseStatus.FORBIDDEN, "");
-    response.setStatus(commonResponse.getStatus());
+    response.setStatus(commonResponse.status());
     response.setContentType("application/json");
     response.getWriter().write(objectMapper.writeValueAsString(commonResponse));
   }
