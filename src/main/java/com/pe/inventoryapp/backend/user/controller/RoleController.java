@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
+import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.user.model.response.RoleResponse;
 import com.pe.inventoryapp.backend.user.service.RoleService;
 
@@ -16,10 +18,13 @@ import com.pe.inventoryapp.backend.user.service.RoleService;
 public class RoleController {
   @Autowired
   private RoleService roleService;
-  
+
+  @Autowired
+  private ResponseService responseService;
+
   @GetMapping
   public ResponseEntity<?> listAllRoles() {
     List<RoleResponse> roles = roleService.findAllRoles();
-    return ResponseEntity.status(200).body(roles);
+    return ResponseEntity.ok(responseService.generateDataResponse(ResponseStatus.SUCCESS, roles));
   }
 }

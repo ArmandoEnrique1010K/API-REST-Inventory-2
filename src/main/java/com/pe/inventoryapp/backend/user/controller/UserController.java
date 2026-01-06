@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
-import com.pe.inventoryapp.backend.common.response.DataResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
@@ -21,7 +21,6 @@ import jakarta.validation.Valid;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -69,18 +68,21 @@ public class UserController {
       @RequestParam(required = false) List<Long> idRoles) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
-    DataResponse response = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
-    return ResponseEntity.status(response.getStatus()).body(response.getData());
+    PageResponse<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
+    return ResponseEntity.ok(
+        responseService.generateDataResponse(ResponseStatus.SUCCESS, users));
   }
 
   @GetMapping("/profile")
   public ResponseEntity<?> getUserProfile(Authentication authentication) {
     Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
     DetailUserResponse user = userService.findUserById(username);
-
-    DataResponse response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
-    return ResponseEntity.status(response.getStatus()).body(response.getData());
+    
+    // DataResponse response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+    // return ResponseEntity.status(response.status()).body(response.data());
+    return ResponseEntity.ok(
+      responseService.generateDataResponse(ResponseStatus.SUCCESS, user)
+    );
   }
 
   @PutMapping("/profile")

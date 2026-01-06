@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.common.response;
+package com.pe.inventoryapp.backend.common.model.response;
 
 import java.util.Map;
 

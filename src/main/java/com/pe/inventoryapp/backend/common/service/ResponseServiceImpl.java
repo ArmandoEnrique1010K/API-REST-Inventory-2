@@ -5,9 +5,9 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
-import com.pe.inventoryapp.backend.common.response.DataResponse;
-import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
+import com.pe.inventoryapp.backend.common.model.response.ErrorWithFieldsResponse;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
@@ -59,14 +59,23 @@ public class ResponseServiceImpl implements ResponseService {
     return errorWithFieldsResponse;
   }
 
+  // @Override
+  // public DataResponse generateDataResponse(ResponseStatus code, Object data) {
+  //   DataResponse dataResponse = new DataResponse();
+  //   dataResponse.setType("success");
+  //   dataResponse.setStatus(code.getStatus().value());
+  //   dataResponse.setData(data);
+
+  //   return dataResponse;
+  // }
+
   @Override
-  public DataResponse generateDataResponse(ResponseStatus code, Object data) {
-    DataResponse dataResponse = new DataResponse();
-    dataResponse.setType("success");
-    dataResponse.setStatus(code.getStatus().value());
-    dataResponse.setData(data);
-    
-    return dataResponse;
+  public <T> DataResponse<T> generateDataResponse(ResponseStatus code, T data) {
+    return new DataResponse<>(
+      "success",
+      code.getStatus().value(),
+      data
+    );
   }
 
   @Override
