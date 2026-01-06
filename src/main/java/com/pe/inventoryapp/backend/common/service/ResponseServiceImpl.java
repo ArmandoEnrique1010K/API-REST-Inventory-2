@@ -11,22 +11,6 @@ import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
 
 @Service
 public class ResponseServiceImpl implements ResponseService {
-
-  @Override
-  public CommonResponse generateCommonResponse(String type, ResponseStatus code, String message) {
-    CommonResponse commonResponse = new CommonResponse();
-    commonResponse.setType(type);
-    commonResponse.setStatus(code.getStatus().value());
-    
-    if (message.isEmpty() || message == null || message.isBlank()) {
-      message = code.getDefaultMessage();
-    }
-
-    commonResponse.setMessage(message);
-
-    return commonResponse;
-  }
-
   @Override
   public CommonResponse generateSucessfullResponse(ResponseStatus code, String message) {
     CommonResponse sucessfulResponse = new CommonResponse();
@@ -42,7 +26,6 @@ public class ResponseServiceImpl implements ResponseService {
     }
 
     sucessfulResponse.setMessage(message);
-
     return sucessfulResponse;
   }
 
@@ -52,13 +35,11 @@ public class ResponseServiceImpl implements ResponseService {
     sucessfulResponse.setType("error");
     sucessfulResponse.setStatus(code.getStatus().value());
 
-    // Normalmente si el mensaje es null o vacio, se muestra el mensaje por defecto
     if (message.isEmpty() || message == null || message.isBlank()) {
       message = code.getDefaultMessage();
     }
 
     sucessfulResponse.setMessage(message);
-
     return sucessfulResponse;
   }
 
@@ -84,6 +65,24 @@ public class ResponseServiceImpl implements ResponseService {
     dataResponse.setType("success");
     dataResponse.setStatus(code.getStatus().value());
     dataResponse.setData(data);
+    
     return dataResponse;
   }
+
+  @Override
+  public CommonResponse generateCommonResponse(String type, ResponseStatus code, String message) {
+    CommonResponse commonResponse = new CommonResponse();
+    commonResponse.setType(type);
+    commonResponse.setStatus(code.getStatus().value());
+    
+    if (message.isEmpty() || message == null || message.isBlank()) {
+      message = code.getDefaultMessage();
+    }
+
+    commonResponse.setMessage(message);
+    return commonResponse;
+  }
+
+
+
 }

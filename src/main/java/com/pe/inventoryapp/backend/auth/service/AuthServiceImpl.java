@@ -121,7 +121,8 @@ public class AuthServiceImpl implements AuthService {
     userToken.setUser(user);
     userToken.setToken(token);
     userToken.setActive(false);
-    userToken.setExpirationTime(LocalDateTime.now().plusMinutes(5));
+    // Este token expira en 10 minutos
+    userToken.setExpirationTime(LocalDateTime.now().plusMinutes(10));
 
     userTokenRepository.save(userToken);
     return token;
@@ -130,10 +131,10 @@ public class AuthServiceImpl implements AuthService {
   // Verifica si el token de 6 digitos es valido y si no ha expirado
   private UserToken getValidUserTokenOrThrow(String token) {
     UserToken userToken = userTokenRepository.findByToken(token)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.TOKEN_EXPIRED));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.UNAUTHORIZED, "El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token"));
 
     if (userToken.getExpirationTime().isBefore(LocalDateTime.now())) {
-      throw new BusinessException(ResponseStatus.TOKEN_EXPIRED);
+      throw new BusinessException(ResponseStatus.UNAUTHORIZED, "El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token");
     }
 
     userToken.setActive(true);

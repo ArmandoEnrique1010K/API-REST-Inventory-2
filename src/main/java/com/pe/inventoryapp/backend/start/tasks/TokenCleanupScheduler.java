@@ -10,10 +10,10 @@ import com.pe.inventoryapp.backend.user.repository.UserTokenRepository;
 // Configuación de la ejecución de tareas programadas con relación al token de 6 digitos de reestablecimiento de contraseña
 @Component
 public class TokenCleanupScheduler {
-  private final UserTokenRepository tokenRepository;
+  private final UserTokenRepository userTokenRepository;
 
-  public TokenCleanupScheduler(UserTokenRepository tokenRepository) {
-    this.tokenRepository = tokenRepository;
+  public TokenCleanupScheduler(UserTokenRepository userTokenRepository) {
+    this.userTokenRepository = userTokenRepository;
   }
 
   // Configuración de cron
@@ -21,6 +21,6 @@ public class TokenCleanupScheduler {
   @Scheduled(cron = "0 0/10 * * * *")
   public void deleteExpiredTokens() {
     System.out.println(LocalDateTime.now() + ": Comienza el borrado de tokens de 6 digitos expirados.");
-    tokenRepository.deleteAllExpiredTokens(LocalDateTime.now());
+    userTokenRepository.deleteAllExpiredTokens(LocalDateTime.now());
   }
 }

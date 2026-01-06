@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RolesRequest {
-  // Recomendado utilizar boolean en lugar de Boolean
-  // No definir nombres de campos que empiezan con "is" o "has"
   @NotNull
   private Boolean operator;
   @NotNull

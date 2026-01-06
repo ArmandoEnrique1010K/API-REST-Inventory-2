@@ -5,8 +5,7 @@ import java.util.Map;
 public class RequestValidation extends RuntimeException {
   private final Map<String, String> errors;
 
-  public RequestValidation(String message, Map<String, String> errors) {
-    super(message);
+  public RequestValidation(Map<String, String> errors) {
     this.errors = errors;
   }
 

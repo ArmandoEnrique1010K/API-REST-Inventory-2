@@ -5,12 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+// Esta clase representa una respuesta común, que se puede utilizar tanto para
+// respuestas exitosas como para respuestas erroneas
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-// Esta clase representa una respuesta común, que se puede utilizar tanto para
-// respuestas exitosas como para respuestas erroneas
 public class CommonResponse {
   private String type;
   private Integer status;

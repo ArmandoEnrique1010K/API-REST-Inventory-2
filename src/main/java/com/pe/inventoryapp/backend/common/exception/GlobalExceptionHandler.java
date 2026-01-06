@@ -27,17 +27,18 @@ public class GlobalExceptionHandler {
   @Autowired
   private ResponseService responseService;
 
-  // Errores de validación de campo en el body de la petición
+
+  // Excepción de validación de campo 
   @ExceptionHandler(RequestValidation.class)
   public ResponseEntity<ErrorWithFieldsResponse> handleValidationException(RequestValidation ex) {
-    // Por defecto se va a tomar el mensaje de error que se encuentra en ResponseStatus
     return buildFieldError(
         ResponseStatus.BAD_REQUEST,
         "Complete los campos faltantes",
         ex.getErrors());
   }
 
-  // Error de duplicación de registro en el body de la petición
+
+  // Excepción de duplicación de registro 
   @ExceptionHandler(FieldValidation.class)
   public ResponseEntity<ErrorWithFieldsResponse> handleDuplicate(FieldValidation ex) {
     Map<String, String> errors = Map.of(ex.getFieldName(), ex.getMessage());
@@ -48,7 +49,8 @@ public class GlobalExceptionHandler {
         errors);
   }
 
-  // Error de ID inválido
+
+  // Excepción de tipo de dato ID inválido
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<CommonResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
     return buildCommonError(
@@ -56,7 +58,8 @@ public class GlobalExceptionHandler {
         "El identificador único es invalido, debe ser un número entero");
   }
 
-  // Error de entidad no encontrada
+
+  // Excepción de entidad no encontrada
   @ExceptionHandler(RuntimeException.class)
   public ResponseEntity<CommonResponse> handleRuntime(RuntimeException ex) {
     log.error("Error en tiempo de ejecución : ", ex);
@@ -66,6 +69,8 @@ public class GlobalExceptionHandler {
         "Error interno del servidor, por favor vuelva a intentarlo");
   }
 
+
+  // Excepción general
   @ExceptionHandler(Exception.class)
   public ResponseEntity<CommonResponse> handleException(Exception ex) {
     log.error("Error no controlado: ", ex);
@@ -75,11 +80,13 @@ public class GlobalExceptionHandler {
         "Error interno del servidor, por favor vuelva a intentarlo");
   }
 
-  // NOTA: Error falso de usuario encontrado en el sistema
-  // Siempre debe devolver un 200 OK, a pesar de que no existe el usuario
+
+  // Excepción falso de usuario no encontrado en el sistema
+  // Doble negación = Acierto (engañar al cliente)
   @ExceptionHandler(CustomUserNotFoundException.class)
   public ResponseEntity<CommonResponse> handleFoundUser(CustomUserNotFoundException ex) {
-    ResponseStatus responseStatus = ResponseStatus.CREATED; // AQUI
+    // Aqui debe devolver 200 OK
+    ResponseStatus responseStatus = ResponseStatus.CREATED;
     CommonResponse response = responseService.generateCommonResponse("success", responseStatus, ex.getMessage());
     HttpStatusCode status = Objects.requireNonNull(
         responseStatus.getStatus(),
@@ -89,10 +96,9 @@ public class GlobalExceptionHandler {
   }
 
 
-  // Error de negocio personalizado
+  // Excepción de negocio personalizado
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<CommonResponse> handleBusiness(BusinessException ex) {
-
     ResponseStatus responseStatus = ex.getResponseStatusCodes();
     CommonResponse response = responseService.generateErrorResponse(responseStatus, ex.getMessage());
     HttpStatusCode status = Objects.requireNonNull(
@@ -102,7 +108,8 @@ public class GlobalExceptionHandler {
       return ResponseEntity.status(status).body(response);
   }
 
-  // Error de base de datos
+
+  // Excepción de base de datos
   @ExceptionHandler(DataAccessException.class)
   public ResponseEntity<CommonResponse> handleDatabase(DataAccessException ex) {
     ResponseStatus responseStatus = ResponseStatus.CONFLICT;
@@ -114,7 +121,13 @@ public class GlobalExceptionHandler {
       return ResponseEntity.status(status).body(response);
   }
 
+
+
+
   // MÉTODOS AUXILIARES
+
+  
+  // Construir una respuesta con errores de validación de campos
   private ResponseEntity<ErrorWithFieldsResponse> buildFieldError(
       ResponseStatus responseStatus,
       String message,
@@ -127,6 +140,8 @@ public class GlobalExceptionHandler {
       return ResponseEntity.status(status).body(response);
   }
 
+
+  // Construir una respuesta con error de validación
   private ResponseEntity<CommonResponse> buildCommonError(
       ResponseStatus responseStatus,
       String message) {
@@ -137,5 +152,4 @@ public class GlobalExceptionHandler {
 
       return ResponseEntity.status(status).body(response);
   }
-
 }

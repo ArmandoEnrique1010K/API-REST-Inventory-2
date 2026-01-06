@@ -77,6 +77,7 @@ public class AuthController {
     return ResponseEntity.status(response.getStatus()).body(response);
   }
 
+  // CERRAR SESION, BORRA LAS COOKIES EN EL CUAL ESTA ALMACENADO EL JWT
   @PostMapping("/logout")
   public ResponseEntity<CommonResponse> logoutUser(HttpServletResponse httpServletResponse) {
 
@@ -86,14 +87,11 @@ public class AuthController {
         "Ha cerrado sesión correctamente");
     return ResponseEntity.status(response.getStatus()).body(response);
   }
-  
-
-  // TODO: CREAR UN ENDPOINT PARA CERRAR SESIÓN Y BORRAR EL TOKEN DE LAS COOKIES
 }
-// SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
-// 1. Envia un correo al email del usuario con un token
-// 2. El usuario debe ingresar el token
-// 3. El usuario debe ingresar su nueva contraseña
-// 4. El usuario debe iniciar sesión con la nueva contraseña
 
-// Nuevo comentario
+// SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
+// 1. El usuario debe escribir su correo electronico
+// 2. El sistema enviara un token de 6 digitos al correo del usuario
+// 3. El usuario debe ingresar el token para activarlo
+// 4. El usuario debe ingresar su nueva contraseña 
+// 5. El usuario podra iniciar sesión con la nueva contraseña

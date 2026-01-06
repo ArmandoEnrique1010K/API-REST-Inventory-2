@@ -36,9 +36,9 @@ public class RegisterRequest {
   private String password;
 
   @NotNull
-  private boolean operator;
+  private Boolean operator;
   @NotNull
-  private boolean secretary;
+  private Boolean secretary;
   @NotNull
-  private boolean admin;
+  private Boolean admin;
 }

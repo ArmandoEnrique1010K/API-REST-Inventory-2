@@ -19,7 +19,6 @@ public class RoleServiceImpl implements RoleService{
 
   @Override
   public List<RoleResponse> findAllRoles() {
-
     List<Role> roles = (List<Role>) roleRepository.findAllByOrderByIdDesc();
     
     return roles.stream()

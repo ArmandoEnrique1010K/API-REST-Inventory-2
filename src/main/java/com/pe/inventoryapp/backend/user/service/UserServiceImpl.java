@@ -36,7 +36,6 @@ public class UserServiceImpl implements UserService {
   @Autowired
   private PasswordEncoder passwordEncoder;
 
-  // Registra un nuevo usuario en el sistema
   @Transactional
   @Override
   public void registerUser(RegisterRequest registerRequest) {
@@ -51,10 +50,9 @@ public class UserServiceImpl implements UserService {
     user.setDni(registerRequest.getDni());
 
     // Asigna los roles al usuario en base a las opciones marcadas
-    user.setRoles(getRoles(registerRequest.isAdmin(), registerRequest.isSecretary(), registerRequest.isOperator()));
+    user.setRoles(getRoles(registerRequest.getAdmin(), registerRequest.getSecretary(), registerRequest.getOperator()));
 
     user.setActive(true);
-
     userRepository.save(user);
   }
 
@@ -81,7 +79,6 @@ public class UserServiceImpl implements UserService {
         .buildListUserResponse());
   }
 
-  // Busca un usuario por su ID
   @Override
   @Transactional(readOnly = true)
   public DetailUserResponse findUserById(Long id) {
@@ -100,7 +97,6 @@ public class UserServiceImpl implements UserService {
         .buildDetailUserResponse();
   }
 
-  // Actualiza el perfil del usuario
   @Override
   @Transactional
   public void updateUserProfileById(Long id, ProfileRequest profileRequest) {
@@ -131,7 +127,6 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
-  // Cambiar los roles del usuario
   @Override
   public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
     if (id == null) {
@@ -139,7 +134,8 @@ public class UserServiceImpl implements UserService {
           ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-
+    // Primero verifica si existe otro usuario con el rol de administrador para no
+    // dejar el sistema sin administradores
     verifyUserByRoleAdminExist(rolesRequest.getAdmin(), id);
 
     User user = userRepository.findById(id)
@@ -147,12 +143,16 @@ public class UserServiceImpl implements UserService {
             ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
 
+    // Verifica que el usuario este activo para que pueda cambiar los roles
+    if (user.isActive() == false) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "El usuario debe estar activo para cambiar sus roles");
+    }
+
     List<Role> roles = getRoles(rolesRequest.getAdmin(), rolesRequest.getSecretary(), rolesRequest.getOperator());
     user.setRoles(roles);
     userRepository.save(user);
   }
 
-  // Elimina un usuario del sistema
   @Override
   @Transactional
   public void changeStatusUserById(Long id_user, Long id_authenticated_user) {
@@ -162,7 +162,7 @@ public class UserServiceImpl implements UserService {
 
     if (id_user == 1L) {
       throw new BusinessException(
-          ResponseStatus.DEFAULT_RESOURCE,
+          ResponseStatus.CONFLICT,
           "Este usuario no se puede bloquear del sistema");
     }
 
@@ -178,9 +178,6 @@ public class UserServiceImpl implements UserService {
             ResponseStatus.NOT_FOUND,
             "El usuario no existe en el sistema"));
     
-
-    // Primero verifica si existe otro usuario con el rol de administrador para no dejar el sistema sin administradores
-    // Luego cambia el estado del usuario
     verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id_user);
 
     if (user.equals(userLogged)) {
@@ -192,11 +189,11 @@ public class UserServiceImpl implements UserService {
     userRepository.save(user);
   }
 
+
   // MÉTODOS AUXILIARES
   // Agregar los roles al usuario
   private List<Role> getRoles(boolean isAdmin, boolean isSecretary, boolean isOperator) {
     List<Role> roles = new ArrayList<>();
-
     // Rol base obligatorio
     roles.add(getRoleOrThrow("ROLE_USER", "El rol de usuario no existe en el sistema"));
 
@@ -240,7 +237,7 @@ public class UserServiceImpl implements UserService {
 
     if (!existsAnotherAdmin && !admin) {
       throw new BusinessException(
-          ResponseStatus.DEFAULT_RESOURCE,
+          ResponseStatus.CONFLICT,
           "Debe existir al menos un administrador distinto a este usuario");
     }
   }

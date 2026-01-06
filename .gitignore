@@ -33,7 +33,6 @@ build/
 .vscode/
 
 
+### Variables de entorno ###
 .env
-
-# TODO: INTENTAR OCULTAR LAS NUEVAS VARIABLES DE ENTORNO
 /src/main/resources/application-secrets.properties

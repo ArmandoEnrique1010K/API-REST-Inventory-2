@@ -21,7 +21,7 @@ public class ValidationServiceImpl implements ValidationService {
 
       // Si se elimina esta linea de codigo, deshabilita la validación de campos
       // Este mensaje queda ignorado, excepto los errores que se pasan
-      throw new RequestValidation("", errors);
+      throw new RequestValidation(errors);
     }
   }
 

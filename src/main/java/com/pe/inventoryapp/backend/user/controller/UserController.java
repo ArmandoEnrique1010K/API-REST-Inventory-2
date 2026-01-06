@@ -58,7 +58,6 @@ public class UserController {
     validationService.validateFieldsAndThrowResponse(result);
     userService.registerUser(registerRequest);
 
-    // NOTA: NUEVA FORMA DE DEVOLVER UNA RESPUESTA
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se ha registrado al usuario en el sistema");
     return ResponseEntity.status(response.getStatus()).body(response);
   }
@@ -87,19 +86,18 @@ public class UserController {
   @PutMapping("/profile")
   public ResponseEntity<CommonResponse> updateUserProfile(Authentication authentication,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
-    Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
-    userService.updateUserProfileById(userId, profileRequest);
+    userService.updateUserProfileById(id_authenticated_user, profileRequest);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Su perfil ha sido actualizado correctamente");
     return ResponseEntity.status(response.getStatus()).body(response);
   }
 
-  @PutMapping("/roles")
-  public ResponseEntity<CommonResponse> updateUserRoles(Authentication authentication,
+  @PutMapping("/{id}/roles")
+  public ResponseEntity<CommonResponse> updateUserRoles(@PathVariable Long id,
       @Valid @RequestBody RolesRequest rolesRequest, BindingResult result) {
-    Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
     validationService.validateFieldsAndThrowResponse(result);
     userService.updateUserRolesById(id, rolesRequest);
 
@@ -112,9 +110,6 @@ public class UserController {
   @PatchMapping("/{id}")
   public ResponseEntity<CommonResponse> changeStatusUser(Authentication authentication, @PathVariable Long id) {
     Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    System.out.println(id_authenticated_user);
-    System.out.println(id);;
-
     userService.changeStatusUserById(id, id_authenticated_user);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,

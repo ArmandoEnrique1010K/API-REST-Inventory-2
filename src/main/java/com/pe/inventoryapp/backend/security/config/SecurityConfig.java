@@ -78,7 +78,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
 
-                                                .requestMatchers(HttpMethod.PUT, "/api/users/roles")
+                                                .requestMatchers(HttpMethod.PUT, "/api/users/*/roles")
                                                 .hasAnyAuthority("ROLE_ADMIN")
                                                 .requestMatchers(HttpMethod.PATCH, "/api/users/*")
                                                 .hasAnyAuthority("ROLE_ADMIN")
