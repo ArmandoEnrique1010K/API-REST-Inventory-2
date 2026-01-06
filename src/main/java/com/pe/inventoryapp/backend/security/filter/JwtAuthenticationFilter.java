@@ -101,7 +101,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         .signWith(SECRET_KEY)
         .compact();
 
-    // TODO: HABILITAR LAS COOKIES EN EL FRONTEND
+    //TODO: HABILITAR LAS COOKIES EN EL FRONTEND
     // Configuración de cookies
     Cookie jwtCookie = new Cookie("ACCESS_TOKEN", token);
     jwtCookie.setHttpOnly(true); // NO accesible por JS

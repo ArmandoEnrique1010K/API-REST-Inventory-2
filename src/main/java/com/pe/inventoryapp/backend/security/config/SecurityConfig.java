@@ -67,7 +67,7 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/auth/forgot-password").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/api/auth/validate-token").permitAll()
                                                 .requestMatchers(HttpMethod.PUT, "/api/auth/change-password/*").permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
 
                                                 // USERS
                                                 .requestMatchers(HttpMethod.POST, "/api/users/register")

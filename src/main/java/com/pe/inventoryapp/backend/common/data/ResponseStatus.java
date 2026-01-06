@@ -35,6 +35,7 @@ public enum ResponseStatus {
 			"Se ha realizado una petición incorrecta, no se puede procesar la solicitud"),
 
 
+    // INVESTIGAR ESTO:
 		// TODO: CADA VEZ QUE SE DEVUELVA UN 401, DEBERA CERRAR SESION DE FORMA AUTOMATICA EN EL FRONTEND
 	// 401 - UNAUTHORIZED
 	// No autenticado
@@ -43,12 +44,6 @@ public enum ResponseStatus {
 	UNAUTHORIZED(
 		HttpStatus.UNAUTHORIZED, 
 		"No estas autorizado para acceder a este recurso"),
-
-		// TODO: ELIMINAR ESTO
-	// Token de 6 digitos invalido o expirado, vuelva a iniciar sesión
-	TOKEN_EXPIRED(
-			HttpStatus.BAD_REQUEST,
-			"El token de 6 digitos es inválido o ha expirado, vuelva a solicitar un nuevo token"),
 
 
 	// 403 - FORBIDDEN
