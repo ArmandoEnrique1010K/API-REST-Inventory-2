@@ -12,7 +12,7 @@ import com.pe.inventoryapp.backend.auth.model.request.ForgotPasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 

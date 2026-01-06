@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 
 import jakarta.servlet.ServletException;

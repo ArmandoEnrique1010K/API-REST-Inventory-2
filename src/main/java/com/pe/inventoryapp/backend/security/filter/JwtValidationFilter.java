@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;

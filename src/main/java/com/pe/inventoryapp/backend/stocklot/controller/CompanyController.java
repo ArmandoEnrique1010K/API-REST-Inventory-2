@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.stocklot.model.request.CompanyRequest;

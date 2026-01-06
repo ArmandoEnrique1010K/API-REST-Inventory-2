@@ -23,8 +23,8 @@ import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
 import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 
 @RestController
 @RequestMapping("/api/locations")

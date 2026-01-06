@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.pe.inventoryapp.backend.common.response.ErrorWithFieldsResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
-import com.pe.inventoryapp.backend.common.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.ErrorWithFieldsResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

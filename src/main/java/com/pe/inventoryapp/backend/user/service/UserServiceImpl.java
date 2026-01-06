@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
@@ -58,9 +59,8 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ListUsersResponse> findAllUsersByParams(
-    String name, 
-      List<Long> roleIds, Pageable pageable) {
+  public PageResponse<ListUsersResponse> findAllUsersByParams(
+    String name, List<Long> roleIds, Pageable pageable) {
     Page<User> users = null;
 
     // Si existe alguna busqueda por roles, debe asegurarse que busque por los roles seleccionados
@@ -74,9 +74,23 @@ public class UserServiceImpl implements UserService {
           pageable);
     }
 
-    return users.map(user -> UserMapper.builder()
-        .setUser(user)
-        .buildListUserResponse());
+    var result = users.getContent().stream()
+            .map(user -> UserMapper.builder()
+                .setUser(user)
+                .buildListUserResponse())
+            .toList();
+
+    PageResponse<ListUsersResponse> pageResponse = new PageResponse<>(
+        result,
+        users.getNumber(),
+        users.getSize(),
+        users.getTotalElements(),
+        users.getTotalPages(),
+        users.isFirst(),
+        users.isLast()
+    );
+
+    return pageResponse;
   }
 
   @Override

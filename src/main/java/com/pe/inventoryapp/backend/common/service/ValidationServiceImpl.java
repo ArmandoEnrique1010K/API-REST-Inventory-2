@@ -19,8 +19,6 @@ public class ValidationServiceImpl implements ValidationService {
         errors.put(err.getField(), err.getDefaultMessage());
       });
 
-      // Si se elimina esta linea de codigo, deshabilita la validación de campos
-      // Este mensaje queda ignorado, excepto los errores que se pasan
       throw new RequestValidation(errors);
     }
   }
