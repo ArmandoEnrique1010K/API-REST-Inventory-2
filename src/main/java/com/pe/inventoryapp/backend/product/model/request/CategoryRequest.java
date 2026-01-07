@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryRequest {
-  @NotBlank(message = "Introduzca una categoria")
+  @NotBlank(message = "Introduzca un nombre para la categoria")
   private String name;
 }

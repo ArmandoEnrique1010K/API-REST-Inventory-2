@@ -1,7 +1,6 @@
 package com.pe.inventoryapp.backend.product.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
 import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
 import com.pe.inventoryapp.backend.product.service.ProductService;
-
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
 
@@ -45,9 +45,10 @@ public class ProductController {
     validationService.validateFieldsAndThrowResponse(result);
     productService.saveProduct(productRequest);
 
-    return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
-            "Se registro el producto en el sistema"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
+        "Se registro el producto en el sistema");
+    return ResponseEntity.status(response.status()).body(response);
+
   }
 
   @GetMapping
@@ -62,11 +63,9 @@ public class ProductController {
 
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, 
-        status, categoryId,
-        pageable);
-
-    return ResponseEntity.status(200).body(products);
+    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,  status, categoryId, pageable);
+    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, products);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/active")
@@ -79,9 +78,11 @@ public class ProductController {
     ) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, true, categoryId, pageable);
-
-    return ResponseEntity.status(200).body(products);
+    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+        true, categoryId, pageable);
+    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, products);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/category/{idCategory}")
@@ -95,11 +96,11 @@ public class ProductController {
 
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, 
-        status, idCategory,
-        pageable);
-
-    return ResponseEntity.status(200).body(products);
+    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+        status, idCategory, pageable);
+    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, products);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/active/category/{idCategory}")
@@ -111,16 +112,19 @@ public class ProductController {
       @RequestParam(required = false) Integer maxStock) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock, true,
-        idCategory, pageable);
-
-    return ResponseEntity.status(200).body(products);
+    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+        true, idCategory, pageable);
+    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, products);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getProduct(@PathVariable Long id) {
     ProductDetailsResponse productDetailsResponse = productService.findProductById(id);
-    return ResponseEntity.status(200).body(productDetailsResponse);
+    DataResponse<ProductDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        productDetailsResponse);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PutMapping("/{id}")
@@ -129,17 +133,17 @@ public class ProductController {
     validationService.validateFieldsAndThrowResponse(result);
     productService.updateProductById(id, productRequest);
 
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "Se actualizo los datos del producto"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se actualizado los datos del producto en el sistema");
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusProduct(@PathVariable Long id) {
     productService.changeStatusProductById(id);
     
-    return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
-            "Se ha cambiado el estado del producto"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se modifico el estado del producto en el sistema");
+    return ResponseEntity.status(response.status()).body(response);
   }
 }

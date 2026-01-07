@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "categorias")
 public class Category {
+    // TODO: SE DEBEN LIMITAR LA CANTIDAD DE CARACTERES QUE SE VAN A INTRODUCIR
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

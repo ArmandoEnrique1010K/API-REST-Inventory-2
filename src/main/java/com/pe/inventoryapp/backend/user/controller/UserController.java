@@ -58,7 +58,7 @@ public class UserController {
     validationService.validateFieldsAndThrowResponse(result);
     userService.registerUser(registerRequest);
 
-    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se ha registrado al usuario en el sistema");
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se registro el usuario en el sistema");
     return ResponseEntity.status(response.status()).body(response);
   }
 
@@ -107,7 +107,7 @@ public class UserController {
   }
 
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
-  @PatchMapping("/{id}")
+  @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusUser(Authentication authentication, @PathVariable Long id) {
     Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
     userService.changeStatusUserById(id, id_authenticated_user);

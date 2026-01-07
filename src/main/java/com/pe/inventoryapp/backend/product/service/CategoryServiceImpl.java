@@ -38,26 +38,18 @@ public class CategoryServiceImpl implements CategoryService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CategoryResponse> findAllCategories() {
-    List<Category> categories = (List<Category>) categoryRepository.findAll();
+  public List<CategoryResponse> searchAllCategoriesByStatus(Boolean status) {
+    List<Category> categories = (List<Category>) categoryRepository.findAllByParams(status);
 
     return categories.stream()
         .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse())
         .collect(Collectors.toList());
   }
 
-  @Override
-  public List<CategoryResponse> findAllCategoriesByStatusTrue() {
-    List<Category> categories = (List<Category>) categoryRepository.findAllByStatusTrue();
-
-    return categories.stream()
-        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse())
-        .collect(Collectors.toList());
-  }
 
   @Override
+  @Transactional(readOnly = true)
   public CategoryResponse findCategoryById(Long id) {
-
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -66,33 +58,33 @@ public class CategoryServiceImpl implements CategoryService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
     }
 
     return CategoryMapper.builder().setCategory(category).buildCategoriesResponse();
   }
 
   @Override
+  @Transactional
   public void updateCategoryById(Long id, CategoryRequest categoryRequest) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "Esta categoria no se puede editar");
+      throw new BusinessException(ResponseStatus.CONFLICT, "Esta categoria no se puede editar");
     }
 
     Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
 
     if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
     }
 
     String newName = categoryRequest.getName().trim();
-
     verifyCategoryNameExistById(newName, id);
-
+    
     category.setName(newName);
 
     categoryRepository.save(category);
@@ -100,13 +92,14 @@ public class CategoryServiceImpl implements CategoryService {
 
   // Obtiene una categoria por su nombre y verifica que no exista
   @Override
+  @Transactional
   public void changeStatusCategoryById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "No se puede cambiar el estado de esta categoria");
+      throw new BusinessException(ResponseStatus.CONFLICT, "No se puede cambiar el estado de esta categoria");
     }
 
     Category category = categoryRepository.findById(id).orElseThrow(

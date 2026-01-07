@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.model.mapper.ProductMapper;
@@ -19,6 +20,8 @@ import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse
 import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
+
+import io.github.cdimascio.dotenv.Dotenv;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -60,10 +63,18 @@ public class ProductServiceImpl implements ProductService {
       product.setEntryDate(productRequest.getEntryDate());
     }
 
+    Dotenv dotenv = Dotenv.load();
+
+    if (productRequest.getImageUrl() == null || productRequest.getImageUrl().isEmpty() || productRequest.getImageUrl().isBlank() || productRequest.getImageUrl().equals("")) {
+      // Toma la URL de la imagen que se encuentra en la variable de entorno
+      product.setImageUrl(dotenv.get("DEFAULT_IMAGE_URL").toString());
+    } else {
+      product.setImageUrl(productRequest.getImageUrl());
+    }
+
     product.setCaducityDate(productRequest.getCaducityDate());
     product.setLength(productRequest.getLength());
     product.setWidth(productRequest.getWidth());
-    product.setImageUrl(productRequest.getImageUrl());
 
     product.setStatus(true);
     product.setCreatedAt(LocalDateTime.now());
@@ -76,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<ProductListResponse> searchAllProductsByParams(
+  public PageResponse<ProductListResponse> searchAllProductsByParams(
       String name,
       Integer minStock,
       Integer maxStock,
@@ -91,7 +102,22 @@ public class ProductServiceImpl implements ProductService {
 
     Page<Product> products = productRepository.findAllByParams(name, minStock, maxStock, status, categoryId, pageable);
 
-    return products.map(product -> ProductMapper.builder().setProduct(product).buildProductListResponse());
+    var result = products.getContent().stream().map(
+      product -> ProductMapper.builder()
+      .setProduct(product).buildProductListResponse()
+    ).toList();
+
+    PageResponse<ProductListResponse> pageResponse = new PageResponse<>(
+      result,
+      products.getNumber(),
+      products.getSize(),
+      products.getTotalElements(),
+      products.getTotalPages(),
+      products.isFirst(),
+      products.isLast()
+    );
+
+    return pageResponse;
   }
 
   @Override
@@ -169,7 +195,7 @@ public class ProductServiceImpl implements ProductService {
   // METODOS AUXILIARES
   private void verifyProductNameExist(String name) {
     if (productRepository.existsByName(name)) {
-      throw new FieldValidation("name", "El producto con ese nombre ya existe, introduzca otro nombre");
+      throw new FieldValidation("name", "Este nombre ya está en uso");
     }
   }
 
@@ -177,7 +203,7 @@ public class ProductServiceImpl implements ProductService {
     if (productRepository.existsByNameAndIdNot(name, id)) {
       throw new FieldValidation(
           "name",
-          "El producto con ese nombre ya existe, introduzca otro nombre");
+          "Este nombre ya está en uso");
     }
   }
 }

@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import com.pe.inventoryapp.backend.common.exception.RequestValidation;
 
 @Service
 public class ValidationServiceImpl implements ValidationService {
-
+  @Transactional(readOnly = true)
   @Override
   public void validateFieldsAndThrowResponse(BindingResult result) {
     if (result.hasErrors()) {
@@ -22,5 +23,4 @@ public class ValidationServiceImpl implements ValidationService {
       throw new RequestValidation(errors);
     }
   }
-
 }

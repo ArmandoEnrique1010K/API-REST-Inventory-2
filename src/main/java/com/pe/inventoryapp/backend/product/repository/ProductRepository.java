@@ -10,7 +10,6 @@ import com.pe.inventoryapp.backend.product.model.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-  // TODO: ESTO SE PODRIA ORDENAR DE FORMA DESCENDENTE SEGUN LA FECHA DE ULTIMA MODIFICACIÓN U DE OTRA FORMA
   // Query personalizado para buscar productos mediante parametros
   // Nota: Lista los productos cuya categoria este activa
   @Query("""
@@ -21,7 +20,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         AND (:maxStock IS NULL OR p.totalQuantityAvailable <= :maxStock)
         AND (:status IS NULL OR p.status = :status)
         AND (:categoryId IS NULL OR p.category.id = :categoryId)
-        AND p.category.status = true
+        AND p.category.status = true ORDER BY p.updatedAt DESC
         """)
   Page<Product> findAllByParams(
       @Param("name") String name,

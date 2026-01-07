@@ -87,7 +87,7 @@ public class SecurityConfig {
 
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/*/roles")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-                                                .requestMatchers(HttpMethod.PATCH, "/api/users/*")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/users/*/status")
                                                 .hasAnyAuthority("ROLE_ADMIN")
 
                                                 // ROLES

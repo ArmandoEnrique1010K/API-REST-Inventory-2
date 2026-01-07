@@ -20,15 +20,13 @@ public class CategoryMapper {
   }
 
   public CategoryResponse buildCategoriesResponse() {
-
     if (category == null) {
       throw new RuntimeException("Debe pasar la entidad Category");
     }
-    // Devuelve una nueva instancia de UserDto con los datos mapeados
+
     return new CategoryResponse(
         category.getId(),
         category.getName().trim(),
         category.isStatus());
   }
-
 }

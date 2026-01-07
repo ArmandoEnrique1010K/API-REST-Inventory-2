@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 public class ProductListResponse {
   private Long id;
   private String name;
-  private Integer stock;
   private String imageUrl;
-  private String categoryName;
+  private Integer totalQuantityAvailable;
   private boolean status;
+  private String categoryName;
 }

@@ -25,14 +25,16 @@ public class ProductMapper {
     if (product == null) {
       throw new RuntimeException("Debe pasar la entidad Product");
     }
+
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new ProductListResponse(
         product.getId(),
         product.getName().trim(),
-        product.getTotalQuantityAvailable(),
         product.getImageUrl().trim(),
-        product.getCategory().getName().trim(),
-        product.isStatus());
+        product.getTotalQuantityAvailable(),
+        product.isStatus(),
+        product.getCategory().getName().trim()
+      );
   }
 
   public ProductDetailsResponse buildProductDetailsResponse() {
@@ -40,17 +42,18 @@ public class ProductMapper {
     if (product == null) {
       throw new RuntimeException("Debe pasar la entidad Product");
     }
-    // Devuelve una nueva instancia de UserDto con los datos mapeados
+
     return new ProductDetailsResponse(
         product.getId(),
         product.getName().trim(),
-        product.getEntryDate(),
-        product.getCaducityDate(),
         product.getLength(),
         product.getWidth(),
-        product.getTotalQuantityAvailable(),
         product.getImageUrl().trim(),
+        product.getEntryDate(),
+        product.getCaducityDate(),
+        product.getTotalQuantityAvailable(),
         product.isStatus(),
-        product.getCategory().getName().trim());
+        product.getCategory().getName()
+      );
   }
 }

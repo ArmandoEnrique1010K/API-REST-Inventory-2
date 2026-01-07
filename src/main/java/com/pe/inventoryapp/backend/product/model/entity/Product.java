@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.product.model.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,13 +42,10 @@ public class Product {
     @Column(unique = true, nullable = false)
     private String name;
 
-    private Double width;
-
-    private Double length;
+    private BigDecimal length;
+    private BigDecimal width;
 
     private String imageUrl;
-
-    private boolean status;
 
     // Fecha de entrada del producto
     private LocalDate entryDate;
@@ -57,6 +55,8 @@ public class Product {
 
     // Sumatoria del stock total
     private Integer totalQuantityAvailable;
+
+    private boolean status;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
