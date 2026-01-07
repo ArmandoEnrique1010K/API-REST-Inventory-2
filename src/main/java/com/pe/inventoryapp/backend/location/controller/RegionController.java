@@ -22,6 +22,7 @@ import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 
 @RestController
 @RequestMapping("/api/regions")
@@ -41,21 +42,25 @@ public class RegionController {
     validationService.validateFieldsAndThrowResponse(result);
     regionService.saveRegion(regionRequest);
 
-    return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
-            "Se registro la región"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
+        "Se registro la región");
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @GetMapping
   public ResponseEntity<?> listAllRegions() {
     List<RegionResponse> regions = regionService.findAllRegions();
-    return ResponseEntity.status(200).body(regions);
+    DataResponse<List<RegionResponse>> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        regions);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getRegion(@PathVariable Long id) {
     RegionResponse regionResponse = regionService.findRegionById(id);
-    return ResponseEntity.status(200).body(regionResponse);
+    DataResponse<RegionResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        regionResponse);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PutMapping("/{id}")
@@ -64,8 +69,8 @@ public class RegionController {
     validationService.validateFieldsAndThrowResponse(result);
     regionService.updateRegionById(id, regionRequest);
 
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "Se actualizo los datos de la región"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se actualizo el nombre de la región");
+    return ResponseEntity.status(response.status()).body(response);
   }
 }

@@ -15,7 +15,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
 
   // Query personalizado para buscar movimientos mediante parametros
 
-  // TODO: ORDENAR ESTOS DATOS OBTENIDOS POR FECHA DE CREACION DE FORMA DESCENDENTE
+  // TODO: DEBE FILTRAR POR EL NOMBRE Y/O APELLIDO DEL USUARIO
   @Query("""
       SELECT m
       FROM Movement m
@@ -24,8 +24,8 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       AND (:minCreatedAt IS NULL OR m.createdAt >= :minCreatedAt)
       AND (:maxCreatedAt IS NULL OR m.createdAt <= :maxCreatedAt)
       AND (:movementType IS NULL OR m.movementType = :movementType)
-      AND (:username IS NULL OR LOWER(m.user) LIKE LOWER(CONCAT('%', :username, '%')))
-      AND (:productName IS NULL OR LOWER(m.product.name) LIKE LOWER(CONCAT('%', :productName, '%')))
+      AND (:username IS NULL OR LOWER(m.user.firstname) LIKE LOWER(CONCAT('%', :username, '%')) OR LOWER(m.user.lastname) LIKE LOWER(CONCAT('%', :username, '%')))
+      AND (:productName IS NULL OR LOWER(m.product.name) LIKE LOWER(CONCAT('%', :productName, '%'))) ORDER BY m.createdAt DESC
       """)
   Page<Movement> findAllByParams(
     @Param("minQuantity") Integer minQuantity,

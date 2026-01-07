@@ -68,7 +68,7 @@ public class Movement {
 
   @ManyToOne
   @JoinColumn(name = "delivery_line_id")
-  @NotNull
+  @Nullable
   private DeliveryLine deliveryLine;
 
   @ManyToOne

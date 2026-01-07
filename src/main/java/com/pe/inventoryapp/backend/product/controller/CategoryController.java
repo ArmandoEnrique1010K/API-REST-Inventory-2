@@ -83,7 +83,6 @@ public class CategoryController {
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
     "Se actualizo el nombre de la categoria");
     return ResponseEntity.status(response.status()).body(response);
-
   }
 
   @PatchMapping("/{id}/status")

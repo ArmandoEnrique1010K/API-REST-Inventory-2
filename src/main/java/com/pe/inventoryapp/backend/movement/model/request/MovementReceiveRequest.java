@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.movement.model.request;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,10 +16,8 @@ public class MovementReceiveRequest {
   @NotNull
   private Integer quantity;
   private String comment;
-  @NotBlank(message = "Introduzca un lote de entrega")
-  private String batch;
-  @NotNull
+  @NotNull(message = "Seleccione un producto")
   private Long idProduct;
-  @NotNull
+  @NotNull(message = "Seleccione una empresa")
   private Long idCompany;
 }

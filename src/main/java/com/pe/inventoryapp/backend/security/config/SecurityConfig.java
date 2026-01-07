@@ -163,6 +163,17 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.PUT, "/api/companies/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
+                                                // MOVEMENT STOCK LOT
+                                                .requestMatchers(HttpMethod.POST, "/api/movements/stock-lots/receive")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.POST, "/api/movements/stock-lots/increase")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.POST, "/api/movements/stock-lots/decrease")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.POST, "/api/movements/stock-lots/recovery")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.POST, "/api/movements/stock-lots/transfer")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
                                                 // TODO: CONTINUAR AQUI
 

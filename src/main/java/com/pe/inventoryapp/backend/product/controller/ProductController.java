@@ -48,7 +48,6 @@ public class ProductController {
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
         "Se registro el producto");
     return ResponseEntity.status(response.status()).body(response);
-
   }
 
   @GetMapping
@@ -60,7 +59,6 @@ public class ProductController {
       @RequestParam(required = false) Boolean status,
       @RequestParam(required = false) Long categoryId
     ) {
-
     Pageable pageable = PageRequest.of(page, 20);
 
     PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,  status, categoryId, pageable);
@@ -93,7 +91,6 @@ public class ProductController {
       @RequestParam(required = false) Integer minStock,
       @RequestParam(required = false) Integer maxStock,
       @RequestParam(required = false) Boolean status) {
-
     Pageable pageable = PageRequest.of(page, 20);
 
     PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
