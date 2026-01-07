@@ -13,7 +13,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.validation.Valid;
@@ -25,6 +24,8 @@ import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 
 @RestController
 @RequestMapping("/api/locations")
@@ -44,10 +45,11 @@ public class LocationController {
     validationService.validateFieldsAndThrowResponse(result);
     locationService.saveLocation(locationRequest);
 
-    return ResponseEntity.status(201)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
-            "Se registro la ubicación en el sistema"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
+        "Se registro la ubicación");
+    return ResponseEntity.status(response.status()).body(response);
   }
+
 
   @GetMapping
   public ResponseEntity<?> listAllLocations(
@@ -57,9 +59,11 @@ public class LocationController {
       @RequestParam(required = false) Boolean status) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<LocationResponse> locations = locationService.searchAllLocations(name, regionId, status, pageable);
+    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, regionId, status, pageable);
+    DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        locations);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
 
-    return ResponseEntity.status(200).body(locations);
   }
 
   @GetMapping("/active")
@@ -69,9 +73,11 @@ public class LocationController {
       @RequestParam(required = false) Long regionId) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<LocationResponse> locations = locationService.searchAllLocations(name, regionId, true, pageable);
-
-    return ResponseEntity.status(200).body(locations);
+    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, regionId, true, pageable);
+    DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
+        locations);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/region/{id}")
@@ -82,9 +88,11 @@ public class LocationController {
       @RequestParam(required = false) Boolean status) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<LocationResponse> locations = locationService.searchAllLocations(name, id, status, pageable);
-
-    return ResponseEntity.status(200).body(locations);
+    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, id, status, pageable);
+    DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
+        locations);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/active/region/{id}")
@@ -94,15 +102,19 @@ public class LocationController {
       @RequestParam(required = false) String name) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    Page<LocationResponse> locations = locationService.searchAllLocations(name, id, true, pageable);
-
-    return ResponseEntity.status(200).body(locations);
+    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, id, true, pageable);
+    DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
+        locations);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getLocation(@PathVariable Long id) {
     LocationResponse locationResponse = locationService.findLocationById(id);
-    return ResponseEntity.status(200).body(locationResponse);
+    DataResponse<LocationResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        locationResponse);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PutMapping("/{id}")
@@ -111,16 +123,17 @@ public class LocationController {
     validationService.validateFieldsAndThrowResponse(result);
     locationService.updateLocationById(id, locationRequest);
 
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "Se actualizo los datos de la ubicación"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se actualizo los datos de la ubicación");
+    return ResponseEntity.status(response.status()).body(response);
   }
 
   @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> disableLocation(@PathVariable Long id) {
     locationService.changeStatusLocationById(id);
-    return ResponseEntity.status(200)
-        .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
-            "Se ha cambiado el estado de la ubicación"));
+
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se modifico el estado de la ubiación");
+    return ResponseEntity.status(response.status()).body(response);
   }
 }

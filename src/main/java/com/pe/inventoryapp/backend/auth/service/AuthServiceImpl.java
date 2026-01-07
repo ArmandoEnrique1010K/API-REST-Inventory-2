@@ -43,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
         .map(User::getId)
         .orElseThrow(() -> new UsernameNotFoundException(
           // "No se encuentra un usuario con email: " + email + " en el sistema"
-          "Ha ocurrido un error desconocido en el sistema"
+          "Ha ocurrido un error desconocido"
         ));
   }
 

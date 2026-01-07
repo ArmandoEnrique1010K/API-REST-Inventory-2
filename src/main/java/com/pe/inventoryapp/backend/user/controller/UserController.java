@@ -58,7 +58,7 @@ public class UserController {
     validationService.validateFieldsAndThrowResponse(result);
     userService.registerUser(registerRequest);
 
-    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se registro el usuario en el sistema");
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se registro el usuario");
     return ResponseEntity.status(response.status()).body(response);
   }
 
@@ -113,7 +113,7 @@ public class UserController {
     userService.changeStatusUserById(id, id_authenticated_user);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-        "Se ha cambiado el estado del usuario en el sistema");
+        "Se ha cambiado el estado del usuario");
     return ResponseEntity.status(response.status()).body(response);
   }
 }

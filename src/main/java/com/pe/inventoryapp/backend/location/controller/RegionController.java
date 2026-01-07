@@ -43,7 +43,7 @@ public class RegionController {
 
     return ResponseEntity.status(201)
         .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
-            "Se registro la región en el sistema"));
+            "Se registro la región"));
   }
 
   @GetMapping

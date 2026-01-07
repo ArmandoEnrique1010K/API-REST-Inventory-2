@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
           pageable);
     }
 
-    var result = users.getContent().stream()
+    List<ListUsersResponse> result = users.getContent().stream()
             .map(user -> UserMapper.builder()
                 .setUser(user)
                 .buildListUserResponse())
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
-            "El usuario no existe en el sistema"));
+            "El usuario no existe"));
 
     return UserMapper.builder()
         .setUser(user)
@@ -122,7 +122,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
-            "El usuario no existe en el sistema"));
+            "El usuario no existe"));
 
     // Obtener el correo del usuario actual y el nuevo
     String currentEmail = user.getEmail();
@@ -155,7 +155,7 @@ public class UserServiceImpl implements UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
-            "El usuario no existe en el sistema"));
+            "El usuario no existe"));
 
     // Verifica que el usuario este activo para que pueda cambiar los roles
     if (user.isActive() == false) {
@@ -184,13 +184,13 @@ public class UserServiceImpl implements UserService {
         id_user).orElseThrow(
         () -> new BusinessException(
             ResponseStatus.NOT_FOUND,
-            "El usuario no existe en el sistema"));
+            "El usuario no existe"));
 
     User userLogged = userRepository.findById(
         id_authenticated_user).orElseThrow(
         () -> new BusinessException(
             ResponseStatus.NOT_FOUND,
-            "El usuario no existe en el sistema"));
+            "El usuario no existe"));
     
     verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id_user);
 
@@ -209,18 +209,18 @@ public class UserServiceImpl implements UserService {
   private List<Role> getRoles(boolean isAdmin, boolean isSecretary, boolean isOperator) {
     List<Role> roles = new ArrayList<>();
     // Rol base obligatorio
-    roles.add(getRoleOrThrow("ROLE_USER", "El rol de usuario no existe en el sistema"));
+    roles.add(getRoleOrThrow("ROLE_USER", "El rol de usuario no existe"));
 
     if (isOperator) {
-      roles.add(getRoleOrThrow("ROLE_OPERATOR", "El rol de operador no existe en el sistema"));
+      roles.add(getRoleOrThrow("ROLE_OPERATOR", "El rol de operador no existe"));
     }
 
     if (isSecretary) {
-      roles.add(getRoleOrThrow("ROLE_SECRETARY", "El rol de secretario no existe en el sistema"));
+      roles.add(getRoleOrThrow("ROLE_SECRETARY", "El rol de secretario no existe"));
     }
 
     if (isAdmin) {
-      roles.add(getRoleOrThrow("ROLE_ADMIN", "El rol de administrador no existe en el sistema"));
+      roles.add(getRoleOrThrow("ROLE_ADMIN", "El rol de administrador no existe"));
     }
 
     return roles;
@@ -239,12 +239,12 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  // Verificar que haya al menos un usuario con el rol de administrador en el sistema, de lo contrario lanza una excepcion
+  // Verificar que haya al menos un usuario con el rol de administrador, de lo contrario lanza una excepcion
   private void verifyUserByRoleAdminExist(boolean admin, Long id) {
     if (!roleRepository.existsByName("ROLE_ADMIN")) {
       throw new BusinessException(
           ResponseStatus.NOT_FOUND,
-          " El rol de administrador no existe en el sistema");
+          " El rol de administrador no existe");
     }
 
     boolean existsAnotherAdmin = userRepository.existsByRoleNameAndIdNot("ROLE_ADMIN", id);

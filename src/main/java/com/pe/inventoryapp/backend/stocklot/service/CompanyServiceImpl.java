@@ -48,13 +48,12 @@ public class CompanyServiceImpl implements CompanyService {
 
   @Override
   public CompanyResponse findCompanyById(Long id) {
-
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La empresa no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La empresa no existe"));
 
     return CompanyMapper.builder().setCompany(company).buildCompanyResponse();
   }
@@ -66,16 +65,14 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "Esta empresa no se puede editar");
+      throw new BusinessException(ResponseStatus.CONFLICT, "No se puede cambiar el nombre de esta empresa");
     }
 
     Company company = companyRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La empresa no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La empresa no existe"));
 
     String newName = companyRequest.getName().trim();
-
     verifyCompanyNameExistById(newName, id);
-
     company.setName(newName);
 
     companyRepository.save(company);
@@ -85,7 +82,7 @@ public class CompanyServiceImpl implements CompanyService {
   // METODOS AUXILIARES
   private void verifyCompanyNameExist(String name) {
     if (companyRepository.existsByName(name)) {
-      throw new FieldValidation("name", "La empresa con ese nombre ya existe, introduzca otro nombre");
+      throw new FieldValidation("name", "Este nombre ya está en uso");
     }
   }
 
@@ -93,7 +90,7 @@ public class CompanyServiceImpl implements CompanyService {
     if (companyRepository.existsByNameAndIdNot(name, id)) {
       throw new FieldValidation(
           "name",
-          "La empresa con ese nombre ya existe, introduzca otro nombre");
+          "Este nombre ya está en uso");
     }
   }
 }

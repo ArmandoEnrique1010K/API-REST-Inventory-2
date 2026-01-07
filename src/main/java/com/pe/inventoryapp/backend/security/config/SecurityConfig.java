@@ -93,7 +93,6 @@ public class SecurityConfig {
                                                 // ROLES
                                                 .requestMatchers(HttpMethod.GET, "/api/roles").hasAnyAuthority("ROLE_ADMIN")
 
-                                                // TODO: CONTINUAR AQUI
                                                 // CATEGORY
                                                 .requestMatchers(HttpMethod.POST, "/api/categories")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
@@ -109,6 +108,7 @@ public class SecurityConfig {
                                                 // PRODUCT
                                                 .requestMatchers(HttpMethod.POST, "/api/products")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+
                                                 .requestMatchers(HttpMethod.GET, "/api/products")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
                                                 .requestMatchers(HttpMethod.GET, "/api/products/active").authenticated()
@@ -117,30 +117,37 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/api/products/active/category/*")
                                                 .authenticated()
                                                 .requestMatchers(HttpMethod.GET, "/api/products/*").authenticated()
+
                                                 .requestMatchers(HttpMethod.PUT, "/api/products/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
                                                 .requestMatchers(HttpMethod.PATCH, "/api/products/*/status")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-
+                                                
                                                 // REGION
                                                 .requestMatchers(HttpMethod.POST, "/api/regions")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/regions").authenticated()
-                                                .requestMatchers(HttpMethod.GET, "/api/regions/*").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/regions")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/regions/*")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
                                                 .requestMatchers(HttpMethod.PUT, "/api/regions/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
                                                 // LOCATION
                                                 .requestMatchers(HttpMethod.POST, "/api/locations")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                
                                                 .requestMatchers(HttpMethod.GET, "/api/locations")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/locations/active").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/locations/active")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
                                                 .requestMatchers(HttpMethod.GET, "/api/locations/region/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
                                                 .requestMatchers(HttpMethod.GET, "/api/locations/active/region/*")
-                                                .authenticated()
-                                                .requestMatchers(HttpMethod.GET, "/api/locations/*").authenticated()
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/locations/*")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+
                                                 .requestMatchers(HttpMethod.PUT, "/api/locations/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
                                                 .requestMatchers(HttpMethod.PATCH, "/api/locations/*/status")
@@ -149,12 +156,15 @@ public class SecurityConfig {
                                                 // COMPANY
                                                 .requestMatchers(HttpMethod.POST, "/api/companies")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/companies").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-                                                .requestMatchers(HttpMethod.GET, "/api/companies/*").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/companies")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/companies/*")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
                                                 .requestMatchers(HttpMethod.PUT, "/api/companies/*")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 
+                                                // TODO: CONTINUAR AQUI
 
                                                 // OTHERS
                                                 .requestMatchers(HttpMethod.GET, "/csrf").permitAll()

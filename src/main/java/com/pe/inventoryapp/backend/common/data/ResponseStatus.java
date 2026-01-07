@@ -55,7 +55,7 @@ public enum ResponseStatus {
 	// 404 - NOT_FOUND
 	NOT_FOUND(
 			HttpStatus.NOT_FOUND,
-			"No se ha encontrado el recurso solicitado en el sistema"),
+			"No se ha encontrado el recurso solicitado"),
 
 		// 409 - CONFLICT
 	// Recurso duplicado
@@ -64,7 +64,7 @@ public enum ResponseStatus {
 
 	DEFAULT_RESOURCE(
 			HttpStatus.CONFLICT,
-			"Este recurso no se puede ser modificado del sistema"),
+			"Este recurso no se puede ser modificado"),
 
 
 

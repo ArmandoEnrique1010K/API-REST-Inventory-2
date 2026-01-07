@@ -52,7 +52,7 @@ public class RegionServiceImpl implements RegionService {
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe"));
 
     return RegionMapper.builder().setRegion(region).buildRegionResponse();
   }
@@ -64,11 +64,11 @@ public class RegionServiceImpl implements RegionService {
     }
 
     if (id == 1L) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "Esta región no se puede editar");
+      throw new BusinessException(ResponseStatus.CONFLICT, "Esta región no se puede editar");
     }
 
     Region region = regionRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe"));
 
     verifyRegionNameExistById(regionRequest.getName().trim(), id);
 
@@ -80,7 +80,7 @@ public class RegionServiceImpl implements RegionService {
   // METODOS AUXILIARES
   private void verifyRegionNameExist(String name) {
     if (regionRepository.existsByName(name)) {
-      throw new FieldValidation("name", "La región con ese nombre ya existe, introduzca otro nombre");
+      throw new FieldValidation("name", "Este nombre ya está en uso");
     }
   }
 
@@ -88,7 +88,7 @@ public class RegionServiceImpl implements RegionService {
     if (regionRepository.existsByNameAndIdNot(name, id)) {
       throw new FieldValidation(
           "name",
-          "La región con ese nombre ya existe, introduzca otro nombre");
+          "Este nombre ya está en uso");
     }
   }
 }

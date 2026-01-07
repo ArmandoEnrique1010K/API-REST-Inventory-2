@@ -2,6 +2,8 @@ package com.pe.inventoryapp.backend.product.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,10 +48,10 @@ public class ProductServiceImpl implements ProductService {
     // Buscar la categoria por su ID
     Category category = categoryRepository.findById(
         idCategory)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
     if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La categoria se encuentra desactivada");
+      throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
     }
     
     String name = productRequest.getName().trim();
@@ -97,12 +99,12 @@ public class ProductServiceImpl implements ProductService {
     if (categoryId != null && !categoryRepository.existsById(categoryId)) {
       throw new BusinessException(
           ResponseStatus.NOT_FOUND,
-          "La categoria no existe en el sistema");
+          "La categoria no existe");
     }
 
     Page<Product> products = productRepository.findAllByParams(name, minStock, maxStock, status, categoryId, pageable);
 
-    var result = products.getContent().stream().map(
+    List<ProductListResponse> result = products.getContent().stream().map(
       product -> ProductMapper.builder()
       .setProduct(product).buildProductListResponse()
     ).toList();
@@ -128,11 +130,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
 
     if (product.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+      throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra desactivado");
     }
 
     return ProductMapper.builder().setProduct(product).buildProductDetailsResponse();
@@ -146,10 +148,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
     if (product.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+      throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra desactivado");
     }
 
     String newName = productRequest.getName().trim();
@@ -164,7 +166,7 @@ public class ProductServiceImpl implements ProductService {
 
     Category category = categoryRepository.findById(
         categoryId)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
     product.setName(newName);
     product.setEntryDate(productRequest.getEntryDate());
@@ -186,7 +188,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     Product product = productRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
     product.setStatus(!product.isStatus());
     productRepository.save(product);

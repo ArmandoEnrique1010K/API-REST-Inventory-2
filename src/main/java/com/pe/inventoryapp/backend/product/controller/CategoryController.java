@@ -44,7 +44,7 @@ public class CategoryController {
     categoryService.saveCategory(categoryRequest);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
-        "Se ha registrado la categoria en el sistema");
+        "Se registro la categoria");
     return ResponseEntity.status(response.status()).body(response);
   }
 

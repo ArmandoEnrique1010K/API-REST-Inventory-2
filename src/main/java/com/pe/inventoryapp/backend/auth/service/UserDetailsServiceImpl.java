@@ -23,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException(
             // "El usuario con el correo " + email + " no existe en el sistema"
-            "Ha ocurrido un error desconocido en el sistema"
+            "Ha ocurrido un error desconocido"
           ));
 
     return new UserPrincipal(user);

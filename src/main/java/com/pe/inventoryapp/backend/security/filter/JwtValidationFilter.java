@@ -99,7 +99,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
       // 3.5 Extraer el usuario
         User user = userRepository.findById(Long.parseLong(userId))
-          .orElseThrow(() -> new BusinessException(ResponseStatus.UNAUTHORIZED, "El usuario no existe en el sistema"));
+          .orElseThrow(() -> new BusinessException(ResponseStatus.UNAUTHORIZED, "El usuario no existe"));
 
         // Si el usuario no esta activo, se eliminara la sesion
         if (!user.isActive()) {
@@ -111,7 +111,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
           cookie.setPath("/");
 
           response.addCookie(cookie);
-          // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "El usuario no esta activo en el sistema");
+          // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "El usuario no esta activo");
 
           return;
         }

@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class LocationRequest {
     @NotBlank(message = "Introduzca el nombre de la ubicación")
     private String name;
+    
     @NotNull(message = "Seleccione una región")
     private Long idRegion;
 }

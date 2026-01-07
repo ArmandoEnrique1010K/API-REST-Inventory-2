@@ -55,7 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
     if (category.isStatus() == false) {
       throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
@@ -76,7 +76,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     Category category = categoryRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
     if (category.isStatus() == false) {
       throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
@@ -103,7 +103,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     Category category = categoryRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe en el sistema"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
     // Cambia el estado de la categoria a false y lo guarda
     category.setStatus(!category.isStatus());
@@ -113,7 +113,7 @@ public class CategoryServiceImpl implements CategoryService {
   // METODOS AUXILIARES
   private void verifyCategoryNameExist(String name) {
     if (categoryRepository.existsByName(name)) {
-      throw new FieldValidation("name", "La categoria con ese nombre ya existe, introduzca otro nombre");
+      throw new FieldValidation("name", "Este nombre ya está en uso");
     }
   }
 
@@ -121,7 +121,7 @@ public class CategoryServiceImpl implements CategoryService {
     if (categoryRepository.existsByNameAndIdNot(name, id)) {
       throw new FieldValidation(
           "name",
-          "La categoria con ese nombre ya existe, introduzca otro nombre");
+          "Este nombre ya está en uso");
     }
   }
 }
