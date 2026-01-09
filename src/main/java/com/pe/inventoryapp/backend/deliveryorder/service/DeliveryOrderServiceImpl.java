@@ -1,7 +1,8 @@
 package com.pe.inventoryapp.backend.deliveryorder.service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,18 +10,17 @@ import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.exception.FieldValidation;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
-import com.pe.inventoryapp.backend.user.service.UserService;
 
 @Service
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
@@ -29,62 +29,131 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   private DeliveryOrderRepository deliveryOrderRepository;
 
   @Autowired
-  private UserService userService;
-
-  @Autowired
   private UserRepository userRepository;
 
+  private static final long BATCH_START = 10000L;
   @Override
   public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
-    verifyBatchExist(deliveryOrderRequest.getBatch());
 
-    if (id_user == null) {
+    Long id_client = deliveryOrderRequest.getIdClient();
+
+    if (id_user == null || id_client == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+    User user = userRepository.findById(id_user).orElseThrow(
+      () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
-    // TODO: SUGERENCIA DE QUE EL BATCH SE PUEDA GENERAR AUTOMATICAMENTE CON CADA ORDEN DE ENTREGA
+    User userClient = userRepository.findById(id_client).orElseThrow(
+      () -> new BusinessException(ResponseStatus.NOT_FOUND, "El cliente no existe")); 
+
+
+    // TODO: ESTO ES IMPOSIBLE, SE SABE QUE CADA NUEVO USUARIO CREADO SIEMPRE VA A TENER EL ROL DE USER
+    // Verificar que el usuario seleccionado tenga el rol de USER (Cliente)
+    // System.out.println(userClient.getRoles().stream().anyMatch(r -> "ROLE_USER".equals(r.getName())));
+
+    // if (!userClient.getRoles().stream().anyMatch(r -> "ROLE_USER".equals(r.getName()))) {
+    //   throw new BusinessException(ResponseStatus.CONFLICT, "El usuario seleccionado no es un cliente");
+    // }
+
     DeliveryOrder deliveryOrder = new DeliveryOrder();
-    deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
+
+    deliveryOrder.setLimitDate(deliveryOrderRequest.getLimitDate());
+    // La fecha limite prioritaria se establece en null porque aun no hay una fecha de entrega de una linea de entrega
+    deliveryOrder.setPriorityDate(null);
+    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
     deliveryOrder.setUserCreator(user);
     deliveryOrder.setUserUpdater(user);
-    deliveryOrder.setLimitDate(null);
-    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+    deliveryOrder.setUserClient(userClient);
 
-    deliveryOrderRepository.save(deliveryOrder);
+    DeliveryOrder saved = deliveryOrderRepository.save(deliveryOrder);
+
+    // Este numero debe ser generado automaticamente
+    String newBatch = (BATCH_START + saved.getId().toString());
+
+    saved.setBatch(newBatch);
+    deliveryOrderRepository.save(saved);
   }
 
   @Override
-  public Page<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
+  public PageResponse<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
+      String batch,
+      LocalDateTime startDate,
+      LocalDateTime endDate,
+      String userClientName,
       OrderStatus status,
-      String createdByUser,
-      String batch,
-      LocalDateTime startDate,
-      LocalDateTime endDate,
-          Pageable pageable
-    ) {
-    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(pageable, status,
-        createdByUser, batch, startDate, endDate);
+      Pageable pageable) {  
+    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(batch, startDate, endDate, status, userClientName, pageable);
 
-    return deliveryOrders
-        .map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-            .buildDeliveryOrderListResponse());
+    List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
+      deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderListResponse()
+    ).toList();
+
+    PageResponse<DeliveryOrderListResponse> pageResponse = new PageResponse<>(
+      result,
+      deliveryOrders.getNumber(),
+      deliveryOrders.getSize(),
+      deliveryOrders.getTotalElements(),
+      deliveryOrders.getTotalPages(),
+      deliveryOrders.hasNext(),
+      deliveryOrders.hasPrevious()
+    );
+
+    return pageResponse;
   }
 
   @Override
-  public Page<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
-      String createdByUser,
+  public PageResponse<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
       String batch,
       LocalDateTime startDate,
       LocalDateTime endDate,
-          Pageable pageable) {
-    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable,
-        createdByUser, batch,  startDate, endDate);
+      String userClientName,
+      Pageable pageable) {
+    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(batch, startDate, endDate, 
+        userClientName, pageable);
 
-    return deliveryOrders
-        .map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-            .buildDeliveryOrderListResponse());
+    List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
+        deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderListResponse())
+        .toList();
+
+    PageResponse<DeliveryOrderListResponse> pageResponse = new PageResponse<>(
+        result,
+        deliveryOrders.getNumber(),
+        deliveryOrders.getSize(),
+        deliveryOrders.getTotalElements(),
+        deliveryOrders.getTotalPages(),
+        deliveryOrders.hasNext(),
+        deliveryOrders.hasPrevious());
+
+    return pageResponse;
+  }
+
+  @Override
+  public PageResponse<DeliveryOrderClientListResponse> findAllDeliveryOrdesByClientId(Long id, String batch,
+      LocalDateTime startDate, LocalDateTime endDate, OrderStatus status, Pageable pageable) {
+
+    if (id == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByUserClientId(id, batch, startDate, endDate, 
+        status, pageable);
+
+    List<DeliveryOrderClientListResponse> result = deliveryOrders.getContent().stream().map(
+        deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderClientListResponse())
+        .toList();
+
+    PageResponse<DeliveryOrderClientListResponse> pageResponse = new PageResponse<>(
+        result,
+        deliveryOrders.getNumber(),
+        deliveryOrders.getSize(),
+        deliveryOrders.getTotalElements(),
+        deliveryOrders.getTotalPages(),
+        deliveryOrders.hasNext(),
+        deliveryOrders.hasPrevious());
+
+    return pageResponse;
+
   }
 
   @Override
@@ -94,47 +163,106 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
-        .orElseThrow(
-            () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    // TODO: IMPLEMENTAR UNA LOGICA PARA VERIFICAR SI EL USUARIO AUTENTICADO ES EL MISMO CLIENTE DE LA ORDEN, SI ES ASI DEVOLVERA LA ORDEN, DE LO CONTRARIO, UNA EXCEPCION
 
     return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
         .buildDeliveryOrderDetailsResponse();
   }
 
   @Override
-  public void updateDeliveryOrderById(Long id, DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
-    if (id == null || id_user == null) {
+  public void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user) {
+
+    if (id == null || limitDate == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // TAMBIEN DEBE ACTUALIZAR EL USUARIO QUE HA ACTUALIZADO LA ORDEN (EL QUE
-    // HA INICIADO SESION)
-
-    // Obtener el ID del usuario que ha iniciado sesión se obtiene desde los headers
-
     User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    // BUSCAR AL USUARIO POR SU ID
-    // Optional<User> userEmail =
-    // userRepository.findByEmail(detailsUserResponse.getEmail());
-    // User userEntity = userEmail.orElseThrow(() -> new
-    // BusinessException(ResponseStatusCodes.NOT_FOUND,
-    // "El usuario no existe"));
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-    verifyBatchExist(deliveryOrderRequest.getBatch());
 
-    deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
+    deliveryOrder.setLimitDate(limitDate);
     deliveryOrder.setUserUpdater(user);
 
     deliveryOrderRepository.save(deliveryOrder);
   }
 
-  private void verifyBatchExist(String batch) {
-    if (deliveryOrderRepository.findByBatch(batch).isPresent()) {
-      throw new FieldValidation("batch", "El lote de entrega ya existe, introduzca otro lote");
+  // @Override
+  // public void updateDeliveryOrderById(Long id, Long id_user) {
+  //   if (id == null || id_user == null) {
+  //     throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+  //   }
+
+  //   User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+
+  //   DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+  //       () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+  //   // verifyBatchExist(deliveryOrderRequest.getBatch());
+
+  //   // deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
+  //   deliveryOrder.setUserUpdater(user);
+
+  //   deliveryOrderRepository.save(deliveryOrder);
+  // }
+
+  // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
+  // SOLAMENTE SI TODAS LAS LINEAS DE ENTREGAS TIENEN EL ESTADO READY
+
+  // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CANCELAR UNA ORDEN DE ENTREGA
+  // SOLAMENTE SI NO TIENE EL ESTADO DELIVERED O CANCELED
+  // ESTO CANCELARA TODAS LAS LINEAS DE ENTREGA
+
+  @Override
+  public void changeStatusOrderToDeliveredById(Long id, Long id_user) {
+    if (id == null || id_user == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
+
+    User user = userRepository.findById(id_user)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    if (deliveryOrder.getOrderStatus() != OrderStatus.READY) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "La orden de entrega no puede ser entregada");
+    }
+    deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+    deliveryOrder.setUserUpdater(user);
+
+    deliveryOrderRepository.save(deliveryOrder);
   }
+
+  @Override
+  public void changeStatusOrderToCanceledById(Long id, Long id_user) {
+    if (id == null || id_user == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    User user = userRepository.findById(id_user)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
+    // SOLAMENTE SI TIENE EL ESTADO READY
+    deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+    deliveryOrder.setUserUpdater(user);
+
+    deliveryOrderRepository.save(deliveryOrder);
+  }
+
+
+
+  // private void verifyBatchExist(String batch) {
+  //   if (deliveryOrderRepository.findByBatch(batch).isPresent()) {
+  //     throw new FieldValidation("batch", "El lote de entrega ya existe, introduzca otro lote");
+  //   }
+  // }
 }

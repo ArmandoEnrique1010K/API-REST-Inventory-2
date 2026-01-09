@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.security.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties.Http;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -175,8 +176,18 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.POST, "/api/movements/stock-lots/transfer")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
-                                                // TODO: CONTINUAR AQUI
+                                                // DELIVERY ORDER
+                                                .requestMatchers(HttpMethod.POST, "/api/delivery-orders").hasAnyAuthority("ROLE_ADMIN","ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders/in-progress")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders/client").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders/*").authenticated()
+                                                .requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
+                                                // TODO: CONTINUAR AQUI
                                                 // OTHERS
                                                 .requestMatchers(HttpMethod.GET, "/csrf").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api").permitAll()

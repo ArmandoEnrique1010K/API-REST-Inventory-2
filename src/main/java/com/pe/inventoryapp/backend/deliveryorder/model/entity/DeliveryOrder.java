@@ -38,10 +38,14 @@ public class DeliveryOrder {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(unique = true, nullable = false)
+  @Column(unique = true)
   private String batch;
 
+  // Fecha limite de toda la orden de entrega
   private LocalDateTime limitDate;
+
+  // Fecha limite prioritaria (se genera automaticamente)
+  private LocalDateTime priorityDate;
 
   @CreationTimestamp
   private LocalDateTime createdAt;
@@ -62,6 +66,11 @@ public class DeliveryOrder {
   @JoinColumn(name = "user_updater_id")
   @NotNull
   private User userUpdater;
+
+  @ManyToOne
+  @JoinColumn(name = "user_client_id")
+  @NotNull
+  private User userClient;
 
   @OneToMany(mappedBy = "deliveryOrder")
   private List<DeliveryLine> deliveryLines;

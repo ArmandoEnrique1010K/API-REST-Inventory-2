@@ -17,6 +17,6 @@ public class DeliveryOrderListResponse {
   private Long id;
   private String batch;
   private LocalDateTime limitDate;
-  private String createdByUser;
+  private String userClientName;
   private OrderStatus status;
 }

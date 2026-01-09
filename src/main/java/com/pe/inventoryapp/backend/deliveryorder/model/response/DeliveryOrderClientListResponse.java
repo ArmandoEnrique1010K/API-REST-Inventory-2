@@ -13,15 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeliveryOrderDetailsResponse {
+public class DeliveryOrderClientListResponse {
   private Long id;
   private String batch;
   private LocalDateTime limitDate;
   private LocalDateTime priorityDate;
-  private String createdByUser;
-  private String updatedByUser;
-  private String userClientName;
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
-  private OrderStatus preparationStatus;
+  private OrderStatus status;
 }

@@ -1,6 +1,9 @@
 package com.pe.inventoryapp.backend.deliveryorder.model.request;
 
-import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,9 +11,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class DeliveryOrderRequest {
-  @NotBlank(message = "Introduzca un lote de entrega")
-  private String batch;
+  private Long idClient;
+  @JsonFormat (pattern = "yyyy-MM-dd HH:mm:ss")
+  private LocalDateTime limitDate;
 }
