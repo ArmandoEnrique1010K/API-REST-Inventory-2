@@ -15,6 +15,7 @@ import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
@@ -73,6 +74,14 @@ public class UserController {
     DataResponse<PageResponse<ListUsersResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
+
+  @GetMapping("/role/user")
+  public ResponseEntity<?> listFirstTenUsersByKeyword(@RequestParam(required = true) String name) {
+    List<ListUsersByRoleUserResponse> users = userService.findAllUsersByRoleUserAndName(name);
+    DataResponse<List<ListUsersByRoleUserResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  }
+  
 
   @GetMapping("/profile")
   public ResponseEntity<?> getUserProfile(Authentication authentication) {

@@ -82,7 +82,7 @@ public class SecurityConfig {
                                                 .hasAnyAuthority("ROLE_ADMIN")
                                                 .requestMatchers(HttpMethod.GET, "/api/users")
                                                 .hasAnyAuthority("ROLE_ADMIN")
-
+                                                .requestMatchers(HttpMethod.GET, "/api/users/role/user").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
                                                 .requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
                                                 .requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
 

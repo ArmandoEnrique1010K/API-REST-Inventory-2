@@ -9,12 +9,15 @@ import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 
 public interface UserService {
   void registerUser(RegisterRequest registerRequest);
 
   PageResponse<ListUsersResponse> findAllUsersByParams(String name, List<Long> roleIds,  Pageable pageable);
+
+  List<ListUsersByRoleUserResponse> findAllUsersByRoleUserAndName(String name);
 
   DetailUserResponse findUserById(Long id);
 

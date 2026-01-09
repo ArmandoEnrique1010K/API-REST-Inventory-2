@@ -5,6 +5,7 @@ import java.util.List;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 
 public class UserMapper {
@@ -84,6 +85,19 @@ public class UserMapper {
         user.getLastname(),
         user.getEmail(),
         user.getDni());
+  }
+
+  public ListUsersByRoleUserResponse buildListUsersByRoleUserResponse() {
+    if (user == null) {
+      throw new RuntimeException("Debe pasar la entidad User");
+    }
+
+    return new ListUsersByRoleUserResponse(
+        user.getId(),
+        user.getFirstname() + " " + user.getLastname(),
+        user.getEmail(),
+        user.getDni()
+    );
   }
 
 }

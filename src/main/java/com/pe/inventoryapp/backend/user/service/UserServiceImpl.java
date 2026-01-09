@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.user.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -91,6 +93,13 @@ public class UserServiceImpl implements UserService {
     );
 
     return pageResponse;
+  }
+
+  @Override
+  public List<ListUsersByRoleUserResponse> findAllUsersByRoleUserAndName(String name) {
+    List<User> users = (List<User>) userRepository.findAllFirstTenUsersByRoleUserAndName(name); 
+      
+    return users.stream().map(user -> UserMapper.builder().setUser(user).buildListUsersByRoleUserResponse()).collect(Collectors.toList());
   }
 
   @Override
@@ -255,4 +264,5 @@ public class UserServiceImpl implements UserService {
           "Debe existir al menos un administrador distinto a este usuario");
     }
   }
+
 }

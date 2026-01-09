@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
                     LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
                     CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
-                )
+                ) AND u.active = true ORDER BY u.id DESC
             """)
     Page<User> findAllByName(
             @Param("name") String name,
@@ -42,7 +42,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 )
                 AND r.id IN :roleIds
                 GROUP BY u.id
-                HAVING COUNT(DISTINCT r.id) = :rolesCount
+                HAVING COUNT(DISTINCT r.id) = :rolesCount AND u.active = true ORDER BY u.id DESC
             """)
     Page<User> findAllByParamsAndHavingRoles(
             @Param("name") String name,
@@ -67,5 +67,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("id") Long id);
 
     boolean existsByEmail(String email);
+
+    // Debe listar todos los usuarios que tengan el rol de "ROLE_USER"
+    @Query("""
+                SELECT u
+                FROM User u
+                WHERE  (
+                    :name IS NULL OR
+                    LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+                    LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+                    LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
+                    CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
+                )
+                AND u.active = true 
+                ORDER BY u.id DESC LIMIT 10
+            """)
+    List<User> findAllFirstTenUsersByRoleUserAndName(String name);
 
 }
