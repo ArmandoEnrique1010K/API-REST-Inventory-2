@@ -190,53 +190,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     deliveryOrderRepository.save(deliveryOrder);
   }
 
-  // @Override
-  // public void updateDeliveryOrderById(Long id, Long id_user) {
-  //   if (id == null || id_user == null) {
-  //     throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-  //   }
-
-  //   User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-
-  //   DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-  //       () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-  //   // verifyBatchExist(deliveryOrderRequest.getBatch());
-
-  //   // deliveryOrder.setBatch(deliveryOrderRequest.getBatch());
-  //   deliveryOrder.setUserUpdater(user);
-
-  //   deliveryOrderRepository.save(deliveryOrder);
-  // }
-
   // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
   // SOLAMENTE SI TODAS LAS LINEAS DE ENTREGAS TIENEN EL ESTADO READY
-
-  // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CANCELAR UNA ORDEN DE ENTREGA
-  // SOLAMENTE SI NO TIENE EL ESTADO DELIVERED O CANCELED
-  // ESTO CANCELARA TODAS LAS LINEAS DE ENTREGA
-
-  @Override
-  public void changeStatusOrderToDeliveredById(Long id, Long id_user) {
-    if (id == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    User user = userRepository.findById(id_user)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-    if (deliveryOrder.getOrderStatus() != OrderStatus.READY) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "La orden de entrega no puede ser entregada");
-    }
-    deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
-    deliveryOrder.setUserUpdater(user);
-
-    deliveryOrderRepository.save(deliveryOrder);
-  }
 
   @Override
   public void changeStatusOrderToCanceledById(Long id, Long id_user) {
@@ -250,19 +205,18 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-    // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
-    // SOLAMENTE SI TIENE EL ESTADO READY
-    deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
-    deliveryOrder.setUserUpdater(user);
+    if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
+        && deliveryOrder.getOrderStatus() != OrderStatus.READY && deliveryOrder.getOrderStatus() != OrderStatus.CANCELED) {
+      throw new BusinessException(ResponseStatus.CONFLICT,
+          "La orden de entrega no puede ser cancelada");
+    }
+    // TODO: IMPLEMENTAR UNA LOGICA PARA HACER ALGO CON LA CANTIDAD REQUERIDA QUE YA
+    // ESTA PREPARADA
+    // TODO: ESTO CANCELARA TODAS LAS LINEAS DE ENTREGA
 
+    deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
+    deliveryOrder.setUserUpdater(user);
     deliveryOrderRepository.save(deliveryOrder);
   }
 
-
-
-  // private void verifyBatchExist(String batch) {
-  //   if (deliveryOrderRepository.findByBatch(batch).isPresent()) {
-  //     throw new FieldValidation("batch", "El lote de entrega ya existe, introduzca otro lote");
-  //   }
-  // }
 }

@@ -45,7 +45,7 @@ public class StockLotMapper {
         stockLot.getBatch().trim(),
         stockLot.getQuantityReceived(),
         stockLot.getQuantityAvailable(),
-        stockLot.getDeliveredTotal(),
+        stockLot.getQuantityDelivered(),
         stockLot.getCreatedAt(),
         stockLot.getUpdatedAt(),
         stockLot.getProduct().getId(),

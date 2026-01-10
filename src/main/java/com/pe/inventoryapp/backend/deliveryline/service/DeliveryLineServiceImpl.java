@@ -536,7 +536,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Company firstCompany = companyRepository.findById(1L).orElseThrow(() -> new RuntimeException("No se encontro la empresa"));
 
     stockLot.setCompany(firstCompany);
-    stockLot.setDeliveredTotal(0);
+    stockLot.setQuantityDelivered(0);
     stockLotRepository.save(stockLot);
 
 

@@ -53,8 +53,10 @@ public class Product {
     // Fecha de caducidad del producto
     private LocalDate caducityDate;
 
-    // Sumatoria del stock total
+    // Sumatoria y calculos de totales
     private Integer totalQuantityAvailable;
+    private Integer totalQuantityReceived;
+    private Integer totalQuantityDelivered;
 
     private boolean status;
 

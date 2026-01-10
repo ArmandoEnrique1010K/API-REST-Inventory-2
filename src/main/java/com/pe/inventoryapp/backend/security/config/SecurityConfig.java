@@ -178,14 +178,12 @@ public class SecurityConfig {
 
                                                 // DELIVERY ORDER
                                                 .requestMatchers(HttpMethod.POST, "/api/delivery-orders").hasAnyAuthority("ROLE_ADMIN","ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders")
-                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders/in-progress")
-                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.GET, "/api/delivery-orders/in-progress").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
                                                 .requestMatchers(HttpMethod.GET, "/api/delivery-orders/client").authenticated()
                                                 .requestMatchers(HttpMethod.GET, "/api/delivery-orders/*").authenticated()
-                                                .requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*")
-                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/canceled").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
                                                 // TODO: CONTINUAR AQUI
                                                 // OTHERS

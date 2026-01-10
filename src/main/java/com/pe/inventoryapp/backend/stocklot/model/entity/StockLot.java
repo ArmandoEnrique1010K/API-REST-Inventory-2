@@ -43,7 +43,7 @@ public class StockLot {
 
   private Integer quantityAvailable;
 
-  private Integer deliveredTotal;
+  private Integer quantityDelivered;
 
   private boolean zeroStock;
 

@@ -140,4 +140,15 @@ public class DeliveryOrderController {
         "Se ha cambiado la fecha de entrega");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  @PatchMapping("/{id}/canceled")
+  public ResponseEntity<?> cancelDeliveryOrder(Authentication authentication, @PathVariable Long id) {
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+
+    deliveryOrderService.changeStatusOrderToCanceledById(id, id_user);
+
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha cancelado la orden de entrega");
+    return ResponseEntity.status(response.status()).body(response);
+  }
 }

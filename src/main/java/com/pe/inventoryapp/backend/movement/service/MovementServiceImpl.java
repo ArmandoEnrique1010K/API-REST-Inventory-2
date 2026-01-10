@@ -100,7 +100,7 @@ public class MovementServiceImpl implements MovementService {
     stockLot.setQuantityAvailable(newAvailable);
 
     // Sumar la cantidad entregada
-    stockLot.setDeliveredTotal(stockLot.getDeliveredTotal() + movementAllocateRequest.getQuantity());
+    stockLot.setQuantityDelivered(stockLot.getQuantityDelivered() + movementAllocateRequest.getQuantity());
 
     // TODO: NO FUNCIONO
     // List<DeliveryLine> deliveryLines = new ArrayList<>();
@@ -149,7 +149,7 @@ public class MovementServiceImpl implements MovementService {
 
     // UNA OPERACIÓN PARA CALCULAR EL NUEVO TOTAL DE STOCK SUMANDO LOS STOCKS DE LOS
     // PRODUCTOS
-    product.setTotalQuantityAvailable(stockLotRepository.sumAvailableByProductId(product.getId()));
+    product.setTotalQuantityAvailable(stockLotRepository.sumQuantityAvailableByProductId(product.getId()));
 
     productRepository.save(product);
 
@@ -306,7 +306,7 @@ public class MovementServiceImpl implements MovementService {
       stockLotRepository.save(targetStockLot);
 
       product.setTotalQuantityAvailable(
-          stockLotRepository.sumAvailableByProductId(product.getId()));
+          stockLotRepository.sumQuantityAvailableByProductId(product.getId()));
       productRepository.save(product);
     } else {
       // TODO: CORREGIR AQUI, EL STOCK NO SE ACTUALIZA
@@ -332,7 +332,7 @@ public class MovementServiceImpl implements MovementService {
       stockLotRepository.save(targetStockLot);
 
       product.setTotalQuantityAvailable(
-          stockLotRepository.sumAvailableByProductId(product.getId()));
+          stockLotRepository.sumQuantityAvailableByProductId(product.getId()));
       productRepository.save(product);
 
     }
