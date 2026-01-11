@@ -12,7 +12,7 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.Product_DeliveryOrderMapper;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.ProductDeliveryOrderResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -32,7 +32,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
 
     @Override
     @Transactional(readOnly = true)
-    public List<ProductDeliveryOrderResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
+    public List<Product_DeliveryOrderResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
 
         List<Product_DeliveryOrder> product_DeliveryOrders = product_DeliveryOrderRepository
                 .findAllByDeliveryOrderId(idDeliveryOrder);
@@ -45,7 +45,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
 
     @Override
     @Transactional
-    public void saveRelationProductInDeliveryOrder(Long idDeliveryOrder, Long idProduct) {
+    public void saveRelationProductInDeliveryOrder(Long idProduct, Long idDeliveryOrder) {
         if (idProduct == null || idDeliveryOrder == null) {
             throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
         }

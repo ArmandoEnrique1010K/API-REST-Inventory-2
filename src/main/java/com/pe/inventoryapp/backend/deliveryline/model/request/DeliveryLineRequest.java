@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryLineRequest {
+  @Min(value = 1, message = "La cantidad debe ser mayor a 0")
   @NotNull(message = "Especifique la cantidad")
   private Integer requiredQuantity;
 
@@ -29,6 +31,6 @@ public class DeliveryLineRequest {
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime limitDate;
 
-  // @NotNull(message = "Seleccione un producto")
-  // private Long idProduct;
+  @NotNull(message = "Seleccione un producto")
+  private Long idProduct;
 }

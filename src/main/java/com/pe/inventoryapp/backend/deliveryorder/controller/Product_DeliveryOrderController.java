@@ -7,7 +7,7 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.ProductDeliveryOrderResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderResponse;
 import com.pe.inventoryapp.backend.deliveryorder.service.Product_DeliveryOrderService;
 import java.util.List;
 
@@ -51,10 +51,10 @@ public class Product_DeliveryOrderController {
 
   @GetMapping("/products/deliveryOrder/{deliveryOrderId}")
   public ResponseEntity<?> listAllProductsByDeliveryOrder(@PathVariable Long deliveryOrderId) {
-    List<ProductDeliveryOrderResponse> product_DeliveryOrderListResponses = product_DeliveryOrderService.findAllByDeliveryOrderId(
+    List<Product_DeliveryOrderResponse> product_DeliveryOrderListResponses = product_DeliveryOrderService.findAllByDeliveryOrderId(
         deliveryOrderId);
 
-    DataResponse<List<ProductDeliveryOrderResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<List<Product_DeliveryOrderResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
         product_DeliveryOrderListResponses);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }

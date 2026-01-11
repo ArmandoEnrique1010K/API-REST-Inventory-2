@@ -36,7 +36,7 @@ import com.pe.inventoryapp.backend.security.service.AuthenticationContextService
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/delivery-line")
+@RequestMapping("/api/delivery-lines")
 public class DeliveryLineController {
   @Autowired
   private ResponseService responseService;
@@ -49,23 +49,25 @@ public class DeliveryLineController {
 
   @Autowired
   private AuthenticationContextService authenticationContextService;
-  @PostMapping("/product-delivery-order/{idProduct_DeliveryOrder}")
+  @PostMapping("/product-delivery-order/{productDeliveryOrderId}")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
       Authentication authentication,
-      @PathVariable Long idProduct_DeliveryOrder,
-      @Valid @RequestBody DeliveryLineRequest deliveryOrderRequest,
+      @PathVariable Long productDeliveryOrderId,
+      @Valid @RequestBody DeliveryLineRequest deliveryLineRequest,
       BindingResult result) {
 
-        Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.saveDeliveryLine(deliveryOrderRequest,idProduct_DeliveryOrder, id_user);
+    deliveryLineService.saveDeliveryLine(deliveryLineRequest, productDeliveryOrderId, id_user_authenticated);
 
-    return ResponseEntity.status(201).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "Nueva orden pendiente"));
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
+        "Se registro una linea de entrega en una orden de entrega");
+    return ResponseEntity.status(response.status()).body(response);
   }
 
+  
+  // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
 
   @GetMapping("/delivery-order/{id}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(

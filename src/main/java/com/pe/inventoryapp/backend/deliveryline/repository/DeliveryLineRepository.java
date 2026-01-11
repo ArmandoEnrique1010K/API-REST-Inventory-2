@@ -40,8 +40,9 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   
   Optional<DeliveryLine> findByLocationId(Long idLocation);
 
-  List<DeliveryLine> findAllByDeliveryOrderId(Long idDeliveryOrder);
+  // List<DeliveryLine> findAllByDeliveryOrderId(Long idDeliveryOrder);
 
+  // Busqueda de la fecha de entrega mas cercana (prioridad de entrega de la linea de entrega cuyo estado sea PENDING)
   @Query("""
         SELECT MIN(dl.limitDate)
         FROM DeliveryLine dl

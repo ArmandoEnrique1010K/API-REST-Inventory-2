@@ -7,14 +7,15 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class ProductDeliveryOrderResponse {
-  private Long id;
-
+@NoArgsConstructor
+public class Product_DeliveryOrder_RegionResponse {
+  // TODO: IMPLEMENTAR ESTO PARA MOSTRAR LAS ORDENES POR REGION
   private Long productId;
   private String productName;
-  private String productImageUrl;
 
-  private Integer requiredQuantityTotal;
+  private Long locationId;
+  private String locationName;
+
+  private Integer totalRequiredQuantity;
 }
