@@ -14,7 +14,6 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
-import com.pe.inventoryapp.backend.movement.model.request.MovementTransferRequest;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
@@ -26,6 +25,7 @@ import com.pe.inventoryapp.backend.stocklot.model.request.StockLotReceiveRequest
 import com.pe.inventoryapp.backend.stocklot.model.request.StockLotTransferRequest;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotDetailsResponse;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotListResponse;
+import com.pe.inventoryapp.backend.stocklot.model.response.StockLotSameProductListResponse;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
@@ -60,11 +60,6 @@ public class StockLotServiceImpl implements StockLotService{
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
     Integer quantity = stockLotReceiveRequest.getQuantity();
-
-    // TODO: VERIFICAR SI HACE FALTA VALIDAR LA CANTIDAD
-    // if (quantity <= 0) {
-    //   throw new BusinessException(ResponseStatus.CONFLICT, "La cantidad debe ser mayor a 0");
-    // }
 
     Long id_product = stockLotReceiveRequest.getIdProduct();
 
@@ -103,6 +98,10 @@ public class StockLotServiceImpl implements StockLotService{
     stockLot.setQuantityAvailable(quantity);
     // El total entregado es 0 porque aun no se ha entregado stock
     stockLot.setQuantityDelivered(0);
+
+    stockLot.setQuantityLost(0);
+    stockLot.setQuantityRecovered(0);
+
     // Indica si el stock es cero
     stockLot.setZeroStock(false);
     stockLot.setProduct(product);
@@ -113,13 +112,12 @@ public class StockLotServiceImpl implements StockLotService{
     Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByProductId(id_product);
     Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByProductId(id_product);
 
-    // TODO: VERIFICAR SI ESTA CAMPO ES NECESARIO
-    Integer sumatoryStockQuantityDelivered = stockLotRepository.sumQuantityDeliveredByProductId(id_product);
+    // TODO: VERIFICAR SI ESTA CAMPO ES NECESARIO, PORQUE SOLAMENTE SUMARIA UN 0 PORQUE AUN NO SE HA ENTREGADO
+    // Integer sumatoryStockQuantityDelivered = stockLotRepository.sumQuantityDeliveredByProductId(id_product);
+    // product.setTotalQuantityDelivered(sumatoryStockQuantityDelivered);
 
     product.setTotalQuantityReceived(sumatoryStockQuantityReceived);
     product.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
-
-    product.setTotalQuantityDelivered(sumatoryStockQuantityDelivered);
 
     productRepository.save(product);
 
@@ -251,6 +249,14 @@ public class StockLotServiceImpl implements StockLotService{
     return pageResponse;
   }
 
+  @Override
+  public List<StockLotSameProductListResponse> searchAllStockLotsExceptOneByProductId(Long stockLotId, Long productId) {
+    List<StockLot> stockLots = stockLotRepository.findAllByStockLotIdAndExcludeProductIdAndZeroStockIsFalse(stockLotId,
+        productId);
+    return stockLots.stream()
+        .map(stockLot -> StockLotMapper.builder().setStockLot(stockLot).buildStockLotSameProductListResponse())
+        .toList();
+  }
 
   @Override
   @Transactional(readOnly = true)
@@ -278,11 +284,6 @@ public class StockLotServiceImpl implements StockLotService{
 
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
-    // TODO: VERIFICAR SI LA CANTIDAD ES MENOR O IGUAL A CERO DESDE EL DTO DE TIPO REQUEST
-    // if (quantity <= 0) {
-    //   throw new BusinessException(ResponseStatus.CONFLICT, "La cantidad debe ser mayor a 0");
-    // }
-
 
     // Encontrar el id del stockLot
     StockLot stockLot = stockLotRepository.findById(
@@ -305,6 +306,8 @@ public class StockLotServiceImpl implements StockLotService{
 
     stockLot.setQuantityReceived(newQuantityReceived);
     stockLot.setQuantityAvailable(newQuantityAvailable);
+    stockLot.setZeroStock(false);
+    
     stockLotRepository.save(stockLot);
 
     // Actualiza las cantidades del stock
@@ -342,17 +345,13 @@ public class StockLotServiceImpl implements StockLotService{
 
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
-    // TODO: VALIDAR ESTO
-    // if (quantity <= 0) {
-    //   throw new BusinessException(ResponseStatus.CONFLICT, "La cantidad debe ser mayor a 0");
-    // }
-
     StockLot stockLot = stockLotRepository.findById(
         idStockLot).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
     // La nueva cantidad de stock se resta
     int newQuantityAvailable = stockLot.getQuantityAvailable() - quantity;
+    int newQuantityLost = stockLot.getQuantityLost() + quantity;
 
     if (newQuantityAvailable < 0) {
       throw new BusinessException(ResponseStatus.CONFLICT, "Stock insuficiente");
@@ -360,6 +359,7 @@ public class StockLotServiceImpl implements StockLotService{
 
     // La cantidad disponible se actualiza
     stockLot.setQuantityAvailable(newQuantityAvailable);
+    stockLot.setQuantityLost(newQuantityLost);
 
     if (newQuantityAvailable == 0) {
       stockLot.setZeroStock(true);
@@ -406,64 +406,54 @@ public class StockLotServiceImpl implements StockLotService{
 
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
-    // TODO: VALIDAR ESTO
-    // if (quantity <= 0) {
-    //   throw new BusinessException(ResponseStatus.CONFLICT, "La cantidad debe ser mayor a 0");
-    // }
-
 
     StockLot stockLot = stockLotRepository.findById(
         idStockLot).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock emisor no existe"));
-
-    // IMPLEMENTAR UNA LOGICA PARA OBTENER EL ULTIMO MOVIMIENTO DE TIPO LOSS DE UN
-    // PRODUCTO
-
-    // 1° DEBE OBTENER TODOS LOS MOVIMIENTOS DE TIPO LOSS DEL PRODUCTO POR SU ID
-    // 2° CALCULAR LA SUMATORIA DEL CAMPO QUANTITY DE LOS MOVIMIENTOS DE TIPO LOSS
-    // DE ESE PRODUCTO
-    // 3° ESE VALOR RESULTANTE DEBE SER MENOR O IGUAL QUE LA CANTIDAD INTRODUCIDA
-    // PARA EL MOVIMIENTO DE TIPO RECOVERY
-
-    Integer totalQuantityLoss = movementRepository.sumQuantityByProductAndType(
-        stockLot.getProduct().getId(),
-        MovementType.LOSS);
-
-    Integer totalQuantityRecovery = movementRepository.sumQuantityByProductAndType(
-        stockLot.getProduct().getId(),
-        MovementType.RECOVERY);
-
-    if (totalQuantityLoss == 0) {
-      throw new BusinessException(
-          ResponseStatus.CONFLICT,
-          "No existen pérdidas registradas para este producto");
-    }
-
-    int maxRecoverable = totalQuantityLoss - totalQuantityRecovery;
-
-    if (quantity > maxRecoverable) {
-      throw new BusinessException(
-          ResponseStatus.CONFLICT,
-          "No se puede recuperar más stock del que ha sido reportado como pérdida");
-    }
-
-    // La nueva cantidad de stock se aumenta
-    int newQuantityAvailable = stockLot.getQuantityAvailable() + quantity;
-
-    // La cantidad disponible se actualiza
-    stockLot.setQuantityAvailable(newQuantityAvailable);
-
-    if (newQuantityAvailable != 0) {
-      stockLot.setZeroStock(false);
-    }
-
-    stockLotRepository.save(stockLot);
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
     Long idProduct = stockLot.getProduct().getId();
 
     if (idProduct == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
+
+    // IMPLEMENTAR UNA LOGICA PARA OBTENER EL ULTIMO MOVIMIENTO DE TIPO LOSS DE UN
+    // PRODUCTO
+
+    Integer quantityLost = stockLot.getQuantityLost();
+    Integer quantityAvailable = stockLot.getQuantityAvailable();
+    Integer quantityRecovered = stockLot.getQuantityRecovered();
+
+    // La nueva cantidad de stock se aumenta
+    int newQuantityAvailable = quantityAvailable + quantity;
+    int newQuantityLost = quantityLost - quantity;
+    int newQuantityRecovered = quantityRecovered + quantity;
+
+
+    if (quantityLost == 0) {
+      throw new BusinessException(
+          ResponseStatus.CONFLICT,
+          "No existen pérdidas registradas para este lote de stock");
+    }
+
+    int maxRecoverable = quantityLost - quantityRecovered;
+
+    if (quantity > maxRecoverable) {
+      throw new BusinessException(
+          ResponseStatus.CONFLICT,
+          "No se puede recuperar más cantidad del que ha sido reportado como pérdida");
+    }
+
+    // La cantidad disponible se actualiza
+    stockLot.setQuantityAvailable(newQuantityAvailable);
+    stockLot.setQuantityLost(newQuantityLost);
+    stockLot.setQuantityRecovered(newQuantityRecovered);
+
+    if (newQuantityAvailable != 0) {
+      stockLot.setZeroStock(false);
+    }
+
+    stockLotRepository.save(stockLot);
 
     Product product = productRepository.findById(idProduct).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
@@ -494,17 +484,18 @@ public class StockLotServiceImpl implements StockLotService{
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
-    // TODO: VALIDAR ESTO
     Integer quantity = stockLotTransferRequest.getQuantity();
-
-    // if (quantity <= 0) {
-    //   throw new BusinessException(ResponseStatus.CONFLICT, "La cantidad debe ser mayor a 0");
-    // }
 
     Long id_stock_lot_receiver = stockLotTransferRequest.getIdStockLotReceiver();
 
     if (idStockLotEmitter == null || id_stock_lot_receiver == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    if (idStockLotEmitter.equals(id_stock_lot_receiver)){
+      throw new BusinessException(
+          ResponseStatus.CONFLICT,
+          "El lote de stock emisor y el lote de stock receptor deben ser diferentes");
     }
 
     // Encontrar el producto por id de stockLot
@@ -516,10 +507,6 @@ public class StockLotServiceImpl implements StockLotService{
 
     int newAvailableEmitter = stockLotEmitter.getQuantityAvailable() - quantity;
     int newAvailableReceiver = stockLotReceiver.getQuantityAvailable() + quantity;
-
-    if (newAvailableEmitter < 0) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "Stock insuficiente del lote de stock emisor");
-    }
 
     Long id_product_emitter = stockLotEmitter.getProduct().getId();
     Long id_product_receiver = stockLotReceiver.getProduct().getId();
@@ -534,6 +521,11 @@ public class StockLotServiceImpl implements StockLotService{
           ResponseStatus.CONFLICT,
           "Los lotes de stock deben pertenecer al mismo producto");
     }
+
+    if (newAvailableEmitter < 0) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "Cantidad insuficiente del lote de stock emisor");
+    }
+
 
     stockLotEmitter.setQuantityAvailable(newAvailableEmitter);
     stockLotReceiver.setQuantityAvailable(newAvailableReceiver);
@@ -564,3 +556,12 @@ public class StockLotServiceImpl implements StockLotService{
     movementRepository.save(movement);
   }
 }
+
+// Integer totalQuantityLoss = movementRepository.sumQuantityByProductAndType(
+// stockLot.getProduct().getId(),
+// MovementType.LOSS);
+
+// Integer totalQuantityRecovery =
+// movementRepository.sumQuantityByProductAndType(
+// stockLot.getProduct().getId(),
+// MovementType.RECOVERY);

@@ -11,21 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockLotDetailsResponse {
+public class StockLotSameProductListResponse {
   private Long id;
   private String batch;
-  private Integer quantityReceived;
   private Integer quantityAvailable;
-  private Integer quantityDelivered;
-  private Integer quantityLost;
-  private Integer quantityRecovered;
   private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
-
-  private Long productId;
-  private String productName;
-  private String productImageUrl;
-
-  private Long companyId;
-  private String companyName;
 }

@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.stocklot.model.mapper;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotDetailsResponse;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotListResponse;
+import com.pe.inventoryapp.backend.stocklot.model.response.StockLotSameProductListResponse;
 
 public class StockLotMapper {
   private StockLot stockLot;
@@ -46,6 +47,8 @@ public class StockLotMapper {
         stockLot.getQuantityReceived(),
         stockLot.getQuantityAvailable(),
         stockLot.getQuantityDelivered(),
+        stockLot.getQuantityLost(),
+        stockLot.getQuantityRecovered(),
         stockLot.getCreatedAt(),
         stockLot.getUpdatedAt(),
         stockLot.getProduct().getId(),
@@ -53,5 +56,17 @@ public class StockLotMapper {
         stockLot.getProduct().getImageUrl(),
         stockLot.getCompany().getId(),
         stockLot.getCompany().getName());
+  }
+
+  public StockLotSameProductListResponse buildStockLotSameProductListResponse() {
+    if (stockLot == null) {
+      throw new RuntimeException("Debe pasar la entidad Company");
+    } 
+    
+    return new StockLotSameProductListResponse(
+        stockLot.getId(),
+        stockLot.getBatch().trim(),
+        stockLot.getQuantityAvailable(),
+        stockLot.getCreatedAt());
   }
 }

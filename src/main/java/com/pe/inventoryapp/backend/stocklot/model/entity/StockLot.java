@@ -45,6 +45,10 @@ public class StockLot {
 
   private Integer quantityDelivered;
 
+  private Integer quantityLost;
+
+  private Integer quantityRecovered;
+
   private boolean zeroStock;
 
   @CreationTimestamp

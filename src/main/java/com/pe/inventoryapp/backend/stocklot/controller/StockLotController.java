@@ -1,10 +1,12 @@
 package com.pe.inventoryapp.backend.stocklot.controller;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -29,6 +31,7 @@ import com.pe.inventoryapp.backend.stocklot.model.request.StockLotReceiveRequest
 import com.pe.inventoryapp.backend.stocklot.model.request.StockLotTransferRequest;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotDetailsResponse;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotListResponse;
+import com.pe.inventoryapp.backend.stocklot.model.response.StockLotSameProductListResponse;
 import com.pe.inventoryapp.backend.stocklot.service.StockLotService;
 
 import jakarta.validation.Valid;
@@ -70,8 +73,8 @@ public class StockLotController {
       @RequestParam(required = false) Integer maxQuantityReceived,
       @RequestParam(required = false) Integer minDeliveredTotal,
       @RequestParam(required = false) Integer maxDeliveredTotal,
-      @RequestParam(required = false) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) LocalDateTime maxCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
       @RequestParam(required = false) String productName,
       @RequestParam(required = false) Boolean zeroStock,
       @RequestParam(required = false) Long companyId
@@ -97,9 +100,8 @@ public class StockLotController {
       @RequestParam(required = false) Integer maxQuantityReceived,
       @RequestParam(required = false) Integer minDeliveredTotal,
       @RequestParam(required = false) Integer maxDeliveredTotal,
-      @RequestParam(required = false) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) LocalDateTime maxCreatedAt,
-      @RequestParam(required = false) String productName,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
       @RequestParam(required = false) Boolean zeroStock,
       @RequestParam(required = false) Long companyId) {
     Pageable pageable = PageRequest.of(page, 20);
@@ -118,8 +120,8 @@ public class StockLotController {
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) Integer minQuantityAvailable,
       @RequestParam(required = false) Integer maxQuantityAvailable,
-      @RequestParam(required = false) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) LocalDateTime maxCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
       @RequestParam(required = false) String productName,
       @RequestParam(required = false) Long companyId) {
     Pageable pageable = PageRequest.of(page, 20);
@@ -139,8 +141,8 @@ public class StockLotController {
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) Integer minQuantityAvailable,
       @RequestParam(required = false) Integer maxQuantityAvailable,
-      @RequestParam(required = false) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) LocalDateTime maxCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
       @RequestParam(required = false) Long companyId) {
     Pageable pageable = PageRequest.of(page, 20);
 
@@ -151,6 +153,16 @@ public class StockLotController {
     DataResponse<PageResponse<StockLotListResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, products);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  }
+
+  @GetMapping("/exclude/{idStock}/some/product/{idProduct}")
+  public ResponseEntity<?> listAllStockLotsExcludeOneByProductAndNotZeroStock(@PathVariable Long idStock,
+          @PathVariable Long idProduct) {
+      List<StockLotSameProductListResponse> stockLots = stockLotService.searchAllStockLotsExceptOneByProductId(idStock,
+              idProduct);
+      DataResponse<List<StockLotSameProductListResponse>> dataResponse = responseService
+              .generateDataResponse(ResponseStatus.SUCCESS, stockLots);
+      return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/{id}")
