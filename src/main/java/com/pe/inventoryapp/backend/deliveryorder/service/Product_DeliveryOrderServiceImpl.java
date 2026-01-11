@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.deliveryorder.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,7 +12,6 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.Product_DeliveryOrderMapper;
-import com.pe.inventoryapp.backend.deliveryorder.model.request.Product_DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.ProductDeliveryOrderResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
@@ -21,70 +19,97 @@ import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 
 @Service
-public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderService{
+public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderService {
 
-  @Autowired
-  private ProductRepository productRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
-  @Autowired
-  private DeliveryOrderRepository deliveryOrderRepository;
+    @Autowired
+    private DeliveryOrderRepository deliveryOrderRepository;
 
-  @Autowired
-  private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
+    @Autowired
+    private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
 
-  // Método para relacionar varios productos con una orden de entrega
-  @Transactional
-  @Override
-  public void saveProduct_DeliveryOrder(Product_DeliveryOrderRequest product_DeliveryOrderRequest, Long idDeliveryOrder) {
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductDeliveryOrderResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
 
-    List<Long> idProducts = product_DeliveryOrderRequest.getIdProducts();
+        List<Product_DeliveryOrder> product_DeliveryOrders = product_DeliveryOrderRepository
+                .findAllByDeliveryOrderId(idDeliveryOrder);
 
-    if (idProducts == null || idProducts.isEmpty() || idDeliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+        return product_DeliveryOrders
+                .stream().map(deliveryOrder -> Product_DeliveryOrderMapper.builder()
+                        .setProduct_DeliveryOrder(deliveryOrder).buildProduct_DeliveryOrderListResponse())
+                .collect(Collectors.toList());
     }
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND,
-            "La orden de entrega no existe en el sistema"));
 
-    List<Product_DeliveryOrder> relations = new ArrayList<>();
-    // Buscar producto y orden de entrega
-    for (Long productId : idProducts) {
-
-        if (productId == null) {
+    @Override
+    @Transactional
+    public void saveRelationProductInDeliveryOrder(Long idDeliveryOrder, Long idProduct) {
+        if (idProduct == null || idDeliveryOrder == null) {
             throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
         }
 
-        Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new BusinessException(
-                ResponseStatus.NOT_FOUND,
-                "El producto con el id " + productId + " no existe en el sistema"
-            ));
+        DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
+                () -> new BusinessException(ResponseStatus.NOT_FOUND,
+                        "La orden de entrega no existe en el sistema"));
 
+        Product product = productRepository.findById(
+                idProduct)
+                .orElseThrow(() -> new BusinessException(
+                        ResponseStatus.NOT_FOUND, "El producto no existe"));
+
+        // Validar no exista la misma relación
+        if (product_DeliveryOrderRepository.existsByDeliveryOrderIdAndProductId(idDeliveryOrder, idProduct)) {
+            throw new BusinessException(ResponseStatus.CONFLICT,
+                    "La relacion de producto y orden de entrega ya existe en el sistema");
+        }
+        
         if (!product.isStatus()) {
             throw new BusinessException(
-                ResponseStatus.DEFAULT_RESOURCE,
-                "El producto con el id " + productId + " se encuentra desactivado"
-            );
+                    ResponseStatus.CONFLICT,
+                    "El producto se encuentra desactivado");
         }
 
-        Product_DeliveryOrder pdo = new Product_DeliveryOrder();
-        pdo.setProduct(product);
-        pdo.setDeliveryOrder(deliveryOrder);
-        pdo.setRequiredQuantityTotal(0);
+        Product_DeliveryOrder product_DeliveryOrder = new Product_DeliveryOrder();
+        product_DeliveryOrder.setProduct(product);
+        product_DeliveryOrder.setDeliveryOrder(deliveryOrder);
+        product_DeliveryOrder.setRequiredQuantityTotal(0);
 
-        relations.add(pdo);
-        // product_DeliveryOrderRepository.save(pdo);
+        product_DeliveryOrderRepository.save(product_DeliveryOrder);
     }
 
-    // NOTA: SOLO SE EJECUTA SI CADA UNO DE LOS REGISTROS FUE VALIDADO
-    product_DeliveryOrderRepository.saveAll(relations);
-  }
+    @Override
+    @Transactional
+    public void deleteRelationProductDeliveryOrder(Long idDeliveryOrder) {
+        if (idDeliveryOrder == null) {
+            throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+        }
 
-  @Override
-  public List<ProductDeliveryOrderResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
+        DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
+                () -> new BusinessException(ResponseStatus.NOT_FOUND,
+                        "La orden de entrega no existe en el sistema"));
+        if (deliveryOrder == null) {
+            throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+        }
 
-    List<Product_DeliveryOrder> product_DeliveryOrders = product_DeliveryOrderRepository.findAllByDeliveryOrderId(idDeliveryOrder);
+        Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
+                () -> new BusinessException(ResponseStatus.NOT_FOUND,
+                        "La relacion de producto y orden de entrega no existe en el sistema")
+        );
 
-    return product_DeliveryOrders.stream().map(deliveryOrder -> Product_DeliveryOrderMapper.builder().setProduct_DeliveryOrder(deliveryOrder).buildProduct_DeliveryOrderListResponse()).collect(Collectors.toList());
-  }  
+        if (product_DeliveryOrder == null) {
+            throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        // Si la sumatoria de las cantidades requeridas es mayor a 0, no se puede eliminar
+        // Porque si hubiera cantidades pendientes de entrega, habria una rleacion con DeliveryLine
+        if (product_DeliveryOrder.getRequiredQuantityTotal() > 0) {
+            throw new BusinessException(
+                    ResponseStatus.CONFLICT,
+                    "La relacion de producto y orden de entrega no puede ser eliminada porque hay cantidades requeridas pendientes");
+        };
+
+        product_DeliveryOrderRepository.delete(product_DeliveryOrder);
+    }
 }

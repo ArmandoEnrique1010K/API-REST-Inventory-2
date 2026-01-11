@@ -16,4 +16,7 @@ public interface Product_DeliveryOrderRepository extends JpaRepository<Product_D
       WHERE p.deliveryOrder.id = :deliveryOrderId
     """)
   List<Product_DeliveryOrder> findAllByDeliveryOrderId(Long deliveryOrderId);
+
+  // Verifica si existe una relacion entre un producto y una orden de entrega
+  boolean existsByDeliveryOrderIdAndProductId(Long deliveryOrderId, Long productId);
 }

@@ -14,6 +14,7 @@ public class ProductDeliveryOrderResponse {
 
   private Long productId;
   private String productName;
+  private String productImageUrl;
 
   private Integer requiredQuantityTotal;
 }

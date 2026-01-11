@@ -193,12 +193,16 @@ public class SecurityConfig {
                                                 .requestMatchers(HttpMethod.PUT, "/api/stock-lots/*/transfer")
                                                 .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
-                                                // PRODUCT_DELIVERYORDER
+                                                // PRODUCT DELIVERYORDER
+                                                .requestMatchers(HttpMethod.POST, "/api/products-delivery-orders/product/*/deliveryOrder/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+                                                .requestMatchers(HttpMethod.GET, "/api/products-delivery-orders/products/deliveryOrder/*")
+                                                .hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/products-delivery-orders/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
                                                 // TODO: CONTINUAR AQUI
                                                 // OTHERS
-                                                .requestMatchers(HttpMethod.GET, "/csrf").permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/api").permitAll()
+                                                // .requestMatchers(HttpMethod.GET, "/csrf").permitAll()
+                                                // .requestMatchers(HttpMethod.GET, "/api").permitAll()
                                                 // .requestMatchers("/api/category").permitAll()
                                                 // .anyRequest().denyAll())
                                 .anyRequest().authenticated())
