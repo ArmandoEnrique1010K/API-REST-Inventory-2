@@ -1,7 +1,6 @@
 package com.pe.inventoryapp.backend.deliveryline.repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -25,7 +24,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND (:minLimitDate IS NULL OR d.limitDate >= :minLimitDate)
         AND (:maxLimitDate IS NULL OR d.limitDate <= :maxLimitDate)
         AND (:lineStatus IS NULL OR d.lineStatus = :lineStatus)
-        AND (:location IS NULL OR LOWER(d.location.name) LIKE LOWER(CONCAT('%', :location, '%')))
+        AND (:location IS NULL OR LOWER(d.location.name) LIKE LOWER(CONCAT('%', :location, '%'))) ORDER BY d.location.id ASC  
       """)
   Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
     Long deliveryOrderId, 
@@ -75,6 +74,21 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   boolean existsByLocationAndProductDeliveryOrder(
       @Param("locationId") Long locationId,
       @Param("orderId") Long orderId);
+
+  @Query("""
+          SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
+          FROM DeliveryLine dl
+          JOIN dl.location l
+          JOIN dl.product p
+          JOIN dl.deliveryOrder d
+          WHERE l.id = :locationId
+            AND p.id = :productId 
+            AND d.id = :deliveryOrderId
+      """)
+  boolean existsByLocationAndProductAndDeliveryOrder(
+      @Param("locationId") Long locationId,
+      @Param("productId") Long productId,
+      @Param("deliveryOrderId") Long deliveryOrderId);
 
   @Query("""
       SELECT COUNT(dl) = 0

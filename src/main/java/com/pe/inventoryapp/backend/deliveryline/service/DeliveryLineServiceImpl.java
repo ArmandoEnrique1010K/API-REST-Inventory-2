@@ -1,6 +1,8 @@
 package com.pe.inventoryapp.backend.deliveryline.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.model.mapper.DeliveryLineMapper;
@@ -21,9 +24,12 @@ import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepositor
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrder_RegionRepository;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
+import com.pe.inventoryapp.backend.location.model.entity.Region;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
@@ -58,6 +64,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
 
   @Autowired
+  private Product_DeliveryOrder_RegionRepository product_DeliveryOrder_RegionRepository;
+
+  @Autowired
   private UserRepository userRepository;
 
   @Autowired
@@ -84,7 +93,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Obtener el producto y orden de entrega desde Product_DeliveryOrder
     Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(id_product_deliveryOrder)
         .orElseThrow(
-            () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+            () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relación de producto y orden de entrega no existe"));
 
     Long idDeliveryOrder = product_DeliveryOrder.getDeliveryOrder().getId();
     Long idProduct = product_DeliveryOrder.getProduct().getId();
@@ -100,6 +109,18 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Product product = productRepository.findById(idProduct).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe en el sistema"));
     
+    
+        // Verificar que exista la relación entre idDeliveryOrder y idProduct
+    boolean existsByDeliveryOrderIdAndProductId = product_DeliveryOrderRepository
+        .existsByDeliveryOrderIdAndProductId(idDeliveryOrder, idProduct);
+
+    if (!existsByDeliveryOrderIdAndProductId) {
+      throw new BusinessException(
+          ResponseStatus.NOT_FOUND,
+          "El producto no pertenece a la orden de entrega");
+    }
+
+
     // Verifica que el producto se encuentre en una de las relaciones de Product y DeliveryOrder
 
     // Si el id del producto no se encuentra en ninguna de las relaciones de Product y DeliveryOrder
@@ -116,7 +137,11 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Si se ha guardado el pedido de entrega, cuya ubicación ya existe en la misma ubicación y 
     // la misma orden de entrega, no se tiene que agregar la linea de entrega
-    existDeliveryLineByProduct_DeliveryOrder(idLocation, id_product_deliveryOrder);
+    existDeliveryLineByProduct_DeliveryOrder(idLocation, idProduct, idDeliveryOrder);
+
+
+
+
 
     DeliveryLine deliveryLine = new DeliveryLine();
 
@@ -154,6 +179,51 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     deliveryOrderRepository.save(deliveryOrder);
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
+
+    // TODO: REALIZAR UNA OPERACION CON LA ENTIDAD PRODUCT_DELIVERYORDER_REGION, EL
+    // CUAL DEBE CALCULAR LA SUMATORIA TOTAL DE LAS CANTIDADES DE UN PRODUCTO POR
+    // ORDEN DE ENTREGA Y REGION ASOCIADA A CADA UBICACIÓN
+
+    // 1° Extraer las claves
+    // Product deliveryLineProduct = deliveryLine.getProduct();
+    // DeliveryOrder deliveryLineDeliveryOrder = deliveryLine.getDeliveryOrder();
+    Region deliveryLineRegion = deliveryLine.getLocation().getRegion();
+    // Integer deliveryLineRequiredQuantity = deliveryLine.getRequiredQuantity();
+    Product_DeliveryOrder deliveryLineProduct_DeliveryOrder = deliveryLine.getProduct_DeliveryOrder();
+
+    // Verificar que la relacion de Product_DeliveryOrder_Region exista
+    // Optional<Product_DeliveryOrder_Region> product_DeliveryOrder_Region = product_DeliveryOrder_RegionRepository
+    //     .findByProduct_DeliveryOrderIdAndRegionId(id_product_deliveryOrder, location.getRegion().getId());
+
+    // 2° Buscar si ya existe el acumulado
+    Optional<Product_DeliveryOrder_Region> opt = product_DeliveryOrder_RegionRepository.findByProduct_DeliveryOrderIdAndRegionId(
+        deliveryLineProduct_DeliveryOrder.getId(),
+      
+        deliveryLineRegion.getId());
+
+    // Calcular la cantidad total
+    Integer quantity = product_DeliveryOrder_RegionRepository
+        .sumRequiredTotalQuantityByProduct_DeliveryOrderIdAndRegionId(
+            deliveryLineProduct_DeliveryOrder.getId(),
+            deliveryLineRegion.getId());
+
+    // 3° si no existe, crear
+    if (opt.isEmpty()) {
+      Product_DeliveryOrder_Region entity = new Product_DeliveryOrder_Region();
+      entity.setProduct_DeliveryOrder(deliveryLineProduct_DeliveryOrder);
+      entity.setRegion(deliveryLineRegion);
+
+
+      entity.setRequiredTotalQuantity(quantity);
+
+      product_DeliveryOrder_RegionRepository.save(entity);
+      return;
+    }
+
+    // En el caso de que exista, lo debe actualizar
+    Product_DeliveryOrder_Region entity = opt.get();
+    entity.setRequiredTotalQuantity(entity.getRequiredTotalQuantity() + quantity);
+    product_DeliveryOrder_RegionRepository.save(entity);
   }
 
   // TODO: EN EL MODULO DE DELIVERYLINE, SI TODAS LAS ORDENES DE ENTREGA YA ESTAN
@@ -165,7 +235,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   // Nunca propagues Optional fuera del repository
 
   @Override
-  public Page<DeliveryLineListResponse> findAllDeliveryLinesByDeliveryOrderIdPageable(
+  public PageResponse<DeliveryLineListResponse> findAllDeliveryLinesByDeliveryOrderIdPageable(
       Long deliveryOrderId,
       Integer minRequiredQuantity,
       Integer maxRequiredQuantity,
@@ -181,11 +251,27 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     Page<DeliveryLine> deliveryLines = deliveryLineRepository.searchAllByDeliveryOrderIdAndParams(
-        deliveryOrderId, minRequiredQuantity, maxRequiredQuantity, minLimitDate, 
+        deliveryOrderId, minRequiredQuantity, maxRequiredQuantity, minLimitDate,
         maxLimitDate, lineStatus, location, pageable);
 
-    return deliveryLines.map(deliveryLine -> DeliveryLineMapper.builder().setDeliveryLine(deliveryLine).buildDeliveryLineListResponse());
+    List<DeliveryLineListResponse> result = deliveryLines.getContent().stream().map(
+      deliveryLine -> DeliveryLineMapper.builder()
+      .setDeliveryLine(deliveryLine).buildDeliveryLineListResponse()
+    ).toList();
+
+    PageResponse<DeliveryLineListResponse> pageResponse = new PageResponse<>(
+      result,
+        deliveryLines.getNumber(),
+        deliveryLines.getSize(),
+        deliveryLines.getTotalElements(),
+        deliveryLines.getTotalPages(),
+        deliveryLines.isFirst(),
+        deliveryLines.isLast()
+    );
+
+    return pageResponse;
   }
+
 
   @Override
   public DeliveryLineDetailsResponse findDeliveryLineById(Long id) {
@@ -451,12 +537,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   // Metodo auxiliar
   // Busca si existe una linea de entrega que pertenezca a esa ubicación y tambien a esa misma orden de entrega
-  private void existDeliveryLineByProduct_DeliveryOrder(Long idLocation, Long idProduct_DeliveryOrder) {
+  private void existDeliveryLineByProduct_DeliveryOrder(Long idLocation, Long idProduct, Long idDeliveryOrder) {
 
     // VERIFICA SI EL MISMO PRODUCTO EXISTE EN ESA MISMA UBICACION
     // SE PUEDE TENER MÁS DE UN PRODUCTO EN ESA MISMA UBICACION
     if (deliveryLineRepository
-        .existsByLocationAndProductDeliveryOrder(idLocation, idProduct_DeliveryOrder)) {
+        .existsByLocationAndProductAndDeliveryOrder(idLocation, idProduct, idDeliveryOrder)) {
 
       throw new FieldValidation(
           "idLocation",
@@ -499,7 +585,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
-    String username = user.getFirstname() + " " + user.getLastname();
+    // String username = user.getFirstname() + " " + user.getLastname();
 
     // IMPLEMENTAR UNA LOGICA PARA REALIZAR ALGO CON LA CANTIDAD REQUERIDA
 
@@ -592,7 +678,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
-    String username = user.getFirstname() + " " + user.getLastname();
+    // String username = user.getFirstname() + " " + user.getLastname();
     // IMPLEMENTAR UNA LOGICA PARA REALIZAR ALGO CON LA CANTIDAD REQUERIDA
 
 
@@ -639,4 +725,32 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
   }
+
+
+  private void validateInput(
+      DeliveryLineRequest request,
+      Long pdoId,
+      Long userId) {
+    if (request.getIdLocation() == null || pdoId == null || userId == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  private User getUser(Long id) {
+    return userRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+  }
+
+  private Location getLocation(Long id) {
+    return locationRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
+  }
+
+  private Product_DeliveryOrder getProductDeliveryOrder(Long id) {
+    return product_DeliveryOrderRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.NOT_FOUND,
+            "La relación producto–orden de entrega no existe"));
+  }
+
 }

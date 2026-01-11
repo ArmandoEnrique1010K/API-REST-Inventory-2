@@ -3,7 +3,6 @@ package com.pe.inventoryapp.backend.deliveryline.controller;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
@@ -67,11 +68,10 @@ public class DeliveryLineController {
   }
 
   
-  // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
 
-  @GetMapping("/delivery-order/{id}")
+  @GetMapping("/delivery-order/{productDeliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
-      @PathVariable Long id, 
+      @PathVariable Long productDeliveryOrderId, 
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) Integer minRequiredQuantity,
       @RequestParam(required = false) Integer maxRequiredQuantity,
@@ -81,19 +81,24 @@ public class DeliveryLineController {
       @RequestParam(required = false) String location    
     ) {
     Pageable pageable = PageRequest.of(page, 20);
-
-    Page<DeliveryLineListResponse> deliveryOrder = deliveryLineService.findAllDeliveryLinesByDeliveryOrderIdPageable(id, 
-        minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, pageable);
-
-    return ResponseEntity.status(200).body(deliveryOrder);
+    PageResponse<DeliveryLineListResponse> deliveryOrders = deliveryLineService
+        .findAllDeliveryLinesByDeliveryOrderIdPageable(
+            productDeliveryOrderId,
+            minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, pageable);
+    DataResponse<PageResponse<DeliveryLineListResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, deliveryOrders);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getDeliveryLine(@PathVariable Long id) {
     DeliveryLineDetailsResponse deliveryLine = deliveryLineService.findDeliveryLineById(id);
-    return ResponseEntity.status(200).body(deliveryLine);
+    DataResponse<DeliveryLineDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        deliveryLine);
+    return ResponseEntity.status(response.status()).body(response);
   }
 
+  // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
   @PutMapping("/{id}")
    public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id, @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
       BindingResult result) {
