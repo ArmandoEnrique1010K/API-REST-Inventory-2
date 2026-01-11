@@ -62,6 +62,17 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   Integer sumRequiredQuantityByProduct_DeliveryOrder(
       @Param("productDeliveryOrderId") Long productDeliveryOrderId);
 
+  @Query("""
+        SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+        FROM DeliveryLine dl
+        WHERE dl.product_DeliveryOrder.id = :pdoId
+          AND dl.location.region.id = :regionId
+      """)
+  Integer sumRequiredByProductDeliveryOrderAndRegion(
+      @Param("pdoId") Long productDeliveryOrderId,
+      @Param("regionId") Long regionId);
+
+
   // TODO: VERIFICAR ESTE METODO
   @Query("""
           SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
@@ -90,6 +101,18 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       @Param("productId") Long productId,
       @Param("deliveryOrderId") Long deliveryOrderId);
 
+
+  @Query("""
+          SELECT COUNT(dl) > 0
+          FROM DeliveryLine dl
+          WHERE dl.deliveryOrder.id = :deliveryOrderId
+            AND dl.product.id = :productId
+            AND dl.location.id = :locationId
+      """)
+  boolean existsDuplicate(
+      @Param("deliveryOrderId") Long deliveryOrderId,
+      @Param("productId") Long productId,
+      @Param("locationId") Long locationId);
   @Query("""
       SELECT COUNT(dl) = 0
       FROM DeliveryLine dl
@@ -97,7 +120,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND dl.lineStatus <> 'READY'
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
-
 
 }
 

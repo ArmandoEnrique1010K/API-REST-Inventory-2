@@ -69,9 +69,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     DeliveryOrder saved = deliveryOrderRepository.save(deliveryOrder);
 
     // Este numero debe ser generado automaticamente
-    String newBatch = (BATCH_START + saved.getId().toString());
+    long newBatch = BATCH_START + saved.getId();
+    String newBatchString = String.valueOf(newBatch);
 
-    saved.setBatch(newBatch);
+    saved.setBatch(newBatchString);
     deliveryOrderRepository.save(saved);
   }
 

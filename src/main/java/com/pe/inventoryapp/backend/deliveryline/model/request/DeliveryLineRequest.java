@@ -31,6 +31,6 @@ public class DeliveryLineRequest {
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private LocalDateTime limitDate;
 
-  @NotNull(message = "Seleccione un producto")
-  private Long idProduct;
+  // @NotNull(message = "Seleccione un producto")
+  // private Long idProduct;
 }

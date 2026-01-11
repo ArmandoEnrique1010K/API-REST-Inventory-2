@@ -19,4 +19,7 @@ public interface Product_DeliveryOrderRepository extends JpaRepository<Product_D
 
   // Verifica si existe una relacion entre un producto y una orden de entrega
   boolean existsByDeliveryOrderIdAndProductId(Long deliveryOrderId, Long productId);
+
+  boolean existsByIdAndDeliveryOrderId(Long id, Long deliveryOrderId);
+
 }
