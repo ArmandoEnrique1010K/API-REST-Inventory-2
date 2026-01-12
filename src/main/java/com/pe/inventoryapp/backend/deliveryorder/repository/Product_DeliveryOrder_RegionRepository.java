@@ -29,5 +29,10 @@ public interface Product_DeliveryOrder_RegionRepository extends JpaRepository<Pr
    Integer sumRequiredTotalQuantityByProduct_DeliveryOrderIdAndRegionId(Long product_DeliveryOrderId, Long regionId);
 
 
+   @Query("""
+         SELECT pdr
+         FROM Product_DeliveryOrder_Region pdr
+         WHERE pdr.product_DeliveryOrder.id = :productDeliveryOrderId
+         """)
    List<Product_DeliveryOrder_Region> findAllByProduct_DeliveryOrderId(Long productDeliveryOrderId);
 }

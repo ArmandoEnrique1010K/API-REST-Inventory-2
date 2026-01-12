@@ -56,7 +56,7 @@ public class Movement {
   // Primera relacion hacia stockLot, almacena un StockLot receptor
   @ManyToOne
   @JoinColumn(name = "stock_lot_receiver_id")
-  @NotNull
+  @Nullable
   private StockLot stockLotReceiver;
 
   // Segunda relación hacia StockLot, almacena un StockLot emisor que se crea cuando se hace una transferencia

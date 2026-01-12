@@ -98,20 +98,23 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
+  // TODO: FALTA PROBAR CUANDO HAYA CANTIDAD ENTREGADA EN UNA LINEA DE ENTREGA
   @PutMapping("/{id}")
    public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id, @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
       BindingResult result) {
-     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+     Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
-    validationService.validateFieldsAndThrowResponse(result);
+     validationService.validateFieldsAndThrowResponse(result);
 
-    deliveryLineService.updateDeliveryLineById(id, deliveryLineUpdateRequest, id_user);
+      deliveryLineService.updateDeliveryLineById(id, deliveryLineUpdateRequest, id_user_authenticated);
 
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "Se actualizo la linea de entrega"));
-  }
+      CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+          "Se actualizo la linea de entrega");
+      return ResponseEntity.status(response.status()).body(response);
+    }
+
+
+    // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
 
   // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE ENTREGADO
   // Solamente si tiene el estado READY

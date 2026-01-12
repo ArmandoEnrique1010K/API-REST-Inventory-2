@@ -5,5 +5,6 @@ public enum LineStatus {
   READY,  // Listo
   PENDING, // Pendiente
   DELIVERED, // Entregado
-  CANCELED // Cancelado
+  CANCELED, // Cancelado
+  EXCESS // Excedente
 }
