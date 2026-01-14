@@ -3,11 +3,7 @@ package com.pe.inventoryapp.backend.movement.model.data;
 public enum MovementType {
   // Relacionados a lotes de stock
   RECEIVE, // Recibir un lote
-  // TODO: REEMPLAZARLO POR INCREASE
-  ADD, // Agregar cantidad a un lote
-  INCREASE,
-  // TODO: REEMPLAZARLO POR DECREASE
-  LOSS,
+  INCREASE, // Agregar cantidad a un lote
   DECREASE, // Quitar cantidad de un lote y repotarlo como perdida
   RECOVERY, // Recuperar cantidad de un lote perdido
   TRANSFER, // Transferir cantidad entre 2 lotes de stocks del mismo producto
@@ -20,6 +16,8 @@ public enum MovementType {
   CANCELED, // Cancelar una linea de entrega
   MISSING, // Marcar una linea de entrega como perdida (con la posibilidad de volver a
            // entregarlo)
+
+  DELIVERED, // Marcar una linea de entrega como entregada
 
   // Relacionados a un lote de stock y linea de entrega a la vez
   SIMULTANEOUS // Crea un lote de stock y asigna la cantidad total de ese lote a un linea de

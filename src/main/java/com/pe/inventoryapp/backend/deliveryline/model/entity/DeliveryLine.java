@@ -60,9 +60,10 @@ public class DeliveryLine {
 
   private LocalDateTime limitDate;
 
+  private boolean status;
+
   @UpdateTimestamp
   private LocalDateTime updatedAt;
-
 
   @Enumerated(EnumType.STRING)
   private LineStatus lineStatus;

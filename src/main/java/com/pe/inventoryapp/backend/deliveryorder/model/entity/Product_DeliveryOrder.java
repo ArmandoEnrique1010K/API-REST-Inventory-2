@@ -32,6 +32,8 @@ public class Product_DeliveryOrder {
 
   private Integer requiredQuantityTotal;
 
+  private boolean status;
+
   @ManyToOne
   @JoinColumn(name = "delivery_order_id")
   @NotNull

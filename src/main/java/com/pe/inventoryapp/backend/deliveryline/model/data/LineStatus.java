@@ -6,5 +6,5 @@ public enum LineStatus {
   PENDING, // Pendiente
   DELIVERED, // Entregado
   CANCELED, // Cancelado
-  EXCESS // Excedente
+  EXCEEDED // Excedente
 }

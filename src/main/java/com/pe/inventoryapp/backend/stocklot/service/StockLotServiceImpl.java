@@ -323,7 +323,7 @@ public class StockLotServiceImpl implements StockLotService{
     Movement movement = new Movement();
     movement.setQuantity(quantity);
     movement.setComment(stockLotAdjustmentRequest.getComment());
-    movement.setMovementType(MovementType.ADD);
+    movement.setMovementType(MovementType.INCREASE);
     movement.setStockLotEmitter(null);
     movement.setStockLotReceiver(stockLot);
     movement.setDeliveryLine(null);
@@ -385,7 +385,7 @@ public class StockLotServiceImpl implements StockLotService{
     Movement movement = new Movement();
     movement.setQuantity(quantity);
     movement.setComment(stockLotAdjustmentRequest.getComment());
-    movement.setMovementType(MovementType.LOSS);
+    movement.setMovementType(MovementType.DECREASE);
     movement.setStockLotEmitter(null);
     movement.setStockLotReceiver(stockLot);
     movement.setDeliveryLine(null);

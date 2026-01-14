@@ -702,7 +702,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // required < delivered
     line.setPendingQuantity(required - delivered);
-    line.setLineStatus(LineStatus.EXCESS);
+    line.setLineStatus(LineStatus.EXCEEDED);
   }
 
 }
