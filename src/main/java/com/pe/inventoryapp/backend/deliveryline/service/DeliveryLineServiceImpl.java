@@ -274,6 +274,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Integer balance = newRequired - oldRequired;
 
     deliveryLine.setRequiredQuantity(newRequired);
+    
     deliveryLine.setLimitDate(deliveryLineUpdateRequest.getLimitDate());
     deliveryLine.setUserUpdater(user);
 
@@ -322,7 +323,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
 
 
-    // ESTO REPRESENTA UN NUEVO MOVIMIENTO DE CANTIDAD
     Movement  movement = new Movement();
     movement.setQuantity(balance);
 
@@ -339,6 +339,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movementRepository.save(movement);
   }
 
+  // Método para eliminar una linea de entrega (solamente si no hay cantidad entregada o si nunca hubo una relacion con StockLot_DeliveryLine)
   @Override
   public void deleteDeliveryLineById(Long id) {
     if (id == null) {
@@ -352,11 +353,11 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Long deliveryLineId = deliveryLine.getId();
+    // Long deliveryLineId = deliveryLine.getId();
 
-    if (deliveryLineId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
+    // if (deliveryLineId == null) {
+    //   throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    // }
 
     Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
 
@@ -366,6 +367,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
         deliveryOrderId).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
     if (deliveryOrder == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -382,21 +384,33 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "No se puede eliminar porque ya hay una cantidad a entregar");
       }
 
-      // TODO: EN SISTEMAS QUE ALMACENAN DATOS HISTORICOS NO SE DEBEN ELIMINAR LOS DATOS
-      deliveryLineRepository.delete(deliveryLine);
-      // RECALCULAR EL TOTAL DE CANTIDAD PENDIENTE
-      // 1° actualizar la fecha limite de deliveryOrder comparando todas las lineas de
-      // entrega y tomar el valor con la fecha más cercana que no haya sido entregada
-      deliveryOrder.setLimitDate(getClosestLimitDate(deliveryOrder.getId()));
+      // Recordar que si hay una relación con StockLot_DeliveryLine no se puede eliminar
+      if (deliveryLine.getStockLotDeliveryLines().size() > 0) {
+        throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "No se puede eliminar porque ya hay una relacion con StockLot_DeliveryLine");
+      }
 
-      // 2° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE
-      // ENTREGA POR ORDEN DE ENTREGA
+      // RECORDAR QUE EN SISTEMAS QUE ALMACENAN DATOS HISTORICOS NO SE DEBEN ELIMINAR LOS DATOS, PERO COMO NO SE HA HECHO NINGUNA RELACION CON STOCKLOT_DELIVERYLINE, SE PUEDE ELIMINAR
+      deliveryLineRepository.delete(deliveryLine);
+
+      // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
       product_DeliveryOrder.setRequiredQuantityTotal(
           deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(product_DeliveryOrder.getId()));
 
-      // 3° actualizar el estado a...
+      product_DeliveryOrderRepository.save(product_DeliveryOrder);
+
+      // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
+      deliveryOrder.setLimitDate(getClosestLimitDate(deliveryOrder.getId()));
+      deliveryOrderRepository.save(deliveryOrder);
+
+      // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
+      recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
+
+      // La linea de entrega no debe tener movimientos
+      // TODO: PROBLEMA, NO SE PUEDE ELIMINAR UNA LINEA DE ENTREGA SI FUE EDITADA,
+      // PORQUE YA HAY UN MOVIMIENTO
       
       // Operacion para verificar si todas las lineas de entrega de una orden de entrega han sido entregadas, es decir si todas tiene el estado READY
+      // TODO: VERIFICAR ESTO
       if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
         deliveryOrder.setOrderStatus(OrderStatus.READY);
       } else {
@@ -651,12 +665,22 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .findAllByProduct_DeliveryOrderId(productDeliveryOrderId);
 
     for (Product_DeliveryOrder_Region entity : regions) {
-      Integer total = deliveryLineRepository.sumRequiredByProductDeliveryOrderAndRegion(
+
+      // Solamente hay un campo para la cantidad total requerida
+      Integer requiredTotal = deliveryLineRepository.sumRequiredByProductDeliveryOrderAndRegion(
           productDeliveryOrderId,
           entity.getRegion().getId());
 
-      entity.setRequiredTotalQuantity(total);
+      entity.setRequiredTotalQuantity(requiredTotal);
     }
+
+    // TODO: ¿FALTA ACTUALIZAR LA CANTIDAD ENTREGADA?
+    if (regions == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR, "No se encontraron regiones para el product_delivery_order");
+    }
+
+    product_DeliveryOrder_RegionRepository.saveAll(regions);
+
   }
 
   private void updateLineStatus(DeliveryLine line) {

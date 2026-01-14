@@ -117,8 +117,6 @@ public class DeliveryOrderController {
     return ResponseEntity.status(200).body(deliveryOrders);
   }
 
-
-
   @GetMapping("/{id}")
   public ResponseEntity<?> getDeliveryOrder(@PathVariable Long id) {
     DeliveryOrderDetailsResponse deliveryOrderDetailsResponse = deliveryOrderService.findDeliveryOrderById(id);
@@ -126,6 +124,11 @@ public class DeliveryOrderController {
         deliveryOrderDetailsResponse);
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  
+
+
+
 
   @PatchMapping("/{id}")
   public ResponseEntity<?> changeLimitDateDeliveryOrder(Authentication authentication, @PathVariable Long id, 

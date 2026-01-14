@@ -113,6 +113,16 @@ public class DeliveryLineController {
       return ResponseEntity.status(response.status()).body(response);
     }
 
+    // RECORDAR QUE SOLAMENTE PODRA BORRAR UNA LINEA DE ENTREGA SI NO HAY CANTIDAD
+    // ENTREGADA
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDeliveryLine(@PathVariable Long id) {
+      deliveryLineService.deleteDeliveryLineById(id);
+
+      return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
+          ResponseStatus.SUCCESS,
+          "Se elimino la linea de entrega"));
+    }
 
     // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
 
@@ -156,13 +166,5 @@ public class DeliveryLineController {
         "La linea de entrega tiene el estado perdido"));
   }
 
-  // RECORDAR QUE SOLAMENTE PODRA BORRAR UNA LINEA DE ENTREGA SI NO HAY CANTIDAD ENTREGADA
-  @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteDeliveryLine(@PathVariable Long id) {
-    deliveryLineService.deleteDeliveryLineById(id);
 
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "Se elimino la linea de entrega"));
-  }
 }
