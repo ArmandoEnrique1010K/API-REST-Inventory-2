@@ -24,7 +24,9 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND (:minLimitDate IS NULL OR d.limitDate >= :minLimitDate)
         AND (:maxLimitDate IS NULL OR d.limitDate <= :maxLimitDate)
         AND (:lineStatus IS NULL OR d.lineStatus = :lineStatus)
-        AND (:location IS NULL OR LOWER(d.location.name) LIKE LOWER(CONCAT('%', :location, '%'))) ORDER BY d.location.id ASC  
+        AND (:location IS NULL OR LOWER(d.location.name) LIKE LOWER(CONCAT('%', :location, '%'))) 
+        AND d.lineStatus != 'CANCELED'
+        ORDER BY d.location.id ASC  
       """)
   Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
     Long deliveryOrderId, 
@@ -58,6 +60,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           JOIN dl.product p
           JOIN p.productDeliveryOrders pdo
           WHERE pdo.id = :productDeliveryOrderId
+          AND dl.lineStatus != 'PENDING'
       """)
   Integer sumRequiredQuantityByProduct_DeliveryOrder(
       @Param("productDeliveryOrderId") Long productDeliveryOrderId);
@@ -67,6 +70,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         FROM DeliveryLine dl
         WHERE dl.product_DeliveryOrder.id = :pdoId
           AND dl.location.region.id = :regionId
+          AND dl.lineStatus != 'PENDING'
       """)
   Integer sumRequiredByProductDeliveryOrderAndRegion(
       @Param("pdoId") Long productDeliveryOrderId,
@@ -81,6 +85,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           JOIN p.productDeliveryOrders pdo
           WHERE dl.location.id = :locationId
             AND pdo.id = :orderId
+            AND dl.lineStatus != 'PENDING'
       """)
   boolean existsByLocationAndProductDeliveryOrder(
       @Param("locationId") Long locationId,
@@ -95,6 +100,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           WHERE l.id = :locationId
             AND p.id = :productId 
             AND d.id = :deliveryOrderId
+            AND dl.lineStatus <> 'PENDING'
       """)
   boolean existsByLocationAndProductAndDeliveryOrder(
       @Param("locationId") Long locationId,
@@ -107,7 +113,8 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           FROM DeliveryLine dl
           WHERE dl.deliveryOrder.id = :deliveryOrderId
             AND dl.product.id = :productId
-            AND dl.location.id = :locationId
+            AND dl.location.id = :locationId 
+            AND dl.lineStatus <> 'PENDING'
       """)
   boolean existsDuplicate(
       @Param("deliveryOrderId") Long deliveryOrderId,
@@ -118,6 +125,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       FROM DeliveryLine dl
       WHERE dl.deliveryOrder.id = :deliveryOrderId
         AND dl.lineStatus <> 'READY'
+        AND dl.lineStatus <> 'PENDING'
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
 

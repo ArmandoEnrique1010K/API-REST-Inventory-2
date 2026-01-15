@@ -91,7 +91,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
          .orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relación de producto y orden de entrega no existe"));
 
-    // Validar pertenencia real de producto y orden de entrega
+    
+    // TODO: Validar pertenencia real de producto y orden de entrega
     if (!product_DeliveryOrderRepository
         .existsByIdAndDeliveryOrderId(
             id_product_deliveryOrder,

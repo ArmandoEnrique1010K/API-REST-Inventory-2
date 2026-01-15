@@ -14,12 +14,31 @@ public interface Product_DeliveryOrderRepository extends JpaRepository<Product_D
       SELECT p
       FROM Product_DeliveryOrder p
       WHERE p.deliveryOrder.id = :deliveryOrderId
+      AND p.status = true
+      ORDER BY p.product.entryDate ASC
     """)
   List<Product_DeliveryOrder> findAllByDeliveryOrderId(Long deliveryOrderId);
 
   // Verifica si existe una relacion entre un producto y una orden de entrega
+
+
+  @Query("""
+        SELECT COUNT(p) > 0
+        FROM Product_DeliveryOrder p
+        WHERE p.deliveryOrder.id = :deliveryOrderId
+        AND p.product.id = :productId
+        AND p.status = true
+      """)
   boolean existsByDeliveryOrderIdAndProductId(Long deliveryOrderId, Long productId);
 
+  // TODO: ESTO SE UTILIZA EN DELIVERYLINE, MODIFICAR EL QUERY
+  @Query("""
+        SELECT COUNT(p) > 0
+        FROM Product_DeliveryOrder p
+        WHERE p.id = :id
+        AND p.deliveryOrder.id = :deliveryOrderId
+        AND p.status = true
+      """)
   boolean existsByIdAndDeliveryOrderId(Long id, Long deliveryOrderId);
 
 }

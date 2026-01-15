@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 
 
@@ -59,8 +59,8 @@ public class Product_DeliveryOrderController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<CommonResponse> deleteProduct_DeliveryOrder(@PathVariable Long id) {
+  @PatchMapping("/{id}")
+  public ResponseEntity<CommonResponse> inactiveRelationProductToDeliveryOrder(@PathVariable Long id) {
     product_DeliveryOrderService.deleteRelationProductDeliveryOrder(id);
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha eliminado un producto de la orden de entrega");
@@ -72,6 +72,4 @@ public class Product_DeliveryOrderController {
   // ACTUALIZAR LA LISTA DE RELACIONES DE PRODUCTOS Y ORDENES DE ENTREGA POR SU ID
 
   // VERIFICAR QUE EL PRODUCTO AGREGADO TENGA UNA SUMATORIA DE CANTIDAD PENDIENTE A 0 DE CANTIDADES PENDIENTES EN LA ORDEN DE ENTREGA PARA QUE SE PUEDA ELIMINAR DE LA RELACIÓN
-
-  
 }

@@ -23,7 +23,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,16 +34,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "lineas_de_entrega", uniqueConstraints = {
-    @UniqueConstraint(
-      columnNames = {
-        "location_id",
-        "product_id",
-        "delivery_order_id"
-      }
-    )
-  }
-)
+
+// TODO: NO IMPLEMENTAR
+// @Table(name = "lineas_de_entrega", uniqueConstraints = {
+//     @UniqueConstraint(
+//       columnNames = {
+//         "location_id",
+//         "product_id",
+//         "delivery_order_id"
+//       }
+//     )
+//   }
+// )
+@Table(name = "lineas_de_entrega")
 public class DeliveryLine {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,8 +61,6 @@ public class DeliveryLine {
   private Integer pendingQuantity;
 
   private LocalDateTime limitDate;
-
-  private boolean status;
 
   @UpdateTimestamp
   private LocalDateTime updatedAt;

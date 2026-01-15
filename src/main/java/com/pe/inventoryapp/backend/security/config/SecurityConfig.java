@@ -67,8 +67,6 @@ public class SecurityConfig {
 
 				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						// TODO: ACTUALIZAR LOS ENDPOINTS
-
 						// AUTH
 						.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/auth/forgot-password")
@@ -216,6 +214,7 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/cancel")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						// TODO: CONTINUAR AQUI
 
 						// PRODUCT DELIVERYORDER
 						.requestMatchers(HttpMethod.POST,
@@ -227,7 +226,6 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.DELETE, "/api/products-delivery-orders/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
-						// TODO: CONTINUAR AQUI
 						// DELIVERY LINE
 						.requestMatchers(HttpMethod.POST,
 								"/api/delivery-lines/product-delivery-order/*")
