@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
@@ -44,7 +45,11 @@ public interface DeliveryOrderService {
 
   DeliveryOrderDetailsResponse findDeliveryOrderById(Long id);
 
+  DeliveryOrderClientDetailsResponse findDeliveryOrderByIdAndValidateUserClient(Long id, Long id_user);
+
   void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user);
 
   void changeStatusOrderToCanceledById(Long id, Long id_user);
+
+  void cancelDeliveryOrderById(Long id);
 }

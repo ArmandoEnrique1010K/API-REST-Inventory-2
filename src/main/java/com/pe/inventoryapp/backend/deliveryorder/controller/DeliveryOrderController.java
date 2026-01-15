@@ -19,6 +19,7 @@ import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
@@ -125,6 +126,17 @@ public class DeliveryOrderController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  // Endpoint para obtener una orden de entrega para un cliente
+  @GetMapping("/{id}/client")
+  public ResponseEntity<?> getDeliveryOrderForClient(Authentication authentication, @PathVariable Long id) {
+    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+
+    DeliveryOrderClientDetailsResponse deliveryOrderDetailsResponse = deliveryOrderService.findDeliveryOrderByIdAndValidateUserClient(id, id_user_authenticated);
+    DataResponse<DeliveryOrderClientDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        deliveryOrderDetailsResponse);
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
   
 
 
@@ -144,14 +156,25 @@ public class DeliveryOrderController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  @PatchMapping("/{id}/canceled")
-  public ResponseEntity<?> cancelDeliveryOrder(Authentication authentication, @PathVariable Long id) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+  // @PatchMapping("/{id}/canceled")
+  // public ResponseEntity<?> cancelDeliveryOrder(Authentication authentication, @PathVariable Long id) {
+  //   Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
-    deliveryOrderService.changeStatusOrderToCanceledById(id, id_user);
+  //   deliveryOrderService.changeStatusOrderToCanceledById(id, id_user);
+
+  //   CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+  //       "Se ha cancelado la orden de entrega");
+  //   return ResponseEntity.status(response.status()).body(response);
+  // }
+
+
+  @PatchMapping("/{id}/cancel")
+  public ResponseEntity<CommonResponse> cancelDeliveryOrder(@PathVariable Long id) {
+    deliveryOrderService.cancelDeliveryOrderById(id);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cancelado la orden de entrega");
     return ResponseEntity.status(response.status()).body(response);
   }
+
 }

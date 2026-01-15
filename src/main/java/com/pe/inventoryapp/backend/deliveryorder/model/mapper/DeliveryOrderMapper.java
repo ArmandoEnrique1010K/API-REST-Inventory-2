@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.deliveryorder.model.mapper;
 
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
@@ -60,6 +61,20 @@ public class DeliveryOrderMapper {
           deliveryOrder.getBatch(),
           deliveryOrder.getLimitDate(),
           deliveryOrder.getPriorityDate(),
+          deliveryOrder.getOrderStatus());
+    }
+
+  }
+
+  public DeliveryOrderClientDetailsResponse buildDeliveryOrderClientDetailsResponse() {
+    if (deliveryOrder == null) {
+      throw new RuntimeException("Debe pasar la entidad DeliveryOrder");
+    } else {
+      return new DeliveryOrderClientDetailsResponse(
+          deliveryOrder.getId(),
+          deliveryOrder.getBatch(),
+          deliveryOrder.getLimitDate(),
+          deliveryOrder.getUserClient().getFirstname() + " " + deliveryOrder.getUserClient().getLastname(),
           deliveryOrder.getOrderStatus());
     }
 

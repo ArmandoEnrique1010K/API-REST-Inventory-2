@@ -21,14 +21,16 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
         SELECT d
         FROM DeliveryOrder d
         WHERE (:status IS NULL OR d.orderStatus = :status)
-          AND (:userClientName IS NULL OR
-              LOWER(d.userClient.firstname) LIKE LOWER(CONCAT('%', :userClientName, '%')) OR
-              LOWER(d.userClient.lastname) LIKE LOWER(CONCAT('%', :userClientName, '%')))
-              AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
-                AND (
-              (:startDate IS NULL OR :endDate IS NULL)
-              OR d.limitDate BETWEEN :startDate AND :endDate
-          )
+          AND (:userClientName IS NULL 
+          OR LOWER(d.userClient.firstname) LIKE LOWER(CONCAT('%', :userClientName, '%')) 
+          OR LOWER(d.userClient.lastname) LIKE LOWER(CONCAT('%', :userClientName, '%')))
+          
+          AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
+          
+          AND ((:startDate IS NULL OR :endDate IS NULL) 
+          OR d.limitDate BETWEEN :startDate AND :endDate)
+          
+          AND d.orderStatus != 'CANCELED'
         ORDER BY d.createdAt DESC
       """)
   Page<DeliveryOrder> findAllByParams(
@@ -39,7 +41,8 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
       @Param("userClientName") String userClientName,
       Pageable pageable);
 
-  // Busca todas las ordenes que estan activas (estado Ready e InProgress) (PARA OPERADORES)
+  // Busca todas las ordenes que estan activas (estado Ready e InProgress) (PARA
+  // OPERADORES)
   @Query("""
         SELECT d
         FROM DeliveryOrder d
@@ -60,8 +63,8 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
       @Param("userClientName") String userClientName,
       Pageable pageable);
 
-
-  // Pagina todas las ordenes por id del cliente y parametros (PARA CLIENTES EN GENERAL Y USUARIOS QUE NO SON EMPLEADOS)
+  // Pagina todas las ordenes por id del cliente y parametros (PARA CLIENTES EN
+  // GENERAL Y USUARIOS QUE NO SON EMPLEADOS)
 
   @Query("""
         SELECT d
@@ -83,12 +86,9 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
       @Param("status") OrderStatus status,
       Pageable pageable);
 
-
-
   // Busca una orden por su batch
   Optional<DeliveryOrder> findByBatch(String batch);
 
   // DEFINIR UN MÉTODO PARA TRAER LAS LINES DE ENTREGA POR UNA ORDEN DE ENTREGA
-
 
 }

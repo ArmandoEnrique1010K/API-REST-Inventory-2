@@ -15,6 +15,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
@@ -166,10 +167,62 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-    // TODO: IMPLEMENTAR UNA LOGICA PARA VERIFICAR SI EL USUARIO AUTENTICADO ES EL MISMO CLIENTE DE LA ORDEN, SI ES ASI DEVOLVERA LA ORDEN, DE LO CONTRARIO, UNA EXCEPCION
+    if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+      throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
+    }
+
+
 
     return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
         .buildDeliveryOrderDetailsResponse();
+  }
+
+  @Override
+  public DeliveryOrderClientDetailsResponse findDeliveryOrderByIdAndValidateUserClient(Long id, Long id_user) {
+    if (id == null || id_user == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+      throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
+    }
+
+    User user = userRepository.findById(id_user)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+    boolean isOnlyUserRole = user.getRoles().size() == 1 &&
+        user.getRoles().stream()
+            .anyMatch(r -> "ROLE_USER".equals(r.getName()));
+
+    // System.out.println(isOnlyUserRole);
+    // System.out.println(user.getRoles());
+    // System.out.println(user.getRoles().size());
+
+    // System.out.println(user.getId());
+    // System.out.println(deliveryOrder.getUserClient().getId());
+    // System.out.println(deliveryOrder.getUserClient().getId().equals(user.getId()));
+    
+    // Si el usuario tiene solamente el rol de USER, entonces solamente podra ver
+    // una orden cuyo userClient sea el mismo usuario que ha iniciado sesión
+    if (isOnlyUserRole) {
+      if (deliveryOrder.getUserClient().getId().equals(user.getId())) {
+        return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+            .buildDeliveryOrderClientDetailsResponse();
+      } else {
+        throw new BusinessException(
+            ResponseStatus.CONFLICT,
+            "El usuario no es el cliente de la orden de entrega");
+      }
+    } else {
+        throw new BusinessException(
+            ResponseStatus.CONFLICT,
+            "El usuario no tiene el rol de cliente"
+        );
+      }
+
   }
 
   @Override
@@ -183,7 +236,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
 
     deliveryOrder.setLimitDate(limitDate);
     deliveryOrder.setUserUpdater(user);
@@ -206,7 +258,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-    if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
+        if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
         && deliveryOrder.getOrderStatus() != OrderStatus.READY && deliveryOrder.getOrderStatus() != OrderStatus.CANCELED) {
       throw new BusinessException(ResponseStatus.CONFLICT,
           "La orden de entrega no puede ser cancelada");
@@ -220,4 +272,17 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
     deliveryOrderRepository.save(deliveryOrder);
   }
 
+  // TODO: ESTE MÉTODO DEBE BORRAR UNA ORDEN DE ENTREGA BAJO CIERTAS CONDICIONES
+  @Override
+  public void cancelDeliveryOrderById(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+      () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
+    deliveryOrderRepository.save(deliveryOrder);
+  }
 }

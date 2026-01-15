@@ -48,8 +48,9 @@ public class DeliveryOrder {
   // Fecha limite prioritaria (se genera automaticamente)
   private LocalDateTime priorityDate;
 
-  // Estado
-  private boolean status;
+  // TODO: ESTE CAMPO PODRIA SER INNECESARIO
+  // Estado 
+  // private boolean status;
 
   @CreationTimestamp
   private LocalDateTime createdAt;
