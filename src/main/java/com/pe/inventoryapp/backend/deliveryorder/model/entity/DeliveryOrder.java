@@ -41,16 +41,11 @@ public class DeliveryOrder {
   @Column(unique = true)
   private String batch;
 
-  // TODO: ESTE CAMPO PODRIA NO SER NECESARIO, PORQUE SOLAMENTE SE PODRIA REQUERIR LA FECHA LIMITE PRIORITARIA
   // Fecha limite de toda la orden de entrega
   private LocalDateTime limitDate;
 
   // Fecha limite prioritaria (se genera automaticamente)
   private LocalDateTime priorityDate;
-
-  // TODO: ESTE CAMPO PODRIA SER INNECESARIO
-  // Estado 
-  // private boolean status;
 
   @CreationTimestamp
   private LocalDateTime createdAt;

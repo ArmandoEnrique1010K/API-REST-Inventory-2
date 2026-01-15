@@ -169,22 +169,6 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/companies/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
-						// DELIVERY ORDER
-						.requestMatchers(HttpMethod.POST, "/api/delivery-orders")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/delivery-orders")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/in-progress")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/client")
-						.authenticated()
-						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/*")
-						.authenticated()
-						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/canceled")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-
 						// STOCK LOT
 						.requestMatchers(HttpMethod.POST, "/api/stock-lots")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
@@ -211,6 +195,27 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/stock-lots/*/transfer")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+
+						// DELIVERY ORDER
+						.requestMatchers(HttpMethod.POST, "/api/delivery-orders")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/delivery-orders")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/in-progress")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/client")
+						.authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/*")
+						.authenticated()
+						// Nota, se especifica que sea solamente el rol de USER
+						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/*/client")
+						.hasAnyAuthority("ROLE_USER")
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/send")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/cancel")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 						// PRODUCT DELIVERYORDER
 						.requestMatchers(HttpMethod.POST,

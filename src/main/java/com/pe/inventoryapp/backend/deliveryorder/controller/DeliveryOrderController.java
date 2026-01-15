@@ -167,10 +167,23 @@ public class DeliveryOrderController {
   //   return ResponseEntity.status(response.status()).body(response);
   // }
 
+  @PatchMapping("/{id}/send")
+  public ResponseEntity<CommonResponse> sendDeliveryOrder(Authentication authentication, @PathVariable Long id) {
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+
+    deliveryOrderService.sendDeliveryOrderById(id, id_user);
+
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha enviado la orden de entrega");
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
 
   @PatchMapping("/{id}/cancel")
-  public ResponseEntity<CommonResponse> cancelDeliveryOrder(@PathVariable Long id) {
-    deliveryOrderService.cancelDeliveryOrderById(id);
+  public ResponseEntity<CommonResponse> cancelDeliveryOrder(Authentication authentication, @PathVariable Long id) {
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+
+    deliveryOrderService.cancelDeliveryOrderById(id, id_user);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cancelado la orden de entrega");

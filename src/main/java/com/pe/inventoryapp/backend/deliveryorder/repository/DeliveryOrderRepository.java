@@ -66,10 +66,14 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
   // Pagina todas las ordenes por id del cliente y parametros (PARA CLIENTES EN
   // GENERAL Y USUARIOS QUE NO SON EMPLEADOS)
 
+
+
+   // Este método no debe listar todas las ordenes que tengan el estado CANCELED
   @Query("""
         SELECT d
         FROM DeliveryOrder d
         WHERE d.userClient.id = :id
+          AND d.orderStatus != 'CANCELED'
           AND (:status IS NULL OR d.orderStatus = :status)
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
                 AND (

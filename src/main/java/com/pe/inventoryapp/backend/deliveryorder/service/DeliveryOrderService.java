@@ -49,7 +49,9 @@ public interface DeliveryOrderService {
 
   void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user);
 
-  void changeStatusOrderToCanceledById(Long id, Long id_user);
+  // void changeStatusOrderToCanceledById(Long id, Long id_user);
 
-  void cancelDeliveryOrderById(Long id);
+  void cancelDeliveryOrderById(Long id, Long id_user);
+
+  void sendDeliveryOrderById(Long id, Long id_user);
 }

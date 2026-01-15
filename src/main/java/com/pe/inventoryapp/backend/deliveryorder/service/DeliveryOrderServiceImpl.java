@@ -246,43 +246,65 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
   // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
   // SOLAMENTE SI TODAS LAS LINEAS DE ENTREGAS TIENEN EL ESTADO READY
 
+  // @Override
+  // public void changeStatusOrderToCanceledById(Long id, Long id_user) {
+  //   if (id == null || id_user == null) {
+  //     throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+  //   }
+
+  //   User user = userRepository.findById(id_user)
+  //       .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+  //   DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+  //       () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+  //       if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
+  //       && deliveryOrder.getOrderStatus() != OrderStatus.READY && deliveryOrder.getOrderStatus() != OrderStatus.CANCELED) {
+  //     throw new BusinessException(ResponseStatus.CONFLICT,
+  //         "La orden de entrega no puede ser cancelada");
+  //   }
+
+  //   deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
+  //   deliveryOrder.setUserUpdater(user);
+  //   deliveryOrderRepository.save(deliveryOrder);
+  // }
+
   @Override
-  public void changeStatusOrderToCanceledById(Long id, Long id_user) {
+  public void cancelDeliveryOrderById(Long id, Long id_user) {
     if (id == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    User user = userRepository.findById(id_user)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+     User user = userRepository.findById(id_user)
+     .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+    // TODO: ESTE MÉTODO DEBE "BORRAR" UNA ORDEN DE ENTREGA BAJO CIERTAS CONDICIONES
+    // SI LO BORRA, DEBE CREAR UN NUEVO LOTE DE STOCK CON LA SUMATORIA DE LAS CANTIDADES ENTREGADAS DE LAS LINEAS DE ENTREGA QUE ESTAN EN MODO READY, PENDING Y DELIVERED
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-        if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
-        && deliveryOrder.getOrderStatus() != OrderStatus.READY && deliveryOrder.getOrderStatus() != OrderStatus.CANCELED) {
-      throw new BusinessException(ResponseStatus.CONFLICT,
-          "La orden de entrega no puede ser cancelada");
-    }
-    // TODO: IMPLEMENTAR UNA LOGICA PARA HACER ALGO CON LA CANTIDAD REQUERIDA QUE YA
-    // ESTA PREPARADA
-    // TODO: ESTO CANCELARA TODAS LAS LINEAS DE ENTREGA
+      () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
     deliveryOrder.setUserUpdater(user);
     deliveryOrderRepository.save(deliveryOrder);
   }
 
-  // TODO: ESTE MÉTODO DEBE BORRAR UNA ORDEN DE ENTREGA BAJO CIERTAS CONDICIONES
   @Override
-  public void cancelDeliveryOrderById(Long id) {
-    if (id == null) {
+  public void sendDeliveryOrderById(Long id, Long id_user) {
+    if (id == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
+    User user = userRepository.findById(id_user)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
+    // TODO: DEBE VERIFICAR QUE TODAS LAS LINEAS DE ENTREGA ASOCIADAS A ESTA ORDEN DE ENTREGA TENGAN EL ESTADO READY, ESTO TAMBIEN CAMBIARA EL ESTADO DE TODAS LAS LINEAS DE ENTREGA A DELIVERED
+
+    // TODO: CONSTRUIR UN METODO PARA ACTUALIZAR EL ESTADO DE UNA ORDEN DE ENTREGA DE FORMA AUTOMATICA CUANDO TODAS LAS LINEAS DE ENTREGA TENGAN EL ESTADO DELIVERED, EN DELIVERYLINESERVICE
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-      () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-    deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
+    deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+    deliveryOrder.setUserUpdater(user);
     deliveryOrderRepository.save(deliveryOrder);
   }
 }
