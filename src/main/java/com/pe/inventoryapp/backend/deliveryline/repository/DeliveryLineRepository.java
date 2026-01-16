@@ -60,7 +60,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           JOIN dl.product p
           JOIN p.productDeliveryOrders pdo
           WHERE pdo.id = :productDeliveryOrderId
-          AND dl.lineStatus != 'PENDING'
+          AND dl.lineStatus != 'CANCELED'
       """)
   Integer sumRequiredQuantityByProduct_DeliveryOrder(
       @Param("productDeliveryOrderId") Long productDeliveryOrderId);
@@ -70,51 +70,54 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         FROM DeliveryLine dl
         WHERE dl.product_DeliveryOrder.id = :pdoId
           AND dl.location.region.id = :regionId
-          AND dl.lineStatus != 'PENDING'
+          AND dl.lineStatus != 'CANCELED'
       """)
   Integer sumRequiredByProductDeliveryOrderAndRegion(
       @Param("pdoId") Long productDeliveryOrderId,
       @Param("regionId") Long regionId);
 
 
-  // TODO: VERIFICAR ESTE METODO
-  @Query("""
-          SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
-          FROM DeliveryLine dl
-          JOIN dl.product p
-          JOIN p.productDeliveryOrders pdo
-          WHERE dl.location.id = :locationId
-            AND pdo.id = :orderId
-            AND dl.lineStatus != 'PENDING'
-      """)
-  boolean existsByLocationAndProductDeliveryOrder(
-      @Param("locationId") Long locationId,
-      @Param("orderId") Long orderId);
-
-  @Query("""
-          SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
-          FROM DeliveryLine dl
-          JOIN dl.location l
-          JOIN dl.product p
-          JOIN dl.deliveryOrder d
-          WHERE l.id = :locationId
-            AND p.id = :productId 
-            AND d.id = :deliveryOrderId
-            AND dl.lineStatus <> 'PENDING'
-      """)
-  boolean existsByLocationAndProductAndDeliveryOrder(
-      @Param("locationId") Long locationId,
-      @Param("productId") Long productId,
-      @Param("deliveryOrderId") Long deliveryOrderId);
+  // @Query("""
+  //         SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
+  //         FROM DeliveryLine dl
+  //         JOIN dl.product p
+  //         JOIN p.productDeliveryOrders pdo
+  //         WHERE dl.location.id = :locationId
+  //           AND pdo.id = :orderId
+  //           AND dl.lineStatus != 'PENDING'
+  //     """)
+  // boolean existsByLocationAndProductDeliveryOrder(
+  //     @Param("locationId") Long locationId,
+  //     @Param("orderId") Long orderId);
 
 
-  @Query("""
+  // TODO: INTENTAR IMPLEMENTAR ESTO
+  // @Query("""
+  //         SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
+  //         FROM DeliveryLine dl
+  //         JOIN dl.location l
+  //         JOIN dl.product p
+  //         JOIN dl.deliveryOrder d
+  //         WHERE l.id = :locationId
+  //           AND p.id = :productId 
+  //           AND d.id = :deliveryOrderId
+  //           AND dl.lineStatus <> 'PENDING'
+  //     """)
+  // boolean existsByLocationAndProductAndDeliveryOrder(
+  //     @Param("locationId") Long locationId,
+  //     @Param("productId") Long productId,
+  //     @Param("deliveryOrderId") Long deliveryOrderId);
+
+
+
+      // Cuando verifica que no exista duplicado, tambien debe verificar que la linea de entrega no este cancelada ('CANCELED' se considera como eliminado, borrado lógico)
+      @Query("""
           SELECT COUNT(dl) > 0
           FROM DeliveryLine dl
           WHERE dl.deliveryOrder.id = :deliveryOrderId
             AND dl.product.id = :productId
             AND dl.location.id = :locationId 
-            AND dl.lineStatus <> 'PENDING'
+            AND dl.lineStatus <> 'CANCELED'
       """)
   boolean existsDuplicate(
       @Param("deliveryOrderId") Long deliveryOrderId,
@@ -124,8 +127,9 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       SELECT COUNT(dl) = 0
       FROM DeliveryLine dl
       WHERE dl.deliveryOrder.id = :deliveryOrderId
-        AND dl.lineStatus <> 'READY'
-        AND dl.lineStatus <> 'PENDING'
+        AND dl.lineStatus != 'READY'
+        AND dl.lineStatus != 'PENDING'
+        AND dl.lineStatus != 'CANCELED'
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
 

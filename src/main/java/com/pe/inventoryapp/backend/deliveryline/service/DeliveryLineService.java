@@ -32,7 +32,7 @@ public interface DeliveryLineService {
 
   void updateDeliveryLineById(Long id, DeliveryLineUpdateRequest deliveryLineUpdateRequest, Long id_user);
 
-  void deleteDeliveryLineById(Long id);
+  void cancelDeliveryLineById(Long id, Long id_user_authenticated);
 
   void changeDeliveredStatusDeliveryLineById(Long id, Long id_user);
 

@@ -100,29 +100,31 @@ public class DeliveryLineController {
 
   // TODO: FALTA PROBAR CUANDO HAYA CANTIDAD ENTREGADA EN UNA LINEA DE ENTREGA
   @PutMapping("/{id}")
-   public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id, @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
-      BindingResult result) {
-     Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+  public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id, @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
+    BindingResult result) {
+    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
-     validationService.validateFieldsAndThrowResponse(result);
+    validationService.validateFieldsAndThrowResponse(result);
 
-      deliveryLineService.updateDeliveryLineById(id, deliveryLineUpdateRequest, id_user_authenticated);
+    deliveryLineService.updateDeliveryLineById(id, deliveryLineUpdateRequest, id_user_authenticated);
 
-      CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-          "Se actualizo la linea de entrega");
-      return ResponseEntity.status(response.status()).body(response);
-    }
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se actualizo la linea de entrega");
+    return ResponseEntity.status(response.status()).body(response);
+  }
 
-    // RECORDAR QUE SOLAMENTE PODRA BORRAR UNA LINEA DE ENTREGA SI NO HAY CANTIDAD
-    // ENTREGADA
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDeliveryLine(@PathVariable Long id) {
-      deliveryLineService.deleteDeliveryLineById(id);
+  // RECORDAR QUE SOLAMENTE PODRA BORRAR UNA LINEA DE ENTREGA SI NO HAY CANTIDAD
+  // ENTREGADA
+  @PatchMapping("/{id}/cancel")
+  public ResponseEntity<?> cancelDeliveryLine(Authentication authentication, @PathVariable Long id) {
+    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
-      return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-          ResponseStatus.SUCCESS,
-          "Se elimino la linea de entrega"));
-    }
+    deliveryLineService.cancelDeliveryLineById(id, id_user_authenticated);
+
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha cancelado la linea de entrega");
+    return ResponseEntity.status(response.status()).body(response);
+  }
 
     // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
 
