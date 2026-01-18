@@ -72,6 +72,7 @@ public class DeliveryLineController {
 
   
 
+  // TODO: PODRIA AÑADIR UN PARAMETRO PARA LISTAR POR PRODUCTOS
   @GetMapping("/delivery-order/{productDeliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
       @PathVariable Long productDeliveryOrderId, 
@@ -101,7 +102,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  // TODO: FALTA PROBAR CUANDO HAYA CANTIDAD ENTREGADA EN UNA LINEA DE ENTREGA
+  // TODO: FALTA PROBAR LA SUMATORIA DE LOS TOTALES CUANDO HAYA CANTIDAD ENTREGADA EN UNA LINEA DE ENTREGA
   @PutMapping("/{id}")
   public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id, @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
     BindingResult result) {
@@ -129,8 +130,6 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-    // TODO: CONTINUAR AQUI CON LOS DEMÁS ENDPOINTS
-
   // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE ENTREGADO
   // Solamente si tiene el estado READY
   @PatchMapping("/{id}/deliver")
@@ -146,7 +145,7 @@ public class DeliveryLineController {
 
 
 
-  @PatchMapping("/{id}/missing")
+  @PutMapping("/{id}/missing")
   public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication, @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest,
       @PathVariable Long id) {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
@@ -156,7 +155,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  @PatchMapping("/{id}/return")
+  @PutMapping("/{id}/return")
   public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
       @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest,
       @PathVariable Long id) {
@@ -167,7 +166,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  @PatchMapping("/{id}/allocate-stock")
+  @PutMapping("/{id}/allocate-stock")
   public ResponseEntity<CommonResponse> allocateStockInDeliveryLine(Authentication authentication,
       @RequestBody DeliveryLineAllocateRequest deliveryLineAllocateRequest,
       @PathVariable Long id) {

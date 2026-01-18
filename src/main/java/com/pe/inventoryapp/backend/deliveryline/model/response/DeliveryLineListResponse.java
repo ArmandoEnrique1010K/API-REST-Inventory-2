@@ -20,6 +20,9 @@ public class DeliveryLineListResponse {
   private Integer pendingQuantity;
   private LocalDateTime limitDate;
   private LineStatus lineStatus;
+
+  // TODO: ESTE CAMPO ES TEMPORAL
+  private Long id_product;
   private String location;
   private String region;
 }

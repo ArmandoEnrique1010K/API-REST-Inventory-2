@@ -52,6 +52,7 @@ public class DeliveryLineMapper {
           deliveryLine.getPendingQuantity(),
           deliveryLine.getLimitDate(),
           deliveryLine.getLineStatus(),
+          deliveryLine.getProduct().getId(),
           deliveryLine.getLocation().getName(),
           deliveryLine.getLocation().getRegion().getName());
     }

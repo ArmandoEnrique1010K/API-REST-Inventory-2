@@ -35,7 +35,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-// TODO: NO IMPLEMENTAR
+// Nota: no implementar esta lógica
 // @Table(name = "lineas_de_entrega", uniqueConstraints = {
 //     @UniqueConstraint(
 //       columnNames = {

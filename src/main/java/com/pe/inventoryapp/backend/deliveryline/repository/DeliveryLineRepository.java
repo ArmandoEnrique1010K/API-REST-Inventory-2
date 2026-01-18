@@ -77,38 +77,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       @Param("regionId") Long regionId);
 
 
-  // @Query("""
-  //         SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
-  //         FROM DeliveryLine dl
-  //         JOIN dl.product p
-  //         JOIN p.productDeliveryOrders pdo
-  //         WHERE dl.location.id = :locationId
-  //           AND pdo.id = :orderId
-  //           AND dl.lineStatus != 'PENDING'
-  //     """)
-  // boolean existsByLocationAndProductDeliveryOrder(
-  //     @Param("locationId") Long locationId,
-  //     @Param("orderId") Long orderId);
-
-
-  // TODO: INTENTAR IMPLEMENTAR ESTO
-  // @Query("""
-  //         SELECT CASE WHEN COUNT(dl) > 0 THEN true ELSE false END
-  //         FROM DeliveryLine dl
-  //         JOIN dl.location l
-  //         JOIN dl.product p
-  //         JOIN dl.deliveryOrder d
-  //         WHERE l.id = :locationId
-  //           AND p.id = :productId 
-  //           AND d.id = :deliveryOrderId
-  //           AND dl.lineStatus <> 'PENDING'
-  //     """)
-  // boolean existsByLocationAndProductAndDeliveryOrder(
-  //     @Param("locationId") Long locationId,
-  //     @Param("productId") Long productId,
-  //     @Param("deliveryOrderId") Long deliveryOrderId);
-
-
 
       // Cuando verifica que no exista duplicado, tambien debe verificar que la linea de entrega no este cancelada ('CANCELED' se considera como eliminado, borrado lógico)
       @Query("""

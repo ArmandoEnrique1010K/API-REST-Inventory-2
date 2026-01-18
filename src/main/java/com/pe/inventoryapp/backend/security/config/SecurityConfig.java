@@ -247,6 +247,10 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/allocate-stock").hasAnyAuthority("ROLE_ADMIN",
 								"ROLE_SECRETARY", "ROLE_OPERATOR")
 
+						// MOVEMENTS
+						.requestMatchers(HttpMethod.GET, "/api/movements").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+
+
 						// OTHERS
 						// .requestMatchers(HttpMethod.GET, "/csrf").permitAll()
 						// .requestMatchers(HttpMethod.GET, "/api").permitAll()
