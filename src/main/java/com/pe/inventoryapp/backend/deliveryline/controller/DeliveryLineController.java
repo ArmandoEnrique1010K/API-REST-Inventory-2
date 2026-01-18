@@ -27,6 +27,8 @@ import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineAllocateRequest;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineAlterRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdateRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
@@ -50,6 +52,7 @@ public class DeliveryLineController {
 
   @Autowired
   private AuthenticationContextService authenticationContextService;
+  // TODO: ESTO SE PODRIA TRASLADAR HACIA EL CONTROLADOR DE PRODUCT-DELIVERY-ORDER
   @PostMapping("/product-delivery-order/{productDeliveryOrderId}")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
       Authentication authentication,
@@ -130,43 +133,51 @@ public class DeliveryLineController {
 
   // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE ENTREGADO
   // Solamente si tiene el estado READY
-  @PatchMapping("/{id}/delivered")
-  public ResponseEntity<CommonResponse> changeDeliveredStatusDeliveryLine(Authentication authentication,
+  @PatchMapping("/{id}/deliver")
+  public ResponseEntity<CommonResponse> sendDeliveryLine(Authentication authentication,
       @PathVariable Long id) {
 
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    deliveryLineService.changeDeliveredStatusDeliveryLineById(id, id_user);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "La linea de entrega tiene el estado entregado"));
+    deliveryLineService.sendDeliveryLineById(id, id_user);
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha entregado la linea de entrega");
+    return ResponseEntity.status(response.status()).body(response);
   }
 
 
-  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE CANCELADO
-  // Solamente si tiene los estados INPROGRESS o READY
-  @PatchMapping("/{id}/canceled")
-  public ResponseEntity<CommonResponse> changeCanceledStatusDeliveryLine(Authentication authentication,
-      @PathVariable Long id) {
 
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    deliveryLineService.changeCanceledStatusDeliveryLineById(id, id_user);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "La linea de entrega tiene el estado cancelado"));
-  }
-
-  // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE PERDIDO (TENDRA EL DERECHO DE REPONER EL PEDIDO EXTRAVIADO)
-  // Solamente si tiene el estado DELIVERED
   @PatchMapping("/{id}/missing")
-  public ResponseEntity<CommonResponse> changeMissingStatusDeliveryLine(Authentication authentication,
+  public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication, @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest,
       @PathVariable Long id) {
-
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    deliveryLineService.changeMissingStatusDeliveryLineById(id, id_user);
-    return ResponseEntity.status(200).body(responseService.generateCommonResponse("success",
-        ResponseStatus.SUCCESS,
-        "La linea de entrega tiene el estado perdido"));
+    deliveryLineService.lostDeliveryLineById(id, deliveryLineAlterRequest, id_user);
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha reportado la perdida de la linea de entrega");
+    return ResponseEntity.status(response.status()).body(response);
   }
+
+  @PatchMapping("/{id}/return")
+  public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
+      @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest,
+      @PathVariable Long id) {
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    deliveryLineService.returnDeliveryLineById(id, deliveryLineAlterRequest, id_user);
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha devuelto una parte de la linea de entrega");
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
+  @PatchMapping("/{id}/allocate-stock")
+  public ResponseEntity<CommonResponse> allocateStockInDeliveryLine(Authentication authentication,
+      @RequestBody DeliveryLineAllocateRequest deliveryLineAllocateRequest,
+      @PathVariable Long id) {
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    deliveryLineService.allocateDeliveryLineById(id, deliveryLineAllocateRequest, id_user);
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha asignado cantidad en toda o una parte de la linea de entrega");
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
 
 
 }

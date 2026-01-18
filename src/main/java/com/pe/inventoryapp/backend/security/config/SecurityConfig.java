@@ -236,8 +236,16 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/delivery-lines/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.DELETE, "/api/delivery-lines/*").hasAnyAuthority("ROLE_ADMIN",
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/cancel").hasAnyAuthority("ROLE_ADMIN",
 								"ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/deliver").hasAnyAuthority("ROLE_ADMIN",
+								"ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/missing").hasAnyAuthority("ROLE_ADMIN",
+								"ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/return").hasAnyAuthority("ROLE_ADMIN",
+								"ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/allocate-stock").hasAnyAuthority("ROLE_ADMIN",
+								"ROLE_SECRETARY", "ROLE_OPERATOR")
 
 						// OTHERS
 						// .requestMatchers(HttpMethod.GET, "/csrf").permitAll()

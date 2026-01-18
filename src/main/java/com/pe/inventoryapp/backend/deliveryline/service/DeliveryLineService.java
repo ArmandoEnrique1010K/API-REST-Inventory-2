@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineAllocateRequest;
+import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineAlterRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdateRequest;
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
@@ -34,12 +36,14 @@ public interface DeliveryLineService {
 
   void cancelDeliveryLineById(Long id, Long id_user_authenticated);
 
-  void changeDeliveredStatusDeliveryLineById(Long id, Long id_user);
+  void sendDeliveryLineById(Long id, Long id_user_authenticated);
 
-  void changeCanceledStatusDeliveryLineById(Long id, Long id_user);
-  void changeMissingStatusDeliveryLineById(Long id, Long id_user);
+  void lostDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user_authenticated);
 
-  // void changePreparationStatusDeliveryLineById(Long id, PreparationStatus preparationStatus, Long id_user);
+  void returnDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user_authenticated);
+
+  void allocateDeliveryLineById(Long id, DeliveryLineAllocateRequest deliveryLineAllocateRequest, Long id_user_authenticated);
+
 
   // TODO: INVENTAR UN METODO QUE PERMITA AÑADIR VARIAS LINEAS A UNA MISMA ORDEN
   // void saveAll(DeliveryLineRequest deliveryLineRequest, Long id_user);
