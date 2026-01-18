@@ -60,10 +60,12 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           JOIN dl.product p
           JOIN p.productDeliveryOrders pdo
           WHERE pdo.id = :productDeliveryOrderId
+          AND p.id = :productId
           AND dl.lineStatus != 'CANCELED'
       """)
   Integer sumRequiredQuantityByProduct_DeliveryOrder(
-      @Param("productDeliveryOrderId") Long productDeliveryOrderId);
+      @Param("productDeliveryOrderId") Long productDeliveryOrderId,
+      @Param("productId") Long productId);
 
   @Query("""
         SELECT COALESCE(SUM(dl.requiredQuantity), 0)

@@ -9,7 +9,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -146,9 +145,11 @@ public class DeliveryLineController {
 
 
   @PutMapping("/{id}/missing")
-  public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication, @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest,
+  public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication,
+      @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
       @PathVariable Long id) {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    validationService.validateFieldsAndThrowResponse(result);
     deliveryLineService.lostDeliveryLineById(id, deliveryLineAlterRequest, id_user);
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha reportado la perdida de la linea de entrega");
@@ -157,9 +158,10 @@ public class DeliveryLineController {
 
   @PutMapping("/{id}/return")
   public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
-      @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest,
+      @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
       @PathVariable Long id) {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    validationService.validateFieldsAndThrowResponse(result);
     deliveryLineService.returnDeliveryLineById(id, deliveryLineAlterRequest, id_user);
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha devuelto una parte de la linea de entrega");
@@ -168,9 +170,10 @@ public class DeliveryLineController {
 
   @PutMapping("/{id}/allocate-stock")
   public ResponseEntity<CommonResponse> allocateStockInDeliveryLine(Authentication authentication,
-      @RequestBody DeliveryLineAllocateRequest deliveryLineAllocateRequest,
+      @Valid @RequestBody DeliveryLineAllocateRequest deliveryLineAllocateRequest, BindingResult result,
       @PathVariable Long id) {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    validationService.validateFieldsAndThrowResponse(result);
     deliveryLineService.allocateDeliveryLineById(id, deliveryLineAllocateRequest, id_user);
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha asignado cantidad en toda o una parte de la linea de entrega");

@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ordenes_de_entrega_region")
+@Table(name = "productos_ordenes_de_entrega_region")
 public class Product_DeliveryOrder_Region {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
