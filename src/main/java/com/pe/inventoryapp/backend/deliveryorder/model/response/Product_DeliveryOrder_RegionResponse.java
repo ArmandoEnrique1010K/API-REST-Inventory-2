@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.deliveryorder.model.response;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,12 +12,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Product_DeliveryOrder_RegionResponse {
-  // TODO: IMPLEMENTAR ESTO PARA MOSTRAR LAS ORDENES POR REGION
   private Long productId;
   private String productName;
 
-  private Long locationId;
-  private String locationName;
+  private Long regionId;
+  private String regionName;
 
-  private Integer totalRequiredQuantity;
+  private LocalDateTime updatedAt;
+
+  private Integer requiredTotalQuantity;
 }

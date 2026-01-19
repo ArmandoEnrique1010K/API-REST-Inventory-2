@@ -556,12 +556,3 @@ public class StockLotServiceImpl implements StockLotService{
     movementRepository.save(movement);
   }
 }
-
-// Integer totalQuantityLoss = movementRepository.sumQuantityByProductAndType(
-// stockLot.getProduct().getId(),
-// MovementType.LOSS);
-
-// Integer totalQuantityRecovery =
-// movementRepository.sumQuantityByProductAndType(
-// stockLot.getProduct().getId(),
-// MovementType.RECOVERY);

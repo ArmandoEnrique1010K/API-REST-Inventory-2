@@ -53,27 +53,23 @@ public class Movement {
   private MovementType movementType;
 
   // Relaciones
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  @NotNull
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
   // Primera relacion hacia stockLot, almacena un StockLot receptor
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "stock_lot_receiver_id")
-  @Nullable
   private StockLot stockLotReceiver;
 
   // Segunda relación hacia StockLot, almacena un StockLot emisor que se crea cuando se hace una transferencia
   // NOTA: ESTO ES OPCIONAL
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "stock_lot_emitter_id")
-  @Nullable
   private StockLot stockLotEmitter;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "delivery_line_id")
-  @Nullable
   private DeliveryLine deliveryLine;
 
   @ManyToOne
@@ -81,10 +77,10 @@ public class Movement {
   @NotNull
   private Product product;
   
-  // TODO: OPCIONALMENTE SE VA A PROBAR CON UNA RELACION @ManyToMany a StockLot
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "movimientos_lotes_de_stock", joinColumns = @JoinColumn(name = "movement_id"), inverseJoinColumns = @JoinColumn(name = "stock_lot_id"), uniqueConstraints = {
       @UniqueConstraint(columnNames = { "movement_id", "stock_lot_id" })
   })
+  @Nullable
   private List<StockLot> stockLots;
 }

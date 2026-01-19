@@ -35,4 +35,16 @@ public interface Product_DeliveryOrder_RegionRepository extends JpaRepository<Pr
          WHERE pdr.product_DeliveryOrder.id = :productDeliveryOrderId
          """)
    List<Product_DeliveryOrder_Region> findAllByProduct_DeliveryOrderId(Long productDeliveryOrderId);
+
+
+
+   // Listar todos y excluir aquellos cuya cantidad requerida total sea 0
+   @Query("""
+         SELECT pdr
+         FROM Product_DeliveryOrder_Region pdr
+         WHERE pdr.product_DeliveryOrder.id = :productDeliveryOrderId
+         AND pdr.requiredTotalQuantity > 0
+         """)
+   List<Product_DeliveryOrder_Region> findAllByProduct_DeliveryOrderIdAndRequiredTotalQuantityGreaterThanZero(Long productDeliveryOrderId);
+
 }

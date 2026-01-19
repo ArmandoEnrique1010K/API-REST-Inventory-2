@@ -1,0 +1,30 @@
+package com.pe.inventoryapp.backend.deliveryorder.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
+import com.pe.inventoryapp.backend.deliveryorder.model.mapper.Product_DeliveryOrder_RegionMapper;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrder_RegionResponse;
+import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrder_RegionRepository;
+
+@Service
+public class Product_DeliveryOrder_RegionServiceImpl implements Product_DeliveryOrder_RegionService {
+
+  @Autowired
+  private Product_DeliveryOrder_RegionRepository product_DeliveryOrder_RegionRepository;
+
+  @Override
+  public List<Product_DeliveryOrder_RegionResponse> findAllByDeliveryOrderId(Long deliveryOrderId){
+   List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions = (List<Product_DeliveryOrder_Region>)  product_DeliveryOrder_RegionRepository.findAllByProduct_DeliveryOrderIdAndRequiredTotalQuantityGreaterThanZero(deliveryOrderId);
+
+    return product_DeliveryOrder_Regions.stream()
+        .map(pdr -> Product_DeliveryOrder_RegionMapper.builder().setProduct_DeliveryOrder_Region(
+            pdr).buildProduct_DeliveryOrder_RegionResponse())
+        .collect(Collectors.toList());
+  }
+  
+}

@@ -509,6 +509,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setStockLotEmitter(null);
     movement.setDeliveryLine(deliveryLine);
 
+    movementRepository.save(movement);
+
   }
 
   // Tomar la fecha mas cercana que no haya sido entregada
@@ -878,12 +880,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ==== Movimiento =====
     Movement movement = new Movement();
     movement.setQuantity(quantity);
-    movement.setComment("Entrega...");
+    movement.setComment("Entrega de stock");
     movement.setDeliveryLine(deliveryLine);
     movement.setMovementType(MovementType.ALLOCATE);
     movement.setStockLots(stockLots);
+    movement.setProduct(deliveryLine.getProduct());
     movement.setUser(user);
 
-
+    movementRepository.save(movement);
   }
 }
