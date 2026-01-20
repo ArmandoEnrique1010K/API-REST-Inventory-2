@@ -35,7 +35,9 @@ import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
+import com.pe.inventoryapp.backend.movement.model.entity.Movement_StockLot;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
+import com.pe.inventoryapp.backend.movement.repository.Movement_StockLotRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
@@ -72,6 +74,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   @Autowired
   private StockLot_DeliveryLineRepository stockLot_DeliveryLineRepository;
+
+  @Autowired
+  private Movement_StockLotRepository movement_StockLotRepository;
 
   @Override
   public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_product_deliveryOrder, Long id_user) {
@@ -811,6 +816,17 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
                 ResponseStatus.BAD_REQUEST,
                 "Stock insuficiente para la cantidad solicitada");
     }
+    // ==== Movimiento =====
+    Movement movement = new Movement();
+    movement.setQuantity(quantity);
+    movement.setComment("Entrega de stock");
+    movement.setDeliveryLine(deliveryLine);
+    movement.setMovementType(MovementType.ALLOCATE);
+    // movement.setStockLots(stockLots);
+    movement.setProduct(deliveryLine.getProduct());
+    movement.setUser(user);
+
+    movementRepository.save(movement);
 
     // ===== Asignar stock por lotes =====
     int remaining = quantity;
@@ -827,15 +843,23 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
       int used = Math.min(available, remaining);
 
+      // 1. Actualizar stock
       stockLot.setQuantityAvailable(available - used);
       stockLotRepository.save(stockLot);
 
-      StockLot_DeliveryLine relation = new StockLot_DeliveryLine();
-      relation.setStockLot(stockLot);
-      relation.setDeliveryLine(deliveryLine);
-      relation.setQuantityUsed(used);
+      // 2. Relación DeliveryLine ↔ StockLot
+      StockLot_DeliveryLine dlRelation = new StockLot_DeliveryLine();
+      dlRelation.setStockLot(stockLot);
+      dlRelation.setDeliveryLine(deliveryLine);
+      dlRelation.setQuantityUsed(used);
+      stockLot_DeliveryLineRepository.save(dlRelation);
 
-      stockLot_DeliveryLineRepository.save(relation);
+      // 3. Relación Movement ↔ StockLot
+      Movement_StockLot mRelation = new Movement_StockLot();
+      mRelation.setMovement(movement);
+      mRelation.setStockLot(stockLot);
+      mRelation.setQuantityTaken(used);
+      movement_StockLotRepository.save(mRelation);
 
       remaining -= used;
     }    
@@ -877,16 +901,5 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ===== Recalcular regiones =====
     recalculateProductDeliveryOrderRegions(deliveryOrder.getId());
 
-    // ==== Movimiento =====
-    Movement movement = new Movement();
-    movement.setQuantity(quantity);
-    movement.setComment("Entrega de stock");
-    movement.setDeliveryLine(deliveryLine);
-    movement.setMovementType(MovementType.ALLOCATE);
-    movement.setStockLots(stockLots);
-    movement.setProduct(deliveryLine.getProduct());
-    movement.setUser(user);
-
-    movementRepository.save(movement);
   }
 }

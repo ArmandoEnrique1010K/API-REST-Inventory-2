@@ -12,6 +12,7 @@ import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.annotation.Nullable;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,11 +21,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,16 +59,19 @@ public class Movement {
   // Primera relacion hacia stockLot, almacena un StockLot receptor
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "stock_lot_receiver_id")
+  @Nullable
   private StockLot stockLotReceiver;
 
   // Segunda relación hacia StockLot, almacena un StockLot emisor que se crea cuando se hace una transferencia
   // NOTA: ESTO ES OPCIONAL
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "stock_lot_emitter_id")
+  @Nullable
   private StockLot stockLotEmitter;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "delivery_line_id")
+  @Nullable
   private DeliveryLine deliveryLine;
 
   @ManyToOne
@@ -77,10 +79,6 @@ public class Movement {
   @NotNull
   private Product product;
   
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "movimientos_lotes_de_stock", joinColumns = @JoinColumn(name = "movement_id"), inverseJoinColumns = @JoinColumn(name = "stock_lot_id"), uniqueConstraints = {
-      @UniqueConstraint(columnNames = { "movement_id", "stock_lot_id" })
-  })
-  @Nullable
-  private List<StockLot> stockLots;
+  @OneToMany(mappedBy = "movement", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Movement_StockLot> stockLotDetails;
 }

@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.movement.model.mapper;
 
+import java.util.List;
+
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.response.MovementDetailsResponse;
 import com.pe.inventoryapp.backend.movement.model.response.MovementListResponse;
@@ -37,12 +39,23 @@ public class MovementMapper {
     if (movement == null){
       throw new RuntimeException("Debe pasar la entidad movement");
     }
+
+    // Verificar que los ids no sean nulos
     Long stockLotEmitterId = movement.getStockLotEmitter() != null
         ? movement.getStockLotEmitter().getId()
         : null;
     Long stockLotReceiverId = movement.getStockLotReceiver() != null
         ? movement.getStockLotReceiver().getId()
         : null;
+    Long deliveryLineId = movement.getDeliveryLine() != null
+        ? movement.getDeliveryLine().getId()
+        : null;
+    List<Long> stockLotDetailIds = movement.getStockLotDetails() != null
+        ? movement.getStockLotDetails()
+            .stream()
+            .map(stockLot -> stockLot.getId())
+            .toList()
+        : List.of();
 
     return new MovementDetailsResponse(
       movement.getId(),
@@ -54,8 +67,8 @@ public class MovementMapper {
       movement.getProduct().getName(),
         stockLotReceiverId,
         stockLotEmitterId,
-      movement.getStockLots().stream().map(stockLot -> stockLot.getId()).toList(),
-      movement.getDeliveryLine().getId()
+        stockLotDetailIds,
+        deliveryLineId
     );
   }
 }

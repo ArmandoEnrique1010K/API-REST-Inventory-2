@@ -48,7 +48,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
         SELECT m
         FROM Movement m
         JOIN m.deliveryLine dl
-        WHERE dl.id = :deliveryLineId
+        WHERE (dl.id = :deliveryLineId)
         AND (:minQuantity IS NULL OR m.quantity >= :minQuantity)
         AND (:maxQuantity IS NULL OR m.quantity <= :maxQuantity)
         AND (:minCreatedAt IS NULL OR m.createdAt >= :minCreatedAt)
@@ -84,10 +84,13 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
   @Query("""
       SELECT DISTINCT m
       FROM Movement m
-      LEFT JOIN m.stockLots sl
-      WHERE sl.id = :stockLotId
+      LEFT JOIN m.stockLotDetails ms
+      LEFT JOIN ms.stockLot sl ON sl.id = :stockLotId
+      WHERE (
+         sl.id = :stockLotId
          OR m.stockLotEmitter.id = :stockLotId
          OR m.stockLotReceiver.id = :stockLotId
+      )
       AND (:minQuantity IS NULL OR m.quantity >= :minQuantity)
       AND (:maxQuantity IS NULL OR m.quantity <= :maxQuantity)
       AND (:minCreatedAt IS NULL OR m.createdAt >= :minCreatedAt)
@@ -116,7 +119,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       SELECT DISTINCT m
       FROM Movement m
       LEFT JOIN m.product p
-      WHERE p.id = :productId
+      WHERE (p.id = :productId)
       AND (:minQuantity IS NULL OR m.quantity >= :minQuantity)
       AND (:maxQuantity IS NULL OR m.quantity <= :maxQuantity)
       AND (:minCreatedAt IS NULL OR m.createdAt >= :minCreatedAt)
@@ -143,7 +146,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       SELECT DISTINCT m
       FROM Movement m
       LEFT JOIN m.user u
-      WHERE u.id = :userId
+      WHERE (u.id = :userId)
       AND (:minQuantity IS NULL OR m.quantity >= :minQuantity)
       AND (:maxQuantity IS NULL OR m.quantity <= :maxQuantity)
       AND (:minCreatedAt IS NULL OR m.createdAt >= :minCreatedAt)

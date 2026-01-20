@@ -249,6 +249,23 @@ public class SecurityConfig {
 
 						// MOVEMENTS
 						.requestMatchers(HttpMethod.GET, "/api/movements").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/movements/delivery-line/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/movements/stock-lot/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/movements/product/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/movements/user/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/movements/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+
+						// PRODUCT DELIVERY ORDER REGION
+						.requestMatchers(HttpMethod.GET, "/api/product-delivery-order-region/delivery-order/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+
+						// STOCK LOT DELIVERY LINE
+						.requestMatchers(HttpMethod.GET, "/api/stock-lot-delivery-lines/delivery-line/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+
 
 
 						// OTHERS
