@@ -3,7 +3,11 @@ package com.pe.inventoryapp.backend.deliveryorder.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +29,12 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderCli
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.repository.ProductRepository;
+import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
+import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
+import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
+import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -41,6 +51,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private CompanyRepository companyRepository;
+
+	@Autowired
+	private ProductRepository productRepository;
+
+	@Autowired
+	private StockLotRepository stockLotRepository;
 
 	private static final long BATCH_START = 10000L;
 
@@ -292,7 +311,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 	@Override
 	@Transactional
-	public void cancelDeliveryOrderById(Long id, Long id_user) {
+	public void processDeliveryOrderCancellation(Long id, Long id_user) {
 		if (id == null || id_user == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -303,7 +322,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		// TODO: MÁS ERRORES
 		if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ya ha sido entregada");
@@ -314,7 +332,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					"La orden de entrega ha sido cancelada");
 		}
 
-		// TODO: ESTE MÉTODO DEBE "BORRAR" UNA ORDEN DE ENTREGA BAJO CIERTAS CONDICIONES
+		// ESTE MÉTODO DEBE "BORRAR" UNA ORDEN DE ENTREGA BAJO CIERTAS CONDICIONES
 		// SI LO BORRA, DEBE CREAR UN NUEVO LOTE DE STOCK CON LA SUMATORIA DE LAS
 		// CANTIDADES ENTREGADAS DE LAS LINEAS DE ENTREGA QUE ESTAN EN MODO READY,
 		// PENDING Y EXCEEDED, CAMBIA EL ESTADO DE ESAS LINEAS A CANCELED
@@ -328,7 +346,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
-		
+
 		boolean hasDeliveredOrMissing = deliveryLines.stream()
 				.anyMatch(dl -> dl.getLineStatus() == LineStatus.DELIVERED ||
 						dl.getLineStatus() == LineStatus.MISSING);
@@ -339,16 +357,29 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		}
 
 		// Estados permitidos que debe tener la linea de entrega
-		List<LineStatus> linesStatus = Arrays.asList(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
+		EnumSet<LineStatus> cancelableStates =
+				EnumSet.of(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
 
+		// NOTA: UNA ORDEN DE ENTREGA TIENE VARIOS PRODUCTOS A LA VEZ
 		// Nueva cantidad que se almacenara en el almacen
-		Integer newQuantityReceived = 0;
+		// Mapeo de los productos y sus cantidades
+		Map<Long, Integer> newStockRestoredQuantity = new HashMap<>();
+		// Integer restoredQuantity = 0;
 
 		// Solamente alterara el estado de las lineas de entrega que tengan los estados mencionados
 		// Las demás lineas de entrega no se alteran (estado MISSING, DELIVERED, CANCELED)
 		for (DeliveryLine deliveryLine : deliveryLines) {
-			if (linesStatus.contains(deliveryLine.getLineStatus())) {
-				newQuantityReceived += deliveryLine.getDeliveredQuantity();
+			if (cancelableStates.contains(deliveryLine.getLineStatus())) {
+
+				Long productId =deliveryLine.getProduct().getId();
+
+				// Verificar que si no existe el key con el id del producto en newStockRestoredQuantity
+				if (!newStockRestoredQuantity.containsKey(productId)) {
+					newStockRestoredQuantity.put(productId, deliveryLine.getDeliveredQuantity());
+				} else {
+					// Si el key existe, se suman las cantidades
+					newStockRestoredQuantity.put(productId, newStockRestoredQuantity.get(productId) + deliveryLine.getDeliveredQuantity());
+				}
 
 				deliveryLine.setLineStatus(LineStatus.CANCELED);
 				deliveryLine.setDeliveredQuantity(0);
@@ -360,15 +391,47 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		}
 
 		// Verificar que si hay lineas de entrega que tiene el estado DELIVERED o MISSING, ya no se podra cambiar el estado a CANCELED
-		if (!deliveryLines.stream().anyMatch(deliveryLine -> deliveryLine.getLineStatus() == LineStatus.DELIVERED || deliveryLine.getLineStatus() == LineStatus.MISSING)) {
+		if (hasDeliveredOrMissing) {
+			deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+		} else {
 			deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
 		}
 
-		// Operacion si las lineas de entrega restantes tienen el estado DELIVERED
-		for (DeliveryLine deliveryLine : deliveryLines) {
-			if (deliveryLine.getLineStatus() == LineStatus.DELIVERED) {
-				deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
-			}
+		// CREAR VARIOS LOTES DE ENTREGA POR CADA UNO DE LOS PRODUCTOS DEVUELTOS
+
+		Company company = companyRepository.findById(1L).get();
+
+		// Guardar el lote de stock
+		for (Map.Entry<Long, Integer> entry : newStockRestoredQuantity.entrySet()) {
+
+			Long productId = entry.getKey();
+
+			Product product = productRepository.findById(
+					productId)
+					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
+
+			Integer restoredQuantity = entry.getValue();
+
+			// CREAR EL LOTE DE STOCK
+			StockLot stockLot = new StockLot();
+
+			// Obtiene la fecha de hoy por partes
+			LocalDateTime now = LocalDateTime.now();
+			String date = now.getDayOfMonth() + "/" + now.getMonthValue() + "/" + now.getYear();
+			String time = now.getHour() + ":" + now.getMinute() + ":" + now.getSecond();
+
+			String batch = "LOT-" + product.getName().replace(" ", "-") + "-" + date + "-" + time;
+
+			stockLot.setBatch(batch);
+			stockLot.setQuantityReceived(restoredQuantity);
+			stockLot.setQuantityAvailable(restoredQuantity);
+			stockLot.setQuantityDelivered(0);
+			stockLot.setQuantityLost(0);
+			stockLot.setQuantityRecovered(0);
+			stockLot.setZeroStock(false);
+			stockLot.setProduct(product);
+			stockLot.setCompany(company);
+			stockLotRepository.save(stockLot);
 		}
 
 		deliveryOrder.setUserUpdater(user);
@@ -376,7 +439,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	}
 
 	@Override
-	public void sendDeliveryOrderById(Long id, Long id_user) {
+	@Transactional
+	public void markDeliveryOrderAsDelivered(Long id, Long id_user) {
 		if (id == null || id_user == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -387,7 +451,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		// TODO: MÁS ERRORES
 		if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ya ha sido entregada");
@@ -398,13 +461,42 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					"La orden de entrega ha sido cancelada");
 		}
 
+		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
+
+		if (deliveryLines.isEmpty()) {
+			throw new BusinessException(ResponseStatus.CONFLICT, "No hay líneas de entrega");
+		}
+
 		// VERIFICA QUE TODAS LAS LINEAS DE ENTREGA ASOCIADAS A ESTA ORDEN DE ENTREGA
 		// TENGAN EL ESTADO READY, ADEMÁS DEL ESTADO DELIVERED
+		assertAllLinesInAllowedStates(
+				deliveryLines,
+				EnumSet.of(LineStatus.READY, LineStatus.DELIVERED, LineStatus.CANCELED, LineStatus.MISSING));
 
 		// Ninguna linea de entrega debe tener el estado "PENDING", "EXCEEDED"
 		// Estados permitidos: "READY", "DELIVERED", "CANCELED", "MISSING"
-		verifyStatusOrderLinesByDeliveryOrderId(id,
-				Arrays.asList(LineStatus.READY, LineStatus.DELIVERED, LineStatus.CANCELED, LineStatus.MISSING), "No puedes entregar esta orden de entrega");
+
+		deliveryLines.stream()
+				.filter(l -> l.getLineStatus() == LineStatus.READY)
+				.forEach(l -> {
+					l.setLineStatus(LineStatus.DELIVERED);
+					l.setUserUpdater(user);
+				});
+
+
+		boolean allCompleted = deliveryLines.stream()
+				.allMatch(l -> l.getLineStatus() == LineStatus.DELIVERED ||
+						l.getLineStatus() == LineStatus.CANCELED ||
+						l.getLineStatus() == LineStatus.MISSING);
+
+		if (allCompleted) {
+			deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+			deliveryOrder.setUserUpdater(user);
+			deliveryOrderRepository.save(deliveryOrder);
+		}
+
+
+		
 
 		// CONSTRUIR UN METODO PARA ACTUALIZAR EL ESTADO DE UNA ORDEN DE ENTREGA DE
 		// FORMA AUTOMATICA CUANDO TODAS LAS LINEAS DE ENTREGA TENGAN EL ESTADO
@@ -412,54 +504,28 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		// ESTO CAMBIARA EL ESTADO DE TODAS LAS LINEAS QUE TENGAN LOS ESTADOS ESPECIFICADOS
 		// A DELIVERED
-		changeDeliveryLinesStatusByDeliveryOrderId(id, Arrays.asList(LineStatus.READY));
+		// changeDeliveryLinesStatusByDeliveryOrderId(id, Arrays.asList(LineStatus.READY));
 
-		deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
-		deliveryOrder.setUserUpdater(user);
-		deliveryOrderRepository.save(deliveryOrder);
+		// deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+		// deliveryOrder.setUserUpdater(user);
+		// deliveryOrderRepository.save(deliveryOrder);
 	}
 
 	// Verifica que todas las lineas de entrega que pertenecen a una orden de
 	// entrega tenga el estado lineStatus, si lo tienen no debe devolver nada, de lo
 	// contrario un mensaje de error
-	private void verifyStatusOrderLinesByDeliveryOrderId(Long id, List<LineStatus> linesStatus, String message) {
-		if (id == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-		}
+	private void assertAllLinesInAllowedStates(
+			List<DeliveryLine> lines,
+			Set<LineStatus> allowedStates) {
+		boolean invalid = lines.stream()
+				.anyMatch(l -> !allowedStates.contains(l.getLineStatus()));
 
-		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
-
-		// SI NO HAY NINGUNA LINEA DE ENTREGA
-		if (deliveryLines.isEmpty()) {
-			throw new BusinessException(ResponseStatus.CONFLICT, "No hay lineas de entrega");
-		}
-
-		for (DeliveryLine deliveryLine : deliveryLines) {
-			// SI TODAS LAS LINEAS DE ENTREGA NO TIENEN UNO DE LOS ESTADOS QUE SE ENCUENTRAN
-			// EN EL ARRAY
-			if (!linesStatus.contains(deliveryLine.getLineStatus())) {
-				throw new BusinessException(ResponseStatus.CONFLICT,
-						message);
-			}
+		if (invalid) {
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"No puedes entregar esta orden de entrega");
 		}
 	}
 
-	private void changeDeliveryLinesStatusByDeliveryOrderId(Long id, List<LineStatus> linesStatus) {
-		if (id == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-		}
-
-		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
-
-		// ¿QUE PASARA CON LAS LINEAS DE ENTREGA QUE TENGAN EL ESTADO MISSING O CANCELED?
-		// RESPUESTA: SE MANTIENEN EL MISMO ESTADO
-		for (DeliveryLine deliveryLine : deliveryLines) {
-			if (linesStatus.contains(deliveryLine.getLineStatus())) {
-				deliveryLine.setLineStatus(LineStatus.DELIVERED);
-				deliveryLineRepository.save(deliveryLine);
-			}
-
-		}
-	}
 
 }

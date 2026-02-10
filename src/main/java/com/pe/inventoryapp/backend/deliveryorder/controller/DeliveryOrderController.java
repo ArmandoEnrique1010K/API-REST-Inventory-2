@@ -171,7 +171,7 @@ public class DeliveryOrderController {
   public ResponseEntity<CommonResponse> sendDeliveryOrder(Authentication authentication, @PathVariable Long id) {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
-    deliveryOrderService.sendDeliveryOrderById(id, id_user);
+    deliveryOrderService.markDeliveryOrderAsDelivered(id, id_user);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha enviado la orden de entrega");
@@ -183,7 +183,7 @@ public class DeliveryOrderController {
   public ResponseEntity<CommonResponse> cancelDeliveryOrder(Authentication authentication, @PathVariable Long id) {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
-    deliveryOrderService.cancelDeliveryOrderById(id, id_user);
+    deliveryOrderService.processDeliveryOrderCancellation(id, id_user);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cancelado la orden de entrega");

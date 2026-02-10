@@ -51,7 +51,7 @@ public interface DeliveryOrderService {
 
   // void changeStatusOrderToCanceledById(Long id, Long id_user);
 
-  void cancelDeliveryOrderById(Long id, Long id_user);
+  void processDeliveryOrderCancellation(Long id, Long id_user);
 
-  void sendDeliveryOrderById(Long id, Long id_user);
+  void markDeliveryOrderAsDelivered(Long id, Long id_user);
 }
