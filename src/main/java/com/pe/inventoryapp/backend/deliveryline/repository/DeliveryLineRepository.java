@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.deliveryline.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +14,11 @@ import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 
 public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long> {
+
+  // Listar todas las lineas de entrega que pertenezcan a una orden de entrega
+
+  List<DeliveryLine> findAllByDeliveryOrderId(Long id);
+
 
   // Busqueda con filtros 
   @Query("""

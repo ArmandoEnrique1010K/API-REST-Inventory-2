@@ -1,6 +1,8 @@
 package com.pe.inventoryapp.backend.deliveryorder.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,9 @@ import org.springframework.stereotype.Service;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
+import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
+import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
@@ -23,288 +28,438 @@ import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderReposit
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
-  @Autowired
-  private DeliveryOrderRepository deliveryOrderRepository;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  private static final long BATCH_START = 10000L;
-  @Override
-  public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
-
-    Long id_client = deliveryOrderRequest.getIdClient();
-
-    if (id_user == null || id_client == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    User user = userRepository.findById(id_user).orElseThrow(
-      () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    User userClient = userRepository.findById(id_client).orElseThrow(
-      () -> new BusinessException(ResponseStatus.NOT_FOUND, "El cliente no existe")); 
-
-
-    // TODO: ESTO ES IMPOSIBLE, SE SABE QUE CADA NUEVO USUARIO CREADO SIEMPRE VA A TENER EL ROL DE USER
-    // Verificar que el usuario seleccionado tenga el rol de USER (Cliente)
-    // System.out.println(userClient.getRoles().stream().anyMatch(r -> "ROLE_USER".equals(r.getName())));
-
-    // if (!userClient.getRoles().stream().anyMatch(r -> "ROLE_USER".equals(r.getName()))) {
-    //   throw new BusinessException(ResponseStatus.CONFLICT, "El usuario seleccionado no es un cliente");
-    // }
-
-    DeliveryOrder deliveryOrder = new DeliveryOrder();
-
-    deliveryOrder.setLimitDate(deliveryOrderRequest.getLimitDate());
-    // La fecha limite prioritaria se establece en null porque aun no hay una fecha de entrega de una linea de entrega
-    deliveryOrder.setPriorityDate(null);
-    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
-    deliveryOrder.setUserCreator(user);
-    deliveryOrder.setUserUpdater(user);
-    deliveryOrder.setUserClient(userClient);
-
-    DeliveryOrder saved = deliveryOrderRepository.save(deliveryOrder);
-
-    // Este numero debe ser generado automaticamente
-    long newBatch = BATCH_START + saved.getId();
-    String newBatchString = String.valueOf(newBatch);
-
-    saved.setBatch(newBatchString);
-    deliveryOrderRepository.save(saved);
-  }
-
-  @Override
-  public PageResponse<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
-      String batch,
-      LocalDateTime startDate,
-      LocalDateTime endDate,
-      String userClientName,
-      OrderStatus status,
-      Pageable pageable) {  
-    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(batch, startDate, endDate, status, userClientName, pageable);
-
-    List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
-      deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderListResponse()
-    ).toList();
-
-    PageResponse<DeliveryOrderListResponse> pageResponse = new PageResponse<>(
-      result,
-      deliveryOrders.getNumber(),
-      deliveryOrders.getSize(),
-      deliveryOrders.getTotalElements(),
-      deliveryOrders.getTotalPages(),
-      deliveryOrders.hasNext(),
-      deliveryOrders.hasPrevious()
-    );
-
-    return pageResponse;
-  }
-
-  @Override
-  public PageResponse<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
-      String batch,
-      LocalDateTime startDate,
-      LocalDateTime endDate,
-      String userClientName,
-      Pageable pageable) {
-    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(batch, startDate, endDate, 
-        userClientName, pageable);
-
-    List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
-        deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderListResponse())
-        .toList();
-
-    PageResponse<DeliveryOrderListResponse> pageResponse = new PageResponse<>(
-        result,
-        deliveryOrders.getNumber(),
-        deliveryOrders.getSize(),
-        deliveryOrders.getTotalElements(),
-        deliveryOrders.getTotalPages(),
-        deliveryOrders.hasNext(),
-        deliveryOrders.hasPrevious());
-
-    return pageResponse;
-  }
-
-  @Override
-  public PageResponse<DeliveryOrderClientListResponse> findAllDeliveryOrdesByClientId(Long id, String batch,
-      LocalDateTime startDate, LocalDateTime endDate, OrderStatus status, Pageable pageable) {
-
-    if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByUserClientId(id, batch, startDate, endDate, 
-        status, pageable);
-
-    List<DeliveryOrderClientListResponse> result = deliveryOrders.getContent().stream().map(
-        deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderClientListResponse())
-        .toList();
-
-    PageResponse<DeliveryOrderClientListResponse> pageResponse = new PageResponse<>(
-        result,
-        deliveryOrders.getNumber(),
-        deliveryOrders.getSize(),
-        deliveryOrders.getTotalElements(),
-        deliveryOrders.getTotalPages(),
-        deliveryOrders.hasNext(),
-        deliveryOrders.hasPrevious());
-
-    return pageResponse;
-
-  }
-
-  @Override
-  public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
-    if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-    if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
-      throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
-    }
-
-
-
-    return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-        .buildDeliveryOrderDetailsResponse();
-  }
-
-  @Override
-  public DeliveryOrderClientDetailsResponse findDeliveryOrderByIdAndValidateUserClient(Long id, Long id_user) {
-    if (id == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-    if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
-      throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
-    }
-
-    User user = userRepository.findById(id_user)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    boolean isOnlyUserRole = user.getRoles().size() == 1 &&
-        user.getRoles().stream()
-            .anyMatch(r -> "ROLE_USER".equals(r.getName()));
-
-    // System.out.println(isOnlyUserRole);
-    // System.out.println(user.getRoles());
-    // System.out.println(user.getRoles().size());
-
-    // System.out.println(user.getId());
-    // System.out.println(deliveryOrder.getUserClient().getId());
-    // System.out.println(deliveryOrder.getUserClient().getId().equals(user.getId()));
-    
-    // Si el usuario tiene solamente el rol de USER, entonces solamente podra ver
-    // una orden cuyo userClient sea el mismo usuario que ha iniciado sesión
-    if (isOnlyUserRole) {
-      if (deliveryOrder.getUserClient().getId().equals(user.getId())) {
-        return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-            .buildDeliveryOrderClientDetailsResponse();
-      } else {
-        throw new BusinessException(
-            ResponseStatus.CONFLICT,
-            "El usuario no es el cliente de la orden de entrega");
-      }
-    } else {
-        throw new BusinessException(
-            ResponseStatus.CONFLICT,
-            "El usuario no tiene el rol de cliente"
-        );
-      }
-
-  }
-
-  @Override
-  public void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user) {
-
-    if (id == null || limitDate == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    User user = userRepository.findById(id_user).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-    deliveryOrder.setLimitDate(limitDate);
-    deliveryOrder.setUserUpdater(user);
-
-    deliveryOrderRepository.save(deliveryOrder);
-  }
-
-  // TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
-  // SOLAMENTE SI TODAS LAS LINEAS DE ENTREGAS TIENEN EL ESTADO READY
-
-  // @Override
-  // public void changeStatusOrderToCanceledById(Long id, Long id_user) {
-  //   if (id == null || id_user == null) {
-  //     throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-  //   }
-
-  //   User user = userRepository.findById(id_user)
-  //       .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-  //   DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-  //       () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-  //       if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
-  //       && deliveryOrder.getOrderStatus() != OrderStatus.READY && deliveryOrder.getOrderStatus() != OrderStatus.CANCELED) {
-  //     throw new BusinessException(ResponseStatus.CONFLICT,
-  //         "La orden de entrega no puede ser cancelada");
-  //   }
-
-  //   deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
-  //   deliveryOrder.setUserUpdater(user);
-  //   deliveryOrderRepository.save(deliveryOrder);
-  // }
-
-  @Override
-  public void cancelDeliveryOrderById(Long id, Long id_user) {
-    if (id == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-     User user = userRepository.findById(id_user)
-     .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    // TODO: ESTE MÉTODO DEBE "BORRAR" UNA ORDEN DE ENTREGA BAJO CIERTAS CONDICIONES
-    // SI LO BORRA, DEBE CREAR UN NUEVO LOTE DE STOCK CON LA SUMATORIA DE LAS CANTIDADES ENTREGADAS DE LAS LINEAS DE ENTREGA QUE ESTAN EN MODO READY, PENDING Y DELIVERED
-
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-      () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-    deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
-    deliveryOrder.setUserUpdater(user);
-    deliveryOrderRepository.save(deliveryOrder);
-  }
-
-  @Override
-  public void sendDeliveryOrderById(Long id, Long id_user) {
-    if (id == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-    User user = userRepository.findById(id_user)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    // TODO: DEBE VERIFICAR QUE TODAS LAS LINEAS DE ENTREGA ASOCIADAS A ESTA ORDEN DE ENTREGA TENGAN EL ESTADO READY, ESTO TAMBIEN CAMBIARA EL ESTADO DE TODAS LAS LINEAS DE ENTREGA A DELIVERED
-
-    // TODO: CONSTRUIR UN METODO PARA ACTUALIZAR EL ESTADO DE UNA ORDEN DE ENTREGA DE FORMA AUTOMATICA CUANDO TODAS LAS LINEAS DE ENTREGA TENGAN EL ESTADO DELIVERED, EN DELIVERYLINESERVICE
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-    deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
-    deliveryOrder.setUserUpdater(user);
-    deliveryOrderRepository.save(deliveryOrder);
-  }
+	@Autowired
+	private DeliveryOrderRepository deliveryOrderRepository;
+
+	@Autowired
+	private DeliveryLineRepository deliveryLineRepository;
+
+	@Autowired
+	private UserRepository userRepository;
+
+	private static final long BATCH_START = 10000L;
+
+	@Override
+	public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
+
+		Long id_client = deliveryOrderRequest.getIdClient();
+
+		if (id_user == null || id_client == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		User user = userRepository.findById(id_user).orElseThrow(
+				() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+		User userClient = userRepository.findById(id_client).orElseThrow(
+				() -> new BusinessException(ResponseStatus.NOT_FOUND, "El cliente no existe"));
+
+		// TODO: ESTO ES IMPOSIBLE, SE SABE QUE CADA NUEVO USUARIO CREADO SIEMPRE VA A
+		// TENER EL ROL DE USER
+		// Verificar que el usuario seleccionado tenga el rol de USER (Cliente)
+		// System.out.println(userClient.getRoles().stream().anyMatch(r ->
+		// "ROLE_USER".equals(r.getName())));
+
+		// if (!userClient.getRoles().stream().anyMatch(r ->
+		// "ROLE_USER".equals(r.getName()))) {
+		// throw new BusinessException(ResponseStatus.CONFLICT, "El usuario seleccionado
+		// no es un cliente");
+		// }
+
+		DeliveryOrder deliveryOrder = new DeliveryOrder();
+
+		deliveryOrder.setLimitDate(deliveryOrderRequest.getLimitDate());
+		// La fecha limite prioritaria se establece en null porque aun no hay una fecha
+		// de entrega de una linea de entrega
+		deliveryOrder.setPriorityDate(null);
+		deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+		deliveryOrder.setUserCreator(user);
+		deliveryOrder.setUserUpdater(user);
+		deliveryOrder.setUserClient(userClient);
+
+		DeliveryOrder saved = deliveryOrderRepository.save(deliveryOrder);
+
+		// Este numero debe ser generado automaticamente
+		long newBatch = BATCH_START + saved.getId();
+		String newBatchString = String.valueOf(newBatch);
+
+		saved.setBatch(newBatchString);
+		deliveryOrderRepository.save(saved);
+	}
+
+	@Override
+	public PageResponse<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
+			String batch,
+			LocalDateTime startDate,
+			LocalDateTime endDate,
+			String userClientName,
+			OrderStatus status,
+			Pageable pageable) {
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(batch, startDate, endDate, status,
+				userClientName, pageable);
+
+		List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
+				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+						.buildDeliveryOrderListResponse())
+				.toList();
+
+		PageResponse<DeliveryOrderListResponse> pageResponse = new PageResponse<>(
+				result,
+				deliveryOrders.getNumber(),
+				deliveryOrders.getSize(),
+				deliveryOrders.getTotalElements(),
+				deliveryOrders.getTotalPages(),
+				deliveryOrders.hasNext(),
+				deliveryOrders.hasPrevious());
+
+		return pageResponse;
+	}
+
+	@Override
+	public PageResponse<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
+			String batch,
+			LocalDateTime startDate,
+			LocalDateTime endDate,
+			String userClientName,
+			Pageable pageable) {
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(batch, startDate, endDate,
+				userClientName, pageable);
+
+		List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
+				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+						.buildDeliveryOrderListResponse())
+				.toList();
+
+		PageResponse<DeliveryOrderListResponse> pageResponse = new PageResponse<>(
+				result,
+				deliveryOrders.getNumber(),
+				deliveryOrders.getSize(),
+				deliveryOrders.getTotalElements(),
+				deliveryOrders.getTotalPages(),
+				deliveryOrders.hasNext(),
+				deliveryOrders.hasPrevious());
+
+		return pageResponse;
+	}
+
+	@Override
+	public PageResponse<DeliveryOrderClientListResponse> findAllDeliveryOrdesByClientId(Long id, String batch,
+			LocalDateTime startDate, LocalDateTime endDate, OrderStatus status, Pageable pageable) {
+
+		if (id == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByUserClientId(id, batch, startDate,
+				endDate,
+				status, pageable);
+
+		List<DeliveryOrderClientListResponse> result = deliveryOrders.getContent().stream().map(
+				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+						.buildDeliveryOrderClientListResponse())
+				.toList();
+
+		PageResponse<DeliveryOrderClientListResponse> pageResponse = new PageResponse<>(
+				result,
+				deliveryOrders.getNumber(),
+				deliveryOrders.getSize(),
+				deliveryOrders.getTotalElements(),
+				deliveryOrders.getTotalPages(),
+				deliveryOrders.hasNext(),
+				deliveryOrders.hasPrevious());
+
+		return pageResponse;
+
+	}
+
+	@Override
+	public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
+		if (id == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+			throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
+		}
+
+		return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+				.buildDeliveryOrderDetailsResponse();
+	}
+
+	@Override
+	public DeliveryOrderClientDetailsResponse findDeliveryOrderByIdAndValidateUserClient(Long id, Long id_user) {
+		if (id == null || id_user == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+			throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
+		}
+
+		User user = userRepository.findById(id_user)
+				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+		boolean isOnlyUserRole = user.getRoles().size() == 1 &&
+				user.getRoles().stream()
+						.anyMatch(r -> "ROLE_USER".equals(r.getName()));
+
+		// System.out.println(isOnlyUserRole);
+		// System.out.println(user.getRoles());
+		// System.out.println(user.getRoles().size());
+
+		// System.out.println(user.getId());
+		// System.out.println(deliveryOrder.getUserClient().getId());
+		// System.out.println(deliveryOrder.getUserClient().getId().equals(user.getId()));
+
+		// Si el usuario tiene solamente el rol de USER, entonces solamente podra ver
+		// una orden cuyo userClient sea el mismo usuario que ha iniciado sesión
+		if (isOnlyUserRole) {
+			if (deliveryOrder.getUserClient().getId().equals(user.getId())) {
+				return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+						.buildDeliveryOrderClientDetailsResponse();
+			} else {
+				throw new BusinessException(
+						ResponseStatus.CONFLICT,
+						"El usuario no es el cliente de la orden de entrega");
+			}
+		} else {
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"El usuario no tiene el rol de cliente");
+		}
+
+	}
+
+	@Override
+	public void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user) {
+
+		if (id == null || limitDate == null || id_user == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		User user = userRepository.findById(id_user)
+				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+		deliveryOrder.setLimitDate(limitDate);
+		deliveryOrder.setUserUpdater(user);
+
+		deliveryOrderRepository.save(deliveryOrder);
+	}
+
+	// TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
+	// SOLAMENTE SI TODAS LAS LINEAS DE ENTREGAS TIENEN EL ESTADO READY
+
+	// @Override
+	// public void changeStatusOrderToCanceledById(Long id, Long id_user) {
+	// if (id == null || id_user == null) {
+	// throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+	// }
+
+	// User user = userRepository.findById(id_user)
+	// .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El
+	// usuario no existe"));
+
+	// DeliveryOrder deliveryOrder =
+	// deliveryOrderRepository.findById(id).orElseThrow(
+	// () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no
+	// existe"));
+
+	// if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
+	// && deliveryOrder.getOrderStatus() != OrderStatus.READY &&
+	// deliveryOrder.getOrderStatus() != OrderStatus.CANCELED) {
+	// throw new BusinessException(ResponseStatus.CONFLICT,
+	// "La orden de entrega no puede ser cancelada");
+	// }
+
+	// deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
+	// deliveryOrder.setUserUpdater(user);
+	// deliveryOrderRepository.save(deliveryOrder);
+	// }
+
+	@Override
+	@Transactional
+	public void cancelDeliveryOrderById(Long id, Long id_user) {
+		if (id == null || id_user == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		User user = userRepository.findById(id_user)
+				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+		// TODO: MÁS ERRORES
+		if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
+			throw new BusinessException(ResponseStatus.CONFLICT,
+					"La orden de entrega ya ha sido entregada");
+		}
+
+		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+			throw new BusinessException(ResponseStatus.CONFLICT,
+					"La orden de entrega ha sido cancelada");
+		}
+
+		// TODO: ESTE MÉTODO DEBE "BORRAR" UNA ORDEN DE ENTREGA BAJO CIERTAS CONDICIONES
+		// SI LO BORRA, DEBE CREAR UN NUEVO LOTE DE STOCK CON LA SUMATORIA DE LAS
+		// CANTIDADES ENTREGADAS DE LAS LINEAS DE ENTREGA QUE ESTAN EN MODO READY,
+		// PENDING Y EXCEEDED, CAMBIA EL ESTADO DE ESAS LINEAS A CANCELED
+
+		// SI HAY LINEAS DE ENTREGA QUE TIENEN EL ESTADO DELIVERED, NO DEBEN SER
+		// ALTERADAS Y NO LA ORDEN NO PODRA TENER EL ESTADO CANCELED
+
+
+		// RECORDAR QUE MISSING ES EL ESTADO CUANDO UNA LINEA DE ENTREGA SE PIERDE LUEGO
+		// DE SER ENTREGADA, SI TIENE EL ESTADO MISSING TAMPOCO PODRÁ SER CANCELADA
+
+
+		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
+		
+		boolean hasDeliveredOrMissing = deliveryLines.stream()
+				.anyMatch(dl -> dl.getLineStatus() == LineStatus.DELIVERED ||
+						dl.getLineStatus() == LineStatus.MISSING);
+
+		// SI NO HAY NINGUNA LINEA DE ENTREGA
+		if (deliveryLines.isEmpty()) {
+			throw new BusinessException(ResponseStatus.CONFLICT, "No hay lineas de entrega");
+		}
+
+		// Estados permitidos que debe tener la linea de entrega
+		List<LineStatus> linesStatus = Arrays.asList(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
+
+		// Nueva cantidad que se almacenara en el almacen
+		Integer newQuantityReceived = 0;
+
+		// Solamente alterara el estado de las lineas de entrega que tengan los estados mencionados
+		// Las demás lineas de entrega no se alteran (estado MISSING, DELIVERED, CANCELED)
+		for (DeliveryLine deliveryLine : deliveryLines) {
+			if (linesStatus.contains(deliveryLine.getLineStatus())) {
+				newQuantityReceived += deliveryLine.getDeliveredQuantity();
+
+				deliveryLine.setLineStatus(LineStatus.CANCELED);
+				deliveryLine.setDeliveredQuantity(0);
+				deliveryLine.setPendingQuantity(deliveryLine.getRequiredQuantity());
+				deliveryLine.setUserUpdater(user);
+
+				deliveryLineRepository.save(deliveryLine);
+			}
+		}
+
+		// Verificar que si hay lineas de entrega que tiene el estado DELIVERED o MISSING, ya no se podra cambiar el estado a CANCELED
+		if (!deliveryLines.stream().anyMatch(deliveryLine -> deliveryLine.getLineStatus() == LineStatus.DELIVERED || deliveryLine.getLineStatus() == LineStatus.MISSING)) {
+			deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
+		}
+
+		// Operacion si las lineas de entrega restantes tienen el estado DELIVERED
+		for (DeliveryLine deliveryLine : deliveryLines) {
+			if (deliveryLine.getLineStatus() == LineStatus.DELIVERED) {
+				deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+			}
+		}
+
+		deliveryOrder.setUserUpdater(user);
+		deliveryOrderRepository.save(deliveryOrder);
+	}
+
+	@Override
+	public void sendDeliveryOrderById(Long id, Long id_user) {
+		if (id == null || id_user == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		User user = userRepository.findById(id_user)
+				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
+				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+		// TODO: MÁS ERRORES
+		if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
+			throw new BusinessException(ResponseStatus.CONFLICT,
+					"La orden de entrega ya ha sido entregada");
+		}
+
+		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+			throw new BusinessException(ResponseStatus.CONFLICT,
+					"La orden de entrega ha sido cancelada");
+		}
+
+		// VERIFICA QUE TODAS LAS LINEAS DE ENTREGA ASOCIADAS A ESTA ORDEN DE ENTREGA
+		// TENGAN EL ESTADO READY, ADEMÁS DEL ESTADO DELIVERED
+
+		// Ninguna linea de entrega debe tener el estado "PENDING", "EXCEEDED"
+		// Estados permitidos: "READY", "DELIVERED", "CANCELED", "MISSING"
+		verifyStatusOrderLinesByDeliveryOrderId(id,
+				Arrays.asList(LineStatus.READY, LineStatus.DELIVERED, LineStatus.CANCELED, LineStatus.MISSING), "No puedes entregar esta orden de entrega");
+
+		// CONSTRUIR UN METODO PARA ACTUALIZAR EL ESTADO DE UNA ORDEN DE ENTREGA DE
+		// FORMA AUTOMATICA CUANDO TODAS LAS LINEAS DE ENTREGA TENGAN EL ESTADO
+		// DELIVERED, EN DELIVERYLINESERVICE
+
+		// ESTO CAMBIARA EL ESTADO DE TODAS LAS LINEAS QUE TENGAN LOS ESTADOS ESPECIFICADOS
+		// A DELIVERED
+		changeDeliveryLinesStatusByDeliveryOrderId(id, Arrays.asList(LineStatus.READY));
+
+		deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+		deliveryOrder.setUserUpdater(user);
+		deliveryOrderRepository.save(deliveryOrder);
+	}
+
+	// Verifica que todas las lineas de entrega que pertenecen a una orden de
+	// entrega tenga el estado lineStatus, si lo tienen no debe devolver nada, de lo
+	// contrario un mensaje de error
+	private void verifyStatusOrderLinesByDeliveryOrderId(Long id, List<LineStatus> linesStatus, String message) {
+		if (id == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
+
+		// SI NO HAY NINGUNA LINEA DE ENTREGA
+		if (deliveryLines.isEmpty()) {
+			throw new BusinessException(ResponseStatus.CONFLICT, "No hay lineas de entrega");
+		}
+
+		for (DeliveryLine deliveryLine : deliveryLines) {
+			// SI TODAS LAS LINEAS DE ENTREGA NO TIENEN UNO DE LOS ESTADOS QUE SE ENCUENTRAN
+			// EN EL ARRAY
+			if (!linesStatus.contains(deliveryLine.getLineStatus())) {
+				throw new BusinessException(ResponseStatus.CONFLICT,
+						message);
+			}
+		}
+	}
+
+	private void changeDeliveryLinesStatusByDeliveryOrderId(Long id, List<LineStatus> linesStatus) {
+		if (id == null) {
+			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
+
+		// ¿QUE PASARA CON LAS LINEAS DE ENTREGA QUE TENGAN EL ESTADO MISSING O CANCELED?
+		// RESPUESTA: SE MANTIENEN EL MISMO ESTADO
+		for (DeliveryLine deliveryLine : deliveryLines) {
+			if (linesStatus.contains(deliveryLine.getLineStatus())) {
+				deliveryLine.setLineStatus(LineStatus.DELIVERED);
+				deliveryLineRepository.save(deliveryLine);
+			}
+
+		}
+	}
+
 }
