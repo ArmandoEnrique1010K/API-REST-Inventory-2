@@ -22,6 +22,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientDetailsResponse;
@@ -29,6 +30,10 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderCli
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrder_RegionRepository;
+import com.pe.inventoryapp.backend.movement.model.data.MovementType;
+import com.pe.inventoryapp.backend.movement.model.entity.Movement;
+import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
@@ -39,6 +44,7 @@ import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 
 @Service
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
@@ -60,6 +66,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 	@Autowired
 	private StockLotRepository stockLotRepository;
+
+	@Autowired
+	private MovementRepository movementRepository;
+
+	@Autowired
+	private Product_DeliveryOrder_RegionRepository product_DeliveryOrder_RegionRepository;
+
 
 	private static final long BATCH_START = 10000L;
 
@@ -340,10 +353,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// SI HAY LINEAS DE ENTREGA QUE TIENEN EL ESTADO DELIVERED, NO DEBEN SER
 		// ALTERADAS Y NO LA ORDEN NO PODRA TENER EL ESTADO CANCELED
 
-
 		// RECORDAR QUE MISSING ES EL ESTADO CUANDO UNA LINEA DE ENTREGA SE PIERDE LUEGO
 		// DE SER ENTREGADA, SI TIENE EL ESTADO MISSING TAMPOCO PODRÁ SER CANCELADA
-
 
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
 
@@ -357,8 +368,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		}
 
 		// Estados permitidos que debe tener la linea de entrega
-		EnumSet<LineStatus> cancelableStates =
-				EnumSet.of(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
+		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
 
 		// NOTA: UNA ORDEN DE ENTREGA TIENE VARIOS PRODUCTOS A LA VEZ
 		// Nueva cantidad que se almacenara en el almacen
@@ -366,19 +376,23 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		Map<Long, Integer> newStockRestoredQuantity = new HashMap<>();
 		// Integer restoredQuantity = 0;
 
-		// Solamente alterara el estado de las lineas de entrega que tengan los estados mencionados
-		// Las demás lineas de entrega no se alteran (estado MISSING, DELIVERED, CANCELED)
+		// Solamente alterara el estado de las lineas de entrega que tengan los estados
+		// mencionados
+		// Las demás lineas de entrega no se alteran (estado MISSING, DELIVERED,
+		// CANCELED)
 		for (DeliveryLine deliveryLine : deliveryLines) {
 			if (cancelableStates.contains(deliveryLine.getLineStatus())) {
 
-				Long productId =deliveryLine.getProduct().getId();
+				Long productId = deliveryLine.getProduct().getId();
 
-				// Verificar que si no existe el key con el id del producto en newStockRestoredQuantity
+				// Verificar que si no existe el key con el id del producto en
+				// newStockRestoredQuantity
 				if (!newStockRestoredQuantity.containsKey(productId)) {
 					newStockRestoredQuantity.put(productId, deliveryLine.getDeliveredQuantity());
 				} else {
 					// Si el key existe, se suman las cantidades
-					newStockRestoredQuantity.put(productId, newStockRestoredQuantity.get(productId) + deliveryLine.getDeliveredQuantity());
+					newStockRestoredQuantity.put(productId,
+							newStockRestoredQuantity.get(productId) + deliveryLine.getDeliveredQuantity());
 				}
 
 				deliveryLine.setLineStatus(LineStatus.CANCELED);
@@ -387,10 +401,24 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				deliveryLine.setUserUpdater(user);
 
 				deliveryLineRepository.save(deliveryLine);
+
+				// CREAR MOVIMIENTOS POR CADA LINEA DE ENTREGA
+				Movement movement = new Movement();
+				movement.setQuantity(deliveryLine.getDeliveredQuantity());
+				movement.setComment("Se cancelo la linea de entrega");
+				movement.setDeliveryLine(deliveryLine);
+				movement.setProduct(deliveryLine.getProduct());
+				movement.setUser(user);
+				movement.setStockLotReceiver(null);
+				movement.setStockLotReceiver(null);
+				movement.setMovementType(MovementType.CANCELED);
+
+				movementRepository.save(movement);
 			}
 		}
 
-		// Verificar que si hay lineas de entrega que tiene el estado DELIVERED o MISSING, ya no se podra cambiar el estado a CANCELED
+		// Verificar que si hay lineas de entrega que tiene el estado DELIVERED o
+		// MISSING, ya no se podra cambiar el estado a CANCELED
 		if (hasDeliveredOrMissing) {
 			deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
 		} else {
@@ -406,8 +434,11 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 			Long productId = entry.getKey();
 
-			Product product = productRepository.findById(
-					productId)
+			if (productId == null) {
+				throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			}
+
+			Product product = productRepository.findById(productId)
 					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
 			Integer restoredQuantity = entry.getValue();
@@ -432,11 +463,51 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			stockLot.setProduct(product);
 			stockLot.setCompany(company);
 			stockLotRepository.save(stockLot);
+
+			// CREAR UN NUEVO MOVIMIENTO POR CADA PRODUCTO
+
+			Movement movement = new Movement();
+			movement.setQuantity(restoredQuantity);
+			movement.setComment("Devolución");
+			movement.setStockLotReceiver(stockLot);
+			movement.setProduct(product);
+			movement.setUser(user);
+			movement.setDeliveryLine(null);
+			movement.setMovementType(MovementType.CANCELED);
+
+			movementRepository.save(movement);
+
 		}
 
-		deliveryOrder.setUserUpdater(user);
-		deliveryOrderRepository.save(deliveryOrder);
+		// TODO: ALTERAR EL CAMPO DE PRODUCT_DELIVERYORDER_REGION
+		recalculateProductDeliveryOrderRegions(deliveryOrder.getId());
+			deliveryOrder.setUserUpdater(user);
+			deliveryOrderRepository.save(deliveryOrder);
+
 	}
+  private void recalculateProductDeliveryOrderRegions(Long productDeliveryOrderId) {
+    List<Product_DeliveryOrder_Region> regions = product_DeliveryOrder_RegionRepository
+        .findAllByProduct_DeliveryOrderId(productDeliveryOrderId);
+
+    for (Product_DeliveryOrder_Region entity : regions) {
+
+      // Solamente hay un campo para la cantidad total requerida
+      Integer requiredTotal = deliveryLineRepository.sumRequiredByProductDeliveryOrderAndRegion(
+          productDeliveryOrderId,
+          entity.getRegion().getId());
+
+      entity.setRequiredTotalQuantity(requiredTotal);
+    }
+
+    // TODO: ¿FALTA ACTUALIZAR LA CANTIDAD ENTREGADA?
+    if (regions == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR,
+          "No se encontraron regiones para el product_delivery_order");
+    }
+
+    product_DeliveryOrder_RegionRepository.saveAll(regions);
+
+  }
 
 	@Override
 	@Transactional
@@ -483,7 +554,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					l.setUserUpdater(user);
 				});
 
-
 		boolean allCompleted = deliveryLines.stream()
 				.allMatch(l -> l.getLineStatus() == LineStatus.DELIVERED ||
 						l.getLineStatus() == LineStatus.CANCELED ||
@@ -495,16 +565,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			deliveryOrderRepository.save(deliveryOrder);
 		}
 
-
-		
-
 		// CONSTRUIR UN METODO PARA ACTUALIZAR EL ESTADO DE UNA ORDEN DE ENTREGA DE
 		// FORMA AUTOMATICA CUANDO TODAS LAS LINEAS DE ENTREGA TENGAN EL ESTADO
 		// DELIVERED, EN DELIVERYLINESERVICE
 
-		// ESTO CAMBIARA EL ESTADO DE TODAS LAS LINEAS QUE TENGAN LOS ESTADOS ESPECIFICADOS
+		// ESTO CAMBIARA EL ESTADO DE TODAS LAS LINEAS QUE TENGAN LOS ESTADOS
+		// ESPECIFICADOS
 		// A DELIVERED
-		// changeDeliveryLinesStatusByDeliveryOrderId(id, Arrays.asList(LineStatus.READY));
+		// changeDeliveryLinesStatusByDeliveryOrderId(id,
+		// Arrays.asList(LineStatus.READY));
 
 		// deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
 		// deliveryOrder.setUserUpdater(user);
@@ -526,6 +595,5 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					"No puedes entregar esta orden de entrega");
 		}
 	}
-
 
 }
