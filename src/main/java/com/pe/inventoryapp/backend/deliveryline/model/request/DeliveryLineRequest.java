@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -28,7 +29,8 @@ public class DeliveryLineRequest {
   // private Long idDeliveryOrder;
   
   @Nullable
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @JsonFormat (pattern = "yyyy-MM-dd HH:mm:ss")
+  @FutureOrPresent(message = "La fecha de entrega debe ser en el presente o en el futuro")
   private LocalDateTime limitDate;
 
   // @NotNull(message = "Seleccione un producto")

@@ -332,7 +332,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
     // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
-    deliveryOrder.setLimitDate(getClosestLimitDate(deliveryOrder_id));
+    deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder_id));
     deliveryOrderRepository.save(deliveryOrder);
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
@@ -448,7 +448,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
       // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
-      deliveryOrder.setLimitDate(getClosestLimitDate(deliveryOrder.getId()));
+      deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder.getId()));
 
       // Operacion para verificar si todas las lineas de entrega de una orden de
       // entrega han sido entregadas, es decir si todas tiene el estado READY
@@ -531,7 +531,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .orElse(null); // o lanza excepción
   }
 
-  // TODO: CONTINUAR A PARTIR DE AQUI
+  // TODO: PROBAR ESTE MÉTODO EN POSTMAN PARA REPORTAR UNA PARTE DE UNA LINEA DE ENTREGA COMO PERDIDA
 
   // ESTO ES UN MOVIMIENTO DE CANCELACIÓN
   @Override
@@ -667,6 +667,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
+    Integer returnedQuantity = deliveryLineAlterRequest.getQuantity();
+
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
         deliveryOrderId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
@@ -686,7 +688,25 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ESTA LINEA DE ENTREGA, PORQUE AL RETORNAR UNA CANTIDAD, SE DEBE ALMANCENAR EN
     // UN NUEVO STOCK LOT
 
-    deliveryLine.setLineStatus(LineStatus.CANCELED);
+    // AQUI NO DEBE CAMBIAR EL ESTADO A CANCELED, SINO QUE DEBE COMPARAR SI
+    // ESTA LINEA DE ENTREGA TIENE CANTIDAD ENTREGADA
+    if (deliveryLine.getDeliveredQuantity() - returnedQuantity == deliveryLine.getRequiredQuantity()) {
+      deliveryLine.setLineStatus(LineStatus.READY);
+    }
+
+    if (deliveryLine.getDeliveredQuantity() - returnedQuantity > deliveryLine.getRequiredQuantity()) {
+      deliveryLine.setLineStatus(LineStatus.EXCEEDED);
+    }
+
+    if (deliveryLine.getDeliveredQuantity() - returnedQuantity < deliveryLine.getRequiredQuantity()) {
+      deliveryLine.setLineStatus(LineStatus.PENDING);
+    }
+
+    deliveryLine.setDeliveredQuantity(deliveryLine.getDeliveredQuantity() - returnedQuantity);
+    deliveryLine.setPendingQuantity(deliveryLine.getPendingQuantity() + returnedQuantity);
+    
+
+
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
@@ -697,7 +717,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
     // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
-    deliveryOrder.setLimitDate(getClosestLimitDate(deliveryOrder.getId()));
+    deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder.getId()));
 
     // Operacion para verificar si todas las lineas de entrega de una orden de
     // entrega han sido entregadas, es decir si todas tiene el estado READY
@@ -887,9 +907,11 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     product_DeliveryOrderRepository.save(product_DeliveryOrder);    
 
     // ===== Recalcular orden =====
-    deliveryOrder.setLimitDate(
+    deliveryOrder.setPriorityDate(
         getClosestLimitDate(deliveryOrder.getId()));
 
+    // TODO: Verificar si todas las lineas de entrega de una orden de
+    // entrega han sido entregadas, es decir si todas tiene el estado READY
     if (deliveryLineRepository.allLinesAreReady(deliveryOrder.getId())) {
       deliveryOrder.setOrderStatus(OrderStatus.READY);
     } else {

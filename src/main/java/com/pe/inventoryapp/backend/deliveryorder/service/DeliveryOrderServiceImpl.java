@@ -485,6 +485,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			deliveryOrderRepository.save(deliveryOrder);
 
 	}
+
+
   private void recalculateProductDeliveryOrderRegions(Long productDeliveryOrderId) {
     List<Product_DeliveryOrder_Region> regions = product_DeliveryOrder_RegionRepository
         .findAllByProduct_DeliveryOrderId(productDeliveryOrderId);
@@ -552,7 +554,20 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				.forEach(l -> {
 					l.setLineStatus(LineStatus.DELIVERED);
 					l.setUserUpdater(user);
+
+					Movement movement = new Movement();
+					movement.setQuantity(l.getDeliveredQuantity());
+					movement.setComment("Se entrego la linea de entrega");
+					movement.setDeliveryLine(l);
+					movement.setProduct(l.getProduct());
+					movement.setUser(user);
+					movement.setStockLotEmitter(null);			
+					movement.setStockLotReceiver(null);
+					movement.setMovementType(MovementType.DELIVERED);
+					movementRepository.save(movement);
 				});
+
+		
 
 		boolean allCompleted = deliveryLines.stream()
 				.allMatch(l -> l.getLineStatus() == LineStatus.DELIVERED ||

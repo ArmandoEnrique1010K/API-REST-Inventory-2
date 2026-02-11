@@ -83,6 +83,8 @@ public class DeliveryLineController {
       @RequestParam(required = false) LineStatus lineStatus,
       @RequestParam(required = false) String location    
     ) {
+      // TODO: AGREGAR UN CAMPO PARA AGRUPAR POR REGION
+      // TODO: PODRIA CREAR UNA ENTIDAD SUB-REGION
     Pageable pageable = PageRequest.of(page, 20);
     PageResponse<DeliveryLineListResponse> deliveryOrders = deliveryLineService
         .findAllDeliveryLinesByDeliveryOrderIdPageable(
@@ -146,6 +148,7 @@ public class DeliveryLineController {
 
 
 
+  // TODO: PROBAR ESTE ENDPOINT
   @PutMapping("/{id}/missing")
   public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
@@ -158,6 +161,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  // TODO: PROBAR ESTE ENDPOINT
   @PutMapping("/{id}/return")
   public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
