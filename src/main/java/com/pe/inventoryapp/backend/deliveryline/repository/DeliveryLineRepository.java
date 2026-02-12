@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.antlr.v4.runtime.atn.SemanticContext.AND;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,11 +51,13 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   // List<DeliveryLine> findAllByDeliveryOrderId(Long idDeliveryOrder);
 
   // Busqueda de la fecha de entrega mas cercana (prioridad de entrega de la linea de entrega cuyo estado sea PENDING)
+
   @Query("""
         SELECT MIN(dl.limitDate)
         FROM DeliveryLine dl
         WHERE dl.deliveryOrder.id = :id
-          AND dl.lineStatus = 'PENDING'
+          AND dl.lineStatus IN ('PENDING', 'EXCEEDED')
+
         ORDER BY dl.limitDate ASC
       """)
   Optional<LocalDateTime> findClosestLimitDate(Long id);
@@ -64,13 +67,13 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           SELECT COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
           JOIN dl.product p
-          JOIN p.productDeliveryOrders pdo
-          WHERE pdo.id = :productDeliveryOrderId
+          JOIN dl.deliveryOrder do
+          WHERE do.id = :deliveryOrderId
           AND p.id = :productId
           AND dl.lineStatus != 'CANCELED'
       """)
-  Integer sumRequiredQuantityByProduct_DeliveryOrder(
-      @Param("productDeliveryOrderId") Long productDeliveryOrderId,
+  Integer sumRequiredQuantityByDeliveryOrder_Product(
+      @Param("deliveryOrderId") Long deliveryOrderId,
       @Param("productId") Long productId);
 
   @Query("""
@@ -78,7 +81,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         FROM DeliveryLine dl
         WHERE dl.product_DeliveryOrder.id = :pdoId
           AND dl.location.region.id = :regionId
-          AND dl.lineStatus != 'CANCELED'
+          AND dl.lineStatus <> 'CANCELED'
       """)
   Integer sumRequiredByProductDeliveryOrderAndRegion(
       @Param("pdoId") Long productDeliveryOrderId,

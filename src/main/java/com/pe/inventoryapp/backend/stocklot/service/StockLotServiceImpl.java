@@ -112,10 +112,6 @@ public class StockLotServiceImpl implements StockLotService{
     Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByProductId(id_product);
     Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByProductId(id_product);
 
-    // TODO: VERIFICAR SI ESTA CAMPO ES NECESARIO, PORQUE SOLAMENTE SUMARIA UN 0 PORQUE AUN NO SE HA ENTREGADO
-    // Integer sumatoryStockQuantityDelivered = stockLotRepository.sumQuantityDeliveredByProductId(id_product);
-    // product.setTotalQuantityDelivered(sumatoryStockQuantityDelivered);
-
     product.setTotalQuantityReceived(sumatoryStockQuantityReceived);
     product.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
 

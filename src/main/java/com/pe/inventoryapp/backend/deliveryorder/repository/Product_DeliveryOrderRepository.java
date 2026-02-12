@@ -30,14 +30,4 @@ public interface Product_DeliveryOrderRepository extends JpaRepository<Product_D
         AND p.status = true
       """)
   boolean existsByDeliveryOrderIdAndProductId(Long deliveryOrderId, Long productId);
-
-  // TODO: PORQUE NO COLOCAR "        AND p.status = true"
-  // @Query("""
-  //       SELECT COUNT(p) > 0
-  //       FROM Product_DeliveryOrder p
-  //       WHERE p.id = :id
-  //       AND p.deliveryOrder.id = :deliveryOrderId
-  //     """)
-  // boolean existsByIdAndDeliveryOrderId(Long id, Long deliveryOrderId);
-
 }

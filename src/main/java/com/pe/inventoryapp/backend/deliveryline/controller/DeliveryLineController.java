@@ -72,9 +72,9 @@ public class DeliveryLineController {
   
 
   // TODO: PODRIA AÑADIR UN PARAMETRO PARA LISTAR POR PRODUCTOS
-  @GetMapping("/delivery-order/{productDeliveryOrderId}")
+  @GetMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
-      @PathVariable Long productDeliveryOrderId, 
+      @PathVariable Long deliveryOrderId, 
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) Integer minRequiredQuantity,
       @RequestParam(required = false) Integer maxRequiredQuantity,
@@ -88,10 +88,11 @@ public class DeliveryLineController {
     Pageable pageable = PageRequest.of(page, 20);
     PageResponse<DeliveryLineListResponse> deliveryOrders = deliveryLineService
         .findAllDeliveryLinesByDeliveryOrderIdPageable(
-            productDeliveryOrderId,
+            deliveryOrderId,
             minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, pageable);
     DataResponse<PageResponse<DeliveryLineListResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, deliveryOrders);
+
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
@@ -104,8 +105,6 @@ public class DeliveryLineController {
   }
 
 
-
-  // TODO: FALTA PROBAR LA SUMATORIA DE LOS TOTALES CUANDO HAYA CANTIDAD ENTREGADA EN UNA LINEA DE ENTREGA
   @PutMapping("/{id}")
   public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id, @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
     BindingResult result) {
@@ -119,6 +118,10 @@ public class DeliveryLineController {
         "Se actualizo la linea de entrega");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+
+  // TODO: FALTA PROBAR LA SUMATORIA DE LOS TOTALES CUANDO HAYA CANTIDAD ENTREGADA
+  // EN UNA LINEA DE ENTREGA
 
   // RECORDAR QUE SOLAMENTE PODRA BORRAR UNA LINEA DE ENTREGA SI NO HAY CANTIDAD
   // ENTREGADA

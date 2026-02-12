@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.deliveryline.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,7 +40,10 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement_StockLot;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.movement.repository.Movement_StockLotRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.repository.ProductRepository;
+import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
+import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -77,6 +81,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   @Autowired
   private Movement_StockLotRepository movement_StockLotRepository;
+
+  @Autowired
+  private ProductRepository productRepository;
+
+  @Autowired
+  private CompanyRepository companyRepository;
 
   @Override
   public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_product_deliveryOrder, Long id_user) {
@@ -161,8 +171,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrderRepository.save(deliveryOrder);
 
     // 3° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE
-    // ENTREGA POR ORDEN DE ENTREGA
-    Integer totalRequired = deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(id_product_deliveryOrder, id_product);
+    // ENTREGA POR ORDEN DE ENTREGA Y PRODUCTO
+    Integer totalRequired = deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(id_deliveryOrder,
+        id_product);
 
     product_DeliveryOrder.setRequiredQuantityTotal(totalRequired);
 
@@ -320,20 +331,20 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // Llamar al método auxiliar para actualizar la linea de entrega
-    updateLineStatus(deliveryLine);
+    updateLineStatus(deliveryLine, deliveryOrder);
     deliveryLineRepository.save(deliveryLine);
+
+    // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
+    deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder_id));
+    deliveryOrderRepository.save(deliveryOrder);
 
     // Recalcular la suma de las cantidades requeridas de las lineas de entrega
 
     // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
     product_DeliveryOrder.setRequiredQuantityTotal(
-        deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(product_DeliveryOrder_id, product.getId()));
+        deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(deliveryOrder_id, product.getId()));
 
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
-
-    // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
-    deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder_id));
-    deliveryOrderRepository.save(deliveryOrder);
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
     recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
@@ -353,28 +364,36 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movementRepository.save(movement);
   }
 
-  private void updateLineStatus(DeliveryLine line) {
+  // Nota: Tambien actualiza el estado de la orden de entrega dependiendo del
+  // estado de las lineas de entrega
+  private void updateLineStatus(DeliveryLine line, DeliveryOrder order) {
 
     int required = line.getRequiredQuantity();
     int delivered = line.getDeliveredQuantity();
+    DeliveryOrder deliveryOrder = line.getDeliveryOrder();
 
     if (required > delivered) {
       line.setPendingQuantity(required - delivered);
       line.setLineStatus(LineStatus.PENDING);
+      deliveryOrder.setOrderStatus(OrderStatus.PENDING);
       return;
     }
 
     if (required == delivered) {
       line.setPendingQuantity(0);
       line.setLineStatus(LineStatus.READY);
+      deliveryOrder.setOrderStatus(OrderStatus.READY);
       return;
     }
 
     // required < delivered
     line.setPendingQuantity(required - delivered);
     line.setLineStatus(LineStatus.EXCEEDED);
+    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+
   }
 
+  // TODO: ARREGLAR LA RELACION EN PRODUCT
   // Método para eliminar una linea de entrega (solamente si no hay cantidad
   // entregada o si nunca hubo una relacion con StockLot_DeliveryLine)
   @Override
@@ -419,64 +438,148 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     if (product_DeliveryOrder == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    } else {
-      // TODO: CORREGIR ESTA PARTE, DEBE ELIMINAR LA LINEA DE ENTREGA
-      // TODO: DEBE CREAR UN NUEVO LOTE DE STOCK CON LA SUMATORIA DE LAS CANTIDADES
-      // ENTREGADAS DE LAS LINEAS DE ENTREGA QUE ESTAN EN MODO READY, PENDING Y
-      // DELIVERED
-      // SI HAY CANTIDAD ENTREGADA, ENTONCES YA NO SE PODRA ELIMINAR ESTE CAMPO
-      if (deliveryLine.getDeliveredQuantity() > 0) {
-        throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
-            "No se puede cancelar esta línea porque ya hay una cantidad a entregar");
-      }
-
-
-
-      if (deliveryLine.getLineStatus() == LineStatus.CANCELED) {
-        throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega ya ha sido cancelada");
-      }
-
-      deliveryLine.setLineStatus(LineStatus.CANCELED);
-      deliveryLine.setUserUpdater(user);
-      deliveryLineRepository.save(deliveryLine);
-
-      // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
-      product_DeliveryOrder.setRequiredQuantityTotal(
-          deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(product_DeliveryOrder.getId(), product_DeliveryOrder.getProduct().getId()));
-
-      product_DeliveryOrder.setStatus(false);
-      product_DeliveryOrderRepository.save(product_DeliveryOrder);
-
-      // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
-      deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder.getId()));
-
-      // Operacion para verificar si todas las lineas de entrega de una orden de
-      // entrega han sido entregadas, es decir si todas tiene el estado READY
-      if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
-        deliveryOrder.setOrderStatus(OrderStatus.READY);
-      } else {
-        deliveryOrder.setOrderStatus(OrderStatus.PENDING);
-      }
-
-      deliveryOrderRepository.save(deliveryOrder);
-
-      // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
-      recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
-
-      Movement movement = new Movement();
-      movement.setQuantity(deliveryLine.getDeliveredQuantity());
-      movement.setMovementType(MovementType.CANCELED);
-      movement.setComment("Cancelacion de linea de entrega: " + deliveryLine.getId());
-      movement.setProduct(deliveryLine.getProduct());
-      movement.setUser(user);
-      movement.setStockLotReceiver(null);
-      movement.setStockLotEmitter(null);
-      movement.setDeliveryLine(deliveryLine);
-
-      movementRepository.save(movement);
-
     }
+
+
+    // TODO: ESTO DEBE CREAR UN NUEVO LOTE DE STOCK CON LA CANTIDAD ENTREGADA DE LA LINEA DE ENTREGA QUE SE ESTA CANCELANDO, PERO SOLAMENTE SI HAY CANTIDAD ENTREGADA
+    // TODO: SE ALTERA EL CAMPO DE LA CANTIDAD PENDIENTE A 0, PERO LA CANTIDAD REQUERIDA SE MANTIENE IGUAL PARA LLEVAR UN REGISTRO DE LA CANTIDAD ORIGINAL QUE SE DEBIA ENTREGAR
+
+    if (deliveryLine.getLineStatus() == LineStatus.CANCELED) {
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega ya ha sido cancelada");
+    }
+
+    Integer quantityCanceled = deliveryLine.getDeliveredQuantity();
+
+    if (quantityCanceled > 0) {
+      // throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
+      //     "No se puede cancelar esta línea porque ya hay una cantidad a entregar");
+      storageTempStockLot(deliveryLine);
+    }
+
+    // TODO: SE ESTABLECE EL ESTADO DE LA LINEA DE ENTREGA A CANCELED, PERO NO SE
+    // ELIMINA FISICAMENTE DE LA BASE DE DATOS PARA LLEVAR UN REGISTRO HISTORICO DE
+    // LAS LINEAS DE ENTREGA CANCELED
+    deliveryLine.setPendingQuantity(0);
+    deliveryLine.setDeliveredQuantity(0);
+    deliveryLine.setUserUpdater(user);
+    deliveryLine.setLineStatus(LineStatus.CANCELED);
+    deliveryLineRepository.save(deliveryLine);
+
+    // TODO: ALTERAR LAS CANTIDADES EN PRODUCT
+    Product product = deliveryLine.getProduct();
+
+    product.setTotalQuantityAvailable(product.getTotalQuantityAvailable() + quantityCanceled);
+    product.setTotalQuantityDelivered(product.getTotalQuantityDelivered() - quantityCanceled);
+
+    productRepository.save(product);
+
+
+    // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
+    product_DeliveryOrder.setRequiredQuantityTotal(
+        deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(deliveryOrder.getId(),
+            product_DeliveryOrder.getProduct().getId()));
+
+    product_DeliveryOrder.setStatus(false);
+    product_DeliveryOrderRepository.save(product_DeliveryOrder);
+
+    // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
+    deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder.getId()));
+
+    // Operacion para verificar si todas las lineas de entrega de una orden de
+    // entrega han sido entregadas, es decir si todas tiene el estado READY
+    if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
+      deliveryOrder.setOrderStatus(OrderStatus.READY);
+    } else {
+      deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+    }
+
+    deliveryOrderRepository.save(deliveryOrder);
+
+    // TODO: RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
+    // TODO: NO FUNCIONA POR ALGUNA RAZON
+    // PROBLEMA: NO RECALCULA LAS SUMATORIAS DE LAS CANTIDADES TOTALES POR REGION LUEGO DE ACTUALIZARLA CUANDO SE ELIMINA UNA LINEA DE ENTREGA
+    recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
+
+    Movement movement = new Movement();
+    movement.setQuantity(quantityCanceled);
+    movement.setMovementType(MovementType.CANCELED);
+    movement.setComment("Cancelacion de linea de entrega: " + deliveryLine.getId());
+    movement.setProduct(deliveryLine.getProduct());
+    movement.setUser(user);
+    movement.setStockLotReceiver(null);
+    movement.setStockLotEmitter(null);
+    movement.setDeliveryLine(deliveryLine);
+
+    movementRepository.save(movement);
+
   }
+
+  // Método auxiliar para almacenar un lote de stock temporal con la cantidad entregada de la linea de entrega que se esta cancelando, para luego ser asignado a otra linea de entrega que lo requiera, pero solamente si hay cantidad entregada
+
+  // Se tiene en cuenta que si vuelve a cancelar otra linea de entrega, se almacenara en este mismo lote de stock antes de las 24 horas de su fecha de creación, para luego ser asignado a otra linea de entrega que lo requiera
+  private void storageTempStockLot(DeliveryLine deliveryLine) {
+    Integer deliveredQuantity = deliveryLine.getDeliveredQuantity();
+
+    // 1️⃣ No hacer nada si no hay cantidad entregada
+    if (deliveredQuantity == null || deliveredQuantity <= 0) {
+        return;
+    }
+
+    Company company = companyRepository.findById(1L)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.NOT_FOUND, 
+            "La empresa no existe"
+        ));
+    LocalDateTime last24Hours = LocalDateTime.now().minusHours(24);
+
+    // 2️⃣ Buscar lote temporal activo
+    Optional<StockLot> optionalStockLot = stockLotRepository.findActiveTemporaryStockLot(
+            1L,
+            deliveryLine.getProduct().getId(),
+            last24Hours);
+
+    StockLot stockLot;
+
+    if (optionalStockLot.isPresent()) {
+      // 3️⃣ Si existe → sumar cantidad
+      stockLot = optionalStockLot.get();
+      stockLot.setQuantityReceived(stockLot.getQuantityReceived() + deliveredQuantity);
+      stockLot.setQuantityAvailable(stockLot.getQuantityAvailable() + deliveredQuantity);
+    } else {
+      // 4️⃣ Si no existe → crear nuevo lote temporal
+      stockLot = new StockLot();
+
+      // Obtiene la fecha de hoy por partes
+      LocalDateTime now = LocalDateTime.now();
+      String date = now.getDayOfMonth() + "/" + now.getMonthValue() + "/" + now.getYear();
+      String time = now.getHour() + ":" + now.getMinute() + ":" + now.getSecond();
+
+      // Genera automaticamente el batch
+      String batch = "LOT-" + deliveryLine.getProduct().getName().replace(" ", "-") + "-" + date + "-" + time;
+
+      stockLot.setBatch(batch);
+      stockLot.setCompany(company);
+      stockLot.setProduct(deliveryLine.getProduct());
+      stockLot.setQuantityReceived(deliveredQuantity);
+      stockLot.setQuantityAvailable(deliveredQuantity);
+      stockLot.setQuantityDelivered(0);
+      stockLot.setQuantityLost(0);
+      stockLot.setQuantityRecovered(0);
+      stockLot.setZeroStock(false);
+      stockLot.setTemporary(true);
+    }
+
+    stockLotRepository.save(stockLot);
+
+    // 5️⃣ Registrar relación
+    StockLot_DeliveryLine stockLot_DeliveryLine = new StockLot_DeliveryLine();
+    stockLot_DeliveryLine.setStockLot(stockLot);
+    stockLot_DeliveryLine.setDeliveryLine(deliveryLine);
+    stockLot_DeliveryLine.setQuantityUsed(deliveredQuantity);
+
+    stockLot_DeliveryLineRepository.save(stockLot_DeliveryLine);
+  }
+
 
   @Override
   public void sendDeliveryLineById(Long id, Long id_user_authenticated) {
@@ -531,7 +634,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .orElse(null); // o lanza excepción
   }
 
-  // TODO: PROBAR ESTE MÉTODO EN POSTMAN PARA REPORTAR UNA PARTE DE UNA LINEA DE ENTREGA COMO PERDIDA
+  // TODO: PROBAR ESTE MÉTODO EN POSTMAN PARA REPORTAR UNA PARTE DE UNA LINEA DE
+  // ENTREGA COMO PERDIDA
 
   // ESTO ES UN MOVIMIENTO DE CANCELACIÓN
   @Override
@@ -597,7 +701,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
     product_DeliveryOrder.setRequiredQuantityTotal(
-        deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(product_DeliveryOrder.getId(), product_DeliveryOrder.getProduct().getId()));
+        deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(deliveryOrder.getId(),
+            product_DeliveryOrder.getProduct().getId()));
 
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
@@ -615,7 +720,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   }
 
-
   // ESTRATEGIA DE ACTUALIZACIÓN
   // MÉTODO AUXILIAR DE REPARACIÓN
   private void recalculateProductDeliveryOrderRegions(Long productDeliveryOrderId) {
@@ -630,9 +734,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           entity.getRegion().getId());
 
       entity.setRequiredTotalQuantity(requiredTotal);
+      System.out.println("Region: " + entity.getRegion().getName() + " - Cantidad requerida total: " + requiredTotal);
     }
 
-    // TODO: ¿FALTA ACTUALIZAR LA CANTIDAD ENTREGADA?
     if (regions == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR,
           "No se encontraron regiones para el product_delivery_order");
@@ -704,15 +808,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     deliveryLine.setDeliveredQuantity(deliveryLine.getDeliveredQuantity() - returnedQuantity);
     deliveryLine.setPendingQuantity(deliveryLine.getPendingQuantity() + returnedQuantity);
-    
-
 
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
     // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
     product_DeliveryOrder.setRequiredQuantityTotal(
-        deliveryLineRepository.sumRequiredQuantityByProduct_DeliveryOrder(product_DeliveryOrder.getId(), product_DeliveryOrder.getProduct().getId()));
+        deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(deliveryOrder.getId(),
+            product_DeliveryOrder.getProduct().getId()));
 
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
@@ -750,7 +853,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Override
   public void allocateDeliveryLineById(Long id, DeliveryLineAllocateRequest deliveryLineAllocateRequest,
       Long id_user_authenticated) {
-        
+
     if (id == null || id_user_authenticated == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -762,7 +865,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ===== Línea de entrega =====
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
-    
+
     // ===== Orden de entrega =====
     Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
 
@@ -773,6 +876,16 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
         deliveryOrderId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    // ==== Producto =====
+    Long productId = deliveryLine.getProduct().getId();
+
+    if (productId == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    Product product = productRepository.findById(productId).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
     // ===== Relación producto-orden =====
     Long id_product_deliveryOrder = deliveryLine.getProduct_DeliveryOrder().getId();
@@ -815,9 +928,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           "Uno o más lotes no existen");
     }
 
-    // ===== Validar producto =====
-    Long productId = deliveryLine.getProduct().getId();
-
     for (StockLot stockLot : stockLots) {
       if (!stockLot.getProduct().getId().equals(productId)) {
         throw new BusinessException(
@@ -828,13 +938,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // ===== Validar stock total =====
     int totalAvailable = stockLots.stream()
-            .mapToInt(StockLot::getQuantityAvailable)
-            .sum();
+        .mapToInt(StockLot::getQuantityAvailable)
+        .sum();
 
     if (totalAvailable < quantity) {
-        throw new BusinessException(
-                ResponseStatus.BAD_REQUEST,
-                "Stock insuficiente para la cantidad solicitada");
+      throw new BusinessException(
+          ResponseStatus.BAD_REQUEST,
+          "Stock insuficiente para la cantidad solicitada");
     }
     // ==== Movimiento =====
     Movement movement = new Movement();
@@ -882,36 +992,40 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       movement_StockLotRepository.save(mRelation);
 
       remaining -= used;
-    }    
-
+    }
 
     // ===== Actualizar línea =====
     deliveryLine.setDeliveredQuantity(
-            deliveryLine.getDeliveredQuantity() + quantity);
+        deliveryLine.getDeliveredQuantity() + quantity);
     deliveryLine.setPendingQuantity(
-            deliveryLine.getPendingQuantity() - quantity);
+        deliveryLine.getPendingQuantity() - quantity);
 
     if (deliveryLine.getPendingQuantity() == 0) {
-        deliveryLine.setLineStatus(LineStatus.READY);
+      deliveryLine.setLineStatus(LineStatus.READY);
     }
+    // ===== Alterar campos del producto =====
+    product.setTotalQuantityDelivered(product.getTotalQuantityDelivered() + quantity);
+    product.setTotalQuantityAvailable(product.getTotalQuantityAvailable() - quantity);
+    productRepository.save(product);
 
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
     // ===== Recalcular producto-orden =====
-    product_DeliveryOrder.setRequiredQuantityTotal(
-        deliveryLineRepository
-            .sumRequiredQuantityByProduct_DeliveryOrder(
-                product_DeliveryOrder.getId(), productId));
+    Integer totalQuantitySumatory = deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(
+        deliveryOrder.getId(), productId);
 
-    product_DeliveryOrderRepository.save(product_DeliveryOrder);    
+    System.out.println("Total quantity sumatory: " + totalQuantitySumatory);
+
+    product_DeliveryOrder.setRequiredQuantityTotal(
+        totalQuantitySumatory);
+
+    product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
     // ===== Recalcular orden =====
     deliveryOrder.setPriorityDate(
         getClosestLimitDate(deliveryOrder.getId()));
 
-    // TODO: Verificar si todas las lineas de entrega de una orden de
-    // entrega han sido entregadas, es decir si todas tiene el estado READY
     if (deliveryLineRepository.allLinesAreReady(deliveryOrder.getId())) {
       deliveryOrder.setOrderStatus(OrderStatus.READY);
     } else {

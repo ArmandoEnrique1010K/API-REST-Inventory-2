@@ -501,7 +501,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
       entity.setRequiredTotalQuantity(requiredTotal);
     }
 
-    // TODO: ¿FALTA ACTUALIZAR LA CANTIDAD ENTREGADA?
     if (regions == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR,
           "No se encontraron regiones para el product_delivery_order");

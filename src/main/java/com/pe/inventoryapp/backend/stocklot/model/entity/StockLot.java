@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Builder.Default;
 
 @Entity
 @Data
@@ -50,6 +51,10 @@ public class StockLot {
   private Integer quantityRecovered;
 
   private boolean zeroStock;
+
+  // TODO: CORREGIR LOS DEMÁS SERVICIOS EN CUANTO AL CAMPO TEMPORALY
+  // Representa si el lote de stock es temporal, es decir, si se ha creado para consolidar una devolución de una linea de entrega cancelada, y se asignara a otra linea de entrega que lo requiera, pero solamente si hay cantidad entregada, y se eliminara cuando se asigne a otra linea de entrega o cuando hayan pasado 24 horas desde su creación
+  private boolean temporary;
 
   @CreationTimestamp
   private LocalDateTime createdAt;

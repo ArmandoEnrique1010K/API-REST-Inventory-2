@@ -16,7 +16,6 @@ public interface Product_DeliveryOrder_RegionRepository extends JpaRepository<Pr
       FROM Product_DeliveryOrder_Region pdr
       WHERE pdr.product_DeliveryOrder.id = :product_DeliveryOrderId AND pdr.region.id = :regionId
       """)
-
    Optional<Product_DeliveryOrder_Region> findByProduct_DeliveryOrderIdAndRegionId(Long product_DeliveryOrderId, Long regionId);
 
 
