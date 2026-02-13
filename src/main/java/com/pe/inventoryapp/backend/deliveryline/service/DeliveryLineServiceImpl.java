@@ -347,7 +347,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
-    recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
+    recalculateProductDeliveryOrderRegions(product_DeliveryOrder.getId());
 
     Movement movement = new Movement();
     movement.setQuantity(quantityBalance);
@@ -393,9 +393,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   }
 
-  // TODO: ARREGLAR LA RELACION EN PRODUCT
-  // Método para eliminar una linea de entrega (solamente si no hay cantidad
-  // entregada o si nunca hubo una relacion con StockLot_DeliveryLine)
   @Override
   public void cancelDeliveryLineById(Long id, Long id_user_authenticated) {
     if (id == null || id_user_authenticated == null) {
@@ -456,16 +453,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       storageTempStockLot(deliveryLine);
     }
 
-    // TODO: SE ESTABLECE EL ESTADO DE LA LINEA DE ENTREGA A CANCELED, PERO NO SE
-    // ELIMINA FISICAMENTE DE LA BASE DE DATOS PARA LLEVAR UN REGISTRO HISTORICO DE
-    // LAS LINEAS DE ENTREGA CANCELED
     deliveryLine.setPendingQuantity(0);
     deliveryLine.setDeliveredQuantity(0);
     deliveryLine.setUserUpdater(user);
     deliveryLine.setLineStatus(LineStatus.CANCELED);
     deliveryLineRepository.save(deliveryLine);
 
-    // TODO: ALTERAR LAS CANTIDADES EN PRODUCT
     Product product = deliveryLine.getProduct();
 
     product.setTotalQuantityAvailable(product.getTotalQuantityAvailable() + quantityCanceled);
@@ -479,7 +472,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(deliveryOrder.getId(),
             product_DeliveryOrder.getProduct().getId()));
 
-    product_DeliveryOrder.setStatus(false);
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
     // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
@@ -487,18 +479,20 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Operacion para verificar si todas las lineas de entrega de una orden de
     // entrega han sido entregadas, es decir si todas tiene el estado READY
-    if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
-      deliveryOrder.setOrderStatus(OrderStatus.READY);
+
+    if (deliveryLineRepository.allLinesAreCanceled(deliveryOrderId)){
+      deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
     } else {
-      deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+      if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
+        deliveryOrder.setOrderStatus(OrderStatus.READY);
+      } else {
+        deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+      }
     }
 
     deliveryOrderRepository.save(deliveryOrder);
 
-    // TODO: RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
-    // TODO: NO FUNCIONA POR ALGUNA RAZON
-    // PROBLEMA: NO RECALCULA LAS SUMATORIAS DE LAS CANTIDADES TOTALES POR REGION LUEGO DE ACTUALIZARLA CUANDO SE ELIMINA UNA LINEA DE ENTREGA
-    recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
+    recalculateProductDeliveryOrderRegions(product_DeliveryOrder.getId());
 
     Movement movement = new Movement();
     movement.setQuantity(quantityCanceled);
@@ -734,7 +728,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           entity.getRegion().getId());
 
       entity.setRequiredTotalQuantity(requiredTotal);
-      System.out.println("Region: " + entity.getRegion().getName() + " - Cantidad requerida total: " + requiredTotal);
     }
 
     if (regions == null) {
@@ -833,7 +826,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrderRepository.save(deliveryOrder);
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
-    recalculateProductDeliveryOrderRegions(deliveryLine.getDeliveryOrder().getId());
+    recalculateProductDeliveryOrderRegions(product_DeliveryOrder.getId());
 
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
@@ -1035,7 +1028,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrderRepository.save(deliveryOrder);
 
     // ===== Recalcular regiones =====
-    recalculateProductDeliveryOrderRegions(deliveryOrder.getId());
+    recalculateProductDeliveryOrderRegions(product_DeliveryOrder.getId());
 
   }
 }

@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.deliveryorder.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -30,4 +31,14 @@ public interface Product_DeliveryOrderRepository extends JpaRepository<Product_D
         AND p.status = true
       """)
   boolean existsByDeliveryOrderIdAndProductId(Long deliveryOrderId, Long productId);
+
+
+  @Query("""
+        SELECT p
+        FROM Product_DeliveryOrder p
+        WHERE p.deliveryOrder.id = :deliveryOrderId
+        AND p.product.id = :productId
+        AND p.status = true
+      """)
+  Optional<Product_DeliveryOrder> findByProductIdAndDeliveryOrderId(Long productId, Long deliveryOrderId);
 }

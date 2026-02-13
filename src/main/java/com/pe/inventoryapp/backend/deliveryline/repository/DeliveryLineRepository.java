@@ -76,6 +76,19 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       @Param("deliveryOrderId") Long deliveryOrderId,
       @Param("productId") Long productId);
 
+
+
+  // TODO: NO ALTERAR ESTE METODO
+  // @Query("""
+  //     SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+  //     FROM DeliveryLine dl
+  //     WHERE dl.productDeliveryOrder.id = :pdoId
+  //       AND dl.region.id = :regionId
+  //       AND dl.lineStatus IN ('DELIVERED', 'MISSING', 'CANCELED')
+  // """)
+  // Integer sumRequiredByProductDeliveryOrderAndRegion(
+  //     @Param("pdoId") Long productDeliveryOrderId,
+  //     @Param("regionId") Long regionId);
   @Query("""
         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
         FROM DeliveryLine dl
@@ -110,5 +123,13 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
 
+
+  @Query("""
+      SELECT COUNT(dl) = 0
+      FROM DeliveryLine dl
+      WHERE dl.deliveryOrder.id = :deliveryOrderId
+        AND dl.lineStatus != 'CANCELED'
+      """)
+  boolean allLinesAreCanceled(@Param("deliveryOrderId") Long deliveryOrderId);
 }
 
