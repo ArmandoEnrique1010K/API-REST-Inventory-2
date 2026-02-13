@@ -246,6 +246,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
+
+    // TODO: ES PROBABLE QUE SI LA LINEA DE ENTREGA TIENE EL ESTADO DE CANCELED, ENTONCES DEBERIA RETORNAR UNA EXCEPCION
     if (deliveryLine == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -438,8 +440,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
 
-    // TODO: ESTO DEBE CREAR UN NUEVO LOTE DE STOCK CON LA CANTIDAD ENTREGADA DE LA LINEA DE ENTREGA QUE SE ESTA CANCELANDO, PERO SOLAMENTE SI HAY CANTIDAD ENTREGADA
-    // TODO: SE ALTERA EL CAMPO DE LA CANTIDAD PENDIENTE A 0, PERO LA CANTIDAD REQUERIDA SE MANTIENE IGUAL PARA LLEVAR UN REGISTRO DE LA CANTIDAD ORIGINAL QUE SE DEBIA ENTREGAR
 
     if (deliveryLine.getLineStatus() == LineStatus.CANCELED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega ya ha sido cancelada");
@@ -447,6 +447,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     Integer quantityCanceled = deliveryLine.getDeliveredQuantity();
 
+    // CREAR UN NUEVO LOTE DE STOCK CON LA CANTIDAD ENTREGADA DE LA LINEA DE ENTREGA
+    // QUE SE ESTA CANCELANDO, PERO SOLAMENTE SI HAY CANTIDAD ENTREGADA
     if (quantityCanceled > 0) {
       // throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
       //     "No se puede cancelar esta línea porque ya hay una cantidad a entregar");
@@ -628,10 +630,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .orElse(null); // o lanza excepción
   }
 
-  // TODO: PROBAR ESTE MÉTODO EN POSTMAN PARA REPORTAR UNA PARTE DE UNA LINEA DE
-  // ENTREGA COMO PERDIDA
 
-  // ESTO ES UN MOVIMIENTO DE CANCELACIÓN
+  // ESTO ES UN MOVIMIENTO DE REPORTAR UNA CANTIDAD COMO PERDIDA DE UNA LINEA DE ENTREGA
+  // TODO: TAMBIEN DEBE ALTERAR LA CANTIDAD EN PRODUCT
   @Override
   public void lostDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user) {
     if (id == null || id_user == null) {
@@ -700,10 +701,25 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     product_DeliveryOrderRepository.save(product_DeliveryOrder);
 
+    Long productId = product_DeliveryOrder.getProduct().getId();
+
+    if (productId == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // TODO: VERIFICAR SI ALTERA EL PRODUCTO, PORQUE SI SE REPORTA UNA CANTIDAD COMO PERDIDA, ENTONCES DEBE DESCONTAR ESA CANTIDAD DE LA CANTIDAD ENTREGADA DEL PRODUCTO, PERO NO DE LA CANTIDAD DISPONIBLE, PORQUE ESA CANTIDAD YA FUE DESCONTADA CUANDO SE ENTREGÓ LA LINEA DE ENTREGA
+    Product product = productRepository.findById(
+        productId)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
+
+    product.setTotalQuantityDelivered(product.getTotalQuantityDelivered() - lostQuantity);
+    productRepository.save(product);
+
+
     // 3° REGISTRARLO COMO MOVIMIENTO
     Movement movement = new Movement();
     movement.setQuantity(lostQuantity);
-    movement.setMovementType(MovementType.MISSING);
+    movement.setMovementType(MovementType.LOST);
     movement.setComment(deliveryLineAlterRequest.getComment());
     movement.setStockLotEmitter(null);
     movement.setStockLotReceiver(null);
@@ -781,7 +797,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // TODO: NECESITO LA SUMATORIA DE LOS LOTES DE STOCK ENTREGADOS, ASOCIADOS A
+    // TODO: CALCULAR LA SUMATORIA DE LOS LOTES DE STOCK ENTREGADOS, ASOCIADOS A
     // ESTA LINEA DE ENTREGA, PORQUE AL RETORNAR UNA CANTIDAD, SE DEBE ALMANCENAR EN
     // UN NUEVO STOCK LOT
 
@@ -830,8 +846,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
-    movement.setMovementType(MovementType.CANCELED);
-    movement.setComment("Cancelacion de linea de entrega: " + deliveryLine.getId());
+    movement.setMovementType(MovementType.RETURN);
+    movement.setComment("Se ha devuelto una cantidad de linea de entrega: " + deliveryLine.getId());
     movement.setProduct(deliveryLine.getProduct());
     movement.setUser(user);
     movement.setStockLotReceiver(null);
@@ -1030,5 +1046,43 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ===== Recalcular regiones =====
     recalculateProductDeliveryOrderRegions(product_DeliveryOrder.getId());
 
+  }
+
+  @Override
+  public void missingDeliveryLineById(Long id, Long id_user_authenticated) {
+    if (id == null || id_user_authenticated == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+    User user = userRepository.findById(
+        id_user_authenticated)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+
+    DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    if (deliveryLine == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Solamente podra declarar entregada si la linea de entrega se encuentra lista
+    if (deliveryLine.getLineStatus() != LineStatus.DELIVERED) {
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega no puede ser reportada como perdida luego de la entrega");
+    }
+
+    deliveryLine.setLineStatus(LineStatus.MISSING);
+    deliveryLine.setUserUpdater(user);
+    deliveryLineRepository.save(deliveryLine);
+
+    Movement movement = new Movement();
+    movement.setQuantity(deliveryLine.getDeliveredQuantity());
+    movement.setMovementType(MovementType.MISSING);
+    movement.setComment("Perdida durante la entrega de la linea de entrega: " + deliveryLine.getId());
+    movement.setProduct(deliveryLine.getProduct());
+    movement.setUser(user);
+    movement.setStockLotReceiver(null);
+    movement.setStockLotEmitter(null);
+    movement.setDeliveryLine(deliveryLine);
+
+    movementRepository.save(movement);
   }
 }

@@ -591,19 +591,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			deliveryOrderRepository.save(deliveryOrder);
 		}
 
-		// CONSTRUIR UN METODO PARA ACTUALIZAR EL ESTADO DE UNA ORDEN DE ENTREGA DE
-		// FORMA AUTOMATICA CUANDO TODAS LAS LINEAS DE ENTREGA TENGAN EL ESTADO
-		// DELIVERED, EN DELIVERYLINESERVICE
-
-		// ESTO CAMBIARA EL ESTADO DE TODAS LAS LINEAS QUE TENGAN LOS ESTADOS
-		// ESPECIFICADOS
-		// A DELIVERED
-		// changeDeliveryLinesStatusByDeliveryOrderId(id,
-		// Arrays.asList(LineStatus.READY));
-
-		// deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
-		// deliveryOrder.setUserUpdater(user);
-		// deliveryOrderRepository.save(deliveryOrder);
 	}
 
 	// Verifica que todas las lineas de entrega que pertenecen a una orden de

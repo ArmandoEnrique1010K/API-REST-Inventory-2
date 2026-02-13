@@ -149,10 +149,20 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PatchMapping("/{id}/missing")
+  public ResponseEntity<CommonResponse> missingDeliveryLine(Authentication authentication,
+      @PathVariable Long id) {
+
+    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    deliveryLineService.missingDeliveryLineById(id, id_user);
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha marcado la linea de entrega como perdida en la entrega");
+    return ResponseEntity.status(response.status()).body(response);
+  }
 
 
   // TODO: PROBAR ESTE ENDPOINT
-  @PutMapping("/{id}/missing")
+  @PutMapping("/{id}/lost")
   public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
       @PathVariable Long id) {

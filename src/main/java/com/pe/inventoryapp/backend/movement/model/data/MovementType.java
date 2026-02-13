@@ -14,9 +14,11 @@ public enum MovementType {
   RETURN, // Devolver una linea de entrega que fue entregada
   CHANGE, // Modificar la cantidad de una linea de entrega que fue reportada como READY
   CANCELED, // Cancelar una linea de entrega
-  MISSING, // Marcar una linea de entrega como perdida (con la posibilidad de volver a
+  LOST, // Marcar una linea de entrega como perdida (con la posibilidad de volver a
            // entregarlo)
 
+  MISSING, // Marcar una linea de entrega como entregada, pero perdida durante la entrega o cuando se reporta que esta mal (sin la posibilidad de volver a
+           // entregarlo)
   DELIVERED, // Marcar una linea de entrega como entregada
 
   // Relacionados a un lote de stock y linea de entrega a la vez

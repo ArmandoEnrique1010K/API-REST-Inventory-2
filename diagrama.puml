@@ -1,0 +1,240 @@
+@startuml
+entity UserToken {
+    Long id
+    String token
+    boolean active
+    expirationTime LocalDateTime
+    User user
+}
+
+entity User {
+    Long id
+    String email
+    String password
+    String firstname
+    String lastname
+    Integer dni
+    boolean active
+    List<Role> roles
+    List<UserToken> userTokens
+    List<Movement> movements
+    List<DeliveryOrder> deliveryOrders
+    List<DeliveryLine> deliveryLines
+}
+
+entity Role {
+    Long id
+    String name
+    String label
+}
+
+entity Company {
+    Long id
+    String name
+    List<StockLot> stockLots
+}
+
+entity StockLot {
+    Long id
+    String batch
+    Integer quantityReceived
+    Integer quantityAvailable
+    Integer quantityDelivered
+    Integer quantityLost
+    Integer quantityRecovered
+    boolean zeroStock
+    boolean temporary
+    LocalDateTime createdAt
+    LocalDateTime updatedAt
+    Product product
+    List<Movement> movements
+    List<StockLot_DeliveryLine> stockLotDeliveryLines
+    Company company
+}
+
+entity Product {
+    Long id
+    String name
+    BigDecimal length
+    BigDecimal width
+    String imageUrl
+    LocalDate entryDate
+    LocalDate caducityDate
+    Integer totalQuantityAvailable
+    Integer totalQuantityReceived
+    Integer totalQuantityDelivered
+    boolean status
+    LocalDateTime createdAt
+    LocalDateTime updatedAt
+    Category category
+    List<Product_DeliveryOrder> productDeliveryOrders
+    List<Movement> movements
+    List<DeliveryLine> deliveryLines
+    List<StockLot> stockLots
+}
+
+entity Category {
+    Long id
+    String name
+    boolean status
+    List<Product> products
+}
+
+entity Movement {
+    Long id
+    Integer quantity
+    String comment
+    LocalDateTime createdAt
+    MovementType movementType
+    User user
+    StockLot stockLotReceiver
+    StockLot stockLotEmitter
+    DeliveryLine deliveryLine
+    Product product
+    List<Movement_StockLot> stockLotDetails
+}
+
+
+enum MovementType {
+    RECEIVE
+    INCREASE
+    DECREASE
+    RECOVERY
+    TRANSFER
+    ALLOCATE
+    ALTER
+    RETURN
+    CHANGE
+    CANCELED
+    LOST
+    MISSING
+    DELIVERED
+    SIMULTANEOUS
+}
+
+entity DeliveryLine {
+    Long id
+    Integer originalQuantity
+    Integer requiredQuantity
+    Integer deliveredQuantity
+    Integer pendingQuantity
+    LocalDateTime limitDate
+    LocalDateTime updatedAt
+    LineStatus lineStatus
+    Location location
+    User userCreator
+    User userUpdater
+    List<StockLot_DeliveryLine> stockLotDeliveryLines
+    List<Movement> movements
+    Product product
+    Product_DeliveryOrder product_DeliveryOrder
+    DeliveryOrder deliveryOrder
+}
+
+entity StockLot_DeliveryLine {
+    Long id
+    Integer quantityUsed
+    LocalDateTime createdAt
+    StockLot stockLot
+    DeliveryLine deliveryLine
+}
+enum LineStatus {
+    MISSING
+    READY
+    PENDING
+    DELIVERED
+    CANCELED
+    EXCEEDED
+}
+
+entity Location {
+    Long id
+    String name
+    boolean status
+    Subregion subregion
+    List<DeliveryLine> deliveryLines
+}
+
+entity Subregion {
+    Long id
+    String name
+    List<Location> locations
+    List<Product_DeliveryOrder_Subregion> product_DeliveryOrder_Subregions
+    
+}
+
+entity Region {
+    Long id
+    String name
+    List<Subregion> subregions
+    List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions
+}
+
+entity Product_DeliveryOrder {
+    Long id
+    Integer requiredQuantityTotal
+    boolean status
+    DeliveryOrder deliveryOrder
+    Product product
+    List<DeliveryLine> deliveryLines
+    List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions
+}
+
+entity DeliveryOrder {
+    Long id
+    String batch
+    LocalDateTime limitDate
+    LocalDateTime priorityDate
+    LocalDateTime createdAt
+    LocalDateTime updatedAt
+    OrderStatus orderStatus
+    User userCreator
+    User userUpdater
+    User userClient
+    List<DeliveryLine> deliveryLines
+    List<Product_DeliveryOrder> product_DeliveryOrders
+}
+
+entity Product_DeliveryOrder_Region {
+    Long id
+    Integer requiredTotalQuantity
+    LocalDateTime updatedAt
+    Region region
+    Product_DeliveryOrder product_DeliveryOrder
+}
+
+enum OrderStatus {
+    READY
+    PENDING
+    DELIVERED
+    CANCELED
+}
+
+
+Role *..* User : requires
+UserToken *.. User : can have
+Movement *.. User : has
+DeliveryOrder *.. User : assign
+DeliveryOrder *.. User : creates
+DeliveryOrder *.. User : update
+DeliveryLine *.. User : creates
+DeliveryLine *.. User : update
+
+StockLot *.. Product : associates
+StockLot ..* Movement : receives
+StockLot ..* Movement : sends
+StockLot ..* StockLot_DeliveryLine : is present in
+StockLot *.. Company : send
+
+Category ..* Product : contains
+Product ..* Product_DeliveryOrder : is present in
+Product ..* Movement : has
+Product ..* DeliveryLine : has
+
+# TODO: CORREGIR ESTE DIAGRAMA
+
+
+
+
+
+@enduml

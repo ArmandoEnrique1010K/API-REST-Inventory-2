@@ -44,6 +44,7 @@ public interface DeliveryLineService {
 
   void allocateDeliveryLineById(Long id, DeliveryLineAllocateRequest deliveryLineAllocateRequest, Long id_user_authenticated);
 
+  void missingDeliveryLineById(Long id, Long id_user_authenticated);
 
   // TODO: INVENTAR UN METODO QUE PERMITA AÑADIR VARIAS LINEAS A UNA MISMA ORDEN
   // void saveAll(DeliveryLineRequest deliveryLineRequest, Long id_user);
