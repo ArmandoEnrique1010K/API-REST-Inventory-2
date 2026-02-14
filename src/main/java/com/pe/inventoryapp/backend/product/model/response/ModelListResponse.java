@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.product.model.response;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -12,15 +11,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductDetailsResponse {
+public class ModelListResponse {
   private Long id;
   private String name;
-  private BigDecimal length;
-  private BigDecimal width;
   private String imageUrl;
   private LocalDate entryDate;
   private LocalDate caducityDate;
   private Integer totalQuantityAvailable;
+  private Integer totalQuantityReceived;
+  private Integer totalQuantityDelivered;
   private boolean status;
-  private String categoryName;
 }

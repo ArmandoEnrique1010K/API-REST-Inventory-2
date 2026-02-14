@@ -9,7 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,11 +18,11 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "categorias")
-public class Category {
+@Builder
+@Table(name = "tipos")
+public class Type {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -29,9 +30,6 @@ public class Category {
   @Column(unique = true, nullable = false)
   private String name;
 
-  @NotNull
-  private boolean status;
-
-  @OneToMany(mappedBy = "category")
+  @OneToMany(mappedBy = "type")
   private List<Product> products;
 }

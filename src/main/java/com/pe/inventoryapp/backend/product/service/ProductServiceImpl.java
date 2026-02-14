@@ -1,7 +1,7 @@
 package com.pe.inventoryapp.backend.product.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +15,17 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
+import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.model.entity.Type;
 import com.pe.inventoryapp.backend.product.model.mapper.ProductMapper;
-import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
-import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
-import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
+import com.pe.inventoryapp.backend.product.model.request.ProductCreateRequest;
+import com.pe.inventoryapp.backend.product.model.request.ProductUpdateRequest;
+import com.pe.inventoryapp.backend.product.model.response.ProductResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
+import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
+import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -32,99 +36,103 @@ public class ProductServiceImpl implements ProductService {
   private ProductRepository productRepository;
 
   @Autowired
+  private TypeRepository typeRepository;
+
+  @Autowired
   private CategoryRepository categoryRepository;
+
+  @Autowired
+  private ModelRepository modelRepository;
 
   @Override
   @Transactional
-  public void saveProduct(ProductRequest productRequest) {
-    verifyProductNameExist(productRequest.getName());
+  public void saveProduct(ProductCreateRequest productCreateRequest) {
+    String name = productCreateRequest.getName().trim();
+    verifyProductNameExist(name);
 
-    Long idCategory = productRequest.getIdCategory();
+    Long idCategory = productCreateRequest.getCategoryId();
+    Long idType = productCreateRequest.getTypeId();
 
-     if (idCategory == null) {
-       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-     }
+    if (idCategory == null || idType == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // Buscar la categoria por su ID
-    Category category = categoryRepository.findById(
-        idCategory)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
+    Category category = categoryRepository.findById(idCategory).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
     if (category.isStatus() == false) {
       throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
     }
-    
-    String name = productRequest.getName().trim();
+
+    Type type = typeRepository.findById(idType)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
+
 
     Product product = new Product();
     product.setName(name);
-
-    if (productRequest.getEntryDate() == null) {
-      product.setEntryDate(LocalDate.now());
-    } else {
-      product.setEntryDate(productRequest.getEntryDate());
-    }
-
-    Dotenv dotenv = Dotenv.load();
-
-    if (productRequest.getImageUrl() == null || productRequest.getImageUrl().isEmpty() || productRequest.getImageUrl().isBlank() || productRequest.getImageUrl().equals("")) {
-      // Toma la URL de la imagen que se encuentra en la variable de entorno
-      product.setImageUrl(dotenv.get("DEFAULT_IMAGE_URL").toString());
-    } else {
-      product.setImageUrl(productRequest.getImageUrl());
-    }
-
-    product.setCaducityDate(productRequest.getCaducityDate());
-    product.setLength(productRequest.getLength());
-    product.setWidth(productRequest.getWidth());
-
+    product.setLength(setZeroDecimal(productCreateRequest.getLength()));
+    product.setWidth(setZeroDecimal(productCreateRequest.getWidth()));
+    product.setHeight(setZeroDecimal(productCreateRequest.getHeight()));
     product.setStatus(true);
-    product.setCreatedAt(LocalDateTime.now());
-    product.setUpdatedAt(LocalDateTime.now());
-    product.setTotalQuantityAvailable(0);
-
+    product.setQuantityModels(1);
     product.setCategory(category);
+    product.setType(type);
     productRepository.save(product);
+
+    // GUARDAR EL MODELO DEL PRODUCTO
+    Model model = new Model();
+    model.setName(productCreateRequest.getModelName());
+    model.setImageUrl(getImageUrl(productCreateRequest.getModelImageUrl()));
+    model.setEntryDate(setEntryDateOrNow(productCreateRequest.getModelEntryDate()));
+
+    // Nota: CaducityDate puede ser nulo
+    model.setCaducityDate(productCreateRequest.getModelCaducityDate());
+    model.setTotalQuantityAvailable(0);
+    model.setTotalQuantityReceived(0);
+    model.setTotalQuantityDelivered(0);
+    model.setStatus(true);
+    model.setProduct(product);
+
+    modelRepository.save(model);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public PageResponse<ProductListResponse> searchAllProductsByParams(
+  public PageResponse<ProductResponse> searchAllProductsByParams(
+      Pageable pageable,
       String name,
-      Integer minStock,
-      Integer maxStock,
       Boolean status,
       Long categoryId,
-      Pageable pageable) {
+      Long typeId
+      ) {
     if (categoryId != null && !categoryRepository.existsById(categoryId)) {
       throw new BusinessException(
           ResponseStatus.NOT_FOUND,
           "La categoria no existe");
     }
 
-    Page<Product> products = productRepository.findAllByParams(name, minStock, maxStock, status, categoryId, pageable);
+    Page<Product> products = productRepository.findAllByParams(pageable, name, status, categoryId, typeId);
 
-    List<ProductListResponse> result = products.getContent().stream().map(
-      product -> ProductMapper.builder()
-      .setProduct(product).buildProductListResponse()
-    ).toList();
+    List<ProductResponse> result = products.getContent().stream().map(
+        product -> ProductMapper.builder()
+            .setProduct(product).buildProductResponse())
+        .toList();
 
-    PageResponse<ProductListResponse> pageResponse = new PageResponse<>(
-      result,
-      products.getNumber(),
-      products.getSize(),
-      products.getTotalElements(),
-      products.getTotalPages(),
-      products.isFirst(),
-      products.isLast()
-    );
+    PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+        result,
+        products.getNumber(),
+        products.getSize(),
+        products.getTotalElements(),
+        products.getTotalPages(),
+        products.isFirst(),
+        products.isLast());
 
     return pageResponse;
   }
 
   @Override
   @Transactional(readOnly = true)
-  public ProductDetailsResponse findProductById(Long id) {
+  public ProductResponse findProductById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -132,17 +140,16 @@ public class ProductServiceImpl implements ProductService {
     Product product = productRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
-
     if (product.isStatus() == false) {
       throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra desactivado");
     }
 
-    return ProductMapper.builder().setProduct(product).buildProductDetailsResponse();
+    return ProductMapper.builder().setProduct(product).buildProductResponse();
   }
 
   @Override
   @Transactional
-  public void updateProductById(Long id, ProductRequest productRequest) {
+  public void updateProductById(Long id, ProductUpdateRequest productUpdateRequest) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -154,11 +161,10 @@ public class ProductServiceImpl implements ProductService {
       throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra desactivado");
     }
 
-    String newName = productRequest.getName().trim();
-
+    String newName = productUpdateRequest.getName().trim();
     verifyProductNameExistById(newName, id);
 
-    Long categoryId = productRequest.getIdCategory();
+    Long categoryId = productUpdateRequest.getCategoryId();
 
     if (categoryId == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -167,15 +173,23 @@ public class ProductServiceImpl implements ProductService {
     Category category = categoryRepository.findById(
         categoryId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
+    
+    Long typeId = productUpdateRequest.getTypeId();
+
+    if (typeId == null){
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    Type type = typeRepository.findById(
+        typeId)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
 
     product.setName(newName);
-    product.setEntryDate(productRequest.getEntryDate());
-    product.setCaducityDate(productRequest.getCaducityDate());
-    product.setLength(productRequest.getLength());
-    product.setWidth(productRequest.getWidth());
-    product.setImageUrl(productRequest.getImageUrl());
+    product.setLength(setZeroDecimal(productUpdateRequest.getLength()));
+    product.setWidth(setZeroDecimal(productUpdateRequest.getWidth()));
+    product.setHeight(setZeroDecimal(productUpdateRequest.getHeight()));
     product.setCategory(category);
-
+    product.setType(type);
     productRepository.save(product);
   }
 
@@ -206,6 +220,25 @@ public class ProductServiceImpl implements ProductService {
       throw new FieldValidation(
           "name",
           "Este nombre ya está en uso");
+    }
+  }
+
+  private BigDecimal setZeroDecimal(BigDecimal number) {
+    return number == null ? BigDecimal.ZERO : number;
+  }
+
+  private LocalDate setEntryDateOrNow(LocalDate date) {
+    return date == null ? LocalDate.now() : date;
+  }
+
+  private String getImageUrl(String imageUrl) {
+    // Cargar variables de entorno
+    Dotenv dotenv = Dotenv.load();
+
+    if (imageUrl == null || imageUrl.isEmpty() || imageUrl.isBlank() || imageUrl.equals("")) {
+      return dotenv.get("DEFAULT_IMAGE_URL").toString();
+    } else {
+      return imageUrl;
     }
   }
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryRequest {
+public class TypeRequest {
   @NotBlank(message = "El nombre no puede estar vacío")
   @Size(min = 4, max = 20, message = "El nombre debe tener entre 4 y 20 caracteres")
   private String name;

@@ -19,9 +19,9 @@ import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
-import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
-import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
+import com.pe.inventoryapp.backend.product.model.request.ProductCreateRequest;
+import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
+import com.pe.inventoryapp.backend.product.model.response.ProductResponse;
 import com.pe.inventoryapp.backend.product.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,7 +40,7 @@ public class ProductController {
   private ValidationService validationService;
 
   @PostMapping
-  public ResponseEntity<CommonResponse> registerProduct(@Valid @RequestBody ProductRequest productRequest,
+  public ResponseEntity<CommonResponse> registerProduct(@Valid @RequestBody ProductCreateRequest productRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     productService.saveProduct(productRequest);
@@ -61,8 +61,8 @@ public class ProductController {
     ) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,  status, categoryId, pageable);
-    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, products);
+    PageResponse<ProductResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,  status, categoryId, pageable);
+    DataResponse<PageResponse<ProductResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, products);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
@@ -76,9 +76,9 @@ public class ProductController {
     ) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+    PageResponse<ProductResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
         true, categoryId, pageable);
-    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService
+    DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, products);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
@@ -93,9 +93,9 @@ public class ProductController {
       @RequestParam(required = false) Boolean status) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+    PageResponse<ProductResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
         status, idCategory, pageable);
-    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService
+    DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, products);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
@@ -109,23 +109,23 @@ public class ProductController {
       @RequestParam(required = false) Integer maxStock) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<ProductListResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
+    PageResponse<ProductResponse> products = productService.searchAllProductsByParams(name, minStock, maxStock,
         true, idCategory, pageable);
-    DataResponse<PageResponse<ProductListResponse>> dataResponse = responseService
+    DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, products);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getProduct(@PathVariable Long id) {
-    ProductDetailsResponse productDetailsResponse = productService.findProductById(id);
-    DataResponse<ProductDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    ModelListResponse productDetailsResponse = productService.findProductById(id);
+    DataResponse<ModelListResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
         productDetailsResponse);
     return ResponseEntity.status(response.status()).body(response);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<CommonResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequest productRequest,
+  public ResponseEntity<CommonResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductCreateRequest productRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     productService.updateProductById(id, productRequest);

@@ -1,8 +1,7 @@
 package com.pe.inventoryapp.backend.product.model.mapper;
 
 import com.pe.inventoryapp.backend.product.model.entity.Product;
-import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
-import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
+import com.pe.inventoryapp.backend.product.model.response.ProductResponse;
 
 public class ProductMapper {
   private Product product;
@@ -20,40 +19,27 @@ public class ProductMapper {
     return this;
   }
 
-  public ProductListResponse buildProductListResponse() {
+  public ProductResponse buildProductResponse() {
 
     if (product == null) {
       throw new RuntimeException("Debe pasar la entidad Product");
     }
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados
-    return new ProductListResponse(
+    return new ProductResponse(
         product.getId(),
-        product.getName().trim(),
-        product.getImageUrl().trim(),
-        product.getTotalQuantityAvailable(),
-        product.isStatus(),
-        product.getCategory().getName().trim()
-      );
-  }
-
-  public ProductDetailsResponse buildProductDetailsResponse() {
-
-    if (product == null) {
-      throw new RuntimeException("Debe pasar la entidad Product");
-    }
-
-    return new ProductDetailsResponse(
-        product.getId(),
-        product.getName().trim(),
+        product.getName(),
         product.getLength(),
         product.getWidth(),
-        product.getImageUrl().trim(),
-        product.getEntryDate(),
-        product.getCaducityDate(),
-        product.getTotalQuantityAvailable(),
+        product.getHeight(),
+        product.getQuantityModels(),
         product.isStatus(),
-        product.getCategory().getName()
+
+        product.getCategory().getId(),
+        product.getCategory().getName(),
+
+        product.getType().getId(),
+        product.getType().getName()
       );
   }
 }

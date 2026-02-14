@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.product.model.response;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +11,18 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductListResponse {
+public class ProductResponse {
   private Long id;
   private String name;
-  private String imageUrl;
-  private Integer totalQuantityAvailable;
+  private BigDecimal length;
+  private BigDecimal width;
+  private BigDecimal height;
+  private Integer quantityModels;
   private boolean status;
+
+  private Long categoryId;
   private String categoryName;
+
+  private Long typeId;
+  private String typeName;
 }

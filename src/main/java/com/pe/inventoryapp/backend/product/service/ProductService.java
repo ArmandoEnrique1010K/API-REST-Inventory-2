@@ -3,24 +3,24 @@ package com.pe.inventoryapp.backend.product.service;
 import org.springframework.data.domain.Pageable;
 
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
-import com.pe.inventoryapp.backend.product.model.request.ProductRequest;
-import com.pe.inventoryapp.backend.product.model.response.ProductDetailsResponse;
-import com.pe.inventoryapp.backend.product.model.response.ProductListResponse;
+import com.pe.inventoryapp.backend.product.model.request.ProductCreateRequest;
+import com.pe.inventoryapp.backend.product.model.request.ProductUpdateRequest;
+import com.pe.inventoryapp.backend.product.model.response.ProductResponse;
 
 public interface ProductService {
-  void saveProduct(ProductRequest productRequest);
+  void saveProduct(ProductCreateRequest productRequest);
 
-  PageResponse<ProductListResponse> searchAllProductsByParams(
+  PageResponse<ProductResponse> searchAllProductsByParams(
+      Pageable pageable,
       String name,
-      Integer minStock,
-      Integer maxStock,
       Boolean status,
       Long categoryId,
-      Pageable pageable);
+      Long typeId
+  );
 
-  ProductDetailsResponse findProductById(Long id);
+  ProductResponse findProductById(Long id);
 
-  void updateProductById(Long id, ProductRequest productRequest);
+  void updateProductById(Long id, ProductUpdateRequest productUpdateRequest);
 
   void changeStatusProductById(Long id);
 }

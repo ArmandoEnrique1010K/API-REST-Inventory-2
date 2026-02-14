@@ -26,7 +26,7 @@ public class CategoryMapper {
 
     return new CategoryResponse(
         category.getId(),
-        category.getName().trim(),
+        category.getName(),
         category.isStatus());
   }
 }
