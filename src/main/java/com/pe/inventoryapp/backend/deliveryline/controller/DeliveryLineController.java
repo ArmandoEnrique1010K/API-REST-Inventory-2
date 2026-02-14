@@ -51,7 +51,7 @@ public class DeliveryLineController {
 
   @Autowired
   private AuthenticationContextService authenticationContextService;
-  // TODO: ESTO SE PODRIA TRASLADAR HACIA EL CONTROLADOR DE PRODUCT-DELIVERY-ORDER
+
   @PostMapping("/product-delivery-order/{productDeliveryOrderId}")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
       Authentication authentication,

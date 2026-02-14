@@ -1,5 +1,5 @@
-@startuml
-entity UserToken {
+@startuml diagrama
+entity UserToken #ffc862 {
     Long id
     String token
     boolean active
@@ -7,7 +7,7 @@ entity UserToken {
     User user
 }
 
-entity User {
+entity User #ffc862 {
     Long id
     String email
     String password
@@ -22,19 +22,19 @@ entity User {
     List<DeliveryLine> deliveryLines
 }
 
-entity Role {
+entity Role #ffc862 {
     Long id
     String name
     String label
 }
 
-entity Company {
+entity Company #ffaaaa {
     Long id
     String name
     List<StockLot> stockLots
 }
 
-entity StockLot {
+entity StockLot #ffaaaa {
     Long id
     String batch
     Integer quantityReceived
@@ -46,41 +46,57 @@ entity StockLot {
     boolean temporary
     LocalDateTime createdAt
     LocalDateTime updatedAt
-    Product product
+    Model model
     List<Movement> movements
     List<StockLot_DeliveryLine> stockLotDeliveryLines
     Company company
 }
 
-entity Product {
+entity Model #d0ffb0{
     Long id
     String name
-    BigDecimal length
-    BigDecimal width
     String imageUrl
     LocalDate entryDate
     LocalDate caducityDate
     Integer totalQuantityAvailable
     Integer totalQuantityReceived
     Integer totalQuantityDelivered
-    boolean status
     LocalDateTime createdAt
     LocalDateTime updatedAt
-    Category category
-    List<Product_DeliveryOrder> productDeliveryOrders
+    boolean status
+
+    Product product
+    List<Model_DeliveryOrder> modelDeliveryOrders
     List<Movement> movements
     List<DeliveryLine> deliveryLines
     List<StockLot> stockLots
 }
 
-entity Category {
+entity Product #d0ffb0 {
+    Long id
+    String name
+    BigDecimal length
+    BigDecimal width
+    boolean status
+    Category category
+    Type type
+    List<Model> models
+}
+
+entity Type #d0ffb0 {
+    Long id
+    String name
+    List<Product> products
+}
+
+entity Category #d0ffb0 {
     Long id
     String name
     boolean status
     List<Product> products
 }
 
-entity Movement {
+entity Movement #fff891{
     Long id
     Integer quantity
     String comment
@@ -90,12 +106,18 @@ entity Movement {
     StockLot stockLotReceiver
     StockLot stockLotEmitter
     DeliveryLine deliveryLine
-    Product product
-    List<Movement_StockLot> stockLotDetails
+    Model model
+    List<Movement_StockLot> movement_StockLots
 }
 
+entity Movement_StockLot #fff891 {
+    Long id
+    Integer quantityTaken
+    Movement movement
+    StockLot stockLot
+}
 
-enum MovementType {
+enum MovementType #fff891 {
     RECEIVE
     INCREASE
     DECREASE
@@ -112,7 +134,7 @@ enum MovementType {
     SIMULTANEOUS
 }
 
-entity DeliveryLine {
+entity DeliveryLine #ecbbff {
     Long id
     Integer originalQuantity
     Integer requiredQuantity
@@ -126,19 +148,19 @@ entity DeliveryLine {
     User userUpdater
     List<StockLot_DeliveryLine> stockLotDeliveryLines
     List<Movement> movements
-    Product product
-    Product_DeliveryOrder product_DeliveryOrder
+    Model model
+    Model_DeliveryOrder model_DeliveryOrder
     DeliveryOrder deliveryOrder
 }
 
-entity StockLot_DeliveryLine {
+entity StockLot_DeliveryLine #ecbbff{
     Long id
     Integer quantityUsed
     LocalDateTime createdAt
     StockLot stockLot
     DeliveryLine deliveryLine
 }
-enum LineStatus {
+enum LineStatus #ecbbff {
     MISSING
     READY
     PENDING
@@ -147,7 +169,7 @@ enum LineStatus {
     EXCEEDED
 }
 
-entity Location {
+entity Location #bebebe{
     Long id
     String name
     boolean status
@@ -155,32 +177,32 @@ entity Location {
     List<DeliveryLine> deliveryLines
 }
 
-entity Subregion {
+entity Subregion #bebebe{
     Long id
     String name
     List<Location> locations
-    List<Product_DeliveryOrder_Subregion> product_DeliveryOrder_Subregions
-    
+    List<Model_DeliveryOrder_Subregion> model_DeliveryOrder_Subregions
 }
 
-entity Region {
+entity Region #bebebe{
     Long id
     String name
     List<Subregion> subregions
-    List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions
+    List<Model_DeliveryOrder_Region> model_DeliveryOrder_Regions
 }
 
-entity Product_DeliveryOrder {
+entity Model_DeliveryOrder #89c6ff{
     Long id
     Integer requiredQuantityTotal
     boolean status
     DeliveryOrder deliveryOrder
-    Product product
+    Model model
     List<DeliveryLine> deliveryLines
-    List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions
+    List<Model_DeliveryOrder_Region> model_DeliveryOrder_Regions
+    List<Model_DeliveryOrder_Subregion> model_DeliveryOrder_Subregions
 }
 
-entity DeliveryOrder {
+entity DeliveryOrder #89c6ff{
     Long id
     String batch
     LocalDateTime limitDate
@@ -192,49 +214,79 @@ entity DeliveryOrder {
     User userUpdater
     User userClient
     List<DeliveryLine> deliveryLines
-    List<Product_DeliveryOrder> product_DeliveryOrders
+    List<Model_DeliveryOrder> model_DeliveryOrders
 }
 
-entity Product_DeliveryOrder_Region {
-    Long id
-    Integer requiredTotalQuantity
-    LocalDateTime updatedAt
-    Region region
-    Product_DeliveryOrder product_DeliveryOrder
-}
-
-enum OrderStatus {
+enum OrderStatus #89c6ff {
     READY
     PENDING
     DELIVERED
     CANCELED
 }
 
+entity Model_DeliveryOrder_Region #91fff9{
+    Long id
+    Integer requiredTotalQuantity
+    LocalDateTime updatedAt
+    Region region
+    Model_DeliveryOrder model_DeliveryOrder
+}
 
-Role *..* User : requires
+entity Model_DeliveryOrder_Subregion #91fff9{
+  Long id
+  Integer requiredTotalQuantity
+  LocalDateTime updatedAt
+  Subregion subregion
+  Model_DeliveryOrder model_DeliveryOrder
+}
+
+Role *.* User : requires
 UserToken *.. User : can have
-Movement *.. User : has
+Movement *... User : has
 DeliveryOrder *.. User : assign
 DeliveryOrder *.. User : creates
 DeliveryOrder *.. User : update
-DeliveryLine *.. User : creates
-DeliveryLine *.. User : update
+DeliveryLine *... User : creates
+DeliveryLine *... User : update
 
-StockLot *.. Product : associates
-StockLot ..* Movement : receives
-StockLot ..* Movement : sends
-StockLot ..* StockLot_DeliveryLine : is present in
-StockLot *.. Company : send
+StockLot *.. Model : associates
+StockLot .* Movement : receives
+StockLot .* Movement : sends
+StockLot .* StockLot_DeliveryLine : is present in
+StockLot *. Company : send
+
+Movement_StockLot *.. StockLot
+Movement_StockLot *.. Movement
 
 Category ..* Product : contains
-Product ..* Product_DeliveryOrder : is present in
-Product ..* Movement : has
-Product ..* DeliveryLine : has
+Type ..* Product : contains
+Model *. Product : has many
 
-# TODO: CORREGIR ESTE DIAGRAMA
+Model ..* Model_DeliveryOrder : is present in
+Model ..* Movement : has
+Model ..* DeliveryLine : has
 
+StockLot_DeliveryLine *.. DeliveryLine: has many
 
+Movement .. MovementType : type of
+Movement *.. DeliveryLine : has
 
+DeliveryLine *.. Model_DeliveryOrder : group
+DeliveryLine *.. DeliveryOrder : has many
+DeliveryLine .. LineStatus : type of
+DeliveryLine *.. Location : assigned
 
+Location *.. Subregion : has
+Subregion *.. Region : has
+
+Region ..* Model_DeliveryOrder_Region : group
+Model_DeliveryOrder_Region *.. Model_DeliveryOrder : performs
+
+Subregion ...* Model_DeliveryOrder_Subregion : group
+
+Model_DeliveryOrder_Subregion *.. Model_DeliveryOrder : performs
+
+Model_DeliveryOrder *.. DeliveryOrder : has many
+DeliveryOrder .. OrderStatus : type of
 
 @enduml
