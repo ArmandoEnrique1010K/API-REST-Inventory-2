@@ -3,13 +3,11 @@ package com.pe.inventoryapp.backend.product.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.mapper.CategoryMapper;
 import com.pe.inventoryapp.backend.product.model.request.CategoryRequest;
@@ -19,15 +17,21 @@ import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
-  @Autowired
-  private CategoryRepository categoryRepository;
+  private final CategoryRepository categoryRepository;
+  private final CategoryDomainService categoryDomainService;
+
+  public CategoryServiceImpl(CategoryRepository categoryRepository, CategoryDomainService categoryDomainService) {
+    this.categoryRepository = categoryRepository;
+    this.categoryDomainService = categoryDomainService;
+  }
+
 
   @Override
   @Transactional
   public void saveCategory(CategoryRequest categoryRequest) {
     String name = categoryRequest.getName().trim();
 
-    verifyCategoryNameExist(name);
+    categoryDomainService.verifyCategoryNameAvailable(name);
 
     Category category = new Category();
     category.setName(name);
@@ -83,7 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     String newName = categoryRequest.getName().trim();
-    verifyCategoryNameExistById(newName, id);
+    categoryDomainService.verifyCategoryNameAvailableExcludingId(newName, id);
     
     category.setName(newName);
 
@@ -108,20 +112,5 @@ public class CategoryServiceImpl implements CategoryService {
     // Cambia el estado de la categoria a false y lo guarda
     category.setStatus(!category.isStatus());
     categoryRepository.save(category);
-  }
-
-  // METODOS AUXILIARES
-  private void verifyCategoryNameExist(String name) {
-    if (categoryRepository.existsByName(name)) {
-      throw new FieldValidation("name", "Este nombre ya está en uso");
-    }
-  }
-
-  private void verifyCategoryNameExistById(String name, Long id) {
-    if (categoryRepository.existsByNameAndIdNot(name, id)) {
-      throw new FieldValidation(
-          "name",
-          "Este nombre ya está en uso");
-    }
   }
 }

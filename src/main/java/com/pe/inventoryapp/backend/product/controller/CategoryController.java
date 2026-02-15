@@ -1,7 +1,6 @@
 package com.pe.inventoryapp.backend.product.controller;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,14 +27,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api/categories")
 public class CategoryController {
 
-  @Autowired
-  private CategoryService categoryService;
+  private final CategoryService categoryService;
+  private final ValidationService validationService;
+  private final ResponseService responseService;
 
-  @Autowired
-  private ValidationService validationService;
-
-  @Autowired
-  private ResponseService responseService;
+  public CategoryController(
+      CategoryService categoryService, ResponseService responseService,
+      ValidationService validationService) {
+    this.categoryService = categoryService;
+    this.responseService = responseService;
+    this.validationService = validationService;
+  }
 
   @PostMapping
   public ResponseEntity<CommonResponse> registerCategory(@Valid @RequestBody CategoryRequest categoryRequest,
@@ -50,10 +52,9 @@ public class CategoryController {
 
   @GetMapping
   public ResponseEntity<?> listAllCategories(
-    @RequestParam(required = false) Boolean status
-  ) {
+      @RequestParam(required = false) Boolean status) {
     List<CategoryResponse> categories = categoryService.searchAllCategoriesByStatus(status);
-    DataResponse<List<CategoryResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<List<CategoryResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         categories);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
@@ -69,19 +70,20 @@ public class CategoryController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getCategory(@PathVariable Long id) {
     CategoryResponse category = categoryService.findCategoryById(id);
-    DataResponse<CategoryResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<CategoryResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         category);
     return ResponseEntity.status(response.status()).body(response);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<CommonResponse> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest categoryRequest,
+  public ResponseEntity<CommonResponse> updateCategory(@PathVariable Long id,
+      @Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     categoryService.updateCategoryById(id, categoryRequest);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-    "Se actualizo el nombre de la categoria");
+        "Se actualizo el nombre de la categoria");
     return ResponseEntity.status(response.status()).body(response);
   }
 

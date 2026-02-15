@@ -1,10 +1,7 @@
 package com.pe.inventoryapp.backend.product.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
@@ -27,28 +23,35 @@ import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 
-import io.github.cdimascio.dotenv.Dotenv;
-
 @Service
 public class ProductServiceImpl implements ProductService {
+  private final ProductRepository productRepository;
+  private final TypeRepository typeRepository;
+  private final CategoryRepository categoryRepository;
+  private final ModelRepository modelRepository;
+  private final ProductDomainService productDomainService;
+  private final ModelDomainService modelDomainService;
 
-  @Autowired
-  private ProductRepository productRepository;
-
-  @Autowired
-  private TypeRepository typeRepository;
-
-  @Autowired
-  private CategoryRepository categoryRepository;
-
-  @Autowired
-  private ModelRepository modelRepository;
+  public ProductServiceImpl(
+      ProductRepository productRepository,
+      TypeRepository typeRepository,
+      CategoryRepository categoryRepository,
+      ModelRepository modelRepository,
+      ProductDomainService productDomainService,
+      ModelDomainService modelDomainService) {
+    this.productRepository = productRepository;
+    this.typeRepository = typeRepository;
+    this.categoryRepository = categoryRepository;
+    this.modelRepository = modelRepository;
+    this.productDomainService = productDomainService;
+    this.modelDomainService = modelDomainService;
+  }
 
   @Override
   @Transactional
   public void saveProduct(ProductCreateRequest productCreateRequest) {
     String name = productCreateRequest.getName().trim();
-    verifyProductNameExist(name);
+    productDomainService.verifyProductNameAvailable(name);
 
     Long idCategory = productCreateRequest.getCategoryId();
     Long idType = productCreateRequest.getTypeId();
@@ -70,9 +73,9 @@ public class ProductServiceImpl implements ProductService {
 
     Product product = new Product();
     product.setName(name);
-    product.setLength(setZeroDecimal(productCreateRequest.getLength()));
-    product.setWidth(setZeroDecimal(productCreateRequest.getWidth()));
-    product.setHeight(setZeroDecimal(productCreateRequest.getHeight()));
+    product.setLength(productDomainService.normalizeDecimal(productCreateRequest.getLength()));
+    product.setWidth(productDomainService.normalizeDecimal(productCreateRequest.getWidth()));
+    product.setHeight(productDomainService.normalizeDecimal(productCreateRequest.getHeight()));
     product.setStatus(true);
     product.setQuantityModels(1);
     product.setCategory(category);
@@ -82,8 +85,8 @@ public class ProductServiceImpl implements ProductService {
     // GUARDAR EL MODELO DEL PRODUCTO
     Model model = new Model();
     model.setName(productCreateRequest.getModelName());
-    model.setImageUrl(getImageUrl(productCreateRequest.getModelImageUrl()));
-    model.setEntryDate(setEntryDateOrNow(productCreateRequest.getModelEntryDate()));
+    model.setImageUrl(modelDomainService.resolveImageUrl(productCreateRequest.getModelImageUrl()));
+    model.setEntryDate(modelDomainService.resolveAnyLocalDate(productCreateRequest.getModelEntryDate()));
 
     // Nota: CaducityDate puede ser nulo
     model.setCaducityDate(productCreateRequest.getModelCaducityDate());
@@ -96,6 +99,7 @@ public class ProductServiceImpl implements ProductService {
     modelRepository.save(model);
   }
 
+  // TODO: ESTE METODO SE PODRIA ELIMINAR YA QUE SE PIENSA BUSCAR POR NOMBRE DE PRODUCTO Y NOMBRE DE MODELO
   @Override
   @Transactional(readOnly = true)
   public PageResponse<ProductResponse> searchAllProductsByParams(
@@ -162,7 +166,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     String newName = productUpdateRequest.getName().trim();
-    verifyProductNameExistById(newName, id);
+    productDomainService.verifyProductNameAvailableExcludingId(newName, id);
 
     Long categoryId = productUpdateRequest.getCategoryId();
 
@@ -185,9 +189,9 @@ public class ProductServiceImpl implements ProductService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
 
     product.setName(newName);
-    product.setLength(setZeroDecimal(productUpdateRequest.getLength()));
-    product.setWidth(setZeroDecimal(productUpdateRequest.getWidth()));
-    product.setHeight(setZeroDecimal(productUpdateRequest.getHeight()));
+    product.setLength(productDomainService.normalizeDecimal(productUpdateRequest.getLength()));
+    product.setWidth(productDomainService.normalizeDecimal(productUpdateRequest.getWidth()));
+    product.setHeight(productDomainService.normalizeDecimal(productUpdateRequest.getHeight()));
     product.setCategory(category);
     product.setType(type);
     productRepository.save(product);
@@ -206,39 +210,5 @@ public class ProductServiceImpl implements ProductService {
 
     product.setStatus(!product.isStatus());
     productRepository.save(product);
-  }
-
-  // METODOS AUXILIARES
-  private void verifyProductNameExist(String name) {
-    if (productRepository.existsByName(name)) {
-      throw new FieldValidation("name", "Este nombre ya está en uso");
-    }
-  }
-
-  private void verifyProductNameExistById(String name, Long id) {
-    if (productRepository.existsByNameAndIdNot(name, id)) {
-      throw new FieldValidation(
-          "name",
-          "Este nombre ya está en uso");
-    }
-  }
-
-  private BigDecimal setZeroDecimal(BigDecimal number) {
-    return number == null ? BigDecimal.ZERO : number;
-  }
-
-  private LocalDate setEntryDateOrNow(LocalDate date) {
-    return date == null ? LocalDate.now() : date;
-  }
-
-  private String getImageUrl(String imageUrl) {
-    // Cargar variables de entorno
-    Dotenv dotenv = Dotenv.load();
-
-    if (imageUrl == null || imageUrl.isEmpty() || imageUrl.isBlank() || imageUrl.equals("")) {
-      return dotenv.get("DEFAULT_IMAGE_URL").toString();
-    } else {
-      return imageUrl;
-    }
   }
 }

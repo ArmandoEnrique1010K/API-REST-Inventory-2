@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.product.service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 
@@ -22,6 +23,8 @@ public interface ModelService {
       Boolean status,
       Long categoryId,
       Long typeId);
+
+  List<ModelListResponse> findAllModelsByProductId(Long productId);
 
   ModelDetailsResponse findModelById(Long id);
 

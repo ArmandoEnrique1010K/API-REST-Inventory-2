@@ -43,4 +43,9 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
 
   List<Model> findAllByProductId(Long productId);
 
+  // Método para verificar que el nombre de modelo sea unico dentro de la lista de modelos de un producto por id
+  boolean existsByNameAndProductId(String name, Long productId);
+
+  // Método para verificar que el nombre de modelo sea unico dentro de la lista de modelos de un producto por id, excluyendo un id de modelo específico (para actualizaciones)
+  boolean existsByNameAndProductIdAndIdNot(String name, Long productId, Long id);
 }

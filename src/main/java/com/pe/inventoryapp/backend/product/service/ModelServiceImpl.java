@@ -1,13 +1,13 @@
 package com.pe.inventoryapp.backend.product.service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
@@ -22,39 +22,47 @@ import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 
-import io.github.cdimascio.dotenv.Dotenv;
 
+@Service
 public class ModelServiceImpl implements ModelService {
+  private final ProductRepository productRepository;
+  private final TypeRepository typeRepository;
+  private final CategoryRepository categoryRepository;
+  private final ModelRepository modelRepository;
+  private final ModelDomainService modelDomainService;
 
-  @Autowired
-  private ProductRepository productRepository;
-
-  @Autowired
-  private ModelRepository modelRepository;
-
-  @Autowired
-  private TypeRepository typeRepository;
-
-  @Autowired
-  private CategoryRepository categoryRepository;
+  public ModelServiceImpl(
+      ProductRepository productRepository,
+      TypeRepository typeRepository,
+      CategoryRepository categoryRepository,
+      ModelRepository modelRepository,
+      ModelDomainService modelDomainService) {
+    this.productRepository = productRepository;
+    this.typeRepository = typeRepository;
+    this.categoryRepository = categoryRepository;
+    this.modelRepository = modelRepository;
+    this.modelDomainService = modelDomainService;
+  }
 
   @Override
+  @Transactional
   public void saveModelInProductId(ModelRequest modelRequest, Long productId) {
     String name = modelRequest.getName().trim();
 
-    // TODO: Verificar que el producto exista, sino lanzar una excepción de negocio
+    modelDomainService.verifyModelNameAvailableByProductId(name, productId);
 
     if (productId == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
     Product product = productRepository.findById(productId)
-        .orElseThrow(() -> new BusinessException(com.pe.inventoryapp.backend.common.data.ResponseStatus.NOT_FOUND, "El producto no existe"));
+        .orElseThrow(() -> new BusinessException(com.pe.inventoryapp.backend.common.data.ResponseStatus.NOT_FOUND,
+            "El producto no existe"));
 
     Model model = new Model();
     model.setName(name);
-    model.setImageUrl(getImageUrl(modelRequest.getImageUrl()));
-    model.setEntryDate(setEntryDateOrNow(modelRequest.getEntryDate()));
+    model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
+    model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
     model.setCaducityDate(modelRequest.getCaducityDate());
     model.setTotalQuantityAvailable(0);
     model.setTotalQuantityReceived(0);
@@ -66,38 +74,54 @@ public class ModelServiceImpl implements ModelService {
   }
 
   @Override
-  public PageResponse<ModelListResponse> searchAllModelsByParams(Pageable pageable, String keyword, Integer minStock, Integer maxStock,
+  @Transactional(readOnly = true)
+  public PageResponse<ModelListResponse> searchAllModelsByParams(Pageable pageable, String keyword, Integer minStock,
+      Integer maxStock,
       LocalDate minEntryDate, LocalDate maxEntryDate, Boolean status, Long categoryId, Long typeId) {
 
-      if (categoryId != null && !categoryRepository.existsById(categoryId)) {
-        throw new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe");
-      }
+    if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+      throw new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe");
+    }
 
-      if (typeId != null && !typeRepository.existsById(typeId)) {
-        throw new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe");
-      }
-      
-      Page<Model> models = modelRepository.findAllByParams(pageable, keyword, minStock, maxStock, minEntryDate, maxEntryDate, status, categoryId, typeId);
+    if (typeId != null && !typeRepository.existsById(typeId)) {
+      throw new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe");
+    }
 
-      List<ModelListResponse> result = models.getContent().stream().map(
-          model -> ModelMapper.builder()
-              .setModel(model).buildModelListResponse())
-          .toList();
+    Page<Model> models = modelRepository.findAllByParams(pageable, keyword, minStock, maxStock, minEntryDate,
+        maxEntryDate, status, categoryId, typeId);
 
-      PageResponse<ModelListResponse> pageResponse = new PageResponse<>(
-          result,
-          models.getNumber(),
-          models.getSize(),
-          models.getTotalElements(),
-          models.getTotalPages(), 
-          models.isFirst(), 
-          models.isLast()
-      );
+    List<ModelListResponse> result = models.getContent().stream().map(
+        model -> ModelMapper.builder()
+            .setModel(model).buildModelListResponse())
+        .toList();
 
-      return pageResponse;
+    PageResponse<ModelListResponse> pageResponse = new PageResponse<>(
+        result,
+        models.getNumber(),
+        models.getSize(),
+        models.getTotalElements(),
+        models.getTotalPages(),
+        models.isFirst(),
+        models.isLast());
+
+    return pageResponse;
   }
 
   @Override
+  public List<ModelListResponse> findAllModelsByProductId(Long productId) {
+    if (productId == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    List<Model> models = (List<Model>) modelRepository.findAllByProductId(productId);
+
+    return models.stream()
+        .map(model -> ModelMapper.builder().setModel(model).buildModelListResponse())
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public ModelDetailsResponse findModelById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -113,34 +137,51 @@ public class ModelServiceImpl implements ModelService {
     return ModelMapper.builder().setModel(model).buildModelResponse();
   }
 
-  // TODO: CONTINUAR AQUI
   @Override
+  @Transactional
   public void updateModelById(Long id, ModelRequest modelRequest) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'updateModelById'");
+    if (id == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    Model model = modelRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
+
+    if (model.isStatus() == false) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "El modelo se encuentra desactivado");
+    }
+
+    Long productId = model.getProduct().getId();
+
+    Product product = productRepository.findById(productId).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto asociado al modelo no existe"));
+
+    if (product.isStatus() == false) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "El producto asociado al modelo se encuentra desactivado");
+    }
+
+    String newName = modelRequest.getName().trim();
+    modelDomainService.verifyModelNameAvailableByProductIdExcludingId(newName, productId, id);
+
+    model.setName(newName);
+    model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
+    model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
+    model.setCaducityDate(modelRequest.getCaducityDate());
+    modelRepository.save(model);
   }
 
   @Override
+  @Transactional
   public void changeStatusModelById(Long id) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'changeStatusModelById'");
-  }
-    private String getImageUrl(String imageUrl) {
-    // Cargar variables de entorno
-    Dotenv dotenv = Dotenv.load();
-
-    if (imageUrl == null || imageUrl.isEmpty() || imageUrl.isBlank() || imageUrl.equals("")) {
-      return dotenv.get("DEFAULT_IMAGE_URL").toString();
-    } else {
-      return imageUrl;
+    if (id == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
-  }
-  private BigDecimal setZeroDecimal(BigDecimal number) {
-    return number == null ? BigDecimal.ZERO : number;
-  }
 
-  private LocalDate setEntryDateOrNow(LocalDate date) {
-    return date == null ? LocalDate.now() : date;
+    Model model = modelRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
+
+    model.setStatus(!model.isStatus());
+    modelRepository.save(model);
   }
 
 }

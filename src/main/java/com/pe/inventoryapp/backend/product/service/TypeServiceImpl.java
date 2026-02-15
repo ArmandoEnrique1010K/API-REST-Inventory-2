@@ -3,12 +3,10 @@ package com.pe.inventoryapp.backend.product.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Type;
 import com.pe.inventoryapp.backend.product.model.mapper.TypeMapper;
 import com.pe.inventoryapp.backend.product.model.request.TypeRequest;
@@ -16,15 +14,19 @@ import com.pe.inventoryapp.backend.product.model.response.TypeResponse;
 import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 
 public class TypeServiceImpl implements TypeService {
+  private final TypeRepository typeRepository;
+  private final TypeDomainService typeDomainService;
 
-  @Autowired
-  private TypeRepository typeRepository;
+  public TypeServiceImpl(TypeRepository typeRepository, TypeDomainService typeDomainService) {
+    this.typeRepository = typeRepository;
+    this.typeDomainService = typeDomainService;
+  }
 
   @Override
   @Transactional
   public void saveType(TypeRequest typeRequest) {
     String name = typeRequest.getName().trim();
-    verifyTypeNameExist(name);
+    typeDomainService.verifyTypeNameAvailable(name);
 
     Type type = new Type();
     type.setName(name);
@@ -52,29 +54,15 @@ public class TypeServiceImpl implements TypeService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
 
     String newName = typeRequest.getName().trim();
-    verifyTypeNameExistById(newName, id);
+    typeDomainService.verifyTypeNameAvailableExcludingId(newName, id);
     type.setName(newName);
 
     typeRepository.save(type);
   }
 
-  private void verifyTypeNameExist(String name) {
-    if (typeRepository.existsByName(name)) {
-      throw new FieldValidation("name", "Este nombre ya está en uso");
-    }
-  }
-
-  private void verifyTypeNameExistById(String name, Long id) {
-    if (typeRepository.existsByNameAndIdNot(name, id)) {
-      throw new FieldValidation(
-          "name",
-          "Este nombre ya está en uso");
-    }
-  }
-
   @Override
   public TypeResponse findTypeById(Long id) {
-        if (id == null) {
+    if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -84,4 +72,3 @@ public class TypeServiceImpl implements TypeService {
     return TypeMapper.builder().setType(type).buildTypeListResponse();
   }
 }
-
