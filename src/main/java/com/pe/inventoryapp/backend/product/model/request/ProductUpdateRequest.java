@@ -22,17 +22,17 @@ public class ProductUpdateRequest {
   private String name;
 
   // Las medidas deben ser un numero positivo o cero, con hasta 3 dígitos enteros y 2 decimales como maximo
-  @NotNull
+  @NotNull(message = "Introduzca un valor númerico")
   @PositiveOrZero(message = "La medida debe ser un valor positivo")
   @Digits(integer = 3, fraction = 2, message = "La longitud debe tener hasta 3 dígitos enteros y 2 decimales")
   private BigDecimal length;
 
-  @NotNull
+  @NotNull(message = "Introduzca un valor númerico")
   @PositiveOrZero(message = "La medida debe ser un valor positivo")
   @Digits(integer = 3, fraction = 2, message = "La longitud debe tener hasta 3 dígitos enteros y 2 decimales")
   private BigDecimal width;
 
-  @NotNull
+  @NotNull(message = "Introduzca un valor númerico")
   @PositiveOrZero(message = "La medida debe ser un valor positivo")
   @Digits(integer = 3, fraction = 2, message = "La longitud debe tener hasta 3 dígitos enteros y 2 decimales")
   private BigDecimal height;

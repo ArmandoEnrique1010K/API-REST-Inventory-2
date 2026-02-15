@@ -17,56 +17,23 @@ public interface StockLotService {
   void saveStockLot(StockLotReceiveRequest stockLotReceiveRequest, Long id_user);
 
   PageResponse<StockLotListResponse> searchAllStockLotsByParams(
-    Integer minQuantityAvailable,
-    Integer maxQuantityAvailable,
-    Integer minQuantityReceived,
-    Integer maxQuantityReceived,
-    Integer minQuantityDelivered,
-    Integer maxQuantityDelivered,
-    LocalDateTime minCreatedAt,
-    LocalDateTime maxCreatedAt,
-    String productName,
-    Boolean zeroStock,
-    Long companyId,
-    Pageable pageable
-  );
-
-  PageResponse<StockLotListResponse> searchAllStockLotsByParamsAndProductId(
-      Integer minQuantityAvailable,
-      Integer maxQuantityAvailable,
       Integer minQuantityReceived,
       Integer maxQuantityReceived,
-      Integer minQuantityDelivered,
-      Integer maxQuantityDelivered,
-      LocalDateTime minCreatedAt,
-      LocalDateTime maxCreatedAt,
-      Boolean zeroStock,
-      Long companyId,
-      Long productId,
-      Pageable pageable);
-
-  PageResponse<StockLotListResponse> searchAllStockLotsByNotZeroStockAndParams(
       Integer minQuantityAvailable,
       Integer maxQuantityAvailable,
       LocalDateTime minCreatedAt,
       LocalDateTime maxCreatedAt,
+      String keyword,
       Long companyId,
-      String productName,
+      Long categoryId,
+      Long typeId,
       Pageable pageable);
 
-  PageResponse<StockLotListResponse> searchAllStockLotsByNotZeroStockAndParamsAndProductId(
-      Integer minQuantityAvailable,
-      Integer maxQuantityAvailable,
-      LocalDateTime minCreatedAt,
-      LocalDateTime maxCreatedAt,
-      Long companyId,
-      Long productId,
-      Pageable pageable);
-
-  List<StockLotSameProductListResponse> searchAllStockLotsExceptOneByProductId(Long stockLotId, Long productId);
+  List<StockLotSameProductListResponse> findAllStockLotsExceptOneStockLotByModelId(Long modelId, Long companyId,
+      Long stockLotId);
 
   StockLotDetailsResponse findStockLotById(Long idStockLot);
-  
+
   void increaseStockLot(Long idStockLot, StockLotAdjustmentRequest stockLotAdjustmentRequest, Long id_user);
 
   void decreaseStockLot(Long idStockLot, StockLotAdjustmentRequest stockLotAdjustmentRequest, Long id_user);

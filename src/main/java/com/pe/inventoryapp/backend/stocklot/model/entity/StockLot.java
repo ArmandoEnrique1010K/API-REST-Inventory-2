@@ -8,7 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.pe.inventoryapp.backend.deliveryline.model.entity.StockLot_DeliveryLine;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
-import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.model.entity.Model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,9 +62,9 @@ public class StockLot {
   private LocalDateTime updatedAt;
 
   @ManyToOne
-  @JoinColumn(name = "product_id")
+  @JoinColumn(name = "model_id")
   @NotNull
-  private Product product;
+  private Model model;
 
   @OneToMany(mappedBy = "stockLotReceiver")
   private List<Movement> movements;

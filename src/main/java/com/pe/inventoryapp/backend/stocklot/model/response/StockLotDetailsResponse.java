@@ -19,13 +19,23 @@ public class StockLotDetailsResponse {
   private Integer quantityDelivered;
   private Integer quantityLost;
   private Integer quantityRecovered;
+  private boolean temporary;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 
-  private Long productId;
-  private String productName;
-  private String productImageUrl;
+  private Long modelId;
+  private String modelName;
+  private String modelImageUrl;
 
   private Long companyId;
   private String companyName;
+
+  private Long productId;
+  private String productName;
+
+  private Long typeId;
+  private String typeName;
+
+  private Long categoryId;
+  private String categoryName;
 }

@@ -1,7 +1,6 @@
 package com.pe.inventoryapp.backend.stocklot.controller;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,15 +24,17 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/companies")
 public class CompanyController {
+  private final CompanyService companyService;
+  private final ValidationService validationService;
+  private final ResponseService responseService;
 
-  @Autowired
-  private CompanyService companyService;
-
-  @Autowired
-  private ValidationService validationService;
-
-  @Autowired
-  private ResponseService responseService;
+  public CompanyController(
+      CompanyService companyService, ResponseService responseService,
+      ValidationService validationService) {
+    this.companyService = companyService;
+    this.responseService = responseService;
+    this.validationService = validationService;
+  }
 
   @PostMapping
   public ResponseEntity<CommonResponse> registerCompany(@Valid @RequestBody CompanyRequest companyRequest,

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockLotAdjustmentRequest {
-  @NotNull
+  @NotNull(message = "Introduzca un valor númerico")
   @Min(value = 1, message = "La cantidad debe ser mayor a 0")
   private Integer quantity;
 

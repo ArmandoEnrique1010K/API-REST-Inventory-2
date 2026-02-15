@@ -58,6 +58,8 @@ public class ModelServiceImpl implements ModelService {
     Product product = productRepository.findById(productId)
         .orElseThrow(() -> new BusinessException(com.pe.inventoryapp.backend.common.data.ResponseStatus.NOT_FOUND,
             "El producto no existe"));
+    product.setQuantityModels(product.getQuantityModels() + 1);
+    productRepository.save(product);
 
     Model model = new Model();
     model.setName(name);

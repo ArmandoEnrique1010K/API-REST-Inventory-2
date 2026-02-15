@@ -16,7 +16,11 @@ public class StockLotListResponse {
   private String batch;
   private Integer quantityAvailable;
   private LocalDateTime createdAt;
+
+  private Long modelId;
+  private String modelName;
+  private String modelImageUrl;
+
   private Long productId;
   private String productName;
-  private String productImageUrl;
 }

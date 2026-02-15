@@ -17,11 +17,7 @@ public class StockLotTransferRequest {
   private Integer quantity;
   private String comment;
 
-  // IDs de los lotes de stocks de emisor y receptor
-  // @NotNull
-  // private Long idStockLotEmitter;
-
-  @NotNull
+  // ID del lote de stock receptor
+  @NotNull(message = "Seleccione un lote de stock receptor")
   private Long idStockLotReceiver;
-
 }

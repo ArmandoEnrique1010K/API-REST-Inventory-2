@@ -13,5 +13,4 @@ public interface CompanyService {
   CompanyResponse findCompanyById(Long id);
 
   void updateCompanyById(Long id, CompanyRequest companyRequest);
-
 }
