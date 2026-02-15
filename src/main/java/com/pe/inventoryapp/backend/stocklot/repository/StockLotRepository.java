@@ -17,9 +17,9 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long> {
   // TODO: ELIMINAR ESTE MÉTODO DEL REPOSITORIO
   // Se reutiliza el último StockLot creado en las últimas 24h
   // para consolidar devoluciones
-  Optional<StockLot> findTopByProductIdAndCreatedAtAfterOrderByCreatedAtDesc(
-      Long productId,
-      LocalDateTime limitCreatedAt);
+//   Optional<StockLot> findTopByProductIdAndCreatedAtAfterOrderByCreatedAtDesc(
+//       Long productId,
+//       LocalDateTime limitCreatedAt);
 
   // Query para la busqueda de lotes de stock para usuarios con el rol de
   // SECRETARY
@@ -56,81 +56,81 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long> {
       Pageable pageable);
 
       // TODO: ELIMINAR ESTOS 3 MÉTODOS DEL REPOSITORIO, SE REUTILIZA EL MÉTODO findAllByParams
-  @Query("""
-      SELECT sl
-      FROM StockLot sl
-      WHERE
-      (:minQuantityReceived IS NULL OR sl.quantityReceived >= :minQuantityReceived)
-      AND (:maxQuantityReceived IS NULL OR sl.quantityReceived <= :maxQuantityReceived)
-      AND (:minQuantityAvailable IS NULL OR sl.quantityAvailable >= :minQuantityAvailable)
-      AND (:maxQuantityAvailable IS NULL OR sl.quantityAvailable <= :maxQuantityAvailable)
-      AND (:minQuantityDelivered IS NULL OR sl.quantityDelivered >= :minQuantityDelivered)
-      AND (:maxQuantityDelivered IS NULL OR sl.quantityDelivered <= :maxQuantityDelivered)
-      AND (:minCreatedAt IS NULL OR sl.createdAt >= :minCreatedAt)
-      AND (:maxCreatedAt IS NULL OR sl.createdAt <= :maxCreatedAt)
-      AND (:zeroStock IS NULL OR sl.zeroStock = :zeroStock)
-      AND (:companyId IS NULL OR sl.company.id = :companyId)
-      AND (sl.product.id = :productId)
-      """)
-  Page<StockLot> findAllByParamsAndProductId(
-      @Param("minQuantityAvailable") Integer minQuantityAvailable,
-      @Param("maxQuantityAvailable") Integer maxQuantityAvailable,
-      @Param("minQuantityReceived") Integer minQuantityReceived,
-      @Param("maxQuantityReceived") Integer maxQuantityReceived,
-      @Param("minQuantityDelivered") Integer minQuantityDelivered,
-      @Param("maxQuantityDelivered") Integer maxQuantityDelivered,
-      @Param("minCreatedAt") LocalDateTime minCreatedAt,
-      @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
-      @Param("zeroStock") Boolean zeroStock,
-      @Param("companyId") Long companyId,
-      @Param("productId") Long productId,
-      Pageable pageable);
+//   @Query("""
+//       SELECT sl
+//       FROM StockLot sl
+//       WHERE
+//       (:minQuantityReceived IS NULL OR sl.quantityReceived >= :minQuantityReceived)
+//       AND (:maxQuantityReceived IS NULL OR sl.quantityReceived <= :maxQuantityReceived)
+//       AND (:minQuantityAvailable IS NULL OR sl.quantityAvailable >= :minQuantityAvailable)
+//       AND (:maxQuantityAvailable IS NULL OR sl.quantityAvailable <= :maxQuantityAvailable)
+//       AND (:minQuantityDelivered IS NULL OR sl.quantityDelivered >= :minQuantityDelivered)
+//       AND (:maxQuantityDelivered IS NULL OR sl.quantityDelivered <= :maxQuantityDelivered)
+//       AND (:minCreatedAt IS NULL OR sl.createdAt >= :minCreatedAt)
+//       AND (:maxCreatedAt IS NULL OR sl.createdAt <= :maxCreatedAt)
+//       AND (:zeroStock IS NULL OR sl.zeroStock = :zeroStock)
+//       AND (:companyId IS NULL OR sl.company.id = :companyId)
+//       AND (sl.product.id = :productId)
+//       """)
+//   Page<StockLot> findAllByParamsAndProductId(
+//       @Param("minQuantityAvailable") Integer minQuantityAvailable,
+//       @Param("maxQuantityAvailable") Integer maxQuantityAvailable,
+//       @Param("minQuantityReceived") Integer minQuantityReceived,
+//       @Param("maxQuantityReceived") Integer maxQuantityReceived,
+//       @Param("minQuantityDelivered") Integer minQuantityDelivered,
+//       @Param("maxQuantityDelivered") Integer maxQuantityDelivered,
+//       @Param("minCreatedAt") LocalDateTime minCreatedAt,
+//       @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
+//       @Param("zeroStock") Boolean zeroStock,
+//       @Param("companyId") Long companyId,
+//       @Param("productId") Long productId,
+//       Pageable pageable);
 
   // Query para la busqueda de lotes de stock para usuarios con el rol de OPERATOR
   // Devuelve una pagina de lotes de stock que cumplen con los criterios de
   // busqueda
-  @Query("""
-      SELECT sl
-      FROM StockLot sl
-      WHERE (:minQuantityAvailable IS NULL OR sl.quantityAvailable >= :minQuantityAvailable)
-      AND (:maxQuantityAvailable IS NULL OR sl.quantityAvailable <= :maxQuantityAvailable)
-      AND (:minCreatedAt IS NULL OR sl.createdAt >= :minCreatedAt)
-      AND (:maxCreatedAt IS NULL OR sl.createdAt <= :maxCreatedAt)
-      AND (:productName IS NULL OR LOWER(sl.product.name) LIKE LOWER(CONCAT('%', :productName, '%')))
-      AND (sl.zeroStock = false)
-      AND (:companyId IS NULL OR sl.company.id = :companyId)
-      """)
-  Page<StockLot> findAllByNotZeroStock(
-      @Param("minQuantityAvailable") Integer minQuantityAvailable,
-      @Param("maxQuantityAvailable") Integer maxQuantityAvailable,
-      @Param("minCreatedAt") LocalDateTime minCreatedAt,
-      @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
-      @Param("productName") String productName,
-      @Param("companyId") Long companyId,
-      Pageable pageable);
+//   @Query("""
+//       SELECT sl
+//       FROM StockLot sl
+//       WHERE (:minQuantityAvailable IS NULL OR sl.quantityAvailable >= :minQuantityAvailable)
+//       AND (:maxQuantityAvailable IS NULL OR sl.quantityAvailable <= :maxQuantityAvailable)
+//       AND (:minCreatedAt IS NULL OR sl.createdAt >= :minCreatedAt)
+//       AND (:maxCreatedAt IS NULL OR sl.createdAt <= :maxCreatedAt)
+//       AND (:productName IS NULL OR LOWER(sl.product.name) LIKE LOWER(CONCAT('%', :productName, '%')))
+//       AND (sl.zeroStock = false)
+//       AND (:companyId IS NULL OR sl.company.id = :companyId)
+//       """)
+//   Page<StockLot> findAllByNotZeroStock(
+//       @Param("minQuantityAvailable") Integer minQuantityAvailable,
+//       @Param("maxQuantityAvailable") Integer maxQuantityAvailable,
+//       @Param("minCreatedAt") LocalDateTime minCreatedAt,
+//       @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
+//       @Param("productName") String productName,
+//       @Param("companyId") Long companyId,
+//       Pageable pageable);
 
   // Query para la busqueda de lotes de stock para usuarios con el rol de OPERATOR
   // Devuelve una pagina de lotes de stock que cumplen con los criterios de
   // busqueda
-  @Query("""
-        SELECT sl
-        FROM StockLot sl
-        WHERE (:minQuantityAvailable IS NULL OR sl.quantityAvailable >= :minQuantityAvailable)
-        AND (:maxQuantityAvailable IS NULL OR sl.quantityAvailable <= :maxQuantityAvailable)
-        AND (:minCreatedAt IS NULL OR sl.createdAt >= :minCreatedAt)
-        AND (:maxCreatedAt IS NULL OR sl.createdAt <= :maxCreatedAt)
-        AND (sl.zeroStock = false)
-        AND (sl.product.id = :productId)
-        AND (:companyId IS NULL OR sl.company.id = :companyId)
-      """)
-  Page<StockLot> findAllByProductIdAndNotZeroStock(
-      @Param("minQuantityAvailable") Integer minQuantityAvailable,
-      @Param("maxQuantityAvailable") Integer maxQuantityAvailable,
-      @Param("minCreatedAt") LocalDateTime minCreatedAt,
-      @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
-      @Param("productId") Long productId,
-      @Param("companyId") Long companyId,
-      Pageable pageable);
+//   @Query("""
+//         SELECT sl
+//         FROM StockLot sl
+//         WHERE (:minQuantityAvailable IS NULL OR sl.quantityAvailable >= :minQuantityAvailable)
+//         AND (:maxQuantityAvailable IS NULL OR sl.quantityAvailable <= :maxQuantityAvailable)
+//         AND (:minCreatedAt IS NULL OR sl.createdAt >= :minCreatedAt)
+//         AND (:maxCreatedAt IS NULL OR sl.createdAt <= :maxCreatedAt)
+//         AND (sl.zeroStock = false)
+//         AND (sl.product.id = :productId)
+//         AND (:companyId IS NULL OR sl.company.id = :companyId)
+//       """)
+//   Page<StockLot> findAllByProductIdAndNotZeroStock(
+//       @Param("minQuantityAvailable") Integer minQuantityAvailable,
+//       @Param("maxQuantityAvailable") Integer maxQuantityAvailable,
+//       @Param("minCreatedAt") LocalDateTime minCreatedAt,
+//       @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
+//       @Param("productId") Long productId,
+//       @Param("companyId") Long companyId,
+//       Pageable pageable);
 
 
 
@@ -179,13 +179,13 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long> {
           SELECT s
           FROM StockLot s
           WHERE s.company.id = :companyId
-            AND s.product.id = :productId
+            AND s.model.id = :modelId
             AND s.temporary = true
             AND s.zeroStock = false
             AND s.createdAt >= :limitDate
       """)
   Optional<StockLot> findActiveTemporaryStockLot(
       @Param("companyId") Long companyId,
-      @Param("productId") Long productId,
+      @Param("modelId") Long modelId,
       @Param("limitDate") LocalDateTime limitDate);
 }

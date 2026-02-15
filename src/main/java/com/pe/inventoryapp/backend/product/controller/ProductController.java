@@ -73,7 +73,7 @@ public class ProductController {
   public ResponseEntity<CommonResponse> changeStatusProduct(@PathVariable Long id) {
     productService.changeStatusProductById(id);
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-        "Se modifico el estado del producto");
+        "Se ha cambiado el estado del producto");
 
     return ResponseEntity.status(response.status()).body(response);
   }

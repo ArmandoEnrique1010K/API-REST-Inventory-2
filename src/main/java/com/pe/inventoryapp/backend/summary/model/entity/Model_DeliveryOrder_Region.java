@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.deliveryorder.model.entity;
+package com.pe.inventoryapp.backend.summary.model.entity;
 
 import java.time.LocalDateTime;
 
@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "productos_ordenes_de_entrega_region")
-public class Product_DeliveryOrder_Region {
+public class Model_DeliveryOrder_Region {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

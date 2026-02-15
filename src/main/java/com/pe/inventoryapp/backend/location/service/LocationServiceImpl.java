@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.location.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,46 +9,52 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
-import com.pe.inventoryapp.backend.location.model.entity.Region;
+import com.pe.inventoryapp.backend.location.model.entity.Subregion;
 import com.pe.inventoryapp.backend.location.model.mapper.LocationMapper;
 import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
 import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.location.repository.RegionRepository;
+import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
 
 @Service
 public class LocationServiceImpl implements LocationService {
+  private final LocationRepository locationRepository;
+  private final SubregionRepository subregionRepository;
+  private final RegionRepository regionRepository;
+  private final LocationDomainService locationDomainService;
 
-  @Autowired
-  private LocationRepository locationRepository;
-
-  @Autowired
-  private RegionRepository regionRepository;
+  public LocationServiceImpl(LocationRepository locationRepository, SubregionRepository subregionRepository,
+      RegionRepository regionRepository, LocationDomainService locationDomainService) {
+    this.locationRepository = locationRepository;
+    this.subregionRepository = subregionRepository;
+    this.regionRepository = regionRepository;
+    this.locationDomainService = locationDomainService;
+  }
 
   @Override
   @Transactional
   public void saveLocation(LocationRequest locationRequest) {
-    verifyLocationNameExist(locationRequest.getName());
+    String name = locationRequest.getName().trim();
+    Long idSubregion = locationRequest.getIdSubregion();
 
-    Long idRegion = locationRequest.getIdRegion();
-
-    if (idRegion == null) {
+    if (idSubregion == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Region region = regionRepository.findById(
-        idRegion)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe"));
+    Subregion subregion = subregionRepository.findById(
+        idSubregion)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La subregión no existe"));
 
-    String name = locationRequest.getName().trim();
+    locationDomainService.verifyLocationNameAvailableBySubregionId(name, idSubregion);
 
     Location location = new Location();
     location.setName(name);
+    location.setAddress(locationRequest.getAddress().trim());
     location.setStatus(true);
-    location.setRegion(region);
+    location.setSubregion(subregion);
 
     locationRepository.save(location);
   }
@@ -57,16 +62,24 @@ public class LocationServiceImpl implements LocationService {
   @Override
   @Transactional(readOnly = true)
   public PageResponse<LocationResponse> searchAllLocations(
+      Pageable pageable,
       String name,
       Long regionId,
-      Boolean status,
-      Pageable pageable) {
+      Long subregionId,
+      Boolean status) {
     if (regionId != null && !regionRepository.existsById(regionId)) {
       throw new BusinessException(
           ResponseStatus.NOT_FOUND,
           "La región no existe");
     }
-    Page<Location> locations = locationRepository.findAllByParams(name, regionId, status, pageable);
+
+    if (subregionId != null && !subregionRepository.existsById(subregionId)) {
+      throw new BusinessException(
+          ResponseStatus.NOT_FOUND,
+          "La subregión no existe");
+    }
+
+    Page<Location> locations = locationRepository.findAllByParams(pageable, name, regionId, subregionId, status);
 
     List<LocationResponse> result = locations.getContent().stream().map(location -> LocationMapper.builder().setLocation(location).buildLocationResponse()).toList();
 
@@ -115,25 +128,25 @@ public class LocationServiceImpl implements LocationService {
     }
 
     String newName = locationRequest.getName().trim();
+    Long idSubregion = locationRequest.getIdSubregion();
 
-    verifyLocationNameExistById(newName, id);
-
-    Long idRegion = locationRequest.getIdRegion();
-
-    if (idRegion == null) {
+    if (idSubregion == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Region region = regionRepository.findById(idRegion)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe"));
-    
-    location.setName(newName);
-    location.setRegion(region);
+    locationDomainService.verifyLocationNameAvailableBySubregionIdExcludingId(newName, idSubregion, id);
 
+    Subregion subregion = subregionRepository.findById(
+        idSubregion)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La subregión no existe"));
+
+    location.setName(newName);
+    location.setSubregion(subregion);
     locationRepository.save(location);
   }
 
   @Override
+  @Transactional
   public void changeStatusLocationById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -147,20 +160,5 @@ public class LocationServiceImpl implements LocationService {
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
     location.setStatus(!location.isStatus());
     locationRepository.save(location);
-  }
-
-  // METODOS AUXILIARES
-  private void verifyLocationNameExist(String name) {
-    if (locationRepository.existsByName(name)) {
-      throw new FieldValidation("name", "Este nombre ya está en uso");
-    }
-  }
-
-  private void verifyLocationNameExistById(String name, Long id) {
-    if (locationRepository.existsByNameAndIdNot(name, id)) {
-      throw new FieldValidation(
-          "name",
-          "Este nombre ya está en uso");
-    }
   }
 }

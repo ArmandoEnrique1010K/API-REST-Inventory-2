@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.validation.BindingResult;
 import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -27,14 +26,16 @@ import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 @RestController
 @RequestMapping("/api/regions")
 public class RegionController {
-  @Autowired
-  private RegionService regionService;
+  private final RegionService regionService;
+  private final ValidationService validationService;
+  private final ResponseService responseService;
 
-  @Autowired
-  private ValidationService validationService;
-
-  @Autowired
-  private ResponseService responseService;
+  public RegionController(RegionService regionService, ValidationService validationService,
+      ResponseService responseService) {
+    this.regionService = regionService;
+    this.validationService = validationService;
+    this.responseService = responseService;
+  }
 
   @PostMapping
   public ResponseEntity<CommonResponse> registerRegion(@Valid @RequestBody RegionRequest regionRequest,

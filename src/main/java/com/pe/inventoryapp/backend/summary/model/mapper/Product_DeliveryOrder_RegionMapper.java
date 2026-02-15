@@ -1,12 +1,12 @@
-package com.pe.inventoryapp.backend.deliveryorder.model.mapper;
+package com.pe.inventoryapp.backend.summary.model.mapper;
 
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrder_RegionResponse;
+import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
+import com.pe.inventoryapp.backend.summary.model.response.Product_DeliveryOrder_RegionResponse;
 
 public class Product_DeliveryOrder_RegionMapper {
-    private Product_DeliveryOrder_Region product_DeliveryOrder_Region;
+    private Model_DeliveryOrder_Region product_DeliveryOrder_Region;
 
   private Product_DeliveryOrder_RegionMapper() {
   }
@@ -16,7 +16,7 @@ public class Product_DeliveryOrder_RegionMapper {
   }
 
   public Product_DeliveryOrder_RegionMapper setProduct_DeliveryOrder_Region(
-      Product_DeliveryOrder_Region product_DeliveryOrder_Region) {
+      Model_DeliveryOrder_Region product_DeliveryOrder_Region) {
     this.product_DeliveryOrder_Region = product_DeliveryOrder_Region;
     return this;
   }

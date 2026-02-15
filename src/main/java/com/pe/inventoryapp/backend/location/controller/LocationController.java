@@ -13,7 +13,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.validation.Valid;
 
@@ -30,14 +29,18 @@ import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 @RestController
 @RequestMapping("/api/locations")
 public class LocationController {
-  @Autowired
-  private LocationService locationService;
+  private final LocationService locationService;
+  private final ResponseService responseService;
+  private final ValidationService validationService;
 
-  @Autowired
-  private ResponseService responseService;
-
-  @Autowired
-  private ValidationService validationService;
+  public LocationController(
+      LocationService locationService,
+      ValidationService validationService,
+      ResponseService responseService) {
+    this.locationService = locationService;
+    this.validationService = validationService;
+    this.responseService = responseService;
+  }
 
   @PostMapping
   public ResponseEntity<CommonResponse> registerLocation(@Valid @RequestBody LocationRequest locationRequest,
@@ -50,69 +53,72 @@ public class LocationController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-
   @GetMapping
   public ResponseEntity<?> listAllLocations(
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long regionId,
+      @RequestParam(required = false) Long subregionId,
       @RequestParam(required = false) Boolean status) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, regionId, status, pageable);
-    DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
-        locations);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-
-  }
-
-  @GetMapping("/active")
-  public ResponseEntity<?> listAllActiveLocations(
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) String name,
-      @RequestParam(required = false) Long regionId) {
-    Pageable pageable = PageRequest.of(page, 20);
-
-    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, regionId, true, pageable);
+    PageResponse<LocationResponse> locations = locationService.searchAllLocations(pageable, name, 
+        regionId, subregionId, status);
     DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
         ResponseStatus.SUCCESS,
         locations);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+
   }
 
-  @GetMapping("/region/{id}")
-  public ResponseEntity<?> listAllLocationsByRegion(
-      @PathVariable Long id,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) String name,
-      @RequestParam(required = false) Boolean status) {
-    Pageable pageable = PageRequest.of(page, 20);
+  // TODO: ELIMINAR ESTOS 3 ENDPOINTS, AUNQUE PODRIAN SERVIR EN ALGUNOS CASOS
+  // @GetMapping("/active")
+  // public ResponseEntity<?> listAllActiveLocations(
+  //     @RequestParam(defaultValue = "0") Integer page,
+  //     @RequestParam(required = false) String name,
+  //     @RequestParam(required = false) Long regionId) {
+  //   Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, id, status, pageable);
-    DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
-        ResponseStatus.SUCCESS,
-        locations);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
+  //   PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, regionId, true, pageable);
+  //   DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
+  //       ResponseStatus.SUCCESS,
+  //       locations);
+  //   return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  // }
 
-  @GetMapping("/active/region/{id}")
-  public ResponseEntity<?> listAllActiveLocationsByRegion(
-      @PathVariable Long id,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) String name) {
-    Pageable pageable = PageRequest.of(page, 20);
+  // @GetMapping("/region/{id}")
+  // public ResponseEntity<?> listAllLocationsByRegion(
+  //     @PathVariable Long id,
+  //     @RequestParam(defaultValue = "0") Integer page,
+  //     @RequestParam(required = false) String name,
+  //     @RequestParam(required = false) Boolean status) {
+  //   Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, id, true, pageable);
-    DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
-        ResponseStatus.SUCCESS,
-        locations);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
+  //   PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, id, status, pageable);
+  //   DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
+  //       ResponseStatus.SUCCESS,
+  //       locations);
+  //   return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  // }
+
+  // @GetMapping("/active/region/{id}")
+  // public ResponseEntity<?> listAllActiveLocationsByRegion(
+  //     @PathVariable Long id,
+  //     @RequestParam(defaultValue = "0") Integer page,
+  //     @RequestParam(required = false) String name) {
+  //   Pageable pageable = PageRequest.of(page, 20);
+
+  //   PageResponse<LocationResponse> locations = locationService.searchAllLocations(name, id, true, pageable);
+  //   DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
+  //       ResponseStatus.SUCCESS,
+  //       locations);
+  //   return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  // }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getLocation(@PathVariable Long id) {
     LocationResponse locationResponse = locationService.findLocationById(id);
-    DataResponse<LocationResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<LocationResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         locationResponse);
     return ResponseEntity.status(response.status()).body(response);
   }
@@ -133,7 +139,7 @@ public class LocationController {
     locationService.changeStatusLocationById(id);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-        "Se modifico el estado de la ubiación");
+        "Se ha cambiado el estado de la ubiación");
     return ResponseEntity.status(response.status()).body(response);
   }
 }

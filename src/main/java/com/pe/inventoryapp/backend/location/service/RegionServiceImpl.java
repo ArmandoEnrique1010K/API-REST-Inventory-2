@@ -3,13 +3,11 @@ package com.pe.inventoryapp.backend.location.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.location.model.entity.Region;
 import com.pe.inventoryapp.backend.location.model.mapper.RegionMapper;
 import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
@@ -19,15 +17,20 @@ import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 @Service
 public class RegionServiceImpl implements RegionService {
 
-  @Autowired
-  private RegionRepository regionRepository;
+  private final RegionRepository regionRepository;
+  private final RegionDomainService regionDomainService;
+
+  public RegionServiceImpl(RegionRepository regionRepository, RegionDomainService regionDomainService) {
+    this.regionRepository = regionRepository;
+    this.regionDomainService = regionDomainService;
+  }
 
   @Override
   @Transactional
   public void saveRegion(RegionRequest regionRequest) {
     String name = regionRequest.getName().trim();
 
-    verifyRegionNameExist(name);
+    regionDomainService.verifyRegionNameAvailable(name);
 
     Region region = new Region();
     region.setName(name);
@@ -46,6 +49,7 @@ public class RegionServiceImpl implements RegionService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public RegionResponse findRegionById(Long id) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -58,6 +62,7 @@ public class RegionServiceImpl implements RegionService {
   }
 
   @Override
+  @Transactional
   public void updateRegionById(Long id, RegionRequest regionRequest) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -70,25 +75,10 @@ public class RegionServiceImpl implements RegionService {
     Region region = regionRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe"));
 
-    verifyRegionNameExistById(regionRequest.getName().trim(), id);
+    String newName = regionRequest.getName().trim();
+    regionDomainService.verifyRegionNameAvailableExcludingId(newName, id);
 
-    region.setName(regionRequest.getName().trim());
-
+    region.setName(newName);
     regionRepository.save(region);
-  }
-
-  // METODOS AUXILIARES
-  private void verifyRegionNameExist(String name) {
-    if (regionRepository.existsByName(name)) {
-      throw new FieldValidation("name", "Este nombre ya está en uso");
-    }
-  }
-
-  private void verifyRegionNameExistById(String name, Long id) {
-    if (regionRepository.existsByNameAndIdNot(name, id)) {
-      throw new FieldValidation(
-          "name",
-          "Este nombre ya está en uso");
-    }
   }
 }

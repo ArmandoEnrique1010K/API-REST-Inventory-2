@@ -48,6 +48,7 @@ public class ProductCreateRequest {
   @Size(min = 4, max = 40, message = "El nombre debe tener entre 4 y 40 caracteres")
   private String modelName;
 
+  // TODO: VERIFICAR SI CLOUDINARY TIENE ESE RANGO DE CARACTERES EN LA URL DE UNA IMAGEN, PARA QUITAR LAS VALIDACIONES
   // URL absoluta de la imagen
   @NotBlank(message = "Suba una imagen")
   @Size(min = 4, max = 500, message = "La URL debe tener entre 4 y 500 caracteres")

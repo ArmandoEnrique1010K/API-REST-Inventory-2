@@ -26,9 +26,10 @@ public class LocationMapper {
         }
         return new LocationResponse(
                 location.getId(),
-                location.getName().trim(),
-                location.getRegion().getName().trim(),
-                location.isStatus());
+                location.getName(),
+                location.getAddress(),
+                location.isStatus(),
+                location.getSubregion().getId(),
+                location.getSubregion().getName());
     }
-
 }

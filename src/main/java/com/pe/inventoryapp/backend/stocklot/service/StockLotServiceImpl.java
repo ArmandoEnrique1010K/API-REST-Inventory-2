@@ -101,6 +101,7 @@ public class StockLotServiceImpl implements StockLotService {
     stockLot.setQuantityLost(0);
     stockLot.setQuantityRecovered(0);
 
+    stockLot.setTemporary(false);
     // Indica si el stock es cero
     stockLot.setZeroStock(false);
     stockLot.setModel(model);

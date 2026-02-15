@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.deliveryorder.service;
+package com.pe.inventoryapp.backend.summary.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
-import com.pe.inventoryapp.backend.deliveryorder.model.mapper.Product_DeliveryOrder_RegionMapper;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrder_RegionResponse;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrder_RegionRepository;
+import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
+import com.pe.inventoryapp.backend.summary.model.mapper.Product_DeliveryOrder_RegionMapper;
+import com.pe.inventoryapp.backend.summary.model.response.Product_DeliveryOrder_RegionResponse;
+import com.pe.inventoryapp.backend.summary.repository.Product_DeliveryOrder_RegionRepository;
 
 @Service
 public class Product_DeliveryOrder_RegionServiceImpl implements Product_DeliveryOrder_RegionService {
@@ -19,7 +19,7 @@ public class Product_DeliveryOrder_RegionServiceImpl implements Product_Delivery
 
   @Override
   public List<Product_DeliveryOrder_RegionResponse> findAllByDeliveryOrderId(Long deliveryOrderId){
-   List<Product_DeliveryOrder_Region> product_DeliveryOrder_Regions = (List<Product_DeliveryOrder_Region>)  product_DeliveryOrder_RegionRepository.findAllByProduct_DeliveryOrderIdAndRequiredTotalQuantityGreaterThanZero(deliveryOrderId);
+   List<Model_DeliveryOrder_Region> product_DeliveryOrder_Regions = (List<Model_DeliveryOrder_Region>)  product_DeliveryOrder_RegionRepository.findAllByProduct_DeliveryOrderIdAndRequiredTotalQuantityGreaterThanZero(deliveryOrderId);
 
     return product_DeliveryOrder_Regions.stream()
         .map(pdr -> Product_DeliveryOrder_RegionMapper.builder().setProduct_DeliveryOrder_Region(

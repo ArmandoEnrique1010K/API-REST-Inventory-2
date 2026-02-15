@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.deliveryorder.model.response;
+package com.pe.inventoryapp.backend.summary.model.response;
 
 import java.time.LocalDateTime;
 

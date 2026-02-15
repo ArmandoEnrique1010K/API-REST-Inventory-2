@@ -6,11 +6,11 @@ import com.pe.inventoryapp.backend.location.model.request.RegionRequest;
 import com.pe.inventoryapp.backend.location.model.response.RegionResponse;
 
 public interface RegionService {
-    void saveRegion(RegionRequest regionRequest);
+  void saveRegion(RegionRequest regionRequest);
 
-    List<RegionResponse> findAllRegions();
+  List<RegionResponse> findAllRegions();
 
-    RegionResponse findRegionById(Long id);
+  RegionResponse findRegionById(Long id);
 
-    void updateRegionById(Long id, RegionRequest regionRequest);
+  void updateRegionById(Long id, RegionRequest regionRequest);
 }

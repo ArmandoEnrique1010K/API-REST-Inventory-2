@@ -10,10 +10,11 @@ public interface LocationService {
   void saveLocation(LocationRequest locationRequest);
 
   PageResponse<LocationResponse> searchAllLocations(
+      Pageable pageable,
       String name,
       Long regionId,
-      Boolean status,
-      Pageable pageable);
+      Long subregionId,
+      Boolean status);
 
   LocationResponse findLocationById(Long id);
 

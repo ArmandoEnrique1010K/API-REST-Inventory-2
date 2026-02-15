@@ -23,7 +23,6 @@ import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepositor
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientDetailsResponse;
@@ -32,7 +31,6 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDet
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrder_RegionRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
@@ -42,6 +40,8 @@ import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
+import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
+import com.pe.inventoryapp.backend.summary.repository.Product_DeliveryOrder_RegionRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -502,10 +502,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	}
 
 	private void recalculateProductDeliveryOrderRegions(Long productDeliveryOrderId) {
-		List<Product_DeliveryOrder_Region> regions = product_DeliveryOrder_RegionRepository
+		List<Model_DeliveryOrder_Region> regions = product_DeliveryOrder_RegionRepository
 				.findAllByProduct_DeliveryOrderId(productDeliveryOrderId);
 
-		for (Product_DeliveryOrder_Region entity : regions) {
+		for (Model_DeliveryOrder_Region entity : regions) {
 
 			// Solamente hay un campo para la cantidad total requerida
 			Integer requiredTotal = deliveryLineRepository.sumRequiredByProductDeliveryOrderAndRegion(

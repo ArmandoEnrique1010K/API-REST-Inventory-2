@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.deliveryorder.controller;
+package com.pe.inventoryapp.backend.summary.controller;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
-import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrder_RegionResponse;
-import com.pe.inventoryapp.backend.deliveryorder.service.Product_DeliveryOrder_RegionService;
+import com.pe.inventoryapp.backend.summary.model.response.Product_DeliveryOrder_RegionResponse;
+import com.pe.inventoryapp.backend.summary.service.Product_DeliveryOrder_RegionService;
 
 @RestController
 @RequestMapping("/api/product-delivery-order-region")

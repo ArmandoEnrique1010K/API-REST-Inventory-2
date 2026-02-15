@@ -2,8 +2,6 @@ package com.pe.inventoryapp.backend.location.model.entity;
 
 import java.util.List;
 
-import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,8 +22,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ubicaciones")
-public class Location {
+@Table(name = "subregiones")
+public class Subregion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,15 +31,14 @@ public class Location {
     @Column(unique = true, nullable = false)
     private String name;
 
-    private String address;
-
-    private boolean status;
-
     @ManyToOne
-    @JoinColumn(name = "subregion_id")
+    @JoinColumn(name = "region_id")
     @NotNull
-    private Subregion subregion;
+    private Region region;
 
-    @OneToMany(mappedBy = "location")
-    private List<DeliveryLine> deliveryLines;
+    @OneToMany(mappedBy = "subregion")
+    private List<Location> locations;
+
+    // TODO: AÑADIR UNA RELACION HACIA LA ENTIDAD Model_DeliveryOrder_Subregion
+    // @OneToMany
 }

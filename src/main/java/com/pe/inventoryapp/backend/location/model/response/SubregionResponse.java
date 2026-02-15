@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LocationResponse {
-    private Long id;
-    private String name;
-    private String address; 
-    private boolean status;
+public class SubregionResponse {
+  private Long id;
+  private String name;
 
-    private Long subregionId;
-    private String subregionName;
+  private Long regionId;
+  private String regionName;
 }

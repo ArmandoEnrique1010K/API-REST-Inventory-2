@@ -28,10 +28,8 @@ import com.pe.inventoryapp.backend.deliveryline.repository.StockLot_DeliveryLine
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder_Region;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrder_RegionRepository;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
@@ -45,6 +43,8 @@ import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
+import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
+import com.pe.inventoryapp.backend.summary.repository.Product_DeliveryOrder_RegionRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -184,12 +184,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         product_DeliveryOrder.getId(),
         location.getRegion().getId());
 
-    Product_DeliveryOrder_Region entity = product_DeliveryOrder_RegionRepository
+    Model_DeliveryOrder_Region entity = product_DeliveryOrder_RegionRepository
         .findByProduct_DeliveryOrderIdAndRegionId(
             product_DeliveryOrder.getId(),
             location.getRegion().getId())
         .orElseGet(() -> {
-          Product_DeliveryOrder_Region e = new Product_DeliveryOrder_Region();
+          Model_DeliveryOrder_Region e = new Model_DeliveryOrder_Region();
           e.setProduct_DeliveryOrder(product_DeliveryOrder);
           e.setRegion(location.getRegion());
           return e;
@@ -531,6 +531,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // 2️⃣ Buscar lote temporal activo
     Optional<StockLot> optionalStockLot = stockLotRepository.findActiveTemporaryStockLot(
             1L,
+            //  TODO: CORREGIR, DEBE SER EL MODEL Y NO PRODUCT
             deliveryLine.getProduct().getId(),
             last24Hours);
 
@@ -733,10 +734,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   // ESTRATEGIA DE ACTUALIZACIÓN
   // MÉTODO AUXILIAR DE REPARACIÓN
   private void recalculateProductDeliveryOrderRegions(Long productDeliveryOrderId) {
-    List<Product_DeliveryOrder_Region> regions = product_DeliveryOrder_RegionRepository
+    List<Model_DeliveryOrder_Region> regions = product_DeliveryOrder_RegionRepository
         .findAllByProduct_DeliveryOrderId(productDeliveryOrderId);
 
-    for (Product_DeliveryOrder_Region entity : regions) {
+    for (Model_DeliveryOrder_Region entity : regions) {
 
       // Solamente hay un campo para la cantidad total requerida
       Integer requiredTotal = deliveryLineRepository.sumRequiredByProductDeliveryOrderAndRegion(

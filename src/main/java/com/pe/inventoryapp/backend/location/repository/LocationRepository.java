@@ -13,16 +13,18 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
       SELECT l
       FROM Location l
       WHERE (:name IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :name, '%')))
-      AND (:regionId IS NULL OR l.region.id = :regionId)
+      AND (:regionId IS NULL OR l.subregion.region.id = :regionId)
+      AND (:subregionId IS NULL OR l.subregion.id = :subregionId)
       AND (:status IS NULL OR l.status = :status) ORDER BY l.id ASC
       """)
   Page<Location> findAllByParams(
+      Pageable pageable,
       @Param("name") String name,
       @Param("regionId") Long regionId,
-      @Param("status") Boolean status,
-      Pageable pageable);
+      @Param("subregionId") Long subregionId,
+      @Param("status") Boolean status);
 
-  boolean existsByName(String name);
+  boolean existsByNameAndSubregionId(String name, Long subregionId);
 
-  boolean existsByNameAndIdNot(String name, Long id);
+  boolean existsByNameAndSubregionIdAndIdNot(String name, Long subregionId, Long id);
 }
