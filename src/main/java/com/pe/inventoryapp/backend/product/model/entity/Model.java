@@ -8,7 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 
@@ -67,7 +67,7 @@ public class Model {
   private boolean status;
 
   @OneToMany(mappedBy = "model")
-  private List<Product_DeliveryOrder> productDeliveryOrders;
+  private List<Model_DeliveryOrder> productDeliveryOrders;
 
   @OneToMany(mappedBy = "model")
   private List<Movement> movements;

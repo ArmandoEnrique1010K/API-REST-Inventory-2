@@ -66,15 +66,15 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   @Query("""
           SELECT COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
-          JOIN dl.product p
+          JOIN dl.model m
           JOIN dl.deliveryOrder do
           WHERE do.id = :deliveryOrderId
-          AND p.id = :productId
+          AND m.id = :modelId
           AND dl.lineStatus != 'CANCELED'
       """)
-  Integer sumRequiredQuantityByDeliveryOrder_Product(
+  Integer sumRequiredQuantityByDeliveryOrderIdAndModelId(
       @Param("deliveryOrderId") Long deliveryOrderId,
-      @Param("productId") Long productId);
+      @Param("modelId") Long modelId);
 
 
 
@@ -89,18 +89,37 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   // Integer sumRequiredByProductDeliveryOrderAndRegion(
   //     @Param("pdoId") Long productDeliveryOrderId,
   //     @Param("regionId") Long regionId);
+
+  /**
+   * Calcula la suma total de la cantidad requerida de artículos en líneas de entrega
+   * asociadas a una orden de entrega específica y una región determinada.
+   *
+   * @param mdoId el identificador único del modelo de orden de entrega (ModelDeliveryOrder)
+   * @param regionId el identificador único de la región
+   * @return la suma de las cantidades requeridas (requiredQuantity) de todas las líneas
+   *         de entrega que coincidan con los criterios especificados. Retorna 0 si no
+   *         hay resultados o si todas las cantidades son nulas. Excluye las líneas
+   *         con estado 'CANCELED'.
+   */
   @Query("""
         SELECT COALESCE(SUM(dl.requiredQuantity), 0)
         FROM DeliveryLine dl
-        WHERE dl.product_DeliveryOrder.id = :pdoId
-          AND dl.location.region.id = :regionId
+        WHERE dl.model_DeliveryOrder.id = :mdoId
+          AND dl.location.subregion.region.id = :regionId
           AND dl.lineStatus <> 'CANCELED'
       """)
-  Integer sumRequiredByProductDeliveryOrderAndRegion(
-      @Param("pdoId") Long productDeliveryOrderId,
+  Integer sumRequiredByModelDeliveryOrderAndRegion(
+      @Param("mdoId") Long mdoId,
       @Param("regionId") Long regionId);
 
-
+  @Query("""
+          SELECT dl.location.subregion.region.id, COALESCE(SUM(dl.requiredQuantity), 0)
+          FROM DeliveryLine dl
+          WHERE dl.model_DeliveryOrder.id = :mdoId
+            AND dl.lineStatus <> 'CANCELED'
+          GROUP BY dl.location.subregion.region.id
+      """)
+  List<Object[]> sumRequiredGroupedByRegion(@Param("mdoId") Long mdoId);
 
       // Cuando verifica que no exista duplicado, tambien debe verificar que la linea de entrega no este cancelada ('CANCELED' se considera como eliminado, borrado lógico)
       @Query("""

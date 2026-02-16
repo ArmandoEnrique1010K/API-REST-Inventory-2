@@ -11,11 +11,11 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.Product_DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 
@@ -29,7 +29,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
     private DeliveryOrderRepository deliveryOrderRepository;
 
     @Autowired
-    private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
+    private Model_DeliveryOrderRepository product_DeliveryOrderRepository;
 
     @Override
     @Transactional
@@ -70,7 +70,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
                     "El producto se encuentra desactivado");
         }
 
-        Product_DeliveryOrder product_DeliveryOrder = new Product_DeliveryOrder();
+        Model_DeliveryOrder product_DeliveryOrder = new Model_DeliveryOrder();
         product_DeliveryOrder.setProduct(product);
         product_DeliveryOrder.setDeliveryOrder(deliveryOrder);
         product_DeliveryOrder.setRequiredQuantityTotal(0);
@@ -83,7 +83,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
     @Transactional(readOnly = true)
     public List<Product_DeliveryOrderResponse> findAllByDeliveryOrderId(Long idDeliveryOrder) {
 
-        List<Product_DeliveryOrder> product_DeliveryOrders = product_DeliveryOrderRepository
+        List<Model_DeliveryOrder> product_DeliveryOrders = product_DeliveryOrderRepository
                 .findAllByDeliveryOrderId(idDeliveryOrder);
 
         return product_DeliveryOrders
@@ -98,7 +98,7 @@ public class Product_DeliveryOrderServiceImpl implements Product_DeliveryOrderSe
         if (id == null) {
             throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
         }
-        Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
+        Model_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
                 id).orElseThrow(
                         () -> new BusinessException(ResponseStatus.NOT_FOUND,
                                 "La relacion de producto y orden de entrega no existe en el sistema"));

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
-import com.pe.inventoryapp.backend.location.model.entity.Region;
+import com.pe.inventoryapp.backend.location.model.entity.Subregion;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,8 +25,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "modelos_ordenes_de_entrega_region")
-public class Model_DeliveryOrder_Region {
+@Table(name = "modelos_ordenes_de_entrega_subregion")
+public class Model_DeliveryOrder_Subregion {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -37,9 +37,9 @@ public class Model_DeliveryOrder_Region {
   private LocalDateTime updatedAt;
 
   @ManyToOne
-  @JoinColumn(name = "region_id")
+  @JoinColumn(name = "subregion_id")
   @NotNull
-  private Region region;
+  private Subregion subregion;
 
   @ManyToOne
   @JoinColumn(name= "model_delivery_order_id")

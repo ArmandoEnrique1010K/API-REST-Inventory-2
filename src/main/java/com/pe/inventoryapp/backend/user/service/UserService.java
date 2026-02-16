@@ -26,4 +26,7 @@ public interface UserService {
   void updateUserRolesById(Long id, RolesRequest rolesRequest);
 
   void changeStatusUserById(Long id_user, Long id_authenticated_user);
+
+  // TODO: DEFINIR UN METODO PARA OBTENER TODOS LOS USUARIOS QUE TENGAN EL ROL DE
+  // SOLAMENTE USER
 }

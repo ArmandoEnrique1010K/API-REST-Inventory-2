@@ -7,10 +7,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
-import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.persistence.Entity;
@@ -34,18 +34,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-
-// Nota: no implementar esta lógica
-// @Table(name = "lineas_de_entrega", uniqueConstraints = {
-//     @UniqueConstraint(
-//       columnNames = {
-//         "location_id",
-//         "product_id",
-//         "delivery_order_id"
-//       }
-//     )
-//   }
-// )
 @Table(name = "lineas_de_entrega")
 public class DeliveryLine {
   @Id
@@ -90,14 +78,14 @@ public class DeliveryLine {
   private List<Movement> movements;
 
   @ManyToOne
-  @JoinColumn(name = "product_id")
+  @JoinColumn(name = "model_id")
   @NotNull
-  private Product product;
+  private Model model;
 
   @ManyToOne
-  @JoinColumn(name = "product_delivery_order_id")
+  @JoinColumn(name = "model_delivery_order_id")
   @NotNull
-  private Product_DeliveryOrder product_DeliveryOrder;
+  private Model_DeliveryOrder model_DeliveryOrder;
 
   @ManyToOne
   @JoinColumn(name = "delivery_order_id")

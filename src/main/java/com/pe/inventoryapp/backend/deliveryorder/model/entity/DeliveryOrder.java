@@ -53,7 +53,6 @@ public class DeliveryOrder {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-
   @Enumerated(EnumType.STRING)
   private OrderStatus orderStatus;
 
@@ -76,5 +75,5 @@ public class DeliveryOrder {
   private List<DeliveryLine> deliveryLines;
 
   @OneToMany(mappedBy = "deliveryOrder")
-  private List<Product_DeliveryOrder> product_DeliveryOrders;
+  private List<Model_DeliveryOrder> model_DeliveryOrders;
 }

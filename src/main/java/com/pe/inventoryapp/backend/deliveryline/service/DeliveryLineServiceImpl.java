@@ -27,9 +27,9 @@ import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepositor
 import com.pe.inventoryapp.backend.deliveryline.repository.StockLot_DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
@@ -44,7 +44,7 @@ import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
-import com.pe.inventoryapp.backend.summary.repository.Product_DeliveryOrder_RegionRepository;
+import com.pe.inventoryapp.backend.summary.repository.Model_DeliveryOrder_RegionRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -65,10 +65,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   private MovementRepository movementRepository;
 
   @Autowired
-  private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
+  private Model_DeliveryOrderRepository product_DeliveryOrderRepository;
 
   @Autowired
-  private Product_DeliveryOrder_RegionRepository product_DeliveryOrder_RegionRepository;
+  private Model_DeliveryOrder_RegionRepository product_DeliveryOrder_RegionRepository;
 
   @Autowired
   private UserRepository userRepository;
@@ -105,7 +105,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
 
     // Obtener el producto y orden de entrega desde Product_DeliveryOrder
-    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(id_product_deliveryOrder)
+    Model_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(id_product_deliveryOrder)
         .orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND,
                 "La relación de producto y orden de entrega no existe"));
@@ -315,7 +315,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // DEBE BUSCAR LA RELACION PRODUCTOS - ORDENES DE ENTREGA PARA ACTUALIZAR LA
     // SUMATORIA DE LA CANTIDAD REQUERIDA
-    Product_DeliveryOrder product_DeliveryOrder = deliveryLine.getProduct_DeliveryOrder();
+    Model_DeliveryOrder product_DeliveryOrder = deliveryLine.getProduct_DeliveryOrder();
     if (product_DeliveryOrder == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -431,7 +431,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
+    Model_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
         id_product_deliveryOrder).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 
@@ -691,7 +691,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // TODO: Probar esta logica para ver si se actualiza el total de la cantidad
     // requerida
-    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
+    Model_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
         deliveryOrderId).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 
@@ -791,7 +791,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
+    Model_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
         deliveryOrderId).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
     if (product_DeliveryOrder == null) {
@@ -904,7 +904,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    Product_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
+    Model_DeliveryOrder product_DeliveryOrder = product_DeliveryOrderRepository.findById(
         id_product_deliveryOrder).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 

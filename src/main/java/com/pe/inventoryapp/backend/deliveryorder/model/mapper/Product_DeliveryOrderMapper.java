@@ -1,10 +1,10 @@
 package com.pe.inventoryapp.backend.deliveryorder.model.mapper;
 
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.Product_DeliveryOrderResponse;
 
 public class Product_DeliveryOrderMapper {
-    private Product_DeliveryOrder product_DeliveryOrder;
+    private Model_DeliveryOrder product_DeliveryOrder;
 
   private Product_DeliveryOrderMapper() {
   }
@@ -13,7 +13,7 @@ public class Product_DeliveryOrderMapper {
     return new Product_DeliveryOrderMapper();
   }
 
-  public Product_DeliveryOrderMapper setProduct_DeliveryOrder(Product_DeliveryOrder product_DeliveryOrder) {
+  public Product_DeliveryOrderMapper setProduct_DeliveryOrder(Model_DeliveryOrder product_DeliveryOrder) {
     this.product_DeliveryOrder = product_DeliveryOrder;
     return this;
   }
@@ -24,9 +24,9 @@ public class Product_DeliveryOrderMapper {
     } else {
       return new Product_DeliveryOrderResponse(
         product_DeliveryOrder.getId(),
-        product_DeliveryOrder.getProduct().getId(),
-        product_DeliveryOrder.getProduct().getName(),
-        product_DeliveryOrder.getProduct().getImageUrl(),
+        product_DeliveryOrder.getModel().getId(),
+        product_DeliveryOrder.getModel().getName(),
+        product_DeliveryOrder.getModel().getImageUrl(),
         product_DeliveryOrder.getRequiredQuantityTotal()
       );
     }

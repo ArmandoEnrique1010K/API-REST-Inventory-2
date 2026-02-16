@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
@@ -22,67 +23,89 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Product_DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
+import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderComentRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Product_DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
+import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
+import com.pe.inventoryapp.backend.stocklot.service.StockLotDomainService;
 import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
-import com.pe.inventoryapp.backend.summary.repository.Product_DeliveryOrder_RegionRepository;
+import com.pe.inventoryapp.backend.summary.repository.Model_DeliveryOrder_RegionRepository;
+import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_RegionDomainService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 
 @Service
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
-	@Autowired
-	private DeliveryOrderRepository deliveryOrderRepository;
 
-	@Autowired
-	private DeliveryLineRepository deliveryLineRepository;
 
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private CompanyRepository companyRepository;
-
-	@Autowired
-	private ProductRepository productRepository;
-
-	@Autowired
-	private StockLotRepository stockLotRepository;
-
-	@Autowired
-	private MovementRepository movementRepository;
-
-	@Autowired
-	private Product_DeliveryOrder_RegionRepository product_DeliveryOrder_RegionRepository;
-
-	@Autowired
-	private Product_DeliveryOrderRepository product_DeliveryOrderRepository;
+	private final DeliveryOrderRepository deliveryOrderRepository;
+	private final DeliveryLineRepository deliveryLineRepository;
+	private final UserRepository userRepository;
+	private final CompanyRepository companyRepository;
+	private final ProductRepository productRepository;
+	private final StockLotRepository stockLotRepository;
+	private final MovementRepository movementRepository;
+	private final ModelRepository modelRepository;
+	private final Model_DeliveryOrder_RegionRepository model_DeliveryOrder_RegionRepository;
+	private final Model_DeliveryOrderRepository model_DeliveryOrderRepository;
+	private final DeliveryOrderDomainService deliveryOrderDomainService;
+	private final StockLotDomainService stockLotDomainService;
+	private final Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService;
 
 	private static final long BATCH_START = 10000L;
 
-	@Override
-	public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
+	public DeliveryOrderServiceImpl(
+			DeliveryOrderRepository deliveryOrderRepository,
+			DeliveryLineRepository deliveryLineRepository,
+			UserRepository userRepository,
+			CompanyRepository companyRepository,
+			ProductRepository productRepository,
+			StockLotRepository stockLotRepository,
+			MovementRepository movementRepository,
+			ModelRepository modelRepository,
+			Model_DeliveryOrder_RegionRepository model_DeliveryOrder_RegionRepository,
+			Model_DeliveryOrderRepository model_DeliveryOrderRepository,
+			DeliveryOrderDomainService deliveryOrderDomainService,
+			StockLotDomainService stockLotDomainService,
+			Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService) {
+		this.deliveryOrderRepository = deliveryOrderRepository;
+		this.deliveryLineRepository = deliveryLineRepository;
+		this.userRepository = userRepository;
+		this.companyRepository = companyRepository;
+		this.productRepository = productRepository;
+		this.stockLotRepository = stockLotRepository;
+		this.movementRepository = movementRepository;
+		this.modelRepository = modelRepository;
+		this.model_DeliveryOrder_RegionRepository = model_DeliveryOrder_RegionRepository;
+		this.model_DeliveryOrderRepository = model_DeliveryOrderRepository;
+		this.deliveryOrderDomainService = deliveryOrderDomainService;
+		this.stockLotDomainService = stockLotDomainService;	
+		this.model_DeliveryOrder_RegionDomainService = model_DeliveryOrder_RegionDomainService;
+	};
 
+	@Override
+	@Transactional
+	public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
 		Long id_client = deliveryOrderRequest.getIdClient();
 
 		if (id_user == null || id_client == null) {
@@ -95,18 +118,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		User userClient = userRepository.findById(id_client).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "El cliente no existe"));
 
-		// TODO: ESTO ES IMPOSIBLE, SE SABE QUE CADA NUEVO USUARIO CREADO SIEMPRE VA A
-		// TENER EL ROL DE USER
-		// Verificar que el usuario seleccionado tenga el rol de USER (Cliente)
-		// System.out.println(userClient.getRoles().stream().anyMatch(r ->
-		// "ROLE_USER".equals(r.getName())));
-
-		// if (!userClient.getRoles().stream().anyMatch(r ->
-		// "ROLE_USER".equals(r.getName()))) {
-		// throw new BusinessException(ResponseStatus.CONFLICT, "El usuario seleccionado
-		// no es un cliente");
-		// }
-
 		DeliveryOrder deliveryOrder = new DeliveryOrder();
 
 		deliveryOrder.setLimitDate(deliveryOrderRequest.getLimitDate());
@@ -116,12 +127,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrder.setOrderStatus(OrderStatus.PENDING);
 		deliveryOrder.setUserCreator(user);
 		deliveryOrder.setUserUpdater(user);
+
+		// Especifica el ID del cliente que se asignara a la orden de entrega
 		deliveryOrder.setUserClient(userClient);
 
 		DeliveryOrder saved = deliveryOrderRepository.save(deliveryOrder);
 
-		// Este numero debe ser generado automaticamente
-		long newBatch = BATCH_START + saved.getId();
+		// Este numero sera generado automaticamente
+		Long newBatch = BATCH_START + saved.getId();
 		String newBatchString = String.valueOf(newBatch);
 
 		saved.setBatch(newBatchString);
@@ -129,15 +142,16 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public PageResponse<DeliveryOrderListResponse> findAllDeliveryOrdersByParams(
+			Pageable pageable,
 			String batch,
 			LocalDateTime startDate,
 			LocalDateTime endDate,
-			String userClientName,
 			OrderStatus status,
-			Pageable pageable) {
-		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(batch, startDate, endDate, status,
-				userClientName, pageable);
+			String userClientName) {
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(pageable, batch, startDate, endDate,
+				status, userClientName);
 
 		List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -157,14 +171,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public PageResponse<DeliveryOrderListResponse> findAllActiveDeliveryOrdersByParams(
+			Pageable pageable,
 			String batch,
 			LocalDateTime startDate,
 			LocalDateTime endDate,
-			String userClientName,
-			Pageable pageable) {
-		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(batch, startDate, endDate,
-				userClientName, pageable);
+			String userClientName) {
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable, batch, startDate,
+				endDate, userClientName);
 
 		List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -184,16 +199,21 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	}
 
 	@Override
-	public PageResponse<DeliveryOrderClientListResponse> findAllDeliveryOrdesByClientId(Long id, String batch,
-			LocalDateTime startDate, LocalDateTime endDate, OrderStatus status, Pageable pageable) {
+	@Transactional(readOnly = true)
+	public PageResponse<DeliveryOrderClientListResponse> findAllDeliveryOrderByClientId(
+			Pageable pageable,
+			Long id,
+			String batch,
+			LocalDateTime startDate,
+			LocalDateTime endDate,
+			OrderStatus status) {
 
 		if (id == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByUserClientId(id, batch, startDate,
-				endDate,
-				status, pageable);
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByUserClientId(pageable, id, batch, startDate,
+				endDate, status);
 
 		List<DeliveryOrderClientListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -210,10 +230,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				deliveryOrders.hasPrevious());
 
 		return pageResponse;
-
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
 		if (id == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -230,7 +250,11 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				.buildDeliveryOrderDetailsResponse();
 	}
 
+	// Encontrar una orden de entrega por su id y validar que el cliente de la orden
+	// de entrega sea el mismo que el usuario que ha iniciado sesión, si no es asi,
+	// entonces se lanza una excepción
 	@Override
+	@Transactional(readOnly = true)
 	public DeliveryOrderClientDetailsResponse findDeliveryOrderByIdAndValidateUserClient(Long id, Long id_user) {
 		if (id == null || id_user == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -246,20 +270,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		User user = userRepository.findById(id_user)
 				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
 
+		// Si el usuario tiene solamente el rol de USER, entonces solamente podra ver
+		// una orden cuyo userClient sea el mismo usuario que ha iniciado sesión
 		boolean isOnlyUserRole = user.getRoles().size() == 1 &&
 				user.getRoles().stream()
 						.anyMatch(r -> "ROLE_USER".equals(r.getName()));
 
-		// System.out.println(isOnlyUserRole);
-		// System.out.println(user.getRoles());
-		// System.out.println(user.getRoles().size());
-
-		// System.out.println(user.getId());
-		// System.out.println(deliveryOrder.getUserClient().getId());
-		// System.out.println(deliveryOrder.getUserClient().getId().equals(user.getId()));
-
-		// Si el usuario tiene solamente el rol de USER, entonces solamente podra ver
-		// una orden cuyo userClient sea el mismo usuario que ha iniciado sesión
 		if (isOnlyUserRole) {
 			if (deliveryOrder.getUserClient().getId().equals(user.getId())) {
 				return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -274,12 +290,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					ResponseStatus.CONFLICT,
 					"El usuario no tiene el rol de cliente");
 		}
-
 	}
 
+	// Cambia la fecha limite de una orden de entrega
 	@Override
+	@Transactional
 	public void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user) {
-
 		if (id == null || limitDate == null || id_user == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -296,40 +312,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrderRepository.save(deliveryOrder);
 	}
 
-	// TODO: PENDIENTE IMPLEMENTAR UNA LOGICA PARA CAMBIAR EL ESTADO DE LA ORDEN
-	// SOLAMENTE SI TODAS LAS LINEAS DE ENTREGAS TIENEN EL ESTADO READY
 
-	// @Override
-	// public void changeStatusOrderToCanceledById(Long id, Long id_user) {
-	// if (id == null || id_user == null) {
-	// throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-	// }
-
-	// User user = userRepository.findById(id_user)
-	// .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El
-	// usuario no existe"));
-
-	// DeliveryOrder deliveryOrder =
-	// deliveryOrderRepository.findById(id).orElseThrow(
-	// () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no
-	// existe"));
-
-	// if (deliveryOrder.getOrderStatus() != OrderStatus.PENDING
-	// && deliveryOrder.getOrderStatus() != OrderStatus.READY &&
-	// deliveryOrder.getOrderStatus() != OrderStatus.CANCELED) {
-	// throw new BusinessException(ResponseStatus.CONFLICT,
-	// "La orden de entrega no puede ser cancelada");
-	// }
-
-	// deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
-	// deliveryOrder.setUserUpdater(user);
-	// deliveryOrderRepository.save(deliveryOrder);
-	// }
-
-	// TODO: CORREGIR ESTE MÉTODO
 	@Override
 	@Transactional
-	public void processDeliveryOrderCancellation(Long id, Long id_user) {
+	public void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest, Long id_user) {
 		if (id == null || id_user == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -340,6 +326,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
+		// Verifica que la orden de entrega no tenga el estado de DELIVERED o CANCELED,
 		if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ya ha sido entregada");
@@ -353,176 +340,155 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// Lista de las lineas de entrega asociadas a la orden de entrega
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
 
-		// Verifica si alguna de las lineas de entrega tiene el estado DELIVERED o
-		// MISSING, si es asi, entonces la orden de entrega no se puede cancelar, pero
-		// si tiene lineas de entrega con el estado READY, PENDING o EXCEEDED, entonces
+		// Verifica que haya al menos una linea de entrega
+		if (deliveryLines.isEmpty()) {
+			throw new BusinessException(ResponseStatus.NOT_FOUND, "No hay lineas de entrega");
+		}
+
+		// Si las lineas de entrega tienen el estado READY, PENDING o EXCEEDED, entonces
 		// se cancelan solamente esas lineas de entrega y se restaura el stock de los
-		// productos asociados a esas lineas de entrega, además se crean movimientos de
-		// tipo CANCELED por cada linea de entrega cancelada y por cada producto
-		// restaurado
+		// modelos de productos asociados a esas lineas de entrega, además se crean
+		// movimientos de tipo CANCELED por cada linea de entrega cancelada y por
+		// cada producto restaurado
+
+		// Verifica si existe al menos una línea de entrega con estado DELIVERED o MISSING
+		// Devuelve false si no hay ninguna línea de entrega con esos estados
 		boolean hasDeliveredOrMissing = deliveryLines.stream().anyMatch(dl -> dl.getLineStatus() == LineStatus.DELIVERED ||
 				dl.getLineStatus() == LineStatus.MISSING);
-
-		// SI NO HAY NINGUNA LINEA DE ENTREGA
-		if (deliveryLines.isEmpty()) {
-			throw new BusinessException(ResponseStatus.CONFLICT, "No hay lineas de entrega");
-		}
 
 		// Estados permitidos que debe tener la linea de entrega
 		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
 
-		// NOTA: UNA ORDEN DE ENTREGA TIENE VARIOS PRODUCTOS A LA VEZ
-		// Nueva cantidad que se almacenara en el almacen
-		// Mapeo de los productos y sus cantidades
+		// UNA ORDEN DE ENTREGA TIENE VARIOS MODELOS DE PRODUCTOS A LA VEZ
+		// La nueva cantidad de los modelos de los productos y sus cantidades se almacenaran en el almacen mediante un mapeo
+		// Key: ID del modelo, Value: canitdad
 		Map<Long, Integer> newStockRestoredQuantity = new HashMap<>();
-		// Integer restoredQuantity = 0;
 
 		// Solamente alterara el estado de las lineas de entrega que tengan los estados
-		// mencionados
-		// Las demás lineas de entrega no se alteran (estado MISSING, DELIVERED,
-		// CANCELED)
+		// mencionados, las demás lineas de entrega no se alteran
 		for (DeliveryLine deliveryLine : deliveryLines) {
-
 			if (!cancelableStates.contains(deliveryLine.getLineStatus())) {
+				// Omite las lineas de entrega que no tengan un estado permitido
 				continue;
 			}
+
 			int quantityToRestore = deliveryLine.getDeliveredQuantity();
 
+			// Almacena en el map el id del modelo del producto y la cantidad que se almacenara
 			if (quantityToRestore > 0) {
 				newStockRestoredQuantity.merge(
-						deliveryLine.getProduct().getId(),
+						deliveryLine.getModel().getId(),
 						quantityToRestore,
 						// (a, b) -> a + b);
 						Integer::sum);
 			}
 
-			// CANCELAR LÍNEA
-			deliveryLine.setLineStatus(LineStatus.CANCELED);
 			deliveryLine.setDeliveredQuantity(0);
 			deliveryLine.setPendingQuantity(0);
+			deliveryLine.setLineStatus(LineStatus.CANCELED);
 			deliveryLine.setUserUpdater(user);
 			deliveryLineRepository.save(deliveryLine);
 
-			// MOVIMIENTO POR LÍNEA
-			Movement m = new Movement();
-			m.setQuantity(quantityToRestore);
-			m.setDeliveryLine(deliveryLine);
-			m.setProduct(deliveryLine.getProduct());
-			m.setUser(user);
-			m.setMovementType(MovementType.CANCELED);
-			m.setComment("Cancelación de línea de entrega");
-			movementRepository.save(m);
-
+			// Crea un nuevo movimiento
+			Movement movement = new Movement();
+			movement.setQuantity(quantityToRestore);
+			movement.setComment(deliveryOrderDomainService.generateComment(
+					deliveryOrderComentRequest.getComment(), "Se cancelo la orden de entrega de la factura #" + deliveryOrder.getBatch()));
+			movement.setMovementType(MovementType.CANCELED);
+			movement.setUser(user);
+			movement.setStockLotReceiver(null);
+			movement.setStockLotEmitter(null);
+			movement.setDeliveryLine(deliveryLine);
+			movement.setModel(deliveryLine.getModel());
+			movementRepository.save(movement);
 		}
 
-		// Verificar que si hay lineas de entrega que tiene el estado DELIVERED o
-		// MISSING, ya no se podra cambiar el estado a CANCELED
+		// Si habia lineas de entrega con el estado de DELIVERED o CANCELED, la orden de entrega tendra un nuevo estado respectivamente 
 		deliveryOrder.setOrderStatus(
 				hasDeliveredOrMissing ? OrderStatus.DELIVERED : OrderStatus.CANCELED);
 
-		// CREAR VARIOS LOTES DE ENTREGA POR CADA UNO DE LOS PRODUCTOS DEVUELTOS
-
 		Company company = companyRepository.findById(1L).get();
 
-		// Guardar el lote de stock
-		for (Map.Entry<Long, Integer> entry : newStockRestoredQuantity.entrySet()) {
-			Long productId = entry.getKey();
-			Integer restoredQuantity = entry.getValue();
+		// Crear varios lotes de stock por cada uno de los modelos de los productos
 
+		// Map.Entry es una subinterfaz de map, se utiliza para iterar las entradas (mediante el método entrySet) permitiendo modificar los valores con el método setValue
+		for (Map.Entry<Long, Integer> modelProductEntry : newStockRestoredQuantity.entrySet()) {
+			Long modelId = modelProductEntry.getKey();
+			Integer restoredQuantity = modelProductEntry.getValue();
+
+			// Si no hay cantidad a almacenar, pasa a la siguiente iteración
 			if (restoredQuantity <= 0)
 				continue;
 
-			if (productId == null) {
+			if (modelId == null) {
 				throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 			}
 
-			Product product = productRepository.findById(productId)
-					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
+			Model model = modelRepository.findById(modelId).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
 
-			// Obtiene la fecha de hoy por partes
-			LocalDateTime now = LocalDateTime.now();
-			String date = now.getDayOfMonth() + "/" + now.getMonthValue() + "/" + now.getYear();
-			String time = now.getHour() + ":" + now.getMinute() + ":" + now.getSecond();
-
-			String batch = "LOT-" + product.getName().replace(" ", "-") + "-" + date + "-" + time;
-
+			// Crea el nuevo lote de stock
 			StockLot stockLot = new StockLot();
-			stockLot.setBatch(batch);
+			stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName()));
 			stockLot.setQuantityReceived(restoredQuantity);
 			stockLot.setQuantityAvailable(restoredQuantity);
 			stockLot.setQuantityDelivered(0);
 			stockLot.setQuantityLost(0);
 			stockLot.setQuantityRecovered(0);
 			stockLot.setZeroStock(false);
-			stockLot.setProduct(product);
+			stockLot.setTemporary(true);
+			stockLot.setModel(model);
 			stockLot.setCompany(company);
 			stockLotRepository.save(stockLot);
 
-			// CREAR UN NUEVO MOVIMIENTO POR CADA PRODUCTO
+			// Crea un nuevo movimiento por cada lote de stock
 			Movement movement = new Movement();
 			movement.setQuantity(restoredQuantity);
-			movement.setComment("Devolución");
-			movement.setStockLotReceiver(restoredQuantity > 0 ? stockLot : null);
-			movement.setProduct(product);
+			movement.setComment(deliveryOrderDomainService.generateComment(
+					deliveryOrderComentRequest.getComment(),
+					"Devolución de productos de la factura #" + deliveryOrder.getBatch()));
+			movement.setMovementType(MovementType.REFUND);
 			movement.setUser(user);
+			movement.setStockLotReceiver(restoredQuantity > 0 ? stockLot : null);
+			movement.setStockLotEmitter(null);
 			movement.setDeliveryLine(null);
-			movement.setMovementType(MovementType.CANCELED);
-
+			movement.setModel(model);
 			movementRepository.save(movement);
 		}
 
-		for (Long productId : newStockRestoredQuantity.keySet()) {
+		// Itera con cada uno de los modelos de los productos devueltos
+		for (Long modelId : newStockRestoredQuantity.keySet()) {
+			// Busca la relación existente entre el modelo del producto y la orden de entrega
+			Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository
+					.findByModelIdAndDeliveryOrderId(modelId, deliveryOrder.getId())
+					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND,
+							"No se encontró la relación entre el modelo del producto y la orden de entrega"));
 
-				Product_DeliveryOrder pdo =
-						product_DeliveryOrderRepository
-								.findByProductIdAndDeliveryOrderId(productId, deliveryOrder.getId())
-								.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND,
-										"No se encontró el product_delivery_order para el producto y la orden de entrega"));
+			// Toma la sumatoria
+			Integer newRequired = deliveryLineRepository.sumRequiredQuantityByDeliveryOrderIdAndModelId(
+					deliveryOrder.getId(), modelId);
 
-				Integer newRequired =
-						deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(
-								deliveryOrder.getId(), productId);
+			model_DeliveryOrder.setRequiredQuantityTotal(newRequired);
+			model_DeliveryOrderRepository.save(model_DeliveryOrder);
 
-				pdo.setRequiredQuantityTotal(newRequired);
-				product_DeliveryOrderRepository.save(pdo);
+			// Recalcula la cantidad total
+			model_DeliveryOrder_RegionDomainService.recalculateSummatoryModel_DeliveryOrderRegions(
+					model_DeliveryOrder.getId());
 
-				recalculateProductDeliveryOrderRegions(pdo.getId());
+			Model model = modelRepository.findById(modelId)
+					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
 
-				// recalculateProductStock(productId); // si aplica
-				Product product = productRepository.findById(productId)
-						.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
-
-				product.setTotalQuantityAvailable(newRequired);
-				productRepository.save(product);
+			// Debe actualizar los campos que contiene la sumatoria
+			// No altera los campos de quantityReceived, quantityDelivered, quantityLost ni quantityRecovered
+			model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + newStockRestoredQuantity.get(modelId));
+			modelRepository.save(model);
 		}
-		deliveryOrder.setPriorityDate(getClosestLimitDate(deliveryOrder.getId()));
+
+		deliveryOrder.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(deliveryOrder.getId()));
 		deliveryOrder.setUserUpdater(user);
 		deliveryOrderRepository.save(deliveryOrder);
 
 	}
 
-	private void recalculateProductDeliveryOrderRegions(Long productDeliveryOrderId) {
-		List<Model_DeliveryOrder_Region> regions = product_DeliveryOrder_RegionRepository
-				.findAllByProduct_DeliveryOrderId(productDeliveryOrderId);
-
-		for (Model_DeliveryOrder_Region entity : regions) {
-
-			// Solamente hay un campo para la cantidad total requerida
-			Integer requiredTotal = deliveryLineRepository.sumRequiredByProductDeliveryOrderAndRegion(
-					productDeliveryOrderId,
-					entity.getRegion().getId());
-
-			entity.setRequiredTotalQuantity(requiredTotal);
-		}
-
-		if (regions == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR,
-					"No se encontraron regiones para el product_delivery_order");
-		}
-
-		product_DeliveryOrder_RegionRepository.saveAll(regions);
-
-	}
 
 	@Override
 	@Transactional
@@ -590,30 +556,5 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			deliveryOrder.setUserUpdater(user);
 			deliveryOrderRepository.save(deliveryOrder);
 		}
-
 	}
-
-	// Verifica que todas las lineas de entrega que pertenecen a una orden de
-	// entrega tenga el estado lineStatus, si lo tienen no debe devolver nada, de lo
-	// contrario un mensaje de error
-	private void assertAllLinesInAllowedStates(
-			List<DeliveryLine> lines,
-			Set<LineStatus> allowedStates) {
-		boolean invalid = lines.stream()
-				.anyMatch(l -> !allowedStates.contains(l.getLineStatus()));
-
-		if (invalid) {
-			throw new BusinessException(
-					ResponseStatus.CONFLICT,
-					"No puedes entregar esta orden de entrega");
-		}
-	}
-
-	// Tomar la fecha mas cercana que no haya sido entregada
-	private LocalDateTime getClosestLimitDate(Long idDeliveryOrder) {
-		return deliveryLineRepository
-				.findClosestLimitDate(idDeliveryOrder)
-				.orElse(null); // o lanza excepción
-	}
-
 }

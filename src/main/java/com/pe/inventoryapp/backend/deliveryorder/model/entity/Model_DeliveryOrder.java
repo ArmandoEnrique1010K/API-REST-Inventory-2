@@ -3,8 +3,9 @@ package com.pe.inventoryapp.backend.deliveryorder.model.entity;
 import java.util.List;
 
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
-import com.pe.inventoryapp.backend.product.model.entity.Product;
+import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
+import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Subregion;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,8 +26,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "productos_ordenes_de_entrega")
-public class Product_DeliveryOrder {
+@Table(name = "modelos_ordenes_de_entrega")
+public class Model_DeliveryOrder {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -41,13 +42,16 @@ public class Product_DeliveryOrder {
   private DeliveryOrder deliveryOrder;
 
   @ManyToOne
-  @JoinColumn(name = "product_id")
+  @JoinColumn(name = "model_id")
   @NotNull
-  private Product product;
+  private Model model;
 
-  @OneToMany(mappedBy = "product_DeliveryOrder")
+  @OneToMany(mappedBy = "model_DeliveryOrder")
   private List<DeliveryLine> deliveryLines;
 
-  @OneToMany(mappedBy = "product_DeliveryOrder")
-  private List<Model_DeliveryOrder_Region> product_DeliveryOrder_Regions;
+  @OneToMany(mappedBy = "model_DeliveryOrder")
+  private List<Model_DeliveryOrder_Region> model_DeliveryOrder_Regions;
+
+  @OneToMany(mappedBy = "model_DeliveryOrder")
+  private List<Model_DeliveryOrder_Subregion> model_DeliveryOrder_Subregions;
 }

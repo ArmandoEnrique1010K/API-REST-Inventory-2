@@ -7,6 +7,7 @@ public enum MovementType {
   DECREASE, // Quitar cantidad de un lote y repotarlo como perdida
   RECOVERY, // Recuperar cantidad de un lote perdido
   TRANSFER, // Transferir cantidad entre 2 lotes de stocks del mismo producto
+  REFUND, // Reembolso de productos que estaban listo en una orden de entrega cancelada
 
   // Relacionados a la linea de entrega
   ALLOCATE, // Entregar parte de un lote de stock a una linea de entrega

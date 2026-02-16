@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
-import com.pe.inventoryapp.backend.summary.model.response.Product_DeliveryOrder_RegionResponse;
+import com.pe.inventoryapp.backend.summary.model.response.Model_DeliveryOrder_RegionResponse;
 import com.pe.inventoryapp.backend.summary.service.Product_DeliveryOrder_RegionService;
 
 @RestController
@@ -28,9 +28,9 @@ public class Product_DeliveryOrder_RegionController {
   @GetMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<?> getSummaryByDeliveryOrder(@PathVariable Long deliveryOrderId) {
 
-    List<Product_DeliveryOrder_RegionResponse> product_DeliveryOrder_RegionResponses = Product_DeliveryOrder_RegionService.findAllByDeliveryOrderId(deliveryOrderId);
+    List<Model_DeliveryOrder_RegionResponse> product_DeliveryOrder_RegionResponses = Product_DeliveryOrder_RegionService.findAllByDeliveryOrderId(deliveryOrderId);
 
-        DataResponse<List<Product_DeliveryOrder_RegionResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        DataResponse<List<Model_DeliveryOrder_RegionResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
             product_DeliveryOrder_RegionResponses);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
 

@@ -29,16 +29,6 @@ public class Product_DeliveryOrderController {
   @Autowired
   private ResponseService responseService;
 
-  // @PostMapping("/{idDeliveryOrder}")
-  // public ResponseEntity<CommonResponse> relationManyProductsToDeliveryOrder(@PathVariable Long idDeliveryOrder, @Valid @RequestBody Product_DeliveryOrderRequest product_DeliveryOrderRequest, BindingResult result) {
-  //   validationService.validateFieldsAndThrowResponse(result);
-  //   product_DeliveryOrderService.saveProduct_DeliveryOrder(product_DeliveryOrderRequest, idDeliveryOrder);
-
-  //   return ResponseEntity.status(201)
-  //       .body(responseService.generateCommonResponse("success", ResponseStatus.SUCCESS,
-  //           "Se han agregado productos a la orden de entrega"));
-  // }
-
   @PostMapping("/product/{productId}/deliveryOrder/{deliveryOrderId}")
   public ResponseEntity<CommonResponse> registerRelationProductToDeliveryOrder(@PathVariable Long productId, @PathVariable Long deliveryOrderId) {
     product_DeliveryOrderService.saveRelationProductInDeliveryOrder(productId, deliveryOrderId);

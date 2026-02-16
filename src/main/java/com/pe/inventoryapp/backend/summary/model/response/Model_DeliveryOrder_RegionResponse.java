@@ -11,14 +11,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Product_DeliveryOrder_RegionResponse {
-  private Long productId;
-  private String productName;
+public class Model_DeliveryOrder_RegionResponse {
+  private Long id;
+  private Integer requiredTotalQuantity;
+  private LocalDateTime updatedAt;
+
+  private Long modelId;
+  private String modelName;
+  private String modelImageUrl;
 
   private Long regionId;
   private String regionName;
-
-  private LocalDateTime updatedAt;
-
-  private Integer requiredTotalQuantity;
 }
