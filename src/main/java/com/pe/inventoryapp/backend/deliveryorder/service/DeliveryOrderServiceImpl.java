@@ -42,6 +42,7 @@ import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.stocklot.service.StockLotDomainService;
 import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_RegionDomainService;
+import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_SubregionDomainService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -59,6 +60,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	private final DeliveryOrderDomainService deliveryOrderDomainService;
 	private final StockLotDomainService stockLotDomainService;
 	private final Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService;
+	private final Model_DeliveryOrder_SubregionDomainService model_DeliveryOrder_SubregionDomainService;
 
 	private static final long BATCH_START = 10000L;
 
@@ -73,7 +75,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			Model_DeliveryOrderRepository model_DeliveryOrderRepository,
 			DeliveryOrderDomainService deliveryOrderDomainService,
 			StockLotDomainService stockLotDomainService,
-			Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService) {
+			Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService,
+			Model_DeliveryOrder_SubregionDomainService model_DeliveryOrder_SubregionDomainService) {
 		this.deliveryOrderRepository = deliveryOrderRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
@@ -85,6 +88,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.deliveryOrderDomainService = deliveryOrderDomainService;
 		this.stockLotDomainService = stockLotDomainService;
 		this.model_DeliveryOrder_RegionDomainService = model_DeliveryOrder_RegionDomainService;
+		this.model_DeliveryOrder_SubregionDomainService = model_DeliveryOrder_SubregionDomainService;
 	};
 
 	@Override
@@ -575,7 +579,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		model_DeliveryOrder_RegionDomainService
 				.recalculateSummatoryModel_DeliveryOrderRegionsByDeliveryOrder(deliveryOrder.getId());
 
-		model_DeliveryOrder_RegionDomainService
+		model_DeliveryOrder_SubregionDomainService
 				.recalculateSummatoryModel_DeliveryOrderSubregionsByDeliveryOrder(deliveryOrder.getId());
 	}
 

@@ -13,7 +13,7 @@ public class Model_DeliveryOrder_SubregionMapper {
     return new Model_DeliveryOrder_SubregionMapper();
   }
 
-  public Model_DeliveryOrder_SubregionMapper setProduct_DeliveryOrder_Region(
+  public Model_DeliveryOrder_SubregionMapper setProduct_DeliveryOrder_Subregion(
       Model_DeliveryOrder_Subregion model_DeliveryOrder_Subregion) {
     this.model_DeliveryOrder_Subregion = model_DeliveryOrder_Subregion;
     return this;

@@ -4,6 +4,6 @@ import java.util.List;
 
 import com.pe.inventoryapp.backend.summary.model.response.Model_DeliveryOrder_RegionResponse;
 
-public interface Product_DeliveryOrder_RegionService {
+public interface Model_DeliveryOrder_RegionService {
   List<Model_DeliveryOrder_RegionResponse> findAllByDeliveryOrderId(Long deliveryOrderId);
 }
