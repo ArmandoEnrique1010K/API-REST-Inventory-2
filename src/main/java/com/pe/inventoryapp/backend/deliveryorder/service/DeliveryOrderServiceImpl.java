@@ -2,14 +2,13 @@ package com.pe.inventoryapp.backend.deliveryorder.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,6 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderComentRequest;
 import com.pe.inventoryapp.backend.deliveryorder.model.request.DeliveryOrderRequest;
@@ -37,36 +35,26 @@ import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
-import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
-import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.stocklot.service.StockLotDomainService;
-import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
-import com.pe.inventoryapp.backend.summary.repository.Model_DeliveryOrder_RegionRepository;
 import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_RegionDomainService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
-import jakarta.validation.constraints.NotNull;
-
 @Service
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
-
-
 
 	private final DeliveryOrderRepository deliveryOrderRepository;
 	private final DeliveryLineRepository deliveryLineRepository;
 	private final UserRepository userRepository;
 	private final CompanyRepository companyRepository;
-	private final ProductRepository productRepository;
 	private final StockLotRepository stockLotRepository;
 	private final MovementRepository movementRepository;
 	private final ModelRepository modelRepository;
-	private final Model_DeliveryOrder_RegionRepository model_DeliveryOrder_RegionRepository;
 	private final Model_DeliveryOrderRepository model_DeliveryOrderRepository;
 	private final DeliveryOrderDomainService deliveryOrderDomainService;
 	private final StockLotDomainService stockLotDomainService;
@@ -79,11 +67,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			DeliveryLineRepository deliveryLineRepository,
 			UserRepository userRepository,
 			CompanyRepository companyRepository,
-			ProductRepository productRepository,
 			StockLotRepository stockLotRepository,
 			MovementRepository movementRepository,
 			ModelRepository modelRepository,
-			Model_DeliveryOrder_RegionRepository model_DeliveryOrder_RegionRepository,
 			Model_DeliveryOrderRepository model_DeliveryOrderRepository,
 			DeliveryOrderDomainService deliveryOrderDomainService,
 			StockLotDomainService stockLotDomainService,
@@ -92,14 +78,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
 		this.companyRepository = companyRepository;
-		this.productRepository = productRepository;
 		this.stockLotRepository = stockLotRepository;
 		this.movementRepository = movementRepository;
 		this.modelRepository = modelRepository;
-		this.model_DeliveryOrder_RegionRepository = model_DeliveryOrder_RegionRepository;
 		this.model_DeliveryOrderRepository = model_DeliveryOrderRepository;
 		this.deliveryOrderDomainService = deliveryOrderDomainService;
-		this.stockLotDomainService = stockLotDomainService;	
+		this.stockLotDomainService = stockLotDomainService;
 		this.model_DeliveryOrder_RegionDomainService = model_DeliveryOrder_RegionDomainService;
 	};
 
@@ -312,10 +296,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrderRepository.save(deliveryOrder);
 	}
 
-
 	@Override
 	@Transactional
-	public void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest, Long id_user) {
+	public void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest,
+			Long id_user) {
 		if (id == null || id_user == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -351,144 +335,22 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// movimientos de tipo CANCELED por cada linea de entrega cancelada y por
 		// cada producto restaurado
 
-		// Verifica si existe al menos una línea de entrega con estado DELIVERED o MISSING
+		// Verifica si existe al menos una línea de entrega con estado DELIVERED o
+		// MISSING
 		// Devuelve false si no hay ninguna línea de entrega con esos estados
 		boolean hasDeliveredOrMissing = deliveryLines.stream().anyMatch(dl -> dl.getLineStatus() == LineStatus.DELIVERED ||
 				dl.getLineStatus() == LineStatus.MISSING);
 
-		// Estados permitidos que debe tener la linea de entrega
-		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
+		Map<Long, Integer> stockToRestore = cancelDeliveryLines(deliveryLines, deliveryOrder, user,
+				deliveryOrderComentRequest);
 
-		// UNA ORDEN DE ENTREGA TIENE VARIOS MODELOS DE PRODUCTOS A LA VEZ
-		// La nueva cantidad de los modelos de los productos y sus cantidades se almacenaran en el almacen mediante un mapeo
-		// Key: ID del modelo, Value: canitdad
-		Map<Long, Integer> newStockRestoredQuantity = new HashMap<>();
+		restoreStock(stockToRestore, deliveryOrder, user, deliveryOrderComentRequest);
 
-		// Solamente alterara el estado de las lineas de entrega que tengan los estados
-		// mencionados, las demás lineas de entrega no se alteran
-		for (DeliveryLine deliveryLine : deliveryLines) {
-			if (!cancelableStates.contains(deliveryLine.getLineStatus())) {
-				// Omite las lineas de entrega que no tengan un estado permitido
-				continue;
-			}
+		recalculateSummaries(deliveryOrder);
 
-			int quantityToRestore = deliveryLine.getDeliveredQuantity();
-
-			// Almacena en el map el id del modelo del producto y la cantidad que se almacenara
-			if (quantityToRestore > 0) {
-				newStockRestoredQuantity.merge(
-						deliveryLine.getModel().getId(),
-						quantityToRestore,
-						// (a, b) -> a + b);
-						Integer::sum);
-			}
-
-			deliveryLine.setDeliveredQuantity(0);
-			deliveryLine.setPendingQuantity(0);
-			deliveryLine.setLineStatus(LineStatus.CANCELED);
-			deliveryLine.setUserUpdater(user);
-			deliveryLineRepository.save(deliveryLine);
-
-			// Crea un nuevo movimiento
-			Movement movement = new Movement();
-			movement.setQuantity(quantityToRestore);
-			movement.setComment(deliveryOrderDomainService.generateComment(
-					deliveryOrderComentRequest.getComment(), "Se cancelo la orden de entrega de la factura #" + deliveryOrder.getBatch()));
-			movement.setMovementType(MovementType.CANCELED);
-			movement.setUser(user);
-			movement.setStockLotReceiver(null);
-			movement.setStockLotEmitter(null);
-			movement.setDeliveryLine(deliveryLine);
-			movement.setModel(deliveryLine.getModel());
-			movementRepository.save(movement);
-		}
-
-		// Si habia lineas de entrega con el estado de DELIVERED o CANCELED, la orden de entrega tendra un nuevo estado respectivamente 
-		deliveryOrder.setOrderStatus(
-				hasDeliveredOrMissing ? OrderStatus.DELIVERED : OrderStatus.CANCELED);
-
-		Company company = companyRepository.findById(1L).get();
-
-		// Crear varios lotes de stock por cada uno de los modelos de los productos
-
-		// Map.Entry es una subinterfaz de map, se utiliza para iterar las entradas (mediante el método entrySet) permitiendo modificar los valores con el método setValue
-		for (Map.Entry<Long, Integer> modelProductEntry : newStockRestoredQuantity.entrySet()) {
-			Long modelId = modelProductEntry.getKey();
-			Integer restoredQuantity = modelProductEntry.getValue();
-
-			// Si no hay cantidad a almacenar, pasa a la siguiente iteración
-			if (restoredQuantity <= 0)
-				continue;
-
-			if (modelId == null) {
-				throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-			}
-
-			Model model = modelRepository.findById(modelId).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
-
-			// Crea el nuevo lote de stock
-			StockLot stockLot = new StockLot();
-			stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName()));
-			stockLot.setQuantityReceived(restoredQuantity);
-			stockLot.setQuantityAvailable(restoredQuantity);
-			stockLot.setQuantityDelivered(0);
-			stockLot.setQuantityLost(0);
-			stockLot.setQuantityRecovered(0);
-			stockLot.setZeroStock(false);
-			stockLot.setTemporary(true);
-			stockLot.setModel(model);
-			stockLot.setCompany(company);
-			stockLotRepository.save(stockLot);
-
-			// Crea un nuevo movimiento por cada lote de stock
-			Movement movement = new Movement();
-			movement.setQuantity(restoredQuantity);
-			movement.setComment(deliveryOrderDomainService.generateComment(
-					deliveryOrderComentRequest.getComment(),
-					"Devolución de productos de la factura #" + deliveryOrder.getBatch()));
-			movement.setMovementType(MovementType.REFUND);
-			movement.setUser(user);
-			movement.setStockLotReceiver(restoredQuantity > 0 ? stockLot : null);
-			movement.setStockLotEmitter(null);
-			movement.setDeliveryLine(null);
-			movement.setModel(model);
-			movementRepository.save(movement);
-		}
-
-		// Itera con cada uno de los modelos de los productos devueltos
-		for (Long modelId : newStockRestoredQuantity.keySet()) {
-			// Busca la relación existente entre el modelo del producto y la orden de entrega
-			Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository
-					.findByModelIdAndDeliveryOrderId(modelId, deliveryOrder.getId())
-					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND,
-							"No se encontró la relación entre el modelo del producto y la orden de entrega"));
-
-			// Toma la sumatoria
-			Integer newRequired = deliveryLineRepository.sumRequiredQuantityByDeliveryOrderIdAndModelId(
-					deliveryOrder.getId(), modelId);
-
-			model_DeliveryOrder.setRequiredQuantityTotal(newRequired);
-			model_DeliveryOrderRepository.save(model_DeliveryOrder);
-
-			// Recalcula la cantidad total
-			model_DeliveryOrder_RegionDomainService.recalculateSummatoryModel_DeliveryOrderRegions(
-					model_DeliveryOrder.getId());
-
-			Model model = modelRepository.findById(modelId)
-					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
-
-			// Debe actualizar los campos que contiene la sumatoria
-			// No altera los campos de quantityReceived, quantityDelivered, quantityLost ni quantityRecovered
-			model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + newStockRestoredQuantity.get(modelId));
-			modelRepository.save(model);
-		}
-
-		deliveryOrder.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(deliveryOrder.getId()));
-		deliveryOrder.setUserUpdater(user);
-		deliveryOrderRepository.save(deliveryOrder);
-
+		// Nota: Este método tambien contiene la logica para guardarlo en el repositorio
+		updateDeliveryOrderStatus(deliveryOrder, user, hasDeliveredOrMissing);
 	}
-
 
 	@Override
 	@Transactional
@@ -513,6 +375,17 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					"La orden de entrega ha sido cancelada");
 		}
 
+		boolean allCompleted = deliveryOrder.getDeliveryLines().stream()
+				.allMatch(l -> l.getLineStatus() == LineStatus.DELIVERED ||
+						l.getLineStatus() == LineStatus.CANCELED ||
+						l.getLineStatus() == LineStatus.MISSING);
+
+		if (!allCompleted) {
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"No todas las líneas están completadas");
+		}
+
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
 
 		if (deliveryLines.isEmpty()) {
@@ -521,40 +394,270 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		// VERIFICA QUE TODAS LAS LINEAS DE ENTREGA ASOCIADAS A ESTA ORDEN DE ENTREGA
 		// TENGAN EL ESTADO READY, ADEMÁS DEL ESTADO DELIVERED
-		assertAllLinesInAllowedStates(
+		deliveryOrderDomainService.assertAllLinesInAllowedStates(
 				deliveryLines,
 				EnumSet.of(LineStatus.READY, LineStatus.DELIVERED, LineStatus.CANCELED, LineStatus.MISSING));
 
 		// Ninguna linea de entrega debe tener el estado "PENDING", "EXCEEDED"
 		// Estados permitidos: "READY", "DELIVERED", "CANCELED", "MISSING"
 
-		deliveryLines.stream()
-				.filter(l -> l.getLineStatus() == LineStatus.READY)
-				.forEach(l -> {
-					l.setLineStatus(LineStatus.DELIVERED);
-					l.setUserUpdater(user);
+		Map<Long, Integer> deliveredByModel = deliverReadyLines(deliveryLines, deliveryOrder, user);
 
-					Movement movement = new Movement();
-					movement.setQuantity(l.getDeliveredQuantity());
-					movement.setComment("Se entrego la linea de entrega");
-					movement.setDeliveryLine(l);
-					movement.setProduct(l.getProduct());
-					movement.setUser(user);
-					movement.setStockLotEmitter(null);
-					movement.setStockLotReceiver(null);
-					movement.setMovementType(MovementType.DELIVERED);
-					movementRepository.save(movement);
-				});
+		// SE ACTUALIZARA LA CANTIDAD TOTAL DEL MODELO DEL PRODUCTO QUE SE ENTREGO
+		applyDeliveredStock(deliveredByModel);
 
-		boolean allCompleted = deliveryLines.stream()
-				.allMatch(l -> l.getLineStatus() == LineStatus.DELIVERED ||
-						l.getLineStatus() == LineStatus.CANCELED ||
-						l.getLineStatus() == LineStatus.MISSING);
+		// NOTA: NO SE RECALCULARAN SUMATORIAS, PORQUE NO IMPLICA QUE SE VAN A ALTERAR LAS CANTIDADES
+		// recalculateSummaries(deliveryOrder);
 
-		if (allCompleted) {
-			deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
-			deliveryOrder.setUserUpdater(user);
-			deliveryOrderRepository.save(deliveryOrder);
+
+		// Calcular la sumatoria de las cantidades de los modelos de productos de las
+		// lineas de entrega que tienen el estado READY y acumularlas en el
+		// totalDelivered
+
+		deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+		deliveryOrder.setUserUpdater(user);
+
+		deliveryOrderRepository.save(deliveryOrder);
+
+	}
+
+	private Map<Long, Integer> cancelDeliveryLines(
+			List<DeliveryLine> lines,
+			DeliveryOrder order,
+			User user,
+			DeliveryOrderComentRequest commentRequest) {
+
+		// Estados permitidos que debe tener la linea de entrega
+		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
+
+		// UNA ORDEN DE ENTREGA TIENE VARIOS MODELOS DE PRODUCTOS A LA VEZ
+		// La nueva cantidad de los modelos de los productos y sus cantidades se
+		// almacenaran en el almacen mediante un mapeo
+		// Key: ID del modelo, Value: canitdad
+		Map<Long, Integer> stockToRestore = new HashMap<>();
+		List<Movement> movements = new ArrayList<>();
+
+		// Solamente alterara el estado de las lineas de entrega que tengan los estados
+		// mencionados, las demás lineas de entrega no se alteran
+		for (DeliveryLine line : lines) {
+			if (!cancelableStates.contains(line.getLineStatus()))
+				continue;
+
+			int quantityToRestore = line.getDeliveredQuantity();
+
+			// Almacena en el map el id del modelo del producto y la cantidad que se
+			// almacenara
+			if (quantityToRestore > 0) {
+				stockToRestore.merge(
+						line.getModel().getId(),
+						quantityToRestore,
+						// (a, b) -> a + b);
+						Integer::sum);
+			}
+
+			// CREAR UN METODO EN EL DOMINIO DE DELIVERYLINE
+			// line.cancel(user);
+			line.setDeliveredQuantity(0);
+			line.setPendingQuantity(0);
+			line.setLineStatus(LineStatus.CANCELED);
+			line.setUserUpdater(user);
+			deliveryLineRepository.save(line);
+
+			// CREAR UN METODO EN EL DOMINIO DE MOVEMENT
+			// movements.add(createCancelMovement(
+			// line, order, user, quantityToRestore, commentRequest));
+			Movement movement = new Movement();
+			movement.setQuantity(quantityToRestore);
+			movement.setComment(deliveryOrderDomainService.generateComment(
+					commentRequest.getComment(),
+					"Se cancelo la orden de entrega de la factura #" + order.getBatch()));
+			movement.setMovementType(MovementType.CANCELED);
+			movement.setUser(user);
+			movement.setStockLotReceiver(null);
+			movement.setStockLotEmitter(null);
+			movement.setDeliveryLine(line);
+			movement.setModel(line.getModel());
+			movementRepository.save(movement);
 		}
+
+		deliveryLineRepository.saveAll(lines);
+		movementRepository.saveAll(movements);
+
+		return stockToRestore;
+	}
+
+	private void restoreStock(
+			Map<Long, Integer> stockToRestore,
+			DeliveryOrder deliveryOrder,
+			User user,
+			DeliveryOrderComentRequest deliveryOrderComentRequest) {
+
+		if (stockToRestore.isEmpty())
+			return;
+
+		Company company = companyRepository.findById(1L).get();
+
+		List<StockLot> stockLots = new ArrayList<>();
+		List<Movement> movements = new ArrayList<>();
+
+		// Crear varios lotes de stock por cada uno de los modelos de los productos
+
+		// Map.Entry es una subinterfaz de map, se utiliza para iterar las entradas
+		// (mediante el método entrySet) permitiendo modificar los valores con el método
+		// setValue
+
+		Map<Long, Model> models = modelRepository.findAllById(stockToRestore.keySet())
+				.stream()
+				.collect(Collectors.toMap(Model::getId, Function.identity()));
+
+		for (Map.Entry<Long, Integer> entry : stockToRestore.entrySet()) {
+			Model model = models.get(entry.getKey());
+			Integer restoredQuantity = entry.getValue();
+
+			// Si no hay cantidad a almacenar, pasa a la siguiente iteración
+			if (restoredQuantity <= 0)
+				continue;
+
+			// StockLot lot = createStockLot(model, qty, company);
+			// stockLots.add(lot);
+
+			// Crea el nuevo lote de stock
+			StockLot stockLot = new StockLot();
+			stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName()));
+			stockLot.setQuantityReceived(restoredQuantity);
+			stockLot.setQuantityAvailable(restoredQuantity);
+			stockLot.setQuantityDelivered(0);
+			stockLot.setQuantityLost(0);
+			stockLot.setQuantityRecovered(0);
+			stockLot.setZeroStock(false);
+			stockLot.setTemporary(true);
+			stockLot.setModel(model);
+			stockLot.setCompany(company);
+			stockLotRepository.save(stockLot);
+
+			// movements.add(createRefundMovement(
+			// model, lot, qty, order, user, commentRequest));
+			Movement movement = new Movement();
+			movement.setQuantity(restoredQuantity);
+			movement.setComment(deliveryOrderDomainService.generateComment(
+					deliveryOrderComentRequest.getComment(),
+					"Devolución de productos de la factura #" + deliveryOrder.getBatch()));
+			movement.setMovementType(MovementType.REFUND);
+			movement.setUser(user);
+			movement.setStockLotReceiver(stockLot);
+			movement.setStockLotEmitter(null);
+			movement.setDeliveryLine(null);
+			movement.setModel(model);
+			movementRepository.save(movement);
+
+			// TODO: LOGICA PARA INCREMENTAR LA CANTIDAD DISPONIBLE DEL MODELO
+			// model.increaseAvailable(qty);
+			Model findedModel = modelRepository.findById(model.getId())
+					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+
+			// Debe actualizar los campos que contiene la sumatoria
+			// No altera los campos de quantityReceived, quantityDelivered, quantityLost ni
+			// quantityRecovered
+			findedModel.setTotalQuantityAvailable(
+					findedModel.getTotalQuantityAvailable() + stockToRestore.get(findedModel.getId()));
+			modelRepository.save(findedModel);
+		}
+
+		stockLotRepository.saveAll(stockLots);
+		movementRepository.saveAll(movements);
+		modelRepository.saveAll(models.values());
+	}
+
+	private void recalculateSummaries(DeliveryOrder deliveryOrder) {
+		model_DeliveryOrderRepository
+				.recalculateRequiredQuantities(deliveryOrder.getId());
+
+		model_DeliveryOrder_RegionDomainService
+				.recalculateSummatoryModel_DeliveryOrderRegionsByDeliveryOrder(deliveryOrder.getId());
+
+		model_DeliveryOrder_RegionDomainService
+				.recalculateSummatoryModel_DeliveryOrderSubregionsByDeliveryOrder(deliveryOrder.getId());
+	}
+
+	private void updateDeliveryOrderStatus(
+			DeliveryOrder order,
+			User user,
+			boolean hasDeliveredOrMissing) {
+
+		// Actualiza la orden de entrega
+		order.setOrderStatus(
+				hasDeliveredOrMissing
+						? OrderStatus.DELIVERED
+						: OrderStatus.CANCELED);
+		order.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(order.getId()));
+		order.setUserUpdater(user);
+
+		deliveryOrderRepository.save(order);
+	}
+
+	private Map<Long, Integer> deliverReadyLines(
+			List<DeliveryLine> deliveryLines,
+			DeliveryOrder deliveryOrder,
+			User user) {
+
+		Map<Long, Integer> deliveredByModel = new HashMap<>();
+		List<Movement> movements = new ArrayList<>();
+
+		for (DeliveryLine deliveryLine : deliveryLines) {
+
+			if (deliveryLine.getLineStatus() != LineStatus.READY)
+				continue;
+
+			int qty = deliveryLine.getDeliveredQuantity();
+
+			deliveredByModel.merge(
+					deliveryLine.getModel().getId(),
+					qty,
+					Integer::sum);
+
+			deliveryLine.setLineStatus(LineStatus.DELIVERED);
+			deliveryLine.setUserUpdater(user);
+
+			// movements.add(createDeliveredMovement(deliveryLines, deliveryOrder, user,
+			// qty));
+			Movement movement = new Movement();
+			movement.setQuantity(deliveryLine.getDeliveredQuantity());
+			movement.setComment("Se entrego la linea de entrega correspondiente a la factura #" + deliveryOrder.getBatch());
+			movement.setMovementType(MovementType.DELIVERED);
+			movement.setUser(user);
+			movement.setStockLotReceiver(null);
+			movement.setStockLotEmitter(null);
+			movement.setDeliveryLine(deliveryLine);
+			movement.setModel(deliveryLine.getModel());
+			movementRepository.save(movement);
+		}
+
+		deliveryLineRepository.saveAll(deliveryLines);
+		movementRepository.saveAll(movements);
+
+		return deliveredByModel;
+	}
+
+	private void applyDeliveredStock(Map<Long, Integer> deliveredByModel) {
+
+		if (deliveredByModel.isEmpty())
+			return;
+
+		Map<Long, Model> models = modelRepository.findAllById(deliveredByModel.keySet())
+				.stream()
+				.collect(Collectors.toMap(Model::getId, Function.identity()));
+
+		for (Map.Entry<Long, Integer> entry : deliveredByModel.entrySet()) {
+			Model model = models.get(entry.getKey());
+			Integer qty = entry.getValue();
+
+			model.setTotalQuantityAvailable(
+					model.getTotalQuantityAvailable() - qty);
+
+			model.setTotalQuantityDelivered(
+					model.getTotalQuantityDelivered() + qty);
+		}
+
+		modelRepository.saveAll(models.values());
 	}
 }

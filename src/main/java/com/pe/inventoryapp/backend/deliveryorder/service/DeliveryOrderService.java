@@ -46,7 +46,8 @@ public interface DeliveryOrderService {
 
   void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user);
 
-  void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest, Long id_user);
+  void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest,
+      Long id_user);
 
   void markDeliveryOrderAsDelivered(Long id, Long id_user);
 }

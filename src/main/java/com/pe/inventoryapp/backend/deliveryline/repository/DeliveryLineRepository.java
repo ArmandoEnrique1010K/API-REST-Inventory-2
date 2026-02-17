@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.atn.SemanticContext.AND;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -76,6 +77,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       @Param("deliveryOrderId") Long deliveryOrderId,
       @Param("modelId") Long modelId);
 
+  
 
 
   // TODO: NO ALTERAR ESTE METODO
@@ -115,11 +117,24 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   @Query("""
           SELECT dl.location.subregion.region.id, COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
-          WHERE dl.model_DeliveryOrder.id = :mdoId
+          WHERE dl.deliveryOrder.id = :deliveryOrderId
             AND dl.lineStatus <> 'CANCELED'
           GROUP BY dl.location.subregion.region.id
       """)
-  List<Object[]> sumRequiredGroupedByRegion(@Param("mdoId") Long mdoId);
+  List<Object[]> sumRequiredGroupedByRegion(
+      @Param("deliveryOrderId") Long deliveryOrderId);
+
+
+  @Query("""
+          SELECT dl.location.subregion.id, COALESCE(SUM(dl.requiredQuantity), 0)
+          FROM DeliveryLine dl
+          WHERE dl.deliveryOrder.id = :deliveryOrderId
+            AND dl.lineStatus <> 'CANCELED'
+          GROUP BY dl.location.subregion.id
+      """)
+  List<Object[]> sumRequiredGroupedBySubregion(
+      @Param("deliveryOrderId") Long deliveryOrderId);
+
 
       // Cuando verifica que no exista duplicado, tambien debe verificar que la linea de entrega no este cancelada ('CANCELED' se considera como eliminado, borrado lógico)
       @Query("""

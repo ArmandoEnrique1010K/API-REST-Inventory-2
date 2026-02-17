@@ -3,14 +3,15 @@ package com.pe.inventoryapp.backend.start.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.model.entity.Region;
+import com.pe.inventoryapp.backend.location.model.entity.Subregion;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.location.repository.RegionRepository;
+import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
@@ -24,32 +25,39 @@ import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class InitialData {
+  // TODO: VERIFICAR SI INTRODUCE LOS DATOS INICIALES POR PRIMERA VEZ AL EJECUTAR LA API REST
 
-  @Autowired
-  private RoleRepository roleRepository;
+  private final RoleRepository roleRepository;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final CategoryRepository categoryRepository;
+  private final RegionRepository regionRepository;
+  private final SubregionRepository subregionRepository;
+  private final LocationRepository locationRepository;
+  private final CompanyRepository companyRepository;
 
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  private CategoryRepository categoryRepository;
-
-  @Autowired
-  private RegionRepository regionRepository;
-
-  @Autowired
-  private LocationRepository locationRepository;
-
-  @Autowired
-  private CompanyRepository companyRepository;
+  public InitialData(
+      RoleRepository roleRepository,
+      UserRepository userRepository,
+      PasswordEncoder passwordEncoder,
+      CategoryRepository categoryRepository,
+      RegionRepository regionRepository,
+      SubregionRepository subregionRepository,
+      LocationRepository locationRepository,
+      CompanyRepository companyRepository) {
+    this.roleRepository = roleRepository;
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.categoryRepository = categoryRepository;
+    this.regionRepository = regionRepository;
+    this.subregionRepository = subregionRepository;
+    this.locationRepository = locationRepository;
+    this.companyRepository = companyRepository;
+  }
 
   // Metodo que se ejecuta cada vez que se inicia la API REST
   @PostConstruct
   public void init() {
-
     // Roles
     Role roleUser = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
       Role newRole = new Role();
@@ -77,6 +85,28 @@ public class InitialData {
       newRole.setName("ROLE_ADMIN");
       newRole.setLabel("Administrador");
       return roleRepository.save(newRole);
+    });
+
+    // Region - Subregion - Ubicacion
+    Region defaultRegion = regionRepository.findByName("Sin región").orElseGet(() -> {
+      Region region = new Region();
+      region.setName("Sin región");
+      return regionRepository.save(region);
+    });
+
+    Subregion defaultSubregion = subregionRepository.findByName("Sin subregión").orElseGet(() -> {
+      Subregion subregion = new Subregion();
+      subregion.setName("Sin subregión");
+      subregion.setRegion(defaultRegion);
+      return subregionRepository.save(subregion);
+    });
+
+    locationRepository.findByName("Sin ubicación").orElseGet(() -> {
+      Location location = new Location();
+      location.setName("Sin ubicación");
+      location.setSubregion(defaultSubregion);
+      location.setStatus(true);
+      return locationRepository.save(location);
     });
 
     // El usuario por defecto (primer usuario de la app)
@@ -109,23 +139,6 @@ public class InitialData {
       category.setName("Sin categoria");
       category.setStatus(true);
       categoryRepository.save(category);
-    }
-
-    // La región por defecto (representa "sin región")
-    if (!regionRepository.existsByName("Sin región")) {
-      Region region = new Region();
-      region.setName("Sin región");
-      regionRepository.save(region);
-    }
-
-    // La ubicación por defecto (representa "sin ubicación")
-    if (!locationRepository.existsByName("Sin ubicación")) {
-      Location location = new Location();
-      location.setName("Sin ubicación");
-      location.setRegion(regionRepository.findByName("Sin región").get());
-      ;
-      location.setStatus(true);
-      locationRepository.save(location);
     }
 
     // Una empresa por defecto (representa "propia de la empresa")

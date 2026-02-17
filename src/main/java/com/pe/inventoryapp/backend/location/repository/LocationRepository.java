@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.location.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +29,9 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
   boolean existsByNameAndSubregionId(String name, Long subregionId);
 
   boolean existsByNameAndSubregionIdAndIdNot(String name, Long subregionId, Long id);
+
+  boolean existsByName(String name);
+  
+  Optional<Location> findByName(String name);
+
 }

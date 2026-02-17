@@ -11,17 +11,23 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
+import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Subregion;
 import com.pe.inventoryapp.backend.summary.repository.Model_DeliveryOrder_RegionRepository;
+import com.pe.inventoryapp.backend.summary.repository.Model_DeliveryOrder_SubregionRepository;
 
 @Service
 public class Model_DeliveryOrder_RegionDomainService {
 	private final Model_DeliveryOrder_RegionRepository model_DeliveryOrder_RegionRepository;
+	private final Model_DeliveryOrder_SubregionRepository model_DeliveryOrder_SubregionRepository;
 	private final DeliveryLineRepository deliveryLineRepository;
+
 
 	public Model_DeliveryOrder_RegionDomainService(
 			Model_DeliveryOrder_RegionRepository model_DeliveryOrder_RegionRepository,
+			Model_DeliveryOrder_SubregionRepository model_DeliveryOrder_SubregionRepository,
 			DeliveryLineRepository deliveryLineRepository) {
 		this.model_DeliveryOrder_RegionRepository = model_DeliveryOrder_RegionRepository;
+		this.model_DeliveryOrder_SubregionRepository = model_DeliveryOrder_SubregionRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 	}
 
@@ -63,10 +69,10 @@ public class Model_DeliveryOrder_RegionDomainService {
 	// Object[0] → regionId
 	// Object[1] → requiredTotal
 	@Transactional
-	public void recalculateSummatoryModel_DeliveryOrderRegions(Long model_DeliveryOrderId) {
+	public void recalculateSummatoryModel_DeliveryOrderRegionsByDeliveryOrder(Long model_DeliveryOrderId) {
 		List<Model_DeliveryOrder_Region> regions = model_DeliveryOrder_RegionRepository
-				.findAllByModel_DeliveryOrderId(model_DeliveryOrderId);
-
+				.findAllModel_DeliveryOrder_RegionsByModel_DeliveryOrderId(model_DeliveryOrderId);
+		
 		if (regions.isEmpty()) {
 			throw new BusinessException(
 					ResponseStatus.INTERNAL_SERVER_ERROR,
@@ -88,5 +94,32 @@ public class Model_DeliveryOrder_RegionDomainService {
 		}
 
 		model_DeliveryOrder_RegionRepository.saveAll(regions);
+	}
+
+	@Transactional
+	public void recalculateSummatoryModel_DeliveryOrderSubregionsByDeliveryOrder(Long model_DeliveryOrderId) {
+		List<Model_DeliveryOrder_Subregion> subregions = model_DeliveryOrder_SubregionRepository
+				.findAllModel_DeliveryOrder_SubregionsByModel_DeliveryOrderId(model_DeliveryOrderId);
+		
+		if (subregions.isEmpty()) {
+			throw new BusinessException(
+					ResponseStatus.INTERNAL_SERVER_ERROR,
+					"No se encontraron subregiones para el model_delivery_order");
+		}
+
+		Map<Long, Integer> totalsBySubregion = deliveryLineRepository
+				.sumRequiredGroupedBySubregion(model_DeliveryOrderId)
+				.stream()
+				.collect(Collectors.toMap(
+						row -> (Long) row[0],
+						row -> ((Number) row[1]).intValue()));
+
+		for (Model_DeliveryOrder_Subregion mds : subregions) {
+			Integer total = totalsBySubregion.getOrDefault(
+					mds.getSubregion().getId(),
+					0);
+			mds.setRequiredTotalQuantity(total);
+		}
+		model_DeliveryOrder_SubregionRepository.saveAll(subregions);
 	}
 }

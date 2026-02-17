@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeliveryOrderComentRequest {
+  // TODO: BUSCAR UNA VALIDACIÓN 
   private String comment;
 }

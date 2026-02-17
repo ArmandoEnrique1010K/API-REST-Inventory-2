@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
 
@@ -39,4 +41,19 @@ public interface Model_DeliveryOrderRepository extends JpaRepository<Model_Deliv
         AND md.status = true
       """)
   Optional<Model_DeliveryOrder> findByModelIdAndDeliveryOrderId(Long modelId, Long deliveryOrderId);
+
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("""
+      UPDATE Model_DeliveryOrder mdo
+      SET mdo.requiredQuantityTotal =
+          (
+              SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+              FROM DeliveryLine dl
+              WHERE dl.deliveryOrder.id = :deliveryOrderId
+                AND dl.model.id = mdo.model.id
+                AND dl.lineStatus <> 'CANCELED'
+          )
+      WHERE mdo.deliveryOrder.id = :deliveryOrderId
+  """)
+  void recalculateRequiredQuantities(@Param("deliveryOrderId") Long deliveryOrderId);
 }

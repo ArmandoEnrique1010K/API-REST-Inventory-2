@@ -9,12 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product_DeliveryOrderResponse {
+public class Model_DeliveryOrderResponse {
   private Long id;
-
-  private Long productId;
-  private String productName;
-  private String productImageUrl;
-
   private Integer requiredQuantityTotal;
+  
+  private Long modelId;
+  private String modelName;
+  private String modelImageUrl;
 }
