@@ -464,6 +464,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			line.setDeliveredQuantity(0);
 			line.setPendingQuantity(0);
 			line.setLineStatus(LineStatus.CANCELED);
+			line.setLimitDate(null);
 			line.setUserUpdater(user);
 			deliveryLineRepository.save(line);
 
