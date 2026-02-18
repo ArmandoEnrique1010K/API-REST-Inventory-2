@@ -18,21 +18,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryLineRequest {
+  @NotNull(message = "Introduzca un valor númerico")
   @Min(value = 1, message = "La cantidad debe ser mayor a 0")
-  @NotNull(message = "Especifique la cantidad")
   private Integer requiredQuantity;
 
   @NotNull(message = "Seleccione una ubicación")
   private Long idLocation;
-
-  // @NotNull(message = "Seleccione una orden de entrega")
-  // private Long idDeliveryOrder;
   
   @Nullable
-  @JsonFormat (pattern = "yyyy-MM-dd HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   @FutureOrPresent(message = "La fecha de entrega debe ser en el presente o en el futuro")
   private LocalDateTime limitDate;
-
-  // @NotNull(message = "Seleccione un producto")
-  // private Long idProduct;
 }

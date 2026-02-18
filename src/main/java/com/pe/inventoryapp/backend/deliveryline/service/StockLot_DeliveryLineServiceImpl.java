@@ -3,7 +3,6 @@ package com.pe.inventoryapp.backend.deliveryline.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.deliveryline.model.entity.StockLot_DeliveryLine;
@@ -14,8 +13,11 @@ import com.pe.inventoryapp.backend.deliveryline.repository.StockLot_DeliveryLine
 @Service
 public class StockLot_DeliveryLineServiceImpl implements StockLot_DeliveryLineService{
 
-  @Autowired
-  private StockLot_DeliveryLineRepository stockLotDeliveryLineRepository;
+  private final StockLot_DeliveryLineRepository stockLotDeliveryLineRepository;
+
+  public StockLot_DeliveryLineServiceImpl (StockLot_DeliveryLineRepository stockLotDeliveryLineRepository){
+    this.stockLotDeliveryLineRepository = stockLotDeliveryLineRepository;
+  }
 
   @Override
   public List<StockLot_DeliveryLineResponse> findAllByDeliveryLineId(Long id) {

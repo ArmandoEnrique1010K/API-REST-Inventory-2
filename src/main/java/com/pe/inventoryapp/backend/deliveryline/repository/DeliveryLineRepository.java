@@ -4,11 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.antlr.v4.runtime.atn.SemanticContext.AND;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -103,16 +101,19 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
    *         hay resultados o si todas las cantidades son nulas. Excluye las líneas
    *         con estado 'CANCELED'.
    */
-  @Query("""
-        SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-        FROM DeliveryLine dl
-        WHERE dl.model_DeliveryOrder.id = :mdoId
-          AND dl.location.subregion.region.id = :regionId
-          AND dl.lineStatus <> 'CANCELED'
-      """)
-  Integer sumRequiredByModelDeliveryOrderAndRegion(
-      @Param("mdoId") Long mdoId,
-      @Param("regionId") Long regionId);
+
+
+  // TODO: ELIMINAR ESTE QUERY
+  // @Query("""
+  //       SELECT COALESCE(SUM(dl.requiredQuantity), 0)
+  //       FROM DeliveryLine dl
+  //       WHERE dl.model_DeliveryOrder.id = :mdoId
+  //         AND dl.location.subregion.region.id = :regionId
+  //         AND dl.lineStatus <> 'CANCELED'
+  //     """)
+  // Integer sumRequiredByModelDeliveryOrderAndRegion(
+  //     @Param("mdoId") Long mdoId,
+  //     @Param("regionId") Long regionId);
 
   @Query("""
           SELECT dl.location.subregion.region.id, COALESCE(SUM(dl.requiredQuantity), 0)

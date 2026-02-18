@@ -19,28 +19,6 @@ public class DeliveryLineMapper {
     return this;
   }
 
-  public DeliveryLineDetailsResponse buildDeliveryLineDetailsResponse() {
-    if (deliveryLine == null) {
-      throw new RuntimeException("Debe pasar la entidad DeliveryLine");
-    } else {
-      return new DeliveryLineDetailsResponse(
-          deliveryLine.getId(),
-          deliveryLine.getRequiredQuantity(),
-          deliveryLine.getDeliveredQuantity(),
-          deliveryLine.getPendingQuantity(),
-          deliveryLine.getUpdatedAt(),
-          deliveryLine.getLimitDate(),
-          deliveryLine.getUserUpdater().getFirstname() + " " + deliveryLine.getUserUpdater().getLastname(),
-          deliveryLine.getLineStatus(),
-          deliveryLine.getLocation().getName(),
-          deliveryLine.getLocation().getRegion().getName(),
-          deliveryLine.getProduct().getId(),
-          deliveryLine.getProduct().getName(),
-          deliveryLine.getProduct().getImageUrl()
-          );
-    }
-  }
-
   public DeliveryLineListResponse buildDeliveryLineListResponse() {
     if (deliveryLine == null) {
       throw new RuntimeException("Debe pasar la entidad DeliveryLine");
@@ -52,9 +30,60 @@ public class DeliveryLineMapper {
           deliveryLine.getPendingQuantity(),
           deliveryLine.getLimitDate(),
           deliveryLine.getLineStatus(),
-          deliveryLine.getProduct().getId(),
+          deliveryLine.getModel().getId(),
+          deliveryLine.getModel().getProduct().getName() + " " + deliveryLine.getModel().getName(),
+          deliveryLine.getLocation().getId(),
           deliveryLine.getLocation().getName(),
-          deliveryLine.getLocation().getRegion().getName());
+          deliveryLine.getLocation().getSubregion().getId(),
+          deliveryLine.getLocation().getSubregion().getName(),
+          deliveryLine.getLocation().getSubregion().getRegion().getId(),
+          deliveryLine.getLocation().getSubregion().getRegion().getName()
+
+      );
+    }
+  }
+
+  public DeliveryLineDetailsResponse buildDeliveryLineDetailsResponse() {
+    if (deliveryLine == null) {
+      throw new RuntimeException("Debe pasar la entidad DeliveryLine");
+    } else {
+      return new DeliveryLineDetailsResponse(
+          deliveryLine.getId(),
+          deliveryLine.getRequiredQuantity(),
+          deliveryLine.getDeliveredQuantity(),
+          deliveryLine.getPendingQuantity(),
+          deliveryLine.getLimitDate(),
+          deliveryLine.getUpdatedAt(),
+          deliveryLine.getLineStatus(),
+
+          deliveryLine.getUserUpdater().getFirstname() + " " + deliveryLine.getUserUpdater().getLastname(),
+
+          deliveryLine.getLocation().getId(),
+          deliveryLine.getLocation().getName(),
+
+          deliveryLine.getLocation().getSubregion().getId(),
+          deliveryLine.getLocation().getSubregion().getName(),
+
+          deliveryLine.getLocation().getSubregion().getRegion().getId(),
+          deliveryLine.getLocation().getSubregion().getRegion().getName(),
+
+          deliveryLine.getModel().getId(),
+          deliveryLine.getModel().getName(),
+          deliveryLine.getModel().getImageUrl(),
+          
+          deliveryLine.getModel().getProduct().getId(),
+          deliveryLine.getModel().getProduct().getName(),
+
+          deliveryLine.getModel().getProduct().getCategory().getId(),
+          deliveryLine.getModel().getProduct().getCategory().getName(),
+
+          deliveryLine.getModel().getProduct().getType().getId(),
+          deliveryLine.getModel().getProduct().getType().getName(),
+
+          deliveryLine.getModel_DeliveryOrder().getDeliveryOrder().getId(),
+          deliveryLine.getModel_DeliveryOrder().getDeliveryOrder().getBatch(),
+          deliveryLine.getModel_DeliveryOrder().getDeliveryOrder().getLimitDate()
+          );
     }
   }
 

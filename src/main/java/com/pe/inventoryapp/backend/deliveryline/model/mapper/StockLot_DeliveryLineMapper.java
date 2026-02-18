@@ -4,7 +4,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.StockLot_DeliveryLi
 import com.pe.inventoryapp.backend.deliveryline.model.response.StockLot_DeliveryLineResponse;
 
 public class StockLot_DeliveryLineMapper {
-    private StockLot_DeliveryLine stockLot_DeliveryLine;
+  private StockLot_DeliveryLine stockLot_DeliveryLine;
 
   private StockLot_DeliveryLineMapper() {
   }
@@ -18,17 +18,18 @@ public class StockLot_DeliveryLineMapper {
     return this;
   }
 
-
   public StockLot_DeliveryLineResponse buildStockLot_DeliveryLineResponse() {
     if (stockLot_DeliveryLine == null) {
       throw new RuntimeException("Debe pasar la entidad DeliveryLine");
     } else {
       return new StockLot_DeliveryLineResponse(
           stockLot_DeliveryLine.getId(),
-          stockLot_DeliveryLine.getQuantityUsed());
+          stockLot_DeliveryLine.getQuantityUsed(),
+          stockLot_DeliveryLine.getCreatedAt(),
+
+          stockLot_DeliveryLine.getStockLot().getId(),
+          stockLot_DeliveryLine.getStockLot().getBatch());
     }
   }
-
-
 
 }

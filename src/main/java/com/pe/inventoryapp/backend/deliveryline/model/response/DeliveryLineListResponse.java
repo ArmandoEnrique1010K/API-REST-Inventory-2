@@ -21,8 +21,15 @@ public class DeliveryLineListResponse {
   private LocalDateTime limitDate;
   private LineStatus lineStatus;
 
-  // TODO: ESTE CAMPO ES TEMPORAL
-  private Long id_product;
-  private String location;
-  private String region;
+  private Long modelId;
+  private String modelproductName;
+
+  private Long locationId;
+  private String locationName;
+
+  private Long subregionId;
+  private String subregionName;
+
+  private Long regionId;
+  private String regionName;
 }

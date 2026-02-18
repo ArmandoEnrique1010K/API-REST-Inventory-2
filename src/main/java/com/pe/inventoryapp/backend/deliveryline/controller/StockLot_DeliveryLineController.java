@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.deliveryline.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,16 +18,22 @@ import com.pe.inventoryapp.backend.deliveryline.service.StockLot_DeliveryLineSer
 @RequestMapping("/api/stock-lot-delivery-lines")
 public class StockLot_DeliveryLineController {
 
-  @Autowired
-  private StockLot_DeliveryLineService stockLot_DeliveryLineService;
+  private final StockLot_DeliveryLineService stockLot_DeliveryLineService;
+  private final ResponseService responseService;
 
-  @Autowired
-  private ResponseService responseService;
+  public StockLot_DeliveryLineController(
+      StockLot_DeliveryLineService stockLot_DeliveryLineService,
+      ResponseService responseService) {
+    this.stockLot_DeliveryLineService = stockLot_DeliveryLineService;
+    this.responseService = responseService;
+  }
 
   @GetMapping("/delivery-line/{id}")
   public ResponseEntity<?> getStockLotsByDeliveryLine(@PathVariable Long id) {
-    List<StockLot_DeliveryLineResponse> stockLot_DeliveryLines = stockLot_DeliveryLineService.findAllByDeliveryLineId(id);
-    DataResponse<List<StockLot_DeliveryLineResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    List<StockLot_DeliveryLineResponse> stockLot_DeliveryLines = stockLot_DeliveryLineService
+        .findAllByDeliveryLineId(id);
+    DataResponse<List<StockLot_DeliveryLineResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
         stockLot_DeliveryLines);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }

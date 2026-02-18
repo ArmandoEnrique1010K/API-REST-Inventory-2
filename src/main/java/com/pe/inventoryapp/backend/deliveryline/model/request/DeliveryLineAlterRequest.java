@@ -12,10 +12,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryLineAlterRequest {
-  @NotNull(message = "Especifique la cantidad")
+  @NotNull(message = "Introduzca un valor númerico")
   @Min(value = 1, message = "La cantidad debe ser mayor a 0")
   private Integer quantity;
 
   private String comment;
-
 }

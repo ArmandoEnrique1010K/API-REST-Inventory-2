@@ -350,7 +350,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		restoreStock(stockToRestore, deliveryOrder, user, deliveryOrderComentRequest);
 
-		recalculateSummaries(deliveryOrder);
+		deliveryOrderDomainService.recalculateSummaries(deliveryOrder);
 
 		// Nota: Este método tambien contiene la logica para guardarlo en el repositorio
 		updateDeliveryOrderStatus(deliveryOrder, user, hasDeliveredOrMissing);
@@ -570,17 +570,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		stockLotRepository.saveAll(stockLots);
 		movementRepository.saveAll(movements);
 		modelRepository.saveAll(models.values());
-	}
-
-	private void recalculateSummaries(DeliveryOrder deliveryOrder) {
-		model_DeliveryOrderRepository
-				.recalculateRequiredQuantities(deliveryOrder.getId());
-
-		model_DeliveryOrder_RegionDomainService
-				.recalculateSummatoryModel_DeliveryOrderRegionsByDeliveryOrder(deliveryOrder.getId());
-
-		model_DeliveryOrder_SubregionDomainService
-				.recalculateSummatoryModel_DeliveryOrderSubregionsByDeliveryOrder(deliveryOrder.getId());
 	}
 
 	private void updateDeliveryOrderStatus(
