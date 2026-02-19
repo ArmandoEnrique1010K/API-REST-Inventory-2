@@ -2,6 +2,8 @@ package com.pe.inventoryapp.backend.location.model.entity;
 
 import java.util.List;
 
+import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Subregion;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,6 +41,6 @@ public class Subregion {
     @OneToMany(mappedBy = "subregion")
     private List<Location> locations;
 
-    // TODO: AÑADIR UNA RELACION HACIA LA ENTIDAD Model_DeliveryOrder_Subregion
-    // @OneToMany
+    @OneToMany(mappedBy = "subregion")
+    private List<Model_DeliveryOrder_Subregion> model_DeliveryOrder_Subregions;
 }

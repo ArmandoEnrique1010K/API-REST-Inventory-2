@@ -22,7 +22,6 @@ import com.pe.inventoryapp.backend.user.service.UserService;
 import jakarta.validation.Valid;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -40,18 +39,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequestMapping("/api/users")
 @CrossOrigin(originPatterns = "*")
 public class UserController {
+  private final UserService userService;
+  private final ResponseService responseService;
+  private final ValidationService validationService;
+  private final AuthenticationContextService authenticationContextService;
 
-  @Autowired
-  private UserService userService;
+  public UserController(
+      UserService userService, 
+      ResponseService responseService,
+      ValidationService validationService,
+      AuthenticationContextService authenticationContextService
+  ){
+    this.userService = userService;
+    this.responseService = responseService;
+    this.validationService = validationService;
+    this.authenticationContextService = authenticationContextService;
+  }
 
-  @Autowired
-  private ResponseService responseService;
-
-  @Autowired
-  private ValidationService validationService;
-
-  @Autowired
-  private AuthenticationContextService authenticationContextService;
 
   @PostMapping("/register")
   public ResponseEntity<CommonResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest,

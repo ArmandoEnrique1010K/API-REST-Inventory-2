@@ -31,44 +31,55 @@ public class MovementMapper {
         movement.getCreatedAt(),
         movement.getMovementType(),
         movement.getUser().getFirstname() + " " + movement.getUser().getLastname(),
-        movement.getProduct().getName()
-    );
+        movement.getModel().getId(),
+        movement.getModel().getName());
   }
 
-  public MovementDetailsResponse buildMovementDetailsResponse(){
-    if (movement == null){
+  public MovementDetailsResponse buildMovementDetailsResponse() {
+    if (movement == null) {
       throw new RuntimeException("Debe pasar la entidad movement");
     }
 
     // Verificar que los ids no sean nulos
-    Long stockLotEmitterId = movement.getStockLotEmitter() != null
-        ? movement.getStockLotEmitter().getId()
-        : null;
     Long stockLotReceiverId = movement.getStockLotReceiver() != null
         ? movement.getStockLotReceiver().getId()
         : null;
+
+    String stockLotReceiverBatch = movement.getStockLotReceiver() != null ? movement.getStockLotReceiver().getBatch()
+        : null;
+
+    Long stockLotEmitterId = movement.getStockLotEmitter() != null
+        ? movement.getStockLotEmitter().getId()
+        : null;
+
+    String stockLotEmitterBatch = movement.getStockLotEmitter() != null ? movement.getStockLotEmitter().getBatch()
+        : null;
+
     Long deliveryLineId = movement.getDeliveryLine() != null
         ? movement.getDeliveryLine().getId()
         : null;
-    List<Long> stockLotDetailIds = movement.getStockLotDetails() != null
-        ? movement.getStockLotDetails()
+
+    List<Long> movement_StockLots = movement.getMovement_StockLots() != null
+        ? movement.getMovement_StockLots()
             .stream()
             .map(stockLot -> stockLot.getId())
             .toList()
         : List.of();
 
     return new MovementDetailsResponse(
-      movement.getId(),
-      movement.getQuantity(),
-      movement.getComment(),
-      movement.getCreatedAt(),
-      movement.getMovementType(),
-      movement.getUser().getFirstname() + " " + movement.getUser().getLastname(),
-      movement.getProduct().getName(),
+        movement.getId(),
+        movement.getQuantity(),
+        movement.getComment(),
+        movement.getCreatedAt(),
+        movement.getMovementType(),
+        movement.getUser().getFirstname() + " " + movement.getUser().getLastname(),
+        movement.getModel().getId(),
+        movement.getModel().getName(),
+        movement_StockLots,
         stockLotReceiverId,
+        stockLotReceiverBatch,
         stockLotEmitterId,
-        stockLotDetailIds,
-        deliveryLineId
-    );
+        stockLotEmitterBatch,
+        deliveryLineId);
   }
 }

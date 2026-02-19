@@ -9,58 +9,18 @@ import com.pe.inventoryapp.backend.movement.model.response.MovementListResponse;
 
 public interface MovementService {
   PageResponse<MovementListResponse> findAllMovements(
+    Pageable pageable,
     Integer minQuantity,
     Integer maxQuantity,
     LocalDateTime minCreatedAt,
     LocalDateTime maxCreatedAt,
     MovementType movementType,
-    String username,
-    String productName,
-    Pageable pageable
-  );
-
-  PageResponse<MovementListResponse> findAllMovementsByDeliveryLine(
     Long deliveryLineId,
-    Integer minQuantity,
-    Integer maxQuantity,
-    LocalDateTime minCreatedAt, 
-    LocalDateTime maxCreatedAt,
-    MovementType movementType,
     String username,
-    String productName,
-    Pageable pageable);
-
-  PageResponse<MovementListResponse> findAllMovementsByStockLot(
-      Long stockLotId,
-      Integer minQuantity,
-      Integer maxQuantity,
-      LocalDateTime minCreatedAt, 
-      LocalDateTime maxCreatedAt,
-      MovementType movementType,
-      String username,
-      String productName,
-      Pageable pageable);
-
-  PageResponse<MovementListResponse> findAllMovementsByProduct(
-      Long productId,
-      Integer minQuantity,
-      Integer maxQuantity,
-      LocalDateTime minCreatedAt, 
-      LocalDateTime maxCreatedAt,
-      MovementType movementType,
-      String username,
-      Pageable pageable);
-
-  PageResponse<MovementListResponse> findAllMovementsByUser(
-      Long userId,
-      Integer minQuantity,
-      Integer maxQuantity,
-      LocalDateTime minCreatedAt,
-      LocalDateTime maxCreatedAt,
-      MovementType movementType,
-      String productName,
-      Pageable pageable);
-
+    String keyword,
+    Long modelId,
+    Long userId
+  );
 
   MovementDetailsResponse findMovementById(Long id);
 }

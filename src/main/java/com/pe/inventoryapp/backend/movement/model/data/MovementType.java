@@ -22,6 +22,7 @@ public enum MovementType {
            // entregarlo)
   DELIVERED, // Marcar una linea de entrega como entregada
 
+  // TODO: IMPLEMENTAR EL MOVIMIENTO SIMULTANEOUS
   // Relacionados a un lote de stock y linea de entrega a la vez
   SIMULTANEOUS // Crea un lote de stock y asigna la cantidad total de ese lote a un linea de
                // entrega

@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.deliveryline.controller;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,29 +39,34 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/delivery-lines")
 public class DeliveryLineController {
-  @Autowired
-  private ResponseService responseService;
 
-  @Autowired
-  private ValidationService validationService;
+  private final ResponseService responseService;
+  private final ValidationService validationService;
+  private final DeliveryLineService deliveryLineService;
+  private final AuthenticationContextService authenticationContextService;
 
-  @Autowired
-  private DeliveryLineService deliveryLineService;
+  public DeliveryLineController (
+  ResponseService responseService,
+  ValidationService validationService,
+  DeliveryLineService deliveryLineService,
+  AuthenticationContextService authenticationContextService ) {
+    this.responseService = responseService;
+    this.validationService = validationService;
+    this.deliveryLineService = deliveryLineService;
+    this.authenticationContextService = authenticationContextService;
+  }
 
-  @Autowired
-  private AuthenticationContextService authenticationContextService;
-
-  @PostMapping("/product-delivery-order/{productDeliveryOrderId}")
+  @PostMapping("/model-delivery-order/{modelDeliveryOrderId}")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
       Authentication authentication,
-      @PathVariable Long productDeliveryOrderId,
+      @PathVariable Long modelDeliveryOrderId,
       @Valid @RequestBody DeliveryLineRequest deliveryLineRequest,
       BindingResult result) {
 
     Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.saveDeliveryLine(deliveryLineRequest, productDeliveryOrderId, id_user_authenticated);
+    deliveryLineService.saveDeliveryLine(deliveryLineRequest, modelDeliveryOrderId, id_user_authenticated);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
         "Se registro una linea de entrega en una orden de entrega");
@@ -71,7 +75,7 @@ public class DeliveryLineController {
 
   
 
-  // TODO: PODRIA AÑADIR UN PARAMETRO PARA LISTAR POR PRODUCTOS
+  // TODO: PODRIA AÑADIR UN PARAMETRO PARA LISTAR POR MODELOS DE PRODUCTOS
   @GetMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
       @PathVariable Long deliveryOrderId, 
@@ -83,8 +87,7 @@ public class DeliveryLineController {
       @RequestParam(required = false) LineStatus lineStatus,
       @RequestParam(required = false) String location    
     ) {
-      // TODO: AGREGAR UN CAMPO PARA AGRUPAR POR REGION
-      // TODO: PODRIA CREAR UNA ENTIDAD SUB-REGION
+      // TODO: AGREGAR UN CAMPO PARA AGRUPAR POR REGION O SUBREGIÓN
     Pageable pageable = PageRequest.of(page, 20);
     PageResponse<DeliveryLineListResponse> deliveryOrders = deliveryLineService
         .findAllDeliveryLinesByDeliveryOrderIdPageable(
@@ -120,11 +123,6 @@ public class DeliveryLineController {
   }
 
 
-  // TODO: FALTA PROBAR LA SUMATORIA DE LOS TOTALES CUANDO HAYA CANTIDAD ENTREGADA
-  // EN UNA LINEA DE ENTREGA
-
-  // RECORDAR QUE SOLAMENTE PODRA BORRAR UNA LINEA DE ENTREGA SI NO HAY CANTIDAD
-  // ENTREGADA
   @PatchMapping("/{id}/cancel")
   public ResponseEntity<?> cancelDeliveryLine(Authentication authentication, @PathVariable Long id) {
     Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);

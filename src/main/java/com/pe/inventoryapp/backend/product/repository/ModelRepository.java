@@ -13,14 +13,19 @@ import com.pe.inventoryapp.backend.product.model.entity.Model;
 
 public interface ModelRepository extends JpaRepository<Model, Long> {
 
-  // TODO: ¿DEBE INCLUIR SOLAMENTE TODOS LOS PRODUCTOS CUYO ESTADO DE CATEGORIA SEA TRUE?
+  // TODO: ¿DEBE INCLUIR SOLAMENTE TODOS LOS PRODUCTOS CUYO ESTADO DE CATEGORIA
+  // SEA TRUE?
   // Query personalizado para buscar productos mediante parametros
   // Nota: Lista los productos cuya categoria este activa
   @Query("""
           SELECT m
           FROM Model m
           JOIN m.product p
-          WHERE (LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+          WHERE (
+            :keyword IS NULL OR
+            LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+            LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
           AND (:minStock IS NULL OR m.quantityAvailable >= :minStock)
           AND (:maxStock IS NULL OR m.quantityAvailable <= :maxStock)
           AND (:minEntryDate IS NULL OR m.entryDate >= :minEntryDate)
@@ -39,14 +44,16 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
       @Param("maxEntryDate") LocalDate maxEntryDate,
       @Param("status") Boolean status,
       @Param("categoryId") Long categoryId,
-      @Param("typeId") Long typeId
-    );
+      @Param("typeId") Long typeId);
 
   List<Model> findAllByProductId(Long productId);
 
-  // Método para verificar que el nombre de modelo sea unico dentro de la lista de modelos de un producto por id
+  // Método para verificar que el nombre de modelo sea unico dentro de la lista de
+  // modelos de un producto por id
   boolean existsByNameAndProductId(String name, Long productId);
 
-  // Método para verificar que el nombre de modelo sea unico dentro de la lista de modelos de un producto por id, excluyendo un id de modelo específico (para actualizaciones)
+  // Método para verificar que el nombre de modelo sea unico dentro de la lista de
+  // modelos de un producto por id, excluyendo un id de modelo específico (para
+  // actualizaciones)
   boolean existsByNameAndProductIdAndIdNot(String name, Long productId, Long id);
 }

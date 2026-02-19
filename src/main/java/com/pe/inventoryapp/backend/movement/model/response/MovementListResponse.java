@@ -18,6 +18,8 @@ public class MovementListResponse {
   private Integer quantity;
   private LocalDateTime createdAt;
   private MovementType movementType;
-  private String username_snapshot;
-  private String productName;
+  private String userName;
+
+  private Long modelId;
+  private String modelName;
 }

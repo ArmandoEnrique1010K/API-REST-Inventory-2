@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
-import com.pe.inventoryapp.backend.product.model.entity.Product;
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
@@ -81,5 +80,5 @@ public class Movement {
   private Model model;
   
   @OneToMany(mappedBy = "movement", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Movement_StockLot> stockLotDetails;
+  private List<Movement_StockLot> movement_StockLots;
 }

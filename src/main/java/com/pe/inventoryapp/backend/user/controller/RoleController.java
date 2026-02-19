@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.user.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,11 +16,14 @@ import com.pe.inventoryapp.backend.user.service.RoleService;
 @RestController
 @RequestMapping("/api/roles")
 public class RoleController {
-  @Autowired
-  private RoleService roleService;
+  private final RoleService roleService;
+  private final ResponseService responseService;
 
-  @Autowired
-  private ResponseService responseService;
+  public RoleController(RoleService roleService, ResponseService responseService){
+    this.roleService = roleService;
+    this.responseService = responseService;
+  }
+
 
   @GetMapping
   public ResponseEntity<?> listAllRoles() {

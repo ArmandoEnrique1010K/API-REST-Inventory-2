@@ -30,7 +30,6 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderCli
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
@@ -41,8 +40,6 @@ import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
 import com.pe.inventoryapp.backend.stocklot.service.StockLotDomainService;
-import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_RegionDomainService;
-import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_SubregionDomainService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -56,11 +53,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	private final StockLotRepository stockLotRepository;
 	private final MovementRepository movementRepository;
 	private final ModelRepository modelRepository;
-	private final Model_DeliveryOrderRepository model_DeliveryOrderRepository;
 	private final DeliveryOrderDomainService deliveryOrderDomainService;
 	private final StockLotDomainService stockLotDomainService;
-	private final Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService;
-	private final Model_DeliveryOrder_SubregionDomainService model_DeliveryOrder_SubregionDomainService;
 
 	private static final long BATCH_START = 10000L;
 
@@ -72,11 +66,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			StockLotRepository stockLotRepository,
 			MovementRepository movementRepository,
 			ModelRepository modelRepository,
-			Model_DeliveryOrderRepository model_DeliveryOrderRepository,
 			DeliveryOrderDomainService deliveryOrderDomainService,
-			StockLotDomainService stockLotDomainService,
-			Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService,
-			Model_DeliveryOrder_SubregionDomainService model_DeliveryOrder_SubregionDomainService) {
+			StockLotDomainService stockLotDomainService) {
 		this.deliveryOrderRepository = deliveryOrderRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
@@ -84,11 +75,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.stockLotRepository = stockLotRepository;
 		this.movementRepository = movementRepository;
 		this.modelRepository = modelRepository;
-		this.model_DeliveryOrderRepository = model_DeliveryOrderRepository;
 		this.deliveryOrderDomainService = deliveryOrderDomainService;
 		this.stockLotDomainService = stockLotDomainService;
-		this.model_DeliveryOrder_RegionDomainService = model_DeliveryOrder_RegionDomainService;
-		this.model_DeliveryOrder_SubregionDomainService = model_DeliveryOrder_SubregionDomainService;
 	};
 
 	@Override

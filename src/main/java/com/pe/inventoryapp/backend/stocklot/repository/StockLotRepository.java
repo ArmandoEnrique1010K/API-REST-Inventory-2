@@ -36,7 +36,11 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long> {
       AND (:maxQuantityAvailable IS NULL OR sl.maxQuantityAvailable <= :maxQuantityAvailable)
       AND (:minCreatedAt IS NULL OR sl.createdAt >= :minCreatedAt)
       AND (:maxCreatedAt IS NULL OR sl.createdAt <= :maxCreatedAt)
-      AND (LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+      AND (
+        :keyword IS NULL OR
+        LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+        LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
       AND (:companyId IS NULL OR sl.company.id = :companyId)
       AND (:categoryId IS NULL OR p.category.id = :categoryId)
       AND (:typeId IS NULL OR p.type.id = :typeId)

@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.movement.controller;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,11 +25,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/api/movements")
 public class MovementController {
-  @Autowired
-  private MovementService movementService;
+  private final MovementService movementService;
+  private final ResponseService responseService;
 
-  @Autowired
-  private ResponseService responseService;
+  public MovementController (MovementService movementService, ResponseService responseService){
+    this.movementService = movementService;
+    this.responseService = responseService;
+  }
 
   @GetMapping
   public ResponseEntity<?> listAllMovements(
@@ -40,101 +41,18 @@ public class MovementController {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
         @RequestParam(required = false) MovementType movementType,
+        @RequestParam(required = false) Long deliveryLineId,
         @RequestParam(required = false) String username,
-        @RequestParam(required = false) String productName
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) Long modelId,
+        @RequestParam(required = false) Long userId
     ) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<MovementListResponse> movements = movementService.findAllMovements(minQuantity, maxQuantity, minCreatedAt, maxCreatedAt, movementType, username, productName, pageable); 
+    PageResponse<MovementListResponse> movements = movementService.findAllMovements(pageable, minQuantity, maxQuantity, minCreatedAt,
+				maxCreatedAt, movementType, deliveryLineId, username, keyword, modelId, userId); 
 
     DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, movements);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
-
-
-  @GetMapping("/delivery-line/{deliveryLineId}")
-  public ResponseEntity<?> listAllMovementsByDeliveryLine(
-      @PathVariable Long deliveryLineId,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) Integer minQuantity,
-      @RequestParam(required = false) Integer maxQuantity,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
-      @RequestParam(required = false) MovementType movementType,
-      @RequestParam(required = false) String username,
-      @RequestParam(required = false) String productName) {
-    Pageable pageable = PageRequest.of(page, 20);
-
-    PageResponse<MovementListResponse> movements = movementService.findAllMovementsByDeliveryLine(deliveryLineId, minQuantity, maxQuantity,
-        minCreatedAt, maxCreatedAt, movementType, username, productName, pageable);
-
-    DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService
-        .generateDataResponse(ResponseStatus.SUCCESS, movements);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
-
-  @GetMapping("/stock-lot/{stockLotId}")
-  public ResponseEntity<?> listAllMovementsByStockLot(
-      @PathVariable Long stockLotId,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) Integer minQuantity,
-      @RequestParam(required = false) Integer maxQuantity,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
-      @RequestParam(required = false) MovementType movementType,
-      @RequestParam(required = false) String username,
-      @RequestParam(required = false) String productName) {
-    Pageable pageable = PageRequest.of(page, 20);
-
-    PageResponse<MovementListResponse> movements = movementService.findAllMovementsByDeliveryLine(stockLotId,
-        minQuantity, maxQuantity,
-        minCreatedAt, maxCreatedAt, movementType, username, productName, pageable);
-
-    DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService
-        .generateDataResponse(ResponseStatus.SUCCESS, movements);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
-
-  @GetMapping("/product/{productId}")
-  public ResponseEntity<?> listAllMovementsByProduct(
-      @PathVariable Long productId,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) Integer minQuantity,
-      @RequestParam(required = false) Integer maxQuantity,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
-      @RequestParam(required = false) MovementType movementType,
-      @RequestParam(required = false) String username) {
-    Pageable pageable = PageRequest.of(page, 20);
-
-    PageResponse<MovementListResponse> movements = movementService.findAllMovementsByProduct(
-        productId,
-        minQuantity, maxQuantity,
-        minCreatedAt, maxCreatedAt, movementType, username, pageable);
-
-    DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService
-        .generateDataResponse(ResponseStatus.SUCCESS, movements);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
-
-
-  @GetMapping("/user/{userId}")
-  public ResponseEntity<?> listAllMovementsByUser(
-      @PathVariable Long userId,
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) Integer minQuantity,
-      @RequestParam(required = false) Integer maxQuantity,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
-      @RequestParam(required = false) MovementType movementType,
-      @RequestParam(required = false) String productName) {
-    Pageable pageable = PageRequest.of(page, 20);
-
-    PageResponse<MovementListResponse> movements = movementService.findAllMovementsByUser(
-        userId, minQuantity, maxQuantity, minCreatedAt, maxCreatedAt, movementType, productName,  pageable);
-
-    DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService
-        .generateDataResponse(ResponseStatus.SUCCESS, movements);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 

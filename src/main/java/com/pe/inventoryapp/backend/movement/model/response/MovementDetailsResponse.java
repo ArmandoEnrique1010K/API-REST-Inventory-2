@@ -20,10 +20,19 @@ public class MovementDetailsResponse {
   private String comment;
   private LocalDateTime createdAt;
   private MovementType movementType;
-  private String username_snapshot;
-  private String productName;
+
+  private String userName;
+
+  private Long modelId;
+  private String modelName;
+
+  private List<Long> movements_StockLots;
+
   private Long stockLotReceiverId;
+  private String stockLotReceiverBatch;
+
   private Long stockLotEmitterId;
-  private List<Long> stockLots;
+  private String stockLotEmitterBatch;
+
   private Long deliveryLineId;
 }

@@ -23,9 +23,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table(name = "movimientos_lotes_de_entrega")
 public class Movement_StockLot {
-    @Id
+  @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @NotNull
+  private Integer quantityTaken;
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "movement_id", nullable = false)
@@ -35,6 +38,4 @@ public class Movement_StockLot {
   @JoinColumn(name = "stock_lot_id", nullable = false)
   private StockLot stockLot;
 
-  @NotNull
-  private Integer quantityTaken;
 }

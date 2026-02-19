@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,14 +29,19 @@ import com.pe.inventoryapp.backend.user.repository.UserRepository;
 @Service
 public class UserServiceImpl implements UserService {
 
-  @Autowired
-  private UserRepository userRepository;
+  private final UserRepository userRepository;
+  private final RoleRepository roleRepository;
+  private final PasswordEncoder passwordEncoder;
 
-  @Autowired
-  private RoleRepository roleRepository;
-
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  public UserServiceImpl (
+    UserRepository userRepository,
+    RoleRepository roleRepository,
+    PasswordEncoder passwordEncoder
+  ){
+    this.userRepository = userRepository;
+    this.roleRepository = roleRepository;
+    this.passwordEncoder = passwordEncoder;
+  }
 
   @Transactional
   @Override
