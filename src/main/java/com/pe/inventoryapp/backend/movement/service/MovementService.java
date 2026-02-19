@@ -19,7 +19,8 @@ public interface MovementService {
     String username,
     String keyword,
     Long modelId,
-    Long userId
+    Long userId,
+    Long stockLotReceiverId
   );
 
   MovementDetailsResponse findMovementById(Long id);

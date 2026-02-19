@@ -14,7 +14,6 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 public interface MovementRepository extends JpaRepository<Movement, Long> {
 
   // Query personalizado para buscar movimientos mediante parametros
-
   @Query("""
       SELECT mv
       FROM Movement mv
@@ -22,7 +21,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       JOIN m.product p
       JOIN mv.user u
       LEFT JOIN mv.deliveryLine dl
-      LEFT JOIN mv.stockLot s
+      LEFT JOIN mv.stockLotReceiver s
       WHERE (:minQuantity IS NULL OR mv.quantity >= :minQuantity)
       AND (:maxQuantity IS NULL OR mv.quantity <= :maxQuantity)
       AND (:minCreatedAt IS NULL OR mv.createdAt >= :minCreatedAt)
@@ -42,6 +41,7 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       AND (:deliveryLineId IS NULL OR dl.id = :deliveryLineId)
       AND (:modelId IS NULL OR m.id = :modelId)
       AND (:userId IS NULL OR u.id = :userId)
+      AND (:stockLotReceiverId IS NULL OR s.id = :stockLotReceiverId)
       ORDER BY mv.createdAt DESC
   """)
   Page<Movement> findAllByParams(
@@ -55,5 +55,6 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       @Param("username") String username,
       @Param("keyword") String keyword,
       @Param("modelId") Long modelId,
-      @Param("userId") Long userId);
+      @Param("userId") Long userId,
+      @Param("stockLotReceiverId") Long stockLotReceiverId);
 }

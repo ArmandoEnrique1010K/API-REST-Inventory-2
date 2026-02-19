@@ -27,6 +27,7 @@ public interface StockLotService {
       Long companyId,
       Long categoryId,
       Long typeId,
+      Long modelId,
       Pageable pageable);
 
   List<StockLotSameProductListResponse> findAllStockLotsExceptOneStockLotByModelId(Long modelId, Long companyId,

@@ -45,12 +45,13 @@ public class MovementController {
         @RequestParam(required = false) String username,
         @RequestParam(required = false) String keyword,
         @RequestParam(required = false) Long modelId,
-        @RequestParam(required = false) Long userId
+        @RequestParam(required = false) Long userId,
+        @RequestParam(required = false) Long stockLotReceiverId
     ) {
     Pageable pageable = PageRequest.of(page, 20);
 
     PageResponse<MovementListResponse> movements = movementService.findAllMovements(pageable, minQuantity, maxQuantity, minCreatedAt,
-				maxCreatedAt, movementType, deliveryLineId, username, keyword, modelId, userId); 
+				maxCreatedAt, movementType, deliveryLineId, username, keyword, modelId, userId, stockLotReceiverId); 
 
     DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, movements);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);

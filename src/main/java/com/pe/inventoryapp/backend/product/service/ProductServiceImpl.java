@@ -1,15 +1,10 @@
 package com.pe.inventoryapp.backend.product.service;
 
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -100,39 +95,39 @@ public class ProductServiceImpl implements ProductService {
   }
 
   // TODO: ESTE METODO SE PODRIA ELIMINAR YA QUE SE PIENSA BUSCAR POR NOMBRE DE PRODUCTO Y NOMBRE DE MODELO
-  @Override
-  @Transactional(readOnly = true)
-  public PageResponse<ProductResponse> searchAllProductsByParams(
-      Pageable pageable,
-      String name,
-      Boolean status,
-      Long categoryId,
-      Long typeId
-      ) {
-    if (categoryId != null && !categoryRepository.existsById(categoryId)) {
-      throw new BusinessException(
-          ResponseStatus.NOT_FOUND,
-          "La categoria no existe");
-    }
+  // @Override
+  // @Transactional(readOnly = true)
+  // public PageResponse<ProductResponse> searchAllProductsByParams(
+  //     Pageable pageable,
+  //     String name,
+  //     Boolean status,
+  //     Long categoryId,
+  //     Long typeId
+  //     ) {
+  //   if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+  //     throw new BusinessException(
+  //         ResponseStatus.NOT_FOUND,
+  //         "La categoria no existe");
+  //   }
 
-    Page<Product> products = productRepository.findAllByParams(pageable, name, status, categoryId, typeId);
+  //   Page<Product> products = productRepository.findAllByParams(pageable, name, status, categoryId, typeId);
 
-    List<ProductResponse> result = products.getContent().stream().map(
-        product -> ProductMapper.builder()
-            .setProduct(product).buildProductResponse())
-        .toList();
+  //   List<ProductResponse> result = products.getContent().stream().map(
+  //       product -> ProductMapper.builder()
+  //           .setProduct(product).buildProductResponse())
+  //       .toList();
 
-    PageResponse<ProductResponse> pageResponse = new PageResponse<>(
-        result,
-        products.getNumber(),
-        products.getSize(),
-        products.getTotalElements(),
-        products.getTotalPages(),
-        products.isFirst(),
-        products.isLast());
+  //   PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+  //       result,
+  //       products.getNumber(),
+  //       products.getSize(),
+  //       products.getTotalElements(),
+  //       products.getTotalPages(),
+  //       products.isFirst(),
+  //       products.isLast());
 
-    return pageResponse;
-  }
+  //   return pageResponse;
+  // }
 
   @Override
   @Transactional(readOnly = true)

@@ -37,6 +37,7 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement_StockLot;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
 import com.pe.inventoryapp.backend.movement.repository.Movement_StockLotRepository;
+import com.pe.inventoryapp.backend.movement.service.MovementDomainService;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
@@ -65,6 +66,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   private final CompanyRepository companyRepository;
   private final DeliveryOrderDomainService deliveryOrderDomainService;
   private final StockLotDomainService stockLotDomainService;
+  private final MovementDomainService movementDomainService;
 
   public DeliveryLineServiceImpl(
       DeliveryLineRepository deliveryLineRepository,
@@ -79,7 +81,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       Movement_StockLotRepository movement_StockLotRepository,
       CompanyRepository companyRepository,
       DeliveryOrderDomainService deliveryOrderDomainService,
-      StockLotDomainService stockLotDomainService) {
+      StockLotDomainService stockLotDomainService,
+      MovementDomainService movementDomainService) {
     this.deliveryLineRepository = deliveryLineRepository;
     this.modelRepository = modelRepository;
     this.locationRepository = locationRepository;
@@ -93,6 +96,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     this.companyRepository = companyRepository;
     this.deliveryOrderDomainService = deliveryOrderDomainService;
     this.stockLotDomainService = stockLotDomainService;
+    this.movementDomainService = movementDomainService;
   }
 
   // TODO: EXAMINAR MINUCIOSAMENTE EL FUNCIONAMIENTO DE CADA UNO DE LOS SERVICIOS
@@ -366,7 +370,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     Movement movement = new Movement();
     movement.setQuantity(quantityBalance);
-    movement.setComment(deliveryOrderDomainService.generateComment(deliveryLineUpdateRequest.getComment(),
+    movement.setComment(movementDomainService.generateComment(deliveryLineUpdateRequest.getComment(),
         "Un usuario altero los datos de la linea de entrega"));
 
     // Si el balance es un número positivo se considera un ALTER, si es negativo se
@@ -745,7 +749,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // 3° REGISTRARLO COMO MOVIMIENTO
     Movement movement = new Movement();
     movement.setQuantity(lostQuantity);
-    movement.setComment(deliveryOrderDomainService.generateComment(deliveryLineAlterRequest.getComment(),
+    movement.setComment(movementDomainService.generateComment(deliveryLineAlterRequest.getComment(),
         "Se ha descontado una cantidad de la linea de entrega con ID: " + deliveryLine.getId()));
     movement.setMovementType(MovementType.LOST);
 

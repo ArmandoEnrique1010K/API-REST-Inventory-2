@@ -214,7 +214,6 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/cancel")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						// TODO: CONTINUAR AQUI
 
 						// PRODUCT DELIVERYORDER
 						.requestMatchers(HttpMethod.POST,

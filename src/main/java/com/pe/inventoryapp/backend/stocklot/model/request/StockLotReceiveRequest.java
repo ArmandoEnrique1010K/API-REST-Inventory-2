@@ -2,6 +2,8 @@ package com.pe.inventoryapp.backend.stocklot.model.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,9 +19,13 @@ public class StockLotReceiveRequest {
   private Integer quantity;
 
   // Opcionalmente puede introducir un comentario
+  @Size(max = 255, message = "El comentario no puede exceder los 255 caracteres")
+  @Pattern(
+    regexp = "^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,;:()\\-_/]*$",
+    message = "El comentario contiene caracteres no permitidos"
+  )
   private String comment;
 
-  // TODO: CREAR UN ENDPOINT PARA QUE DE ALGUNA MANERA DEBE LISTAR LOS MODELOS RELACIONADOS HACIA UN PRODUCTO POR ID
   @NotNull(message = "Seleccione un modelo del producto")
   private Long idModel;
 

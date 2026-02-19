@@ -15,7 +15,6 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
   // Page<DeliveryOrder> findByPreparationStatus(PreparationStatus status);
 
   // TODO: PODRIA ELEGIR LA FECHA LIMITE EN UN UNICO PARAMETRO PARA QUE LO BUSQUE
-  // TODO: EL CAMPO limitDate PODRIA SER REEMPLAZADO POR priorityDate PARA QUE TOME LA FECHA MÁS CERCANA DE ENTREGA
   // POR UN DIA Y NO POR UN RANGO DE DIAS
   // Busca todas las ordenes por los siguientes parametros (PARA SECRETARIOS Y
   // ADMINISTRADORES)
@@ -27,7 +26,7 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
           OR LOWER(d.userClient.firstname) LIKE LOWER(CONCAT('%', :userClientName, '%'))
           OR LOWER(d.userClient.lastname) LIKE LOWER(CONCAT('%', :userClientName, '%')))
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
-          AND ((:startDate IS NULL OR :endDate IS NULL) OR d.limitDate BETWEEN :startDate AND :endDate)
+          AND ((:startDate IS NULL OR :endDate IS NULL) OR d.priorityDate BETWEEN :startDate AND :endDate)
           AND d.orderStatus != 'CANCELED'
         ORDER BY d.createdAt DESC
       """)

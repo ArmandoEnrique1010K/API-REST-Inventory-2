@@ -26,11 +26,11 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
             LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
             LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
           )
-          AND (:minStock IS NULL OR m.quantityAvailable >= :minStock)
-          AND (:maxStock IS NULL OR m.quantityAvailable <= :maxStock)
+          AND (:minStock IS NULL OR m.totalQuantityAvailable >= :minStock)
+          AND (:maxStock IS NULL OR m.totalQuantityAvailable <= :maxStock)
           AND (:minEntryDate IS NULL OR m.entryDate >= :minEntryDate)
           AND (:maxEntryDate IS NULL OR m.entryDate <= :maxEntryDate)
-          AND (m.status IS NULL OR m.status = :status)
+          AND (:status IS NULL OR m.status = :status)
           AND (:categoryId IS NULL OR p.category.id = :categoryId)
           AND (:typeId IS NULL OR p.type.id = :typeId)
           AND p.category.status = true ORDER BY m.updatedAt DESC

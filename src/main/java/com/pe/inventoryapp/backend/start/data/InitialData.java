@@ -25,8 +25,6 @@ import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class InitialData {
-  // TODO: VERIFICAR SI INTRODUCE LOS DATOS INICIALES POR PRIMERA VEZ AL EJECUTAR LA API REST
-
   private final RoleRepository roleRepository;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
@@ -104,6 +102,7 @@ public class InitialData {
     locationRepository.findByName("Sin ubicación").orElseGet(() -> {
       Location location = new Location();
       location.setName("Sin ubicación");
+      location.setAddress("Sin dirección especificada");
       location.setSubregion(defaultSubregion);
       location.setStatus(true);
       return locationRepository.save(location);

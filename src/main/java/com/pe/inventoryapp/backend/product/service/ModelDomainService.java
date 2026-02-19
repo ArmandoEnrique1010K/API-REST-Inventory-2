@@ -2,11 +2,14 @@ package com.pe.inventoryapp.backend.product.service;
 
 import java.time.LocalDate;
 
+import org.springframework.stereotype.Service;
+
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
+@Service
 public class ModelDomainService {
   private final ModelRepository modelRepository;
   private final String defaultImageUrl;

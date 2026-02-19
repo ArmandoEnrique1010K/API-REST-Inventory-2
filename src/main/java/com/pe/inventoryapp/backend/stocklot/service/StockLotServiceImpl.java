@@ -151,11 +151,12 @@ public class StockLotServiceImpl implements StockLotService {
       Long companyId,
       Long categoryId,
       Long typeId,
+      Long modelId,
       Pageable pageable) {
     Page<StockLot> stockLots = stockLotRepository.findAllByParams(minQuantityReceived, 
         maxQuantityReceived, 
         minQuantityAvailable, maxQuantityAvailable, minCreatedAt, maxCreatedAt, keyword, 
-        companyId, categoryId, typeId, pageable);
+        companyId, categoryId, typeId, modelId,pageable);
 
     List<StockLotListResponse> stockLotListResponse = stockLots.getContent().stream()
         .map(stockLot -> StockLotMapper.builder().setStockLot(stockLot).buildStockLotListResponse()).toList();

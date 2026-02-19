@@ -50,18 +50,6 @@ public class DeliveryOrderDomainService {
     }
   }
 
-  // TODO: TRASLADAR ESTE MÉTODO EN MovementDomainService, ESTE MÉTODO ES
-  // REUTILIZABLE PARA CUALQUIER TIPO DE MOVIMIENTO, NO SOLO PARA LAS ORDENES DE
-  // ENTREGA
-  // Genera un comentario para la cancelacion de una orden de entrega, si el
-  // comentario es nulo o vacio, se asigna un comentario por defecto
-  public String generateComment(String comment, String defaultComment) {
-    if (comment == null || comment.trim().isEmpty()) {
-      return defaultComment;
-    }
-    return comment;
-  }
-
   // Tomar la fecha mas cercana que no haya sido entregada
   public LocalDateTime getClosestLimitDate(Long idDeliveryOrder) {
 

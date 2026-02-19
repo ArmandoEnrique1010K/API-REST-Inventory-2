@@ -1,8 +1,11 @@
 package com.pe.inventoryapp.backend.location.service;
 
+import org.springframework.stereotype.Service;
+
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
 
+@Service
 public class SubregionDomainService {
   private final SubregionRepository subregionRepository;
 

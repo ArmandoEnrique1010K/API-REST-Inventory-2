@@ -34,9 +34,6 @@ public class DeliveryLineDetailsResponse {
   private Long regionId;
   private String regionName;
 
-  // TODO: ¿ES POSIBLE OBTENER LA LISTA?
-  // private Object[] stockLot_DeliveryLines;
-
   private Long modelId;
   private String modelName;
   private String modelImageUrl;

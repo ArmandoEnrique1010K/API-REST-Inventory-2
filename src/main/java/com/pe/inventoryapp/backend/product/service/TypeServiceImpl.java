@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.product.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
@@ -13,6 +14,7 @@ import com.pe.inventoryapp.backend.product.model.request.TypeRequest;
 import com.pe.inventoryapp.backend.product.model.response.TypeResponse;
 import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 
+@Service
 public class TypeServiceImpl implements TypeService {
   private final TypeRepository typeRepository;
   private final TypeDomainService typeDomainService;

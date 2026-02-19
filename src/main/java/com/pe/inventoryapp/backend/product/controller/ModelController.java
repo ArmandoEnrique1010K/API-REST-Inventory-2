@@ -137,39 +137,3 @@ public class ModelController {
   }
 }
 
-// TODO: PODRIA AGREGAR OTROS ENDPOINTS RELACIONADOS A LOS CAMPOS, COMO LOS SIGUIENTES:
-
-// @GetMapping("/category/{idCategory}")
-// public ResponseEntity<?> listAllProductsByCategory(
-// @PathVariable Long idCategory,
-// @RequestParam(defaultValue = "0") Integer page,
-// @RequestParam(required = false) String name,
-// @RequestParam(required = false) Integer minStock,
-// @RequestParam(required = false) Integer maxStock,
-// @RequestParam(required = false) Boolean status) {
-// Pageable pageable = PageRequest.of(page, 20);
-
-// PageResponse<ProductResponse> products =
-// productService.searchAllProductsByParams(name, minStock, maxStock,
-// status, idCategory, pageable);
-// DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
-// .generateDataResponse(ResponseStatus.SUCCESS, products);
-// return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-// }
-
-// @GetMapping("/active/category/{idCategory}")
-// public ResponseEntity<?> listAllActiveProductsByCategory(
-// @PathVariable Long idCategory,
-// @RequestParam(defaultValue = "0") Integer page,
-// @RequestParam(required = false) String name,
-// @RequestParam(required = false) Integer minStock,
-// @RequestParam(required = false) Integer maxStock) {
-// Pageable pageable = PageRequest.of(page, 20);
-
-// PageResponse<ProductResponse> products =
-// productService.searchAllProductsByParams(name, minStock, maxStock,
-// true, idCategory, pageable);
-// DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
-// .generateDataResponse(ResponseStatus.SUCCESS, products);
-// return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-// }

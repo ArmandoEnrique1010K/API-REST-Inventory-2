@@ -38,10 +38,10 @@ public class MovementServiceImpl implements MovementService {
 			String username,
 			String keyword,
 			Long modelId,
-			Long userId) {
-
+			Long userId,
+			Long stockLotReceiverId) {
 		Page<Movement> movements = movementRepository.findAllByParams(pageable, minQuantity, maxQuantity, minCreatedAt,
-				maxCreatedAt, movementType, deliveryLineId, username, keyword, modelId, userId);
+				maxCreatedAt, movementType, deliveryLineId, username, keyword, modelId, userId, stockLotReceiverId);
 
 		List<MovementListResponse> result = movements.getContent().stream().map(
 				movement -> MovementMapper.builder()

@@ -41,6 +41,7 @@ public class Model {
   @Column(nullable = false)
   private String name;
 
+  // TODO: PODRIA CREAR UNA ENTIDAD PARA RELACIONAR VARIAS IMAGENES HACIA UN MODELO
   private String imageUrl;
 
   // Fecha de entrada del producto

@@ -105,7 +105,7 @@ public class DeliveryOrderController {
 
   // Este endpoint se utiliza para listar todas las ordenes de entrega por el
   // usuario que ha iniciado sesión
-  // TODO: SE PODRIA UTILIZAR SOLAMENTE EN USUARIOS QUE TENGA EL ROL DE USER
+  //* EL ENDPOINT SE PODRIA UTILIZAR SOLAMENTE EN USUARIOS QUE TENGA EL ROL DE USER
   @GetMapping("/client")
   public ResponseEntity<?> listAllDeliveryOrdersByClient(Authentication authentication,
       @RequestParam(defaultValue = "0") Integer page,
@@ -134,7 +134,7 @@ public class DeliveryOrderController {
   }
 
   // Endpoint para obtener una orden de entrega para un cliente
-  // TODO: SE PUEDE UTILIZAR EN USUARIOS QUE TENGA EL ROL DE USER
+  //* UTILIZAR EL ENDPOINT EN USUARIOS QUE TENGA EL ROL DE USER
   @GetMapping("/{id}/client")
   public ResponseEntity<?> getDeliveryOrderForClient(Authentication authentication, @PathVariable Long id) {
     Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);

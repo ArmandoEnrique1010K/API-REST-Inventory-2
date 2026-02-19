@@ -47,10 +47,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   
   Optional<DeliveryLine> findByLocationId(Long idLocation);
 
-  // List<DeliveryLine> findAllByDeliveryOrderId(Long idDeliveryOrder);
-
   // Busqueda de la fecha de entrega mas cercana (prioridad de entrega de la linea de entrega cuyo estado sea PENDING)
-
   @Query("""
         SELECT MIN(dl.limitDate)
         FROM DeliveryLine dl
@@ -74,46 +71,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   Integer sumRequiredQuantityByDeliveryOrderIdAndModelId(
       @Param("deliveryOrderId") Long deliveryOrderId,
       @Param("modelId") Long modelId);
-
-  
-
-
-  // TODO: NO ALTERAR ESTE METODO
-  // @Query("""
-  //     SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-  //     FROM DeliveryLine dl
-  //     WHERE dl.productDeliveryOrder.id = :pdoId
-  //       AND dl.region.id = :regionId
-  //       AND dl.lineStatus IN ('DELIVERED', 'MISSING', 'CANCELED')
-  // """)
-  // Integer sumRequiredByProductDeliveryOrderAndRegion(
-  //     @Param("pdoId") Long productDeliveryOrderId,
-  //     @Param("regionId") Long regionId);
-
-  /**
-   * Calcula la suma total de la cantidad requerida de artículos en líneas de entrega
-   * asociadas a una orden de entrega específica y una región determinada.
-   *
-   * @param mdoId el identificador único del modelo de orden de entrega (ModelDeliveryOrder)
-   * @param regionId el identificador único de la región
-   * @return la suma de las cantidades requeridas (requiredQuantity) de todas las líneas
-   *         de entrega que coincidan con los criterios especificados. Retorna 0 si no
-   *         hay resultados o si todas las cantidades son nulas. Excluye las líneas
-   *         con estado 'CANCELED'.
-   */
-
-
-  // TODO: ELIMINAR ESTE QUERY
-  // @Query("""
-  //       SELECT COALESCE(SUM(dl.requiredQuantity), 0)
-  //       FROM DeliveryLine dl
-  //       WHERE dl.model_DeliveryOrder.id = :mdoId
-  //         AND dl.location.subregion.region.id = :regionId
-  //         AND dl.lineStatus <> 'CANCELED'
-  //     """)
-  // Integer sumRequiredByModelDeliveryOrderAndRegion(
-  //     @Param("mdoId") Long mdoId,
-  //     @Param("regionId") Long regionId);
 
   @Query("""
           SELECT dl.location.subregion.region.id, COALESCE(SUM(dl.requiredQuantity), 0)
@@ -142,13 +99,13 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           SELECT COUNT(dl) > 0
           FROM DeliveryLine dl
           WHERE dl.deliveryOrder.id = :deliveryOrderId
-            AND dl.product.id = :productId
+            AND dl.model.id = :modelId
             AND dl.location.id = :locationId 
             AND dl.lineStatus <> 'CANCELED'
       """)
   boolean existsDuplicate(
       @Param("deliveryOrderId") Long deliveryOrderId,
-      @Param("productId") Long productId,
+      @Param("modelId") Long modelId,
       @Param("locationId") Long locationId);
   @Query("""
       SELECT COUNT(dl) = 0

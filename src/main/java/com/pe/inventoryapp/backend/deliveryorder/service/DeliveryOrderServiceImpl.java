@@ -33,6 +33,7 @@ import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderReposit
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
+import com.pe.inventoryapp.backend.movement.service.MovementDomainService;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
@@ -55,6 +56,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	private final ModelRepository modelRepository;
 	private final DeliveryOrderDomainService deliveryOrderDomainService;
 	private final StockLotDomainService stockLotDomainService;
+	private final MovementDomainService movementDomainService;
 
 	private static final long BATCH_START = 10000L;
 
@@ -67,7 +69,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			MovementRepository movementRepository,
 			ModelRepository modelRepository,
 			DeliveryOrderDomainService deliveryOrderDomainService,
-			StockLotDomainService stockLotDomainService) {
+			StockLotDomainService stockLotDomainService,
+			MovementDomainService movementDomainService) {
 		this.deliveryOrderRepository = deliveryOrderRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
@@ -77,6 +80,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.modelRepository = modelRepository;
 		this.deliveryOrderDomainService = deliveryOrderDomainService;
 		this.stockLotDomainService = stockLotDomainService;
+		this.movementDomainService = movementDomainService;	
 	};
 
 	@Override
@@ -461,7 +465,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			// line, order, user, quantityToRestore, commentRequest));
 			Movement movement = new Movement();
 			movement.setQuantity(quantityToRestore);
-			movement.setComment(deliveryOrderDomainService.generateComment(
+			movement.setComment(movementDomainService.generateComment(
 					commentRequest.getComment(),
 					"Se cancelo la orden de entrega de la factura #" + order.getBatch()));
 			movement.setMovementType(MovementType.CANCELED);
@@ -532,7 +536,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			// model, lot, qty, order, user, commentRequest));
 			Movement movement = new Movement();
 			movement.setQuantity(restoredQuantity);
-			movement.setComment(deliveryOrderDomainService.generateComment(
+			movement.setComment(movementDomainService.generateComment(
 					deliveryOrderComentRequest.getComment(),
 					"Devolución de productos de la factura #" + deliveryOrder.getBatch()));
 			movement.setMovementType(MovementType.REFUND);
@@ -543,7 +547,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			movement.setModel(model);
 			movementRepository.save(movement);
 
-			// TODO: LOGICA PARA INCREMENTAR LA CANTIDAD DISPONIBLE DEL MODELO
 			// model.increaseAvailable(qty);
 			Model findedModel = modelRepository.findById(model.getId())
 					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
