@@ -22,7 +22,8 @@ public class MailerSendServiceImpl implements MailerSendService {
   public void sendResetPasswordToken(String toEmail, String token) {
     // Configuración de MailerSend
     MailerSend ms = new MailerSend();
-    
+  
+    // TODO: DESINSTALAR DOTENV Y REEMPLAZARLO POR EL SISTEMA CLASICO DE SPRING BOOT PARA CARGAR VARIABLES DE ENTORNO
     Dotenv dotenv = Dotenv.load();
 
     String apiKey = dotenv.get("MAILERSEND_API_TOKEN");

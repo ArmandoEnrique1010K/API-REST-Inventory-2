@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.auth.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,15 +27,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 @RequestMapping("/api/auth")
 @CrossOrigin(originPatterns = "*")
 public class AuthController {
+  private final AuthService authService;
+  private final ResponseService responseService;
+  private final ValidationService validationService;
 
-  @Autowired
-  private AuthService authService;
-
-  @Autowired
-  private ResponseService responseService;
-
-  @Autowired
-  private ValidationService validationService;
+  public AuthController (AuthService authService, ResponseService responseService, ValidationService validationService) {
+    this.authService = authService;
+    this.responseService = responseService;
+    this.validationService = validationService; 
+  }
 
   // Nota: El endpoint POST "/" ya esta siendo manejado por Spring Security
 
@@ -79,7 +78,7 @@ public class AuthController {
 
   // CERRAR SESION, BORRA LAS COOKIES EN EL CUAL ESTA ALMACENADO EL JWT
   @PostMapping("/logout")
-  public ResponseEntity<CommonResponse> logoutUser(HttpServletResponse httpServletResponse) {
+  public ResponseEntity<CommonResponse> logout(HttpServletResponse httpServletResponse) {
     authService.logout(httpServletResponse);
     
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,

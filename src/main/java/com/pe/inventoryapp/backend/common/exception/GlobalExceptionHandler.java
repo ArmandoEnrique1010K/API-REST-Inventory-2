@@ -82,21 +82,6 @@ public class GlobalExceptionHandler {
   }
 
 
-  // Excepción falso de usuario no encontrado en el sistema
-  // Doble negación = Acierto (engañar al cliente)
-  @ExceptionHandler(CustomUserNotFoundException.class)
-  public ResponseEntity<CommonResponse> handleFoundUser(CustomUserNotFoundException ex) {
-    // Aqui debe devolver 200 OK
-    ResponseStatus responseStatus = ResponseStatus.CREATED;
-    CommonResponse response = responseService.generateCommonResponse("success", responseStatus, ex.getMessage());
-    HttpStatusCode status = Objects.requireNonNull(
-        responseStatus.getStatus(),
-        "HttpStatus no puede ser null");
-
-    return ResponseEntity.status(status).body(response);
-  }
-
-
   // Excepción de negocio personalizado
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<CommonResponse> handleBusiness(BusinessException ex) {

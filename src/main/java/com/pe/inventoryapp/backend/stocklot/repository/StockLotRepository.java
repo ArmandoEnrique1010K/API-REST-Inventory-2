@@ -38,7 +38,7 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long> {
       AND (:companyId IS NULL OR sl.company.id = :companyId)
       AND (:categoryId IS NULL OR p.category.id = :categoryId)
       AND (:typeId IS NULL OR p.type.id = :typeId)
-      AND (:modelId IS NULL OR p.model.id = :modelId)
+      AND (:modelId IS NULL OR m.id = :modelId)
 
       """)
   Page<StockLot> findAllByParams(

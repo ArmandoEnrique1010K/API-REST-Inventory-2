@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.auth.service;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.common.exception.CustomUserNotFoundException;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.entity.UserToken;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -23,17 +21,22 @@ import jakarta.servlet.http.HttpServletResponse;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private PasswordEncoder passwordEncoder;
-
-  @Autowired
-  private UserTokenRepository userTokenRepository;
-
-  @Autowired
-  private MailerSendService mailerSendService;
+  private final UserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final UserTokenRepository userTokenRepository;
+  private final MailerSendService mailerSendService;
+  
+  public AuthServiceImpl(
+      UserRepository userRepository, 
+      PasswordEncoder passwordEncoder, 
+      UserTokenRepository userTokenRepository,
+      MailerSendService mailerSendService
+  ) {
+    this.userRepository = userRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.userTokenRepository = userTokenRepository;
+    this.mailerSendService = mailerSendService;
+  }
 
   // Obtiene el id del usuario por su email
   @Override
@@ -52,9 +55,9 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public void processUserForgotPassword(String email) {
 
-    // DEVUELVE UN ERROR FALSO, SE VE COMO SI EL USUARIO EXISTE
+    // DEVUELVE UN ERROR FALSO, SIMULA QUE EL USUARIO EXISTE EN EL SISTEMA A PESAR DE QUE NO EXISTA, PARA EVITAR FILTRAR USUARIOS POR SU EMAIL
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new CustomUserNotFoundException(ResponseStatus.NOT_FOUND, "Si el correo existe, se le enviará un código de verificación al correo"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.CREATED, "Si el correo existe, se le enviará un código de verificación al correo"));
 
     // Eliminar tokens previos
     userTokenRepository.deleteByUser(user);

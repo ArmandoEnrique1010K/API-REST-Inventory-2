@@ -68,11 +68,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-    // Debe listar todos los usuarios que tengan el rol de "ROLE_USER"
+    // Lista los primeros 10 usuarios que tengan el rol de "ROLE_USER" y que coincidan con el parametro de busqueda
     @Query("""
                 SELECT u
                 FROM User u
-                WHERE  (
+                JOIN u.roles r
+                WHERE r.name = 'ROLE_USER'
+                AND  (
                     :name IS NULL OR
                     LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
                     LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
