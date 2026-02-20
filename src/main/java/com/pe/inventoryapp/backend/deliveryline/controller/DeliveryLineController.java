@@ -85,14 +85,16 @@ public class DeliveryLineController {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime minLimitDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime maxLimitDate,
       @RequestParam(required = false) LineStatus lineStatus,
-      @RequestParam(required = false) String location    
+      @RequestParam(required = false) String location,
+      @RequestParam(required = false) Long subregionId,
+      @RequestParam(required = false) Long regionId,
+      @RequestParam(required = false) Long modelId
     ) {
-      // TODO: AGREGAR UN CAMPO PARA AGRUPAR POR REGION O SUBREGIÓN
     Pageable pageable = PageRequest.of(page, 20);
     PageResponse<DeliveryLineListResponse> deliveryOrders = deliveryLineService
         .findAllDeliveryLinesByDeliveryOrderIdPageable(
             deliveryOrderId,
-            minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, pageable);
+            minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, subregionId, regionId, modelId, pageable);
     DataResponse<PageResponse<DeliveryLineListResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, deliveryOrders);
 

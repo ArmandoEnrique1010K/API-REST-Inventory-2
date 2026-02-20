@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.start.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +16,11 @@ import io.github.cdimascio.dotenv.Dotenv;
 @RestController
 @RequestMapping("/api")
 public class WelcomeController {
-  @Autowired
-  private UserService userService;
+  private final UserService userService;
 
-  // @Autowired
-  // private UserRepository userRepository;
+  public WelcomeController(UserService userService) {
+    this.userService = userService;
+  }
 
   @GetMapping
   public String welcome() {
@@ -49,13 +48,13 @@ public class WelcomeController {
 
   // Configuracion de CSRF (OBLIGATORIO)
   @GetMapping("/csrf")
-public ResponseEntity<?> csrf(CsrfToken token) {
+  public ResponseEntity<?> csrf(CsrfToken token) {
+    System.out.println("Token CSRF: " + token.getToken());
     return ResponseEntity.ok(Map.of(
         "token", token.getToken(),
         "header", token.getHeaderName(),
-        "parameter", token.getParameterName()
-    ));
-}
+        "parameter", token.getParameterName()));
+  }
 
   // PRUEBA DE STACK OVERFLOW (NO ACTIVAR ESTE ENDPOINT)
   // Encontrar al usuario y traer la entidad relacionada como respuesta
@@ -63,21 +62,21 @@ public ResponseEntity<?> csrf(CsrfToken token) {
   // @GetMapping("/stackoverflow/{id}")
   // public ResponseEntity<?> stackOverflow(@PathVariable Long id) {
 
-  //   if (id == null) {
-  //     return ResponseEntity.ok("No se encuentra el usuario");
-  //   }
+  // if (id == null) {
+  // return ResponseEntity.ok("No se encuentra el usuario");
+  // }
 
-  //   User user = userRepository.findById(id).orElseThrow(
-  //     () -> new RuntimeException("No se encuentra el usuario")
-  //   );
+  // User user = userRepository.findById(id).orElseThrow(
+  // () -> new RuntimeException("No se encuentra el usuario")
+  // );
 
-  //   if (user != null) {
-  //     System.out.println("El usuario " + user.getFirstname()+ " se encuentra");
-  //     System.out.println(user);
-  //     System.out.println(user.getTokens());
-  //     return ResponseEntity.ok(user);
-  //   } else {
-  //     return ResponseEntity.ok("No se encuentra el usuario");
-  //   }
+  // if (user != null) {
+  // System.out.println("El usuario " + user.getFirstname()+ " se encuentra");
+  // System.out.println(user);
+  // System.out.println(user.getTokens());
+  // return ResponseEntity.ok(user);
+  // } else {
+  // return ResponseEntity.ok("No se encuentra el usuario");
+  // }
   // }
 }

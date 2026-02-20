@@ -4,7 +4,6 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
@@ -17,7 +16,6 @@ import com.pe.inventoryapp.backend.product.service.CategoryService;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,17 +49,8 @@ public class CategoryController {
   }
 
   @GetMapping
-  public ResponseEntity<?> listAllCategories(
-      @RequestParam(required = false) Boolean status) {
-    List<CategoryResponse> categories = categoryService.searchAllCategoriesByStatus(status);
-    DataResponse<List<CategoryResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
-        categories);
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
-
-  @GetMapping("/active")
-  public ResponseEntity<?> listAllCategoriesActive() {
-    List<CategoryResponse> categories = categoryService.searchAllCategoriesByStatus(true);
+  public ResponseEntity<?> listAllCategories() {
+    List<CategoryResponse> categories = categoryService.findAllCategories();
     DataResponse<List<CategoryResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         categories);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
@@ -84,15 +73,6 @@ public class CategoryController {
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se actualizo el nombre de la categoria");
-    return ResponseEntity.status(response.status()).body(response);
-  }
-
-  @PatchMapping("/{id}/status")
-  public ResponseEntity<CommonResponse> changeStatusCategory(@PathVariable Long id) {
-    categoryService.changeStatusCategoryById(id);
-
-    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-        "Se ha cambiado el estado de la categoria");
     return ResponseEntity.status(response.status()).body(response);
   }
 }

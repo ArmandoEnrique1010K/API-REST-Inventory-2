@@ -64,7 +64,7 @@ public class CompanyController {
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody CompanyRequest companyRequest,
+  public ResponseEntity<?> updateCompany(@PathVariable Long id, @Valid @RequestBody CompanyRequest companyRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     companyService.updateCompanyById(id, companyRequest);

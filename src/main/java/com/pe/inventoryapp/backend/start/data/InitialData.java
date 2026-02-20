@@ -136,7 +136,6 @@ public class InitialData {
     if (!categoryRepository.existsByName("Sin categoria")) {
       Category category = new Category();
       category.setName("Sin categoria");
-      category.setStatus(true);
       categoryRepository.save(category);
     }
 

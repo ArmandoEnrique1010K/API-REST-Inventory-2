@@ -39,7 +39,8 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long> {
       AND (:categoryId IS NULL OR p.category.id = :categoryId)
       AND (:typeId IS NULL OR p.type.id = :typeId)
       AND (:modelId IS NULL OR m.id = :modelId)
-
+      AND sl.zeroStock = false
+      ORDER BY sl.createdAt DESC
       """)
   Page<StockLot> findAllByParams(
       @Param("minQuantityReceived") Integer minQuantityReceived,

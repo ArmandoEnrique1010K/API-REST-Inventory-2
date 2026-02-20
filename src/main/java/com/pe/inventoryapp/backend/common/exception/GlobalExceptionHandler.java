@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +24,11 @@ public class GlobalExceptionHandler {
   
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-  @Autowired
-  private ResponseService responseService;
+  private final ResponseService responseService;
 
+  public GlobalExceptionHandler(ResponseService responseService) {
+    this.responseService = responseService;
+  }
 
   // Excepción de validación de campo 
   @ExceptionHandler(RequestValidation.class)

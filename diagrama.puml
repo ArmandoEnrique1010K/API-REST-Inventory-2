@@ -94,7 +94,6 @@ entity Type #d0ffb0 {
 entity Category #d0ffb0 {
     Long id
     String name
-    boolean status
     List<Product> products
 }
 

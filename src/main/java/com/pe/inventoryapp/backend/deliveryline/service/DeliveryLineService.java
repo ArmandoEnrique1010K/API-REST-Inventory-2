@@ -24,9 +24,12 @@ public interface DeliveryLineService {
     Integer minRequiredQuantity,
     Integer maxRequiredQuantity,
     LocalDateTime minLimitDate, 
-      LocalDateTime maxLimitDate, 
+    LocalDateTime maxLimitDate, 
     LineStatus lineStatus, 
     String location, 
+    Long subregionId,
+    Long regionId,
+    Long modelId,
     Pageable pageable);
 
   // Busca una linea por id

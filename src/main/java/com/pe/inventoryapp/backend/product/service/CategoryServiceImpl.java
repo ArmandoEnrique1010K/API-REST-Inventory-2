@@ -35,15 +35,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     Category category = new Category();
     category.setName(name);
-    category.setStatus(true);
 
     categoryRepository.save(category);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<CategoryResponse> searchAllCategoriesByStatus(Boolean status) {
-    List<Category> categories = (List<Category>) categoryRepository.findAllByParams(status);
+  public List<CategoryResponse> findAllCategories() {
+    List<Category> categories = (List<Category>) categoryRepository.findAll();
 
     return categories.stream()
         .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse())
@@ -60,10 +59,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
-
-    if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
-    }
 
     return CategoryMapper.builder().setCategory(category).buildCategoriesResponse();
   }
@@ -82,35 +77,11 @@ public class CategoryServiceImpl implements CategoryService {
     Category category = categoryRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
-    if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
-    }
-
     String newName = categoryRequest.getName().trim();
     categoryDomainService.verifyCategoryNameAvailableExcludingId(newName, id);
     
     category.setName(newName);
 
-    categoryRepository.save(category);
-  }
-
-  // Obtiene una categoria por su nombre y verifica que no exista
-  @Override
-  @Transactional
-  public void changeStatusCategoryById(Long id) {
-    if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    if (id == 1L) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "No se puede cambiar el estado de esta categoria");
-    }
-
-    Category category = categoryRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
-
-    // Cambia el estado de la categoria a false y lo guarda
-    category.setStatus(!category.isStatus());
     categoryRepository.save(category);
   }
 }

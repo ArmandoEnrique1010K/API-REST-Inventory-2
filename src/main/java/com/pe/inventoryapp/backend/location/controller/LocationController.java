@@ -90,7 +90,7 @@ public class LocationController {
   }
 
   @PatchMapping("/{id}/status")
-  public ResponseEntity<CommonResponse> disableLocation(@PathVariable Long id) {
+  public ResponseEntity<CommonResponse> changeStatusLocation(@PathVariable Long id) {
     locationService.changeStatusLocationById(id);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,

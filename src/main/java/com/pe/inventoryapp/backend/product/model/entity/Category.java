@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,9 +27,6 @@ public class Category {
 
   @Column(unique = true, nullable = false)
   private String name;
-
-  @NotNull
-  private boolean status;
 
   @OneToMany(mappedBy = "category")
   private List<Product> products;

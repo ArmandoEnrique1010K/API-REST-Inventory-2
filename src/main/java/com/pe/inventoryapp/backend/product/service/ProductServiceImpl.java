@@ -58,10 +58,6 @@ public class ProductServiceImpl implements ProductService {
     // Buscar la categoria por su ID
     Category category = categoryRepository.findById(idCategory).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
-    if (category.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "La categoria se encuentra desactivada");
-    }
-
     Type type = typeRepository.findById(idType)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
 
@@ -93,41 +89,6 @@ public class ProductServiceImpl implements ProductService {
 
     modelRepository.save(model);
   }
-
-  // TODO: ESTE METODO SE PODRIA ELIMINAR YA QUE SE PIENSA BUSCAR POR NOMBRE DE PRODUCTO Y NOMBRE DE MODELO
-  // @Override
-  // @Transactional(readOnly = true)
-  // public PageResponse<ProductResponse> searchAllProductsByParams(
-  //     Pageable pageable,
-  //     String name,
-  //     Boolean status,
-  //     Long categoryId,
-  //     Long typeId
-  //     ) {
-  //   if (categoryId != null && !categoryRepository.existsById(categoryId)) {
-  //     throw new BusinessException(
-  //         ResponseStatus.NOT_FOUND,
-  //         "La categoria no existe");
-  //   }
-
-  //   Page<Product> products = productRepository.findAllByParams(pageable, name, status, categoryId, typeId);
-
-  //   List<ProductResponse> result = products.getContent().stream().map(
-  //       product -> ProductMapper.builder()
-  //           .setProduct(product).buildProductResponse())
-  //       .toList();
-
-  //   PageResponse<ProductResponse> pageResponse = new PageResponse<>(
-  //       result,
-  //       products.getNumber(),
-  //       products.getSize(),
-  //       products.getTotalElements(),
-  //       products.getTotalPages(),
-  //       products.isFirst(),
-  //       products.isLast());
-
-  //   return pageResponse;
-  // }
 
   @Override
   @Transactional(readOnly = true)

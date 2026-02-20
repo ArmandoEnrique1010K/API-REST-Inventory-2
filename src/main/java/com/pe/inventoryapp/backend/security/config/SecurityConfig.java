@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.security.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,16 +28,24 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
 
-	@Autowired
-	private AuthenticationConfiguration authenticationConfiguration;
+	private final AuthenticationConfiguration authenticationConfiguration;
+	private final UserRepository userRepository;
+	private final AuthService authService;
+	private final ResponseService responseService;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private AuthService authService;
-
-	@Autowired
-	private ResponseService responseService;
+	public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, UserRepository userRepository,
+			AuthService authService, ResponseService responseService,
+			CustomAccessDeniedHandler customAccessDeniedHandler,
+			CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
+		this.authenticationConfiguration = authenticationConfiguration;
+		this.userRepository = userRepository;
+		this.authService = authService;
+		this.responseService = responseService;
+		this.customAccessDeniedHandler = customAccessDeniedHandler;
+		this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+	}
 
 	@Bean
 	AuthenticationManager authenticationManager() throws Exception {
@@ -50,10 +57,6 @@ public class SecurityConfig {
 		return new CsrfTokenRequestAttributeHandler();
 	}
 
-	@Autowired
-	private CustomAccessDeniedHandler customAccessDeniedHandler;
-	@Autowired
-	private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
@@ -77,6 +80,10 @@ public class SecurityConfig {
 						.permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
 
+						// ROLES
+						.requestMatchers(HttpMethod.GET, "/api/roles")
+						.hasAnyAuthority("ROLE_ADMIN")
+
 						// USERS
 						.requestMatchers(HttpMethod.POST, "/api/users/register")
 						.hasAnyAuthority("ROLE_ADMIN")
@@ -86,46 +93,52 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
-
 						.requestMatchers(HttpMethod.PUT, "/api/users/*/roles")
 						.hasAnyAuthority("ROLE_ADMIN")
 						.requestMatchers(HttpMethod.PATCH, "/api/users/*/status")
 						.hasAnyAuthority("ROLE_ADMIN")
 
-						// ROLES
-						.requestMatchers(HttpMethod.GET, "/api/roles")
-						.hasAnyAuthority("ROLE_ADMIN")
 
 						// CATEGORY
 						.requestMatchers(HttpMethod.POST, "/api/categories")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET, "/api/categories")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/categories/active")
 						.authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/categories/*").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/categories/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.PATCH, "/api/categories/*/status")
+
+						// TYPE
+						.requestMatchers(HttpMethod.POST, "/api/types")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/types")
+						.authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/types/*").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/types/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 						// PRODUCT
 						.requestMatchers(HttpMethod.POST, "/api/products")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-
-						.requestMatchers(HttpMethod.GET, "/api/products")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/products/active").authenticated()
-						.requestMatchers(HttpMethod.GET, "/api/products/category/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/products/active/category/*")
-						.authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/products/*").authenticated()
-
 						.requestMatchers(HttpMethod.PUT, "/api/products/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/products/*/status")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+
+						// MODEL
+						.requestMatchers(HttpMethod.POST, "/api/models/product/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/models/product/*")
+						.authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/models/products")
+						.authenticated()
+						.requestMatchers(HttpMethod.GET, "/api/models/*").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/models/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PATCH, "/api/models/*/status")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+
 
 						// REGION
 						.requestMatchers(HttpMethod.POST, "/api/regions")
@@ -137,18 +150,23 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.PUT, "/api/regions/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
+						// SUBREGION
+						.requestMatchers(HttpMethod.POST, "/api/subregions")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/subregions")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+						.requestMatchers(HttpMethod.GET, "/api/subregions/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+						.requestMatchers(HttpMethod.PUT, "/api/subregions/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+
+
 						// LOCATION
 						.requestMatchers(HttpMethod.POST, "/api/locations")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 						.requestMatchers(HttpMethod.GET, "/api/locations")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/locations/active")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.GET, "/api/locations/region/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/locations/active/region/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.GET, "/api/locations/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
@@ -170,21 +188,12 @@ public class SecurityConfig {
 						// STOCK LOT
 						.requestMatchers(HttpMethod.POST, "/api/stock-lots")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.GET, "/api/stock-lots")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET, "/api/stock-lots/product/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/stock-lots/some")
+						.requestMatchers(HttpMethod.GET, "/api/stock-lots/exclude/*/company/*/model/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.GET, "/api/stock-lots/some/product/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.GET,
-								"/api/stock-lots/exclude/*/some/product/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-
 						.requestMatchers(HttpMethod.GET, "/api/stock-lots/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-
 						.requestMatchers(HttpMethod.PUT, "/api/stock-lots/*/increase")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/stock-lots/*/decrease")
@@ -205,29 +214,30 @@ public class SecurityConfig {
 						.authenticated()
 						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/*")
 						.authenticated()
+
 						// Nota, se especifica que sea solamente el rol de USER
 						.requestMatchers(HttpMethod.GET, "/api/delivery-orders/*/client")
 						.hasAnyAuthority("ROLE_USER")
+						.requestMatchers(HttpMethod.PUT, "/api/delivery-orders/*/cancel")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/send")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.PATCH, "/api/delivery-orders/*/cancel")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
-						// PRODUCT DELIVERYORDER
+						// MODEL - DELIVERY ORDER
 						.requestMatchers(HttpMethod.POST,
-								"/api/products-delivery-orders/product/*/deliveryOrder/*")
+								"/api/models-delivery-orders/model/*/deliveryOrder/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET,
-								"/api/products-delivery-orders/products/deliveryOrder/*")
+								"/api/models-delivery-orders/models/deliveryOrder/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.DELETE, "/api/products-delivery-orders/*")
+						.requestMatchers(HttpMethod.DELETE, "/api/models-delivery-orders/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 						// DELIVERY LINE
 						.requestMatchers(HttpMethod.POST,
-								"/api/delivery-lines/product-delivery-order/*")
+								"/api/delivery-lines/model-delivery-order/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET, "/api/delivery-lines/delivery-order/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
@@ -235,44 +245,47 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/delivery-lines/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+
+
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/cancel").hasAnyAuthority("ROLE_ADMIN",
 								"ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/deliver").hasAnyAuthority("ROLE_ADMIN",
 								"ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/missing").hasAnyAuthority("ROLE_ADMIN",
 								"ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/return").hasAnyAuthority("ROLE_ADMIN",
+
+						.requestMatchers(HttpMethod.PUT, "/api/delivery-lines/*/lost").hasAnyAuthority("ROLE_ADMIN",
 								"ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.PATCH, "/api/delivery-lines/*/allocate-stock").hasAnyAuthority("ROLE_ADMIN",
+						.requestMatchers(HttpMethod.PUT, "/api/delivery-lines/*/return").hasAnyAuthority("ROLE_ADMIN",
+								"ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.PUT, "/api/delivery-lines/*/allocate-stock").hasAnyAuthority("ROLE_ADMIN",
 								"ROLE_SECRETARY", "ROLE_OPERATOR")
+						
+								// STOCK LOT - DELIVERY LINE
+						.requestMatchers(HttpMethod.PUT, "/api/stock-lot-delivery-lines/delivery-line/*").hasAnyAuthority("ROLE_ADMIN",
+								"ROLE_SECRETARY", "ROLE_OPERATOR")
+
 
 						// MOVEMENTS
 						.requestMatchers(HttpMethod.GET, "/api/movements").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/movements/delivery-line/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/movements/stock-lot/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/movements/product/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/movements/user/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET, "/api/movements/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
-						// PRODUCT DELIVERY ORDER REGION
-						.requestMatchers(HttpMethod.GET, "/api/product-delivery-order-region/delivery-order/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
-						// STOCK LOT DELIVERY LINE
-						.requestMatchers(HttpMethod.GET, "/api/stock-lot-delivery-lines/delivery-line/*")
+						// MODEL - DELIVERY ORDER - REGION
+						.requestMatchers(HttpMethod.GET, "/api/model-delivery-order-region/delivery-order/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+
+						// MODEL - DELIVERY ORDER - SUBREGION
+						.requestMatchers(HttpMethod.GET, "/api/model-delivery-order-subregion/delivery-order/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
-
-
-						// OTHERS
-						// .requestMatchers(HttpMethod.GET, "/csrf").permitAll()
-						// .requestMatchers(HttpMethod.GET, "/api").permitAll()
-						// .requestMatchers("/api/category").permitAll()
-						// .anyRequest().denyAll())
-						.anyRequest().authenticated())
+						// TODO: ELIMINAR LOS SIGUIENTES ENDPOINTS
+						// ENDPOINTS DE PRUEBA 
+						.requestMatchers(HttpMethod.GET, "/api").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/dotenv").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/database").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/csrf").permitAll()
+						.anyRequest().denyAll())
 				.addFilter(new JwtAuthenticationFilter(
 						authenticationManager(), authService, responseService))
 				.addFilter(new JwtValidationFilter(

@@ -24,15 +24,23 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   @Query("""
       SELECT  d
       FROM DeliveryLine d
-      WHERE d.deliveryOrder.id = :deliveryOrderId
+      JOIN d.model m
+      JOIN d.location l
+      JOIN l.subregion sr
+      JOIN sr.region r
+      JOIN d.deliveryOrder do
+      WHERE do.id = :deliveryOrderId
         AND (:minRequiredQuantity IS NULL OR d.requiredQuantity >= :minRequiredQuantity)
         AND (:maxRequiredQuantity IS NULL OR d.requiredQuantity <= :maxRequiredQuantity)
         AND (:minLimitDate IS NULL OR d.limitDate >= :minLimitDate)
         AND (:maxLimitDate IS NULL OR d.limitDate <= :maxLimitDate)
         AND (:lineStatus IS NULL OR d.lineStatus = :lineStatus)
-        AND (:location IS NULL OR LOWER(d.location.name) LIKE LOWER(CONCAT('%', :location, '%'))) 
+        AND (:location IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :location, '%')))
+        AND (:subregionId IS NULL OR sr.id = :subregionId)
+        AND (:regionId IS NULL OR r.id = :regionId)
+        AND (:modelId IS NULL OR d.model.id = :modelId)
         AND d.lineStatus != 'CANCELED'
-        ORDER BY d.location.id ASC  
+        ORDER BY l.id ASC  
       """)
   Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
     Long deliveryOrderId, 
@@ -41,7 +49,10 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
     LocalDateTime minLimitDate, 
     LocalDateTime maxLimitDate, 
     LineStatus lineStatus, 
-    String location, 
+    String location,
+    Long subregionId,
+    Long regionId,
+    Long modelId,
     Pageable pageable);
 
   

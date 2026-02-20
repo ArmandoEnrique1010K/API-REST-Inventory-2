@@ -88,26 +88,6 @@ public class ModelController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
-  @GetMapping("/active")
-  public ResponseEntity<?> listAllActiveModels(
-      @RequestParam(defaultValue = "0") Integer page,
-      @RequestParam(required = false) String keyword,
-      @RequestParam(required = false) Integer minStock,
-      @RequestParam(required = false) Integer maxStock,
-      @RequestParam(required = false) LocalDate minEntryDate,
-      @RequestParam(required = false) LocalDate maxEntryDate,
-      @RequestParam(required = false) Long categoryId,
-      @RequestParam(required = false) Long typeId) {
-    Pageable pageable = PageRequest.of(page, 20);
-    PageResponse<ModelListResponse> models = modelService.searchAllModelsByParams(pageable, keyword, minStock, maxStock,
-        minEntryDate, maxEntryDate, true, categoryId, typeId);
-    DataResponse<PageResponse<ModelListResponse>> dataResponse = responseService
-        .generateDataResponse(ResponseStatus.SUCCESS, models);
-
-    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
-  }
-  
-
   @GetMapping("/{id}")
   public ResponseEntity<?> getModel(@PathVariable Long id) {
     ModelDetailsResponse model = modelService.findModelById(id);

@@ -33,7 +33,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
           AND (:status IS NULL OR m.status = :status)
           AND (:categoryId IS NULL OR p.category.id = :categoryId)
           AND (:typeId IS NULL OR p.type.id = :typeId)
-          AND p.category.status = true ORDER BY m.updatedAt DESC
+          ORDER BY m.updatedAt DESC
       """)
   Page<Model> findAllByParams(
       Pageable pageable,

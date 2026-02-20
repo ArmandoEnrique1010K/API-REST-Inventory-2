@@ -215,6 +215,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       LocalDateTime maxLimitDate,
       LineStatus lineStatus,
       String location,
+      Long subregionId,
+      Long regionId,
+      Long modelId,
       Pageable pageable) {
     if (deliveryOrderId != null && !deliveryOrderRepository.existsById(deliveryOrderId)) {
       throw new BusinessException(
@@ -224,7 +227,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     Page<DeliveryLine> deliveryLines = deliveryLineRepository.searchAllByDeliveryOrderIdAndParams(
         deliveryOrderId, minRequiredQuantity, maxRequiredQuantity, minLimitDate,
-        maxLimitDate, lineStatus, location, pageable);
+        maxLimitDate, lineStatus, location, subregionId, regionId, modelId, pageable);
 
     List<DeliveryLineListResponse> result = deliveryLines.getContent().stream().map(
         deliveryLine -> DeliveryLineMapper.builder()

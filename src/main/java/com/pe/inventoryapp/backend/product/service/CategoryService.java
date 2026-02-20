@@ -8,11 +8,9 @@ import com.pe.inventoryapp.backend.product.model.response.CategoryResponse;
 public interface CategoryService {
   void saveCategory(CategoryRequest categoryRequest);
 
-  List<CategoryResponse> searchAllCategoriesByStatus(Boolean status);
+  List<CategoryResponse> findAllCategories();
 
   CategoryResponse findCategoryById(Long id);
 
   void updateCategoryById(Long id, CategoryRequest categoryRequest);
-
-  void changeStatusCategoryById(Long id);
 }

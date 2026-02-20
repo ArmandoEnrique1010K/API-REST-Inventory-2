@@ -76,7 +76,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"value\": \"698720\"\r\n}",
+              "raw": "{\r\n    \"value\": \"670851\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -114,7 +114,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/api/auth/change-password/698720",
+              "raw": "http://localhost:8080/api/auth/change-password/670851",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -124,7 +124,7 @@
                 "api",
                 "auth",
                 "change-password",
-                "698720"
+                "670851"
               ]
             }
           },
@@ -154,6 +154,31 @@
       ]
     },
     {
+      "name": "ROLE",
+      "item": [
+        {
+          "name": "listAllRoles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/roles",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "USER",
       "item": [
         {
@@ -172,7 +197,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"firstname\": \"Armando Enrique\",\r\n    \"lastname\": \"Kaneko Diaz\",\r\n    \"email\": \"enrique21010k@gmail.com\",\r\n    \"dni\": \"12345678\",\r\n    \"password\": \"12345\",\r\n    \"operator\": true,\r\n    \"secretary\": true,\r\n    \"admin\": true\r\n}",
+              "raw": "{\r\n    \"firstname\": \"Usuario 2\",\r\n    \"lastname\": \"Apellido 2\",\r\n    \"email\": \"juan213@gmail.com\",\r\n    \"dni\": \"12345678\",\r\n    \"password\": \"12345\",\r\n    \"operator\": true,\r\n    \"secretary\": false,\r\n    \"admin\": false\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -216,6 +241,13 @@
               ],
               "query": [
                 {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Página actual",
+                  "type": "text",
+                  "disabled": true
+                },
+                {
                   "key": "name",
                   "value": "prueba",
                   "description": "Nombre, apellido, dni o email del usuario",
@@ -224,15 +256,8 @@
                 },
                 {
                   "key": "idRoles",
-                  "value": "1,2",
-                  "description": "Lista de roles separados por coma o un rol por ID",
-                  "disabled": true
-                },
-                {
-                  "key": "page",
-                  "value": "0",
-                  "description": "Página actual",
-                  "type": "text",
+                  "value": "1",
+                  "description": "Lista de roles separados por coma",
                   "disabled": true
                 }
               ]
@@ -265,8 +290,7 @@
                 {
                   "key": "name",
                   "value": "a",
-                  "description": "Nombre, apellido, dni o email del usuario",
-                  "type": "text"
+                  "description": "Nombre, apellido, dni o email del usuario"
                 }
               ]
             }
@@ -379,16 +403,6 @@
         {
           "name": "changeStatusUser",
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiaWQiOjIsImF1dGhvcml0aWVzIjpbIlJPTEVfQURNSU4iLCJST0xFX09QRVJBVE9SIiwiUk9MRV9TRUNSRVRBUlkiLCJST0xFX1VTRVIiXSwiaWF0IjoxNzY2MzUxMzA2LCJleHAiOjE3NjYzNTQ5MDZ9.mD__0eyJH85bt8hUMKk0eJj1eraDgdkxQOF1KfBk2qE",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "PATCH",
             "header": [],
             "url": {
@@ -403,31 +417,6 @@
                 "users",
                 "3",
                 "status"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "ROLE",
-      "item": [
-        {
-          "name": "listAllRoles",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/roles",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "roles"
               ]
             }
           },
@@ -488,27 +477,6 @@
           "response": []
         },
         {
-          "name": "listAllActiveCategories",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/categories/active",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "categories",
-                "active"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "getCategory",
           "request": {
             "method": "GET",
@@ -558,14 +526,28 @@
             }
           },
           "response": []
-        },
+        }
+      ]
+    },
+    {
+      "name": "TYPE",
+      "item": [
         {
-          "name": "changeStatusCategory",
+          "name": "registerType",
           "request": {
-            "method": "PATCH",
+            "method": "POST",
             "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Afiche\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
-              "raw": "http://localhost:8080/api/categories/2/status",
+              "raw": "http://localhost:8080/api/types",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -573,9 +555,78 @@
               "port": "8080",
               "path": [
                 "api",
-                "categories",
-                "2",
-                "status"
+                "types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listAllTypes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/types",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getType",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/types/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "types",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateType",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Afiches\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/types/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "types",
+                "2"
               ]
             }
           },
@@ -593,7 +644,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\": \"32213442 x 302\",\r\n    \"length\": \"30.02\", // Las medidas son en centimetros\r\n    \"width\": \"20\",\r\n    \"imageUrl\": \"\", // URL absoluta de una imagen\r\n    \"entryDate\": \"2025-12-31\", // LocalDate yyyy-MM-dd\r\n    \"caducityDate\": \"2026-01-07\", // LocalDate yyyy-MM-dd\r\n    \"idCategory\": 2\r\n}",
+              "raw": "{\r\n    \"name\": \"32213442 x 302\",\r\n    \"length\": \"30.02\", // Las medidas son en centimetros\r\n    \"width\": \"20\",\r\n    \"height\": \"2\",\r\n    \"modelName\": \"Modelo 1\",\r\n    \"modelImageUrl\": \"\", // URL absoluta de una imagen\r\n    \"modelEntryDate\": \"2025-12-31\", // LocalDate yyyy-MM-dd\r\n    \"modelCaducityDate\": \"2026-01-07\", // LocalDate yyyy-MM-dd\r\n    \"categoryId\": 1,\r\n    \"typeId\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -616,233 +667,12 @@
           "response": []
         },
         {
-          "name": "listAllProducts",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/products",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "products"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "name",
-                  "value": "Kola",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "minStock",
-                  "value": "0",
-                  "disabled": true
-                },
-                {
-                  "key": "maxStock",
-                  "value": "100",
-                  "disabled": true
-                },
-                {
-                  "key": "status",
-                  "value": "false",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "categoryId",
-                  "value": "11",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllActiveProducts",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/products/active?page=0",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "products",
-                "active"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "name",
-                  "value": "false",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "minStock",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "maxStock",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "categoryId",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllProductsByCategory",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/products/category/2",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "products",
-                "category",
-                "2"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "name",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "minStock",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "maxStock",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "status",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllActiveProductsByCategory",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/products/active/category/2",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "products",
-                "active",
-                "category",
-                "2"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "name",
-                  "value": "false",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "minStock",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "maxStock",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "getProduct",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/products/2a",
+              "raw": "http://localhost:8080/api/products/2",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -851,7 +681,7 @@
               "path": [
                 "api",
                 "products",
-                "2a"
+                "2"
               ]
             }
           },
@@ -864,7 +694,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\": \"Afiches Inca Kola 213\",\r\n    \"width\": 15.0,\r\n    \"length\": 15.0,\r\n    \"imageUrl\": \"http://dummyimage.com/158x100.png/cc0000/ffffff\",\r\n    \"entryDate\": \"2025-12-31\",\r\n    \"caducityDate\": \"2026-01-16\",\r\n    \"idCategory\": 1\r\n}",
+              "raw": "{\r\n    \"name\": \"32213442 x 302\",\r\n    \"length\": \"30.02\", // Las medidas son en centimetros\r\n    \"width\": \"20\",\r\n    \"height\": \"2\",\r\n    \"categoryId\": 1,\r\n    \"typeId\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -902,6 +732,214 @@
               "path": [
                 "api",
                 "products",
+                "3",
+                "status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "MODEL",
+      "item": [
+        {
+          "name": "registerModelInProduct",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"32213442 x 302\",\r\n    \"imageUrl\": \"\", // URL absoluta de una imagen\r\n    \"entryDate\": \"2025-12-31\", // LocalDate yyyy-MM-dd\r\n    \"caducityDate\": \"2026-01-07\" // LocalDate yyyy-MM-dd\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/models/product/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "models",
+                "product",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listAllModelsByProductId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/models/product/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "models",
+                "product",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listAllModels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/models/products/2?page=0",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "models",
+                "products",
+                "2"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Página actual"
+                },
+                {
+                  "key": "keyword",
+                  "value": null,
+                  "description": "Palabras claves del nombre del modelo y/o producto",
+                  "disabled": true
+                },
+                {
+                  "key": "minStock",
+                  "value": null,
+                  "description": "Cantidad total disponible minima",
+                  "disabled": true
+                },
+                {
+                  "key": "maxStock",
+                  "value": null,
+                  "description": "Cantidad total disponible maxima",
+                  "disabled": true
+                },
+                {
+                  "key": "minEntryDate",
+                  "value": null,
+                  "description": "Fecha de entrada minima",
+                  "disabled": true
+                },
+                {
+                  "key": "maxEntryDate",
+                  "value": null,
+                  "description": "Fecha de entrada maxima",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "description": "Estado del modelo",
+                  "disabled": true
+                },
+                {
+                  "key": "categoryId",
+                  "value": null,
+                  "description": "Id de la categoria",
+                  "disabled": true
+                },
+                {
+                  "key": "typeId",
+                  "value": null,
+                  "description": "Id del tipo",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getModel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/models/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "models",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateModel",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"32213442 x 302\",\r\n    \"imageUrl\": \"\", // URL absoluta de una imagen\r\n    \"entryDate\": \"2025-12-31\", // LocalDate yyyy-MM-dd\r\n    \"caducityDate\": \"2026-01-07\" // LocalDate yyyy-MM-dd\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/models/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "models",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "changeStatusModel",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/models/3/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "models",
                 "3",
                 "status"
               ]
@@ -1017,6 +1055,113 @@
       ]
     },
     {
+      "name": "SUBREGION",
+      "item": [
+        {
+          "name": "registerSubregion",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Norte\",\r\n    \"idRegion\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/subregions",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "subregions"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listAllSubregionsByRegionId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/subregions/region/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "subregions",
+                "region",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "getSubregion",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/subregions/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "subregions",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "updateSubregion",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Norte\",\r\n    \"idRegion\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/subregions/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "subregions",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "LOCATION",
       "item": [
         {
@@ -1026,7 +1171,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\": \"Tumbes\",\r\n    \"idRegion\": 2\r\n}",
+              "raw": "{\r\n    \"name\": \"Tumbes\",\r\n    \"address\": \"Dirección actual de la ubicación\",\r\n    \"idRegion\": 2\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1083,121 +1228,14 @@
                   "disabled": true
                 },
                 {
+                  "key": "subregionId",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
                   "key": "status",
-                  "value": null,
+                  "value": "true",
                   "type": "text",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllActive",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/locations/active",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "locations",
-                "active"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "name",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "regionId",
-                  "value": null,
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllLocationsByRegion",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/locations/region/2",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "locations",
-                "region",
-                "2"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "name",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "status",
-                  "value": null,
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllActiveLocationsByRegion",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/locations/active/region/2",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "locations",
-                "active",
-                "region",
-                "2"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "name",
-                  "value": null,
                   "disabled": true
                 }
               ]
@@ -1257,7 +1295,7 @@
           "response": []
         },
         {
-          "name": "disableLocation",
+          "name": "changeStatusLocation",
           "request": {
             "method": "PATCH",
             "header": [],
@@ -1290,7 +1328,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\": \"El otro local encargado de enviar stock\"\r\n}",
+              "raw": "{\r\n    \"name\": \"El otro local\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1395,7 +1433,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"quantity\": 8000,\r\n    \"comment\": \"Envio de lote de stock\",\r\n    \"idProduct\": 5,\r\n    \"idCompany\": 2\r\n}",
+              "raw": "{\r\n    \"quantity\": 8000,\r\n    \"comment\": \"Llegada de lote de stock\",\r\n    \"idModel\": 1,\r\n    \"idCompany\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1412,88 +1450,6 @@
               "path": [
                 "api",
                 "stock-lots"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllStockLots",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/stock-lots",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "stock-lots"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minQuantityAvailable",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "maxQuantityAvailable",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minQuantityReceived",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "maxQuantityReceived",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minDeliveredTotal",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "maxDeliveredTotal",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minCreatedAt",
-                  "value": "2020-01-01T00:00:00",
-                  "disabled": true
-                },
-                {
-                  "key": "maxCreatedAt",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "productName",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "zeroStock",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "companyId",
-                  "value": null,
-                  "disabled": true
-                }
               ]
             }
           },
@@ -1520,144 +1476,16 @@
               "query": [
                 {
                   "key": "page",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minQuantityAvailable",
                   "value": "",
-                  "disabled": true
-                },
-                {
-                  "key": "maxQuantityAvailable",
-                  "value": null,
                   "disabled": true
                 },
                 {
                   "key": "minQuantityReceived",
-                  "value": null,
+                  "value": "",
                   "disabled": true
                 },
                 {
                   "key": "maxQuantityReceived",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minDeliveredTotal",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "maxDeliveredTotal",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minCreatedAt",
-                  "value": "2020-01-01T00:00:00",
-                  "disabled": true
-                },
-                {
-                  "key": "maxCreatedAt",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "zeroStock",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "companyId",
-                  "value": null,
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllStockLotsByNotZeroStock",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/stock-lots/some",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "stock-lots",
-                "some"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minQuantityAvailable",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "maxQuantityAvailable",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "minCreatedAt",
-                  "value": "2020-01-01T00:00:00",
-                  "disabled": true
-                },
-                {
-                  "key": "maxCreatedAt",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "productName",
-                  "value": null,
-                  "disabled": true
-                },
-                {
-                  "key": "companyId",
-                  "value": null,
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllStockLotsByProductAndNotZeroStock",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/stock-lots/some/product/1",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "stock-lots",
-                "some",
-                "product",
-                "1"
-              ],
-              "query": [
-                {
-                  "key": "page",
                   "value": "",
                   "disabled": true
                 },
@@ -1682,8 +1510,31 @@
                   "disabled": true
                 },
                 {
+                  "key": "keyword",
+                  "value": "",
+                  "disabled": true
+                },
+                {
                   "key": "companyId",
                   "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "categoryId",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "typeId",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                },
+                {
+                  "key": "modelId",
+                  "value": null,
+                  "type": "text",
                   "disabled": true
                 }
               ]
@@ -1692,12 +1543,12 @@
           "response": []
         },
         {
-          "name": "listAllStockLotsExcludeOneByProductAndNotZeroStock",
+          "name": "listAllStockLotsByModelAndExcludeOne",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/stock-lots/exclude/15/some/product/1",
+              "raw": "http://localhost:8080/api/stock-lots/exclude/15/company/1/model/2",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -1708,9 +1559,10 @@
                 "stock-lots",
                 "exclude",
                 "15",
-                "some",
-                "product",
-                "1"
+                "company",
+                "1",
+                "model",
+                "2"
               ]
             }
           },
@@ -1876,7 +1728,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"idClient\": 3,\r\n    \"limitDate\": \"2026-01-01 23:59:59\"\r\n}",
+              "raw": "{\r\n    \"limitDate\": \"2026-01-01 23:59:59\",\r\n    \"idClient\": 3\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2049,12 +1901,6 @@
                   "disabled": true
                 },
                 {
-                  "key": "userClientName",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
                   "key": "status",
                   "value": "PENDING",
                   "disabled": true
@@ -2114,6 +1960,37 @@
           "response": []
         },
         {
+          "name": "cancelDeliveryOrder",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"comment\": \"Esto es un comentario\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/delivery-orders/1/cancel",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "delivery-orders",
+                "1",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "changeLimitDateDeliveryOrder",
           "request": {
             "auth": {
@@ -2158,7 +2035,7 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/delivery-orders/4/send",
+              "raw": "http://localhost:8080/api/delivery-orders/1/send",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2167,30 +2044,8 @@
               "path": [
                 "api",
                 "delivery-orders",
-                "4",
+                "1",
                 "send"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "cancelDeliveryOrder",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/delivery-orders/4/cancel",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "delivery-orders",
-                "4",
-                "cancel"
               ]
             }
           },
@@ -2199,15 +2054,15 @@
       ]
     },
     {
-      "name": "PRODUCT - DELIVERY ORDER",
+      "name": "MODEL - DELIVERY ORDER",
       "item": [
         {
-          "name": "registerRelationProductToDeliveryOrder",
+          "name": "registerRelationModelToDeliveryOrder",
           "request": {
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/products-delivery-orders/product/4/deliveryOrder/1",
+              "raw": "http://localhost:8080/api/models-delivery-orders/model/4/deliveryOrder/1",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2215,8 +2070,8 @@
               "port": "8080",
               "path": [
                 "api",
-                "products-delivery-orders",
-                "product",
+                "models-delivery-orders",
+                "model",
                 "4",
                 "deliveryOrder",
                 "1"
@@ -2226,12 +2081,12 @@
           "response": []
         },
         {
-          "name": "listAllProductsByDeliveryOrder",
+          "name": "listAllModelsByDeliveryOrder",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/products-delivery-orders/products/deliveryOrder/2",
+              "raw": "http://localhost:8080/api/models-delivery-orders/models/deliveryOrder/6",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2239,22 +2094,22 @@
               "port": "8080",
               "path": [
                 "api",
-                "products-delivery-orders",
-                "products",
+                "models-delivery-orders",
+                "models",
                 "deliveryOrder",
-                "2"
+                "6"
               ]
             }
           },
           "response": []
         },
         {
-          "name": "inactiveRelationProductToDeliveryOrder",
+          "name": "inactiveRelationModelToDeliveryOrder",
           "request": {
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/products-delivery-orders/2",
+              "raw": "http://localhost:8080/api/models-delivery-orders/2",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2262,7 +2117,7 @@
               "port": "8080",
               "path": [
                 "api",
-                "products-delivery-orders",
+                "models-delivery-orders",
                 "2"
               ]
             }
@@ -2281,7 +2136,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"requiredQuantity\": 5000,\r\n    \"idLocation\": 5,\r\n    \"limitDate\": \"2025-12-01 23:59:59\"\r\n}",
+              "raw": "{\r\n    \"requiredQuantity\": 1000,\r\n    \"idLocation\": 10,\r\n    \"limitDate\": \"2026-02-11 23:59:59\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2289,7 +2144,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/api/delivery-lines/product-delivery-order/6",
+              "raw": "http://localhost:8080/api/delivery-lines/model-delivery-order/10",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2298,8 +2153,8 @@
               "path": [
                 "api",
                 "delivery-lines",
-                "product-delivery-order",
-                "6"
+                "model-delivery-order",
+                "10"
               ]
             }
           },
@@ -2311,7 +2166,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/delivery-lines/delivery-order/1",
+              "raw": "http://localhost:8080/api/delivery-lines/delivery-order/9",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2321,7 +2176,59 @@
                 "api",
                 "delivery-lines",
                 "delivery-order",
-                "1"
+                "9"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "disabled": true
+                },
+                {
+                  "key": "minRequiredQuantity",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "maxRequiredQuantity",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "minLimitDate",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "maxLimitDate",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "lineStatus",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "location",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "subregionId",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "regionId",
+                  "value": null,
+                  "disabled": true
+                },
+                {
+                  "key": "modelId",
+                  "value": null,
+                  "disabled": true
+                }
               ]
             }
           },
@@ -2349,44 +2256,13 @@
           "response": []
         },
         {
-          "name": "allocateStockInDeliveryLine",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"quantity\": 1000, // Agregar esa cantidad a la linea de entrega...\r\n    \"idStockLots\": [3]\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/delivery-lines/2/allocate-stock",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "delivery-lines",
-                "2",
-                "allocate-stock"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "updateDeliveryLine",
           "request": {
             "method": "PUT",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"requiredQuantity\": 800, // Nueva cantidad\r\n    \"limitDate\": \"2026-01-19 23:59:59\",\r\n    \"comment\": \"Prueba de actualización 2\"\r\n}",
+              "raw": "{\r\n    \"requiredQuantity\": 150, // Nueva cantidad\r\n    \"limitDate\": \"2026-02-19 23:59:59\",\r\n    \"comment\": \"Prueba de actualización 2\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2394,7 +2270,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/api/delivery-lines/1",
+              "raw": "http://localhost:8080/api/delivery-lines/4",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2403,69 +2279,7 @@
               "path": [
                 "api",
                 "delivery-lines",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "lostDeliveryLine",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"quantity\": 1500, // Se perdio esa cantidad...\r\n    \"comment\": \"Prueba de actualización\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/delivery-lines/25/missing",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "delivery-lines",
-                "25",
-                "missing"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "returnDeliveryLine",
-          "request": {
-            "method": "PUT",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"quantity\": 1500, // Devolver...\r\n    \"comment\": \"Prueba de actualización\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/delivery-lines/25/return",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "delivery-lines",
-                "25",
-                "return"
+                "4"
               ]
             }
           },
@@ -2477,7 +2291,7 @@
             "method": "PATCH",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/delivery-lines/5/cancel",
+              "raw": "http://localhost:8080/api/delivery-lines/61/cancel",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2486,7 +2300,7 @@
               "path": [
                 "api",
                 "delivery-lines",
-                "5",
+                "61",
                 "cancel"
               ]
             }
@@ -2510,6 +2324,148 @@
                 "delivery-lines",
                 "1",
                 "deliver"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "missingDeliveryLine",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/delivery-lines/1/missing",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "delivery-lines",
+                "1",
+                "missing"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "lostDeliveryLine",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 1500, // Se perdio esa cantidad...\r\n    \"comment\": \"Prueba de actualización\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/delivery-lines/25/lost",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "delivery-lines",
+                "25",
+                "lost"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "returnDeliveryLine",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 30, // Devolver...\r\n    \"comment\": \"Prueba de devolución\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/delivery-lines/4/return",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "delivery-lines",
+                "4",
+                "return"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "allocateStockInDeliveryLine",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"quantity\": 10, // Agregar esa cantidad a la linea de entrega...\r\n    \"idStockLots\": [7] // Tomara de los lotes de stock\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/delivery-lines/7/allocate-stock",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "delivery-lines",
+                "7",
+                "allocate-stock"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "STOCK LOT - DELIVERY LINE",
+      "item": [
+        {
+          "name": "getStockLotsByDeliveryLine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/stock-lot-delivery-lines/delivery-line/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "stock-lot-delivery-lines",
+                "delivery-line",
+                "2"
               ]
             }
           },
@@ -2567,78 +2523,14 @@
                   "disabled": true
                 },
                 {
-                  "key": "username",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "productName",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
                   "key": "movementType",
                   "value": "CHANGE",
                   "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllMovementsByDeliveryLine",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/movements/delivery-line/1",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "movements",
-                "delivery-line",
-                "1"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0",
-                  "disabled": true
                 },
                 {
-                  "key": "minQuantity",
-                  "value": "10000",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": " maxQuantity",
+                  "key": "deliveryLineId",
                   "value": "",
                   "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "minCreatedAt",
-                  "value": "2025-12-20",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "maxCreatedAt",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "movementType",
-                  "value": "CHANGE",
                   "disabled": true
                 },
                 {
@@ -2648,206 +2540,26 @@
                   "disabled": true
                 },
                 {
-                  "key": "productName",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllMovementsByStockLot",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/movements/delivery-line/1",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "movements",
-                "delivery-line",
-                "1"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0",
-                  "disabled": true
-                },
-                {
-                  "key": "minQuantity",
-                  "value": "10000",
+                  "key": "keyword",
+                  "value": null,
                   "type": "text",
                   "disabled": true
                 },
                 {
-                  "key": " maxQuantity",
-                  "value": "",
+                  "key": "modelId",
+                  "value": null,
                   "type": "text",
                   "disabled": true
                 },
                 {
-                  "key": "minCreatedAt",
-                  "value": "2025-12-20",
+                  "key": "userId",
+                  "value": null,
                   "type": "text",
                   "disabled": true
                 },
                 {
-                  "key": "maxCreatedAt",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "movementType",
-                  "value": "CHANGE",
-                  "disabled": true
-                },
-                {
-                  "key": "username",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "productName",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllMovementsByProduct",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/movements/product/5",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "movements",
-                "product",
-                "5"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0",
-                  "disabled": true
-                },
-                {
-                  "key": "minQuantity",
-                  "value": "10000",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": " maxQuantity",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "minCreatedAt",
-                  "value": "2025-12-20",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "maxCreatedAt",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "movementType",
-                  "value": "CHANGE",
-                  "disabled": true
-                },
-                {
-                  "key": "username",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "listAllMovementsByUser",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/movements/user/1",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8080",
-              "path": [
-                "api",
-                "movements",
-                "user",
-                "1"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0",
-                  "disabled": true
-                },
-                {
-                  "key": "minQuantity",
-                  "value": "10000",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": " maxQuantity",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "minCreatedAt",
-                  "value": "2025-12-20",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "maxCreatedAt",
-                  "value": "",
-                  "type": "text",
-                  "disabled": true
-                },
-                {
-                  "key": "movementType",
-                  "value": "CHANGE",
-                  "disabled": true
-                },
-                {
-                  "key": "productName",
-                  "value": "",
+                  "key": "stockLotReceiverId",
+                  "value": null,
                   "type": "text",
                   "disabled": true
                 }
@@ -2880,7 +2592,7 @@
       ]
     },
     {
-      "name": "PRODUCT - DELIVERY ORDER - REGION",
+      "name": "MODEL - DELIVERY ORDER - REGION",
       "item": [
         {
           "name": "getSummaryByDeliveryOrder",
@@ -2888,7 +2600,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/product-delivery-order-region/delivery-order/1",
+              "raw": "http://localhost:8080/api/model-delivery-order-region/delivery-order/6",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2896,9 +2608,9 @@
               "port": "8080",
               "path": [
                 "api",
-                "product-delivery-order-region",
+                "model-delivery-order-region",
                 "delivery-order",
-                "1"
+                "6"
               ]
             }
           },
@@ -2907,15 +2619,15 @@
       ]
     },
     {
-      "name": "STOCK LOT - DELIVERY LINE",
+      "name": "MODEL - DELIVERY ORDER - SUBREGION",
       "item": [
         {
-          "name": "getStockLotsByDeliveryLine",
+          "name": "getSummaryByDeliveryOrder",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/stock-lot-delivery-lines/delivery-line/2",
+              "raw": "http://localhost:8080/api/model-delivery-order-subregion/delivery-order/6",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -2923,9 +2635,9 @@
               "port": "8080",
               "path": [
                 "api",
-                "stock-lot-delivery-lines",
-                "delivery-line",
-                "2"
+                "model-delivery-order-subregion",
+                "delivery-order",
+                "6"
               ]
             }
           },
@@ -3001,35 +2713,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/api",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "api"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "relationManyProductsToDeliveryOrder",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\r\n    \"idProducts\": [2,3,4,5]\r\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "http://localhost:8080/api/product-delivery-order/1",
+          "raw": "http://localhost:8080/api/csrf",
           "protocol": "http",
           "host": [
             "localhost"
@@ -3037,8 +2721,7 @@
           "port": "8080",
           "path": [
             "api",
-            "product-delivery-order",
-            "1"
+            "csrf"
           ]
         }
       },
