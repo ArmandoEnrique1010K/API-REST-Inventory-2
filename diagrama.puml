@@ -119,20 +119,20 @@ entity Movement_StockLot #fff891 {
 }
 
 enum MovementType #fff891 {
-    RECEIVE
-    INCREASE
-    DECREASE
-    RECOVERY
-    TRANSFER
-    ALLOCATE
-    ALTER
-    RETURN
-    CHANGE
-    CANCELED
-    LOST
-    MISSING
-    DELIVERED
-    SIMULTANEOUS
+    MOVEMENT_STOCK_RECEIVE
+    MOVEMENT_STOCK_INCREASE
+    MOVEMENT_STOCK_DECREASE
+    MOVEMENT_STOCK_RECOVERY
+    MOVEMENT_STOCK_TRANSFER
+    MOVEMENT_LINE_ALLOCATE
+    MOVEMENT_LINE_ALTER
+    MOVEMENT_LINE_RETURN
+    MOVEMENT_LINE_CHANGE
+    MOVEMENT_LINE_CANCELED
+    MOVEMENT_LINE_LOST
+    MOVEMENT_LINE_MISSING
+    MOVEMENT_LINE_DELIVERED
+    MOVEMENT_LINE_SIMULTANEOUS
 }
 
 entity DeliveryLine #ecbbff {
@@ -162,12 +162,12 @@ entity StockLot_DeliveryLine #ecbbff{
     DeliveryLine deliveryLine
 }
 enum LineStatus #ecbbff {
-    MISSING
-    READY
-    PENDING
-    DELIVERED
-    CANCELED
-    EXCEEDED
+    LINE_MISSING
+    LINE_READY
+    LINE_PENDING
+    LINE_DELIVERED
+    LINE_CANCELED
+    LINE_EXCEEDED
 }
 
 entity Location #bebebe{
@@ -220,10 +220,10 @@ entity DeliveryOrder #89c6ff{
 }
 
 enum OrderStatus #89c6ff {
-    READY
-    PENDING
-    DELIVERED
-    CANCELED
+    ORDER_READY
+    ORDER_PENDING
+    ORDER_DELIVERED
+    ORDER_CANCELED
 }
 
 entity Model_DeliveryOrder_Region #91fff9{

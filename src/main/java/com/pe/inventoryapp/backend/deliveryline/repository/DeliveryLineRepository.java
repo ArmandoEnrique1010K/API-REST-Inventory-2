@@ -39,7 +39,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND (:subregionId IS NULL OR sr.id = :subregionId)
         AND (:regionId IS NULL OR r.id = :regionId)
         AND (:modelId IS NULL OR d.model.id = :modelId)
-        AND d.lineStatus != 'CANCELED'
+        AND d.lineStatus != 'LINE_CANCELED'
         ORDER BY l.id ASC  
       """)
   Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
@@ -63,7 +63,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         SELECT MIN(dl.limitDate)
         FROM DeliveryLine dl
         WHERE dl.deliveryOrder.id = :id
-          AND dl.lineStatus IN ('PENDING', 'EXCEEDED')
+          AND dl.lineStatus IN ('LINE_PENDING', 'LINE_EXCEEDED')
 
         ORDER BY dl.limitDate ASC
       """)
@@ -77,7 +77,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           JOIN dl.deliveryOrder do
           WHERE do.id = :deliveryOrderId
           AND m.id = :modelId
-          AND dl.lineStatus != 'CANCELED'
+          AND dl.lineStatus != 'LINE_CANCELED'
       """)
   Integer sumRequiredQuantityByDeliveryOrderIdAndModelId(
       @Param("deliveryOrderId") Long deliveryOrderId,
@@ -87,7 +87,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           SELECT dl.location.subregion.region.id, COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
           WHERE dl.deliveryOrder.id = :deliveryOrderId
-            AND dl.lineStatus <> 'CANCELED'
+            AND dl.lineStatus <> 'LINE_CANCELED'
           GROUP BY dl.location.subregion.region.id
       """)
   List<Object[]> sumRequiredGroupedByRegion(
@@ -98,21 +98,21 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
           SELECT dl.location.subregion.id, COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
           WHERE dl.deliveryOrder.id = :deliveryOrderId
-            AND dl.lineStatus <> 'CANCELED'
+            AND dl.lineStatus <> 'LINE_CANCELED'
           GROUP BY dl.location.subregion.id
       """)
   List<Object[]> sumRequiredGroupedBySubregion(
       @Param("deliveryOrderId") Long deliveryOrderId);
 
 
-      // Cuando verifica que no exista duplicado, tambien debe verificar que la linea de entrega no este cancelada ('CANCELED' se considera como eliminado, borrado lógico)
+      // Cuando verifica que no exista duplicado, tambien debe verificar que la linea de entrega no este cancelada ('MOVEMENT_LINE_CANCELED' se considera como eliminado, borrado lógico)
       @Query("""
           SELECT COUNT(dl) > 0
           FROM DeliveryLine dl
           WHERE dl.deliveryOrder.id = :deliveryOrderId
             AND dl.model.id = :modelId
             AND dl.location.id = :locationId 
-            AND dl.lineStatus <> 'CANCELED'
+            AND dl.lineStatus <> 'LINE_CANCELED'
       """)
   boolean existsDuplicate(
       @Param("deliveryOrderId") Long deliveryOrderId,
@@ -122,7 +122,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       SELECT COUNT(dl) = 0
       FROM DeliveryLine dl
       WHERE dl.deliveryOrder.id = :deliveryOrderId
-        AND dl.lineStatus IN ('PENDING', 'EXCEEDED')
+        AND dl.lineStatus IN ('LINE_PENDING', 'LINE_EXCEEDED')
   """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
 
@@ -131,7 +131,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       SELECT COUNT(dl) = 0
       FROM DeliveryLine dl
       WHERE dl.deliveryOrder.id = :deliveryOrderId
-        AND dl.lineStatus != 'CANCELED'
+        AND dl.lineStatus != 'LINE_CANCELED'
       """)
   boolean allLinesAreCanceled(@Param("deliveryOrderId") Long deliveryOrderId);
 }

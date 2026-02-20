@@ -51,7 +51,7 @@ public interface Model_DeliveryOrderRepository extends JpaRepository<Model_Deliv
               FROM DeliveryLine dl
               WHERE dl.deliveryOrder.id = :deliveryOrderId
                 AND dl.model.id = mdo.model.id
-                AND dl.lineStatus <> 'CANCELED'
+                AND dl.lineStatus <> 'LINE_CANCELED'
           )
       WHERE mdo.deliveryOrder.id = :deliveryOrderId
   """)

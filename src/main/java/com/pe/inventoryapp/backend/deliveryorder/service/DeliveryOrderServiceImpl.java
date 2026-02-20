@@ -104,7 +104,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// La fecha limite prioritaria se establece en null porque aun no hay una fecha
 		// de entrega de una linea de entrega
 		deliveryOrder.setPriorityDate(null);
-		deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+		deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
 		deliveryOrder.setUserCreator(user);
 		deliveryOrder.setUserUpdater(user);
 
@@ -222,7 +222,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
 				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
 			throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
 		}
 
@@ -243,7 +243,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
 				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
 			throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
 		}
 
@@ -306,13 +306,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		// Verifica que la orden de entrega no tenga el estado de DELIVERED o CANCELED,
-		if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
+		// Verifica que la orden de entrega no tenga el estado de MOVEMENT_LINE_DELIVERED o MOVEMENT_LINE_CANCELED,
+		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_DELIVERED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ya ha sido entregada");
 		}
 
-		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ha sido cancelada");
 		}
@@ -328,14 +328,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// Si las lineas de entrega tienen el estado READY, PENDING o EXCEEDED, entonces
 		// se cancelan solamente esas lineas de entrega y se restaura el stock de los
 		// modelos de productos asociados a esas lineas de entrega, además se crean
-		// movimientos de tipo CANCELED por cada linea de entrega cancelada y por
+		// movimientos de tipo MOVEMENT_LINE_CANCELED por cada linea de entrega cancelada y por
 		// cada producto restaurado
 
-		// Verifica si existe al menos una línea de entrega con estado DELIVERED o
-		// MISSING
+		// Verifica si existe al menos una línea de entrega con estado MOVEMENT_LINE_DELIVERED o
+		// MOVEMENT_LINE_MISSING
 		// Devuelve false si no hay ninguna línea de entrega con esos estados
-		boolean hasDeliveredOrMissing = deliveryLines.stream().anyMatch(dl -> dl.getLineStatus() == LineStatus.DELIVERED ||
-				dl.getLineStatus() == LineStatus.MISSING);
+		boolean hasDeliveredOrMissing = deliveryLines.stream().anyMatch(dl -> dl.getLineStatus() == LineStatus.LINE_DELIVERED ||
+				dl.getLineStatus() == LineStatus.LINE_MISSING);
 
 		Map<Long, Integer> stockToRestore = cancelDeliveryLines(deliveryLines, deliveryOrder, user,
 				deliveryOrderComentRequest);
@@ -361,20 +361,20 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
+		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_DELIVERED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ya ha sido entregada");
 		}
 
-		if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ha sido cancelada");
 		}
 
 		boolean allCompleted = deliveryOrder.getDeliveryLines().stream()
-				.allMatch(l -> l.getLineStatus() == LineStatus.DELIVERED ||
-						l.getLineStatus() == LineStatus.CANCELED ||
-						l.getLineStatus() == LineStatus.MISSING);
+				.allMatch(l -> l.getLineStatus() == LineStatus.LINE_DELIVERED ||
+						l.getLineStatus() == LineStatus.LINE_CANCELED ||
+						l.getLineStatus() == LineStatus.LINE_MISSING);
 
 		if (!allCompleted) {
 			throw new BusinessException(
@@ -389,13 +389,13 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		}
 
 		// VERIFICA QUE TODAS LAS LINEAS DE ENTREGA ASOCIADAS A ESTA ORDEN DE ENTREGA
-		// TENGAN EL ESTADO READY, ADEMÁS DEL ESTADO DELIVERED
+		// TENGAN EL ESTADO READY, ADEMÁS DEL ESTADO MOVEMENT_LINE_DELIVERED
 		deliveryOrderDomainService.assertAllLinesInAllowedStates(
 				deliveryLines,
-				EnumSet.of(LineStatus.READY, LineStatus.DELIVERED, LineStatus.CANCELED, LineStatus.MISSING));
+				EnumSet.of(LineStatus.LINE_READY, LineStatus.LINE_DELIVERED, LineStatus.LINE_CANCELED, LineStatus.LINE_MISSING));
 
 		// Ninguna linea de entrega debe tener el estado "PENDING", "EXCEEDED"
-		// Estados permitidos: "READY", "DELIVERED", "CANCELED", "MISSING"
+		// Estados permitidos: "READY", "MOVEMENT_LINE_DELIVERED", "MOVEMENT_LINE_CANCELED", "MOVEMENT_LINE_MISSING"
 
 		Map<Long, Integer> deliveredByModel = deliverReadyLines(deliveryLines, deliveryOrder, user);
 
@@ -410,7 +410,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// lineas de entrega que tienen el estado READY y acumularlas en el
 		// totalDelivered
 
-		deliveryOrder.setOrderStatus(OrderStatus.DELIVERED);
+		deliveryOrder.setOrderStatus(OrderStatus.ORDER_DELIVERED);
 		deliveryOrder.setUserUpdater(user);
 
 		deliveryOrderRepository.save(deliveryOrder);
@@ -424,7 +424,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			DeliveryOrderComentRequest commentRequest) {
 
 		// Estados permitidos que debe tener la linea de entrega
-		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.READY, LineStatus.PENDING, LineStatus.EXCEEDED);
+		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.LINE_READY, LineStatus.LINE_PENDING, LineStatus.LINE_EXCEEDED);
 
 		// UNA ORDEN DE ENTREGA TIENE VARIOS MODELOS DE PRODUCTOS A LA VEZ
 		// La nueva cantidad de los modelos de los productos y sus cantidades se
@@ -455,7 +455,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			// line.cancel(user);
 			line.setDeliveredQuantity(0);
 			line.setPendingQuantity(0);
-			line.setLineStatus(LineStatus.CANCELED);
+			line.setLineStatus(LineStatus.LINE_CANCELED);
 			line.setLimitDate(null);
 			line.setUserUpdater(user);
 			deliveryLineRepository.save(line);
@@ -468,7 +468,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			movement.setComment(movementDomainService.generateComment(
 					commentRequest.getComment(),
 					"Se cancelo la orden de entrega de la factura #" + order.getBatch()));
-			movement.setMovementType(MovementType.CANCELED);
+			movement.setMovementType(MovementType.MOVEMENT_LINE_CANCELED);
 			movement.setUser(user);
 			movement.setStockLotReceiver(null);
 			movement.setStockLotEmitter(null);
@@ -539,7 +539,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			movement.setComment(movementDomainService.generateComment(
 					deliveryOrderComentRequest.getComment(),
 					"Devolución de productos de la factura #" + deliveryOrder.getBatch()));
-			movement.setMovementType(MovementType.REFUND);
+			movement.setMovementType(MovementType.MOVEMENT_STOCK_REFUND);
 			movement.setUser(user);
 			movement.setStockLotReceiver(stockLot);
 			movement.setStockLotEmitter(null);
@@ -572,8 +572,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// Actualiza la orden de entrega
 		order.setOrderStatus(
 				hasDeliveredOrMissing
-						? OrderStatus.DELIVERED
-						: OrderStatus.CANCELED);
+						? OrderStatus.ORDER_DELIVERED
+						: OrderStatus.ORDER_CANCELED);
 		order.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(order.getId()));
 		order.setUserUpdater(user);
 
@@ -590,7 +590,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		for (DeliveryLine deliveryLine : deliveryLines) {
 
-			if (deliveryLine.getLineStatus() != LineStatus.READY)
+			if (deliveryLine.getLineStatus() != LineStatus.LINE_READY)
 				continue;
 
 			int qty = deliveryLine.getDeliveredQuantity();
@@ -600,7 +600,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					qty,
 					Integer::sum);
 
-			deliveryLine.setLineStatus(LineStatus.DELIVERED);
+			deliveryLine.setLineStatus(LineStatus.LINE_DELIVERED);
 			deliveryLine.setUserUpdater(user);
 
 			// movements.add(createDeliveredMovement(deliveryLines, deliveryOrder, user,
@@ -608,7 +608,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			Movement movement = new Movement();
 			movement.setQuantity(deliveryLine.getDeliveredQuantity());
 			movement.setComment("Se entrego la linea de entrega correspondiente a la factura #" + deliveryOrder.getBatch());
-			movement.setMovementType(MovementType.DELIVERED);
+			movement.setMovementType(MovementType.MOVEMENT_LINE_DELIVERED);
 			movement.setUser(user);
 			movement.setStockLotReceiver(null);
 			movement.setStockLotEmitter(null);

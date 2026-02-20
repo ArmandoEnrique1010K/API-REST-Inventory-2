@@ -2524,7 +2524,7 @@
                 },
                 {
                   "key": "movementType",
-                  "value": "CHANGE",
+                  "value": "MOVEMENT_LINE_CHANGE",
                   "disabled": true
                 },
                 {

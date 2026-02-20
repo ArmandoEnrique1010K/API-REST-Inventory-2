@@ -1,8 +1,8 @@
 package com.pe.inventoryapp.backend.deliveryorder.model.data;
 
 public enum OrderStatus {
-  READY,  // Listo
-  PENDING, // Pendiente
-  DELIVERED, // Entregado
-  CANCELED // Cancelado
+  ORDER_READY,  // Listo
+  ORDER_PENDING, // Pendiente
+  ORDER_DELIVERED, // Entregado
+  ORDER_CANCELED // Cancelado
 }

@@ -118,12 +118,12 @@ public class StockLotServiceImpl implements StockLotService {
     modelRepository.save(model);
 
     // MOVIMIENTO DE AGREGAR STOCK A UN MODELO DE PRODUCTO EXISTENTE EN EL ALMACEN (TIPO
-    // RECEIVE)
+    // MOVEMENT_STOCK_RECEIVE)
     Movement movement = new Movement();
 
     movement.setQuantity(quantity);
     movement.setComment(stockLotReceiveRequest.getComment());
-    movement.setMovementType(MovementType.RECEIVE);
+    movement.setMovementType(MovementType.MOVEMENT_STOCK_RECEIVE);
 
     movement.setUser(user);
 
@@ -249,11 +249,11 @@ public class StockLotServiceImpl implements StockLotService {
 
     modelRepository.save(model);
 
-    // GUARDAR EL MOVIMIENTO DE TIPO INCREASE
+    // GUARDAR EL MOVIMIENTO DE TIPO MOVEMENT_STOCK_INCREASE
     Movement movement = new Movement();
     movement.setQuantity(quantity);
     movement.setComment(stockLotAdjustmentRequest.getComment());
-    movement.setMovementType(MovementType.INCREASE);
+    movement.setMovementType(MovementType.MOVEMENT_STOCK_INCREASE);
     movement.setStockLotEmitter(null);
     movement.setStockLotReceiver(stockLot);
     movement.setDeliveryLine(null);
@@ -314,7 +314,7 @@ public class StockLotServiceImpl implements StockLotService {
     Movement movement = new Movement();
     movement.setQuantity(quantity);
     movement.setComment(stockLotAdjustmentRequest.getComment());
-    movement.setMovementType(MovementType.DECREASE);
+    movement.setMovementType(MovementType.MOVEMENT_STOCK_DECREASE);
     movement.setStockLotEmitter(null);
     movement.setStockLotReceiver(stockLot);
     movement.setDeliveryLine(null);
@@ -394,7 +394,7 @@ public class StockLotServiceImpl implements StockLotService {
     Movement movement = new Movement();
     movement.setQuantity(quantity);
     movement.setComment(stockLotAdjustmentRequest.getComment());
-    movement.setMovementType(MovementType.RECOVERY);
+    movement.setMovementType(MovementType.MOVEMENT_STOCK_RECOVERY);
     movement.setStockLotEmitter(null);
     movement.setStockLotReceiver(stockLot);
     movement.setDeliveryLine(null);
@@ -484,7 +484,7 @@ public class StockLotServiceImpl implements StockLotService {
     Movement movement = new Movement();
     movement.setQuantity(quantity);
     movement.setComment(stockLotTransferRequest.getComment());
-    movement.setMovementType(MovementType.TRANSFER);
+    movement.setMovementType(MovementType.MOVEMENT_STOCK_TRANSFER);
     movement.setStockLotEmitter(stockLotEmitter);
     movement.setStockLotReceiver(stockLotReceiver);
     movement.setDeliveryLine(null);

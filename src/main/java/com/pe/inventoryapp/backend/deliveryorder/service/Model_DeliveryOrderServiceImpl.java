@@ -47,12 +47,12 @@ public class Model_DeliveryOrderServiceImpl implements Model_DeliveryOrderServic
                 () -> new BusinessException(ResponseStatus.NOT_FOUND,
                         "La orden de entrega no existe en el sistema"));
 
-        if (deliveryOrder.getOrderStatus() == OrderStatus.CANCELED) {
+        if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
             throw new BusinessException(ResponseStatus.CONFLICT,
                     "La orden de entrega ha sido cancelada");
         }
 
-        if (deliveryOrder.getOrderStatus() == OrderStatus.DELIVERED) {
+        if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_DELIVERED) {
             throw new BusinessException(ResponseStatus.CONFLICT,
                     "La orden de entrega ha sido entregada");
         }

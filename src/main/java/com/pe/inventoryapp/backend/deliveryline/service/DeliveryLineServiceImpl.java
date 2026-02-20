@@ -130,7 +130,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // Regla: no permitir duplicados por ubicación, excepto de las lineas de entrega
-    // con estado CANCELED
+    // con estado MOVEMENT_LINE_CANCELED
     boolean exists = deliveryLineRepository
         .existsDuplicate(id_deliveryOrder, id_model, id_location);
 
@@ -149,7 +149,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setPendingQuantity(deliveryLineRequest.getRequiredQuantity());
     deliveryLine.setLimitDate(deliveryLineRequest.getLimitDate());
     // La fecha de actualización se genera automaticamente
-    deliveryLine.setLineStatus(LineStatus.PENDING);
+    deliveryLine.setLineStatus(LineStatus.LINE_PENDING);
 
     deliveryLine.setLocation(location);
 
@@ -170,7 +170,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // 2° actualizar el estado a PENDING cada vez que se guarde una nueva linea de
     // entrega
-    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+    deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     deliveryOrderRepository.save(deliveryOrder);
 
     // 3° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE
@@ -260,9 +260,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // TODO: ES PROBABLE QUE SI LA LINEA DE ENTREGA TIENE EL ESTADO DE CANCELED,
+    // TODO: ES PROBABLE QUE SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED,
     // DEVUELVA UN THROW
-    if (deliveryLine.getLineStatus() == LineStatus.CANCELED) {
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
       throw new BusinessException(
           ResponseStatus.CONFLICT,
           "La linea de entrega se encuentra cancelada");
@@ -298,8 +298,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // LOGICA QUE VERIFIQUE QUE EL ESTADO DE LA LINEA DE ENTREGA NO TENGA EL ESTADO
-    // DELIVERED NI CANCELED
-    if (deliveryLine.getLineStatus() == LineStatus.DELIVERED || deliveryLine.getLineStatus() == LineStatus.CANCELED) {
+    // MOVEMENT_LINE_DELIVERED NI MOVEMENT_LINE_CANCELED
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED || deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
           "La linea de entrega no puede ser modificada");
     }
@@ -376,9 +376,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setComment(movementDomainService.generateComment(deliveryLineUpdateRequest.getComment(),
         "Un usuario altero los datos de la linea de entrega"));
 
-    // Si el balance es un número positivo se considera un ALTER, si es negativo se
-    // considera un CHANGE
-    movement.setMovementType(quantityBalance > 0 ? MovementType.ALTER : MovementType.CHANGE);
+    // Si el balance es un número positivo se considera un MOVEMENT_LINE_ALTER, si es negativo se
+    // considera un MOVEMENT_LINE_CHANGE
+    movement.setMovementType(quantityBalance > 0 ? MovementType.MOVEMENT_LINE_ALTER : MovementType.MOVEMENT_LINE_CHANGE);
 
     movement.setUser(user);
     movement.setStockLotReceiver(null);
@@ -399,22 +399,22 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     if (required > delivered) {
       line.setPendingQuantity(required - delivered);
-      line.setLineStatus(LineStatus.PENDING);
-      deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+      line.setLineStatus(LineStatus.LINE_PENDING);
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
       return;
     }
 
     if (required == delivered) {
       line.setPendingQuantity(0);
-      line.setLineStatus(LineStatus.READY);
-      deliveryOrder.setOrderStatus(OrderStatus.READY);
+      line.setLineStatus(LineStatus.LINE_READY);
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
       return;
     }
 
     // required < delivered
     line.setPendingQuantity(required - delivered);
-    line.setLineStatus(LineStatus.EXCEEDED);
-    deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+    line.setLineStatus(LineStatus.LINE_EXCEEDED);
+    deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
 
   }
 
@@ -462,7 +462,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    if (deliveryLine.getLineStatus() == LineStatus.CANCELED) {
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega ya ha sido cancelada");
     }
 
@@ -481,7 +481,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setPendingQuantity(0);
     deliveryLine.setDeliveredQuantity(0);
     deliveryLine.setLimitDate(null);
-    deliveryLine.setLineStatus(LineStatus.CANCELED);
+    deliveryLine.setLineStatus(LineStatus.LINE_CANCELED);
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
@@ -514,12 +514,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // entrega han sido entregadas, es decir si todas tiene el estado READY
 
     if (deliveryLineRepository.allLinesAreCanceled(deliveryOrderId)) {
-      deliveryOrder.setOrderStatus(OrderStatus.CANCELED);
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
     } else {
       if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
-        deliveryOrder.setOrderStatus(OrderStatus.READY);
+        deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
       } else {
-        deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+        deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
       }
     }
 
@@ -529,7 +529,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Movement movement = new Movement();
     movement.setQuantity(quantityCanceled);
     movement.setComment("Se cancelo la linea de entrega con el ID: " + deliveryLine.getId());
-    movement.setMovementType(MovementType.CANCELED);
+    movement.setMovementType(MovementType.MOVEMENT_LINE_CANCELED);
     movement.setUser(user);
     movement.setStockLotReceiver(null);
     movement.setStockLotEmitter(null);
@@ -620,11 +620,11 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // Solamente podra declarar entregada si la linea de entrega se encuentra lista
-    if (deliveryLine.getLineStatus() != LineStatus.READY) {
+    if (deliveryLine.getLineStatus() != LineStatus.LINE_READY) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega no puede ser entregada");
     }
 
-    deliveryLine.setLineStatus(LineStatus.DELIVERED);
+    deliveryLine.setLineStatus(LineStatus.LINE_DELIVERED);
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
@@ -641,7 +641,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
     movement.setComment("Se entrego la linea de entrega con el ID: " + deliveryLine.getId());
-    movement.setMovementType(MovementType.DELIVERED);
+    movement.setMovementType(MovementType.MOVEMENT_LINE_DELIVERED);
     movement.setUser(user);
     movement.setStockLotReceiver(null);
     movement.setStockLotEmitter(null);
@@ -682,9 +682,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // Si una linea de entrega fue reportada como perdida
-    if (deliveryLine.getLineStatus() == LineStatus.DELIVERED ||
-        deliveryLine.getLineStatus() == LineStatus.CANCELED ||
-        deliveryLine.getLineStatus() == LineStatus.MISSING) {
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_MISSING) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
           "La linea de entrega no puede ser reportada como perdida");
     }
@@ -705,9 +705,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Actualizar el estado de la linea de entrega
     if (deliveryLine.getPendingQuantity() == 0) {
-      deliveryLine.setLineStatus(LineStatus.READY);
+      deliveryLine.setLineStatus(LineStatus.LINE_READY);
     } else {
-      deliveryLine.setLineStatus(LineStatus.PENDING);
+      deliveryLine.setLineStatus(LineStatus.LINE_PENDING);
     }
 
     deliveryLine.setUserUpdater(user);
@@ -754,7 +754,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setQuantity(lostQuantity);
     movement.setComment(movementDomainService.generateComment(deliveryLineAlterRequest.getComment(),
         "Se ha descontado una cantidad de la linea de entrega con ID: " + deliveryLine.getId()));
-    movement.setMovementType(MovementType.LOST);
+    movement.setMovementType(MovementType.MOVEMENT_LINE_LOST);
 
     movement.setUser(user);
     movement.setStockLotEmitter(null);
@@ -814,18 +814,18 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ESTA LINEA DE ENTREGA, PORQUE AL RETORNAR UNA CANTIDAD, SE DEBE ALMANCENAR EN
     // UN NUEVO STOCK LOT
 
-    // AQUI NO DEBE CAMBIAR EL ESTADO A CANCELED, SINO QUE DEBE COMPARAR SI
+    // AQUI NO DEBE CAMBIAR EL ESTADO A MOVEMENT_LINE_CANCELED, SINO QUE DEBE COMPARAR SI
     // ESTA LINEA DE ENTREGA TIENE CANTIDAD ENTREGADA
     if (deliveryLine.getDeliveredQuantity() - returnedQuantity == deliveryLine.getRequiredQuantity()) {
-      deliveryLine.setLineStatus(LineStatus.READY);
+      deliveryLine.setLineStatus(LineStatus.LINE_READY);
     }
 
     if (deliveryLine.getDeliveredQuantity() - returnedQuantity > deliveryLine.getRequiredQuantity()) {
-      deliveryLine.setLineStatus(LineStatus.EXCEEDED);
+      deliveryLine.setLineStatus(LineStatus.LINE_EXCEEDED);
     }
 
     if (deliveryLine.getDeliveredQuantity() - returnedQuantity < deliveryLine.getRequiredQuantity()) {
-      deliveryLine.setLineStatus(LineStatus.PENDING);
+      deliveryLine.setLineStatus(LineStatus.LINE_PENDING);
     }
 
     deliveryLine.setDeliveredQuantity(deliveryLine.getDeliveredQuantity() - returnedQuantity);
@@ -847,9 +847,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Operacion para verificar si todas las lineas de entrega de una orden de
     // entrega han sido entregadas, es decir si todas tiene el estado READY
     if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
-      deliveryOrder.setOrderStatus(OrderStatus.READY);
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
     } else {
-      deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
 
     deliveryOrderRepository.save(deliveryOrder);
@@ -859,7 +859,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
-    movement.setMovementType(MovementType.RETURN);
+    movement.setMovementType(MovementType.MOVEMENT_LINE_RETURN);
     movement.setComment("Se ha devuelto una cantidad de linea de entrega: " + deliveryLine.getId());
     movement.setModel(deliveryLine.getModel());
     movement.setUser(user);
@@ -973,7 +973,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setQuantity(quantity);
     movement.setComment("Entrega de stock");
     movement.setDeliveryLine(deliveryLine);
-    movement.setMovementType(MovementType.ALLOCATE);
+    movement.setMovementType(MovementType.MOVEMENT_LINE_ALLOCATE);
     // movement.setStockLots(stockLots);
     movement.setModel(deliveryLine.getModel());
     movement.setUser(user);
@@ -1023,7 +1023,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         deliveryLine.getPendingQuantity() - quantity);
 
     if (deliveryLine.getPendingQuantity() == 0) {
-      deliveryLine.setLineStatus(LineStatus.READY);
+      deliveryLine.setLineStatus(LineStatus.LINE_READY);
     }
     // ===== Alterar campos del producto =====
     model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() + quantity);
@@ -1049,9 +1049,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         deliveryOrderDomainService.getClosestLimitDate(deliveryOrder.getId()));
 
     if (deliveryLineRepository.allLinesAreReady(deliveryOrder.getId())) {
-      deliveryOrder.setOrderStatus(OrderStatus.READY);
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
     } else {
-      deliveryOrder.setOrderStatus(OrderStatus.PENDING);
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
 
     deliveryOrderRepository.save(deliveryOrder);
@@ -1078,18 +1078,18 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // Solamente podra declarar entregada si la linea de entrega se encuentra lista
-    if (deliveryLine.getLineStatus() != LineStatus.DELIVERED) {
+    if (deliveryLine.getLineStatus() != LineStatus.LINE_DELIVERED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
           "La linea de entrega no puede ser reportada como perdida luego de la entrega");
     }
 
-    deliveryLine.setLineStatus(LineStatus.MISSING);
+    deliveryLine.setLineStatus(LineStatus.LINE_MISSING);
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
-    movement.setMovementType(MovementType.MISSING);
+    movement.setMovementType(MovementType.MOVEMENT_LINE_MISSING);
     movement.setComment("Perdida durante la entrega de la linea de entrega: " + deliveryLine.getId());
     movement.setModel(deliveryLine.getModel());
     movement.setUser(user);
