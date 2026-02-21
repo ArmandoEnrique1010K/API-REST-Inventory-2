@@ -109,11 +109,14 @@ public class StockLotServiceImpl implements StockLotService {
     stockLotRepository.save(stockLot);
 
     // Actualiza las cantidades del stock
-    Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByModelId(modelId);
-    Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(modelId);
+    // Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByModelId(modelId);
+    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(modelId);
 
-    model.setTotalQuantityReceived(sumatoryStockQuantityReceived);
-    model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
+    // model.setTotalQuantityReceived(sumatoryStockQuantityReceived);
+    // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
+
+    model.setTotalQuantityReceived(model.getTotalQuantityReceived() + quantity);
+    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
 
     modelRepository.save(model);
 
@@ -241,11 +244,14 @@ public class StockLotServiceImpl implements StockLotService {
     stockLotRepository.save(stockLot);
 
     // Actualiza las cantidades del stock
-    Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByModelId(modelId);
-    Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(modelId);
+    // Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByModelId(modelId);
+    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(modelId);
 
-    model.setTotalQuantityReceived(sumatoryStockQuantityReceived);
-    model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
+    // model.setTotalQuantityReceived(sumatoryStockQuantityReceived);
+    // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
+
+    model.setTotalQuantityReceived(model.getTotalQuantityReceived() + quantity);
+    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
 
     modelRepository.save(model);
 
@@ -308,8 +314,11 @@ public class StockLotServiceImpl implements StockLotService {
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
 
     // Actualiza las cantidades del stock
-    Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(idModel);
-    model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
+    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(idModel);
+    // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
+    
+    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
+    modelRepository.save(model);
 
     Movement movement = new Movement();
     movement.setQuantity(quantity);
@@ -386,9 +395,10 @@ public class StockLotServiceImpl implements StockLotService {
         idModel).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
 
-    Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(idModel);
+    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(idModel);
+    // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
 
-    model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
+    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
     modelRepository.save(model);
 
     Movement movement = new Movement();

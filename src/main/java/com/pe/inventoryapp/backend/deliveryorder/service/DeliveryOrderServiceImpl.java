@@ -397,7 +397,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// Ninguna linea de entrega debe tener el estado "PENDING", "EXCEEDED"
 		// Estados permitidos: "READY", "MOVEMENT_LINE_DELIVERED", "MOVEMENT_LINE_CANCELED", "MOVEMENT_LINE_MISSING"
 
-		Map<Long, Integer> deliveredByModel = deliverReadyLines(deliveryLines, deliveryOrder, user);
+		Map<Long, Integer> deliveredByModel = processDeliveredLines(deliveryLines, deliveryOrder, user);
 
 		// SE ACTUALIZARA LA CANTIDAD TOTAL DEL MODELO DEL PRODUCTO QUE SE ENTREGO
 		applyDeliveredStock(deliveredByModel);
@@ -440,6 +440,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				continue;
 
 			int quantityToRestore = line.getDeliveredQuantity();
+			// Long modelId = line.getModel().getId();
 
 			// Almacena en el map el id del modelo del producto y la cantidad que se
 			// almacenara
@@ -453,34 +454,85 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 			// CREAR UN METODO EN EL DOMINIO DE DELIVERYLINE
 			// line.cancel(user);
-			line.setDeliveredQuantity(0);
-			line.setPendingQuantity(0);
-			line.setLineStatus(LineStatus.LINE_CANCELED);
-			line.setLimitDate(null);
-			line.setUserUpdater(user);
-			deliveryLineRepository.save(line);
+			// line.setDeliveredQuantity(0);
+			// line.setPendingQuantity(0);
+			// line.setLineStatus(LineStatus.LINE_CANCELED);
+			// line.setLimitDate(null);
+			// line.setUserUpdater(user);
+			// deliveryLineRepository.save(line);
 
+			// Cancelación de la línea (idealmente método de dominio)
+			cancelLine(line, user);
+
+			// Movimiento
+			movements.add(buildCancelMovement(
+					line,
+					order,
+					user,
+					quantityToRestore,
+					commentRequest));
+
+			// Model model = modelRepository.findById(line.getModel().getId()).orElseThrow(
+			// 		() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+
+			// model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantityToRestore);
+			// model.setTotalQuantityTaken(model.getTotalQuantityTaken() - quantityToRestore);
+			
 			// CREAR UN METODO EN EL DOMINIO DE MOVEMENT
 			// movements.add(createCancelMovement(
 			// line, order, user, quantityToRestore, commentRequest));
-			Movement movement = new Movement();
-			movement.setQuantity(quantityToRestore);
-			movement.setComment(movementDomainService.generateComment(
-					commentRequest.getComment(),
-					"Se cancelo la orden de entrega de la factura #" + order.getBatch()));
-			movement.setMovementType(MovementType.MOVEMENT_LINE_CANCELED);
-			movement.setUser(user);
-			movement.setStockLotReceiver(null);
-			movement.setStockLotEmitter(null);
-			movement.setDeliveryLine(line);
-			movement.setModel(line.getModel());
-			movementRepository.save(movement);
+			
+			// Movement movement = new Movement();
+			// movement.setQuantity(quantityToRestore);
+			// movement.setComment(movementDomainService.generateComment(
+			// 		commentRequest.getComment(),
+			// 		"Se cancelo la orden de entrega de la factura #" + order.getBatch()));
+			// movement.setMovementType(MovementType.MOVEMENT_LINE_CANCELED);
+			// movement.setUser(user);
+			// movement.setStockLotReceiver(null);
+			// movement.setStockLotEmitter(null);
+			// movement.setDeliveryLine(line);
+			// movement.setModel(line.getModel());
+
+			// AÑADIR A LA LISTA
+			// movements.add(movement);
 		}
 
 		deliveryLineRepository.saveAll(lines);
+
+		// GUARDAR TODOS LOS MOVIMIENTOS
 		movementRepository.saveAll(movements);
 
 		return stockToRestore;
+	}
+
+	private void cancelLine(DeliveryLine line, User user) {
+		line.setDeliveredQuantity(0);
+		line.setPendingQuantity(0);
+		line.setLineStatus(LineStatus.LINE_CANCELED);
+		line.setLimitDate(null);
+		line.setUserUpdater(user);
+	}
+
+	private Movement buildCancelMovement(
+			DeliveryLine line,
+			DeliveryOrder order,
+			User user,
+			int quantity,
+			DeliveryOrderComentRequest commentRequest) {
+
+		Movement movement = new Movement();
+		movement.setQuantity(quantity);
+		movement.setComment(
+				movementDomainService.generateComment(
+						commentRequest.getComment(),
+						"Se canceló la orden de entrega de la factura #" + order.getBatch()));
+		movement.setMovementType(MovementType.MOVEMENT_LINE_CANCELED);
+		movement.setUser(user);
+		movement.setDeliveryLine(line);
+		movement.setModel(line.getModel());
+
+		return movement;
 	}
 
 	private void restoreStock(
@@ -494,6 +546,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		Company company = companyRepository.findById(1L).get();
 
+		Map<Long, Model> models = modelRepository.findAllById(stockToRestore.keySet())
+				.stream()
+				.collect(Collectors.toMap(Model::getId, Function.identity()));
+
 		List<StockLot> stockLots = new ArrayList<>();
 		List<Movement> movements = new ArrayList<>();
 
@@ -503,9 +559,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// (mediante el método entrySet) permitiendo modificar los valores con el método
 		// setValue
 
-		Map<Long, Model> models = modelRepository.findAllById(stockToRestore.keySet())
-				.stream()
-				.collect(Collectors.toMap(Model::getId, Function.identity()));
 
 		for (Map.Entry<Long, Integer> entry : stockToRestore.entrySet()) {
 			Model model = models.get(entry.getKey());
@@ -530,7 +583,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			stockLot.setTemporary(true);
 			stockLot.setModel(model);
 			stockLot.setCompany(company);
-			stockLotRepository.save(stockLot);
+			stockLots.add(stockLot);
 
 			// movements.add(createRefundMovement(
 			// model, lot, qty, order, user, commentRequest));
@@ -545,7 +598,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			movement.setStockLotEmitter(null);
 			movement.setDeliveryLine(null);
 			movement.setModel(model);
-			movementRepository.save(movement);
+			movements.add(movement);
 
 			// model.increaseAvailable(qty);
 			Model findedModel = modelRepository.findById(model.getId())
@@ -556,6 +609,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			// quantityRecovered
 			findedModel.setTotalQuantityAvailable(
 					findedModel.getTotalQuantityAvailable() + stockToRestore.get(findedModel.getId()));
+
+			findedModel.setTotalQuantityTaken(
+				findedModel.getTotalQuantityTaken() - stockToRestore.get(findedModel.getId())
+			);
 			modelRepository.save(findedModel);
 		}
 
@@ -580,7 +637,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrderRepository.save(order);
 	}
 
-	private Map<Long, Integer> deliverReadyLines(
+	private Map<Long, Integer> processDeliveredLines(
 			List<DeliveryLine> deliveryLines,
 			DeliveryOrder deliveryOrder,
 			User user) {
@@ -614,7 +671,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			movement.setStockLotEmitter(null);
 			movement.setDeliveryLine(deliveryLine);
 			movement.setModel(deliveryLine.getModel());
-			movementRepository.save(movement);
+			movements.add(movement);
 		}
 
 		deliveryLineRepository.saveAll(deliveryLines);
@@ -636,8 +693,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			Model model = models.get(entry.getKey());
 			Integer qty = entry.getValue();
 
-			model.setTotalQuantityAvailable(
-					model.getTotalQuantityAvailable() - qty);
+			model.setTotalQuantityTaken(
+					model.getTotalQuantityTaken() - qty);
 
 			model.setTotalQuantityDelivered(
 					model.getTotalQuantityDelivered() + qty);

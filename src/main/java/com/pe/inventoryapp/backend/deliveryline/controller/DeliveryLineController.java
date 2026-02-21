@@ -75,7 +75,6 @@ public class DeliveryLineController {
 
   
 
-  // TODO: PODRIA AÑADIR UN PARAMETRO PARA LISTAR POR MODELOS DE PRODUCTOS
   @GetMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
       @PathVariable Long deliveryOrderId, 

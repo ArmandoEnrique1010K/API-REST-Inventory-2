@@ -55,6 +55,10 @@ public class Model {
   private Integer totalQuantityAvailable;
   @NotNull
   private Integer totalQuantityReceived;
+  
+  @NotNull
+  private Integer totalQuantityTaken;
+
   @NotNull
   private Integer totalQuantityDelivered;
 

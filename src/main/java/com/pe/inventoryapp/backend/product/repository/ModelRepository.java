@@ -13,10 +13,7 @@ import com.pe.inventoryapp.backend.product.model.entity.Model;
 
 public interface ModelRepository extends JpaRepository<Model, Long> {
 
-  // TODO: ¿DEBE INCLUIR SOLAMENTE TODOS LOS PRODUCTOS CUYO ESTADO DE CATEGORIA
-  // SEA TRUE?
   // Query personalizado para buscar productos mediante parametros
-  // Nota: Lista los productos cuya categoria este activa
   @Query("""
           SELECT m
           FROM Model m

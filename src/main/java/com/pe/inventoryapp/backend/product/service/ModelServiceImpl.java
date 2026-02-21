@@ -68,6 +68,7 @@ public class ModelServiceImpl implements ModelService {
     model.setCaducityDate(modelRequest.getCaducityDate());
     model.setTotalQuantityAvailable(0);
     model.setTotalQuantityReceived(0);
+    model.setTotalQuantityTaken(0);
     model.setTotalQuantityDelivered(0);
     model.setStatus(false);
     model.setProduct(product);

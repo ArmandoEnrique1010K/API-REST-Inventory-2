@@ -485,6 +485,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
+    // TODO: VERIFICAR ESTO
+    //* Debe eliminar la cantidad que fue tomada
+    Model model = model_DeliveryOrder.getModel();
+    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + deliveryLine.getDeliveredQuantity());
+    model.setTotalQuantityTaken(model.getTotalQuantityTaken() - deliveryLine.getDeliveredQuantity());
+    modelRepository.save(model);
+
+
     // TODO: EL PROBLEMA ESTA RELACIONADO CON EL CAMPO QUANTITYDELIVERED
     // NOTA: RECUERDA QUE TOTALQUANTITYDELIVERED REPRESENTA LA CANTIDAD QUE HA SIDO
     // ENTREGADA AL CLIENTE
@@ -635,6 +643,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Actualizara los campos porque se ha entregado el modelo del producto
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() - deliveryLine.getDeliveredQuantity());
+
+    // La cantidad tomada ahora pasa a ser la cantidad entregada
+    model.setTotalQuantityTaken(model.getTotalQuantityTaken() - deliveryLine.getDeliveredQuantity());
     model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() + deliveryLine.getDeliveredQuantity());
     modelRepository.save(model);
 
@@ -749,6 +760,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // lostQuantity);
     // productRepository.save(model);
 
+    Model model = modelRepository.findById(modelId).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+
+    // Al reportar una cantidad como perdida, se debe descontar esa cantidad de la cantidad tomada del producto, porque esa cantidad ya no sera entregada al cliente
+    model.setTotalQuantityTaken(model.getTotalQuantityTaken() - lostQuantity);
+    modelRepository.save(model);
+
     // 3° REGISTRARLO COMO MOVIMIENTO
     Movement movement = new Movement();
     movement.setQuantity(lostQuantity);
@@ -856,6 +874,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
     deliveryOrderDomainService.recalculateSummaries(deliveryOrder);
+
+    Model model = modelRepository.findById(model_DeliveryOrder.getModel().getId()).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+
+    model.setTotalQuantityTaken(model.getTotalQuantityTaken() - returnedQuantity);
+      modelRepository.save(model);
 
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
@@ -1026,8 +1050,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       deliveryLine.setLineStatus(LineStatus.LINE_READY);
     }
     // ===== Alterar campos del producto =====
-    model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() + quantity);
+    // model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() + quantity);
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() - quantity);
+    model.setTotalQuantityTaken(model.getTotalQuantityTaken() + quantity);
     modelRepository.save(model);
 
     deliveryLine.setUserUpdater(user);
@@ -1086,6 +1111,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setLineStatus(LineStatus.LINE_MISSING);
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
+
+    // AQUI NO SE ALTERAN LOS CAMPOS DE LAS CANTIDADES DEL MODELO DEL PRODUCTO
 
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
