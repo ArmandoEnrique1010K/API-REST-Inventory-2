@@ -881,6 +881,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     model.setTotalQuantityTaken(model.getTotalQuantityTaken() - returnedQuantity);
       modelRepository.save(model);
 
+
+    // TODO: DEBE CREAR UN NUEVO LOTE DE STOCK TEMPORAL CON LA CANTIDAD DEVUELTA
+    
+
     Movement movement = new Movement();
     movement.setQuantity(deliveryLine.getDeliveredQuantity());
     movement.setMovementType(MovementType.MOVEMENT_LINE_RETURN);
