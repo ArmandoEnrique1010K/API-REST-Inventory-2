@@ -1,9 +1,19 @@
 @startuml diagrama
-entity UserToken #ffc862 {
+entity UserPasswordOtp #ffc862 {
     Long id
-    String token
-    boolean active
-    expirationTime LocalDateTime
+    String requestId
+    String otpHash
+    Integer attempts
+    boolean verified
+    expirationTime expiresAt
+    User user
+}
+
+entity PasswordResetToken #ffc862 {
+    Long id
+    String tokenHash
+    LocalDateTime expiresAt
+    boolean used
     User user
 }
 
@@ -16,7 +26,6 @@ entity User #ffc862 {
     Integer dni
     boolean active
     List<Role> roles
-    List<UserToken> userTokens
     List<Movement> movements
     List<DeliveryOrder> deliveryOrders
     List<DeliveryLine> deliveryLines
@@ -243,7 +252,8 @@ entity Model_DeliveryOrder_Subregion #91fff9{
 }
 
 Role *.* User : requires
-UserToken *.. User : can have
+UserPasswordOtp *.. User : can have
+PasswordResetToken *.. User : can have
 Movement *... User : has
 DeliveryOrder *.. User : assign
 DeliveryOrder *.. User : creates

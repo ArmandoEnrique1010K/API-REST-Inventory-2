@@ -20,4 +20,7 @@ public class ChangePasswordRequest {
 
   @NotBlank(message = "Confirme su nueva contraseña")
   private String confirmNewPassword;
+
+  @NotBlank
+  private String resetToken;
 }

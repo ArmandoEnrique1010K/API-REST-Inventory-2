@@ -52,9 +52,6 @@ public class User  {
       @UniqueConstraint(columnNames = { "user_id", "role_id" })
   })
   private List<Role> roles;
-
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<UserToken> userTokens;
   
   @OneToMany(mappedBy = "user")
   private List<Movement> movements;

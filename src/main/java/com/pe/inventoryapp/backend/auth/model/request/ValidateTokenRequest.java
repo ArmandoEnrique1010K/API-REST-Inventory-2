@@ -15,4 +15,6 @@ public class ValidateTokenRequest {
   @NotBlank(message = "El token es obligatorio y no debe ser nulo o vacío")
   @Pattern(regexp = "^[0-9]{6}$", message = "El token debe contener exactamente 6 digitos")
   private String value;
+  
+  private String requestId;
 }

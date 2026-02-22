@@ -52,13 +52,15 @@ public class MailerSendServiceImpl implements MailerSendService {
       MailerSendResponse resp = ms.emails().send(email);
       System.out.println("Email enviado, messageId: " + resp.messageId);
     } catch (MailerSendException e) {
-      // Hay un problema con la asignación de variables de entorno:
-      // Se almacenan en memoria el ultimo valor asignado en el archivo .env, aunque no exista
-      // Ejemplo: Si comentas o eliminas una variable de entorno, se queda con el ultimo valor asignado
-      // La unica solución es reasignar el valor de la variable de entorno
       log.error("Error al enviar el correo: " + e.getMessage());
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR, "El servicio de envio de emails no ha respondido");
     }
   }
-
 }
+
+// * Habia un problema con la asignación de variables de entorno:
+// * Se almacenan en memoria el ultimo valor asignado en el archivo .env, aunque
+// no exista
+// * Ejemplo: Si comentas o eliminas una variable de entorno, se queda con el
+// ultimo valor asignado
+// * La unica solución es reasignar el valor de la variable de entorno

@@ -16,7 +16,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "// {\r\n//     \"email\": \"enrique1010k@gmail.com\",\r\n//     \"password\": \"Dark267AA3\"\r\n// }\r\n\r\n{\r\n    \"email\": \"correo@example.com\",\r\n    \"password\": \"12345\"\r\n}\r\n\r\n",
+              "raw": "{\r\n    \"email\": \"enrique1010k@gmail.com\",\r\n    \"password\": \"Dark267AA3\"\r\n}\r\n\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -76,7 +76,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"value\": \"670851\"\r\n}",
+              "raw": "{\r\n    \"value\": \"131386\",\r\n    \"requestId\": \"2f4af2c5-dcc1-459c-932d-a379a1f6fdb6\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -106,7 +106,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"newPassword\": \"Dark267AA3\",\r\n    \"confirmNewPassword\": \"Dark267AA3\"\r\n}",
+              "raw": "{\r\n    \"newPassword\": \"Dark267AA3\",\r\n    \"confirmNewPassword\": \"Dark267AA3\",\r\n    \"resetToken\": \"a68239b0-0c33-4888-a63f-10839c34e0b67860fb11-ddc7-48a4-8b56-8fbef0804dd5\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -114,7 +114,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/api/auth/change-password/670851",
+              "raw": "http://localhost:8080/api/auth/change-password",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -123,8 +123,7 @@
               "path": [
                 "api",
                 "auth",
-                "change-password",
-                "670851"
+                "change-password"
               ]
             }
           },
@@ -803,7 +802,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/models/products/2?page=0",
+              "raw": "http://localhost:8080/api/models/products",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -812,15 +811,9 @@
               "path": [
                 "api",
                 "models",
-                "products",
-                "2"
+                "products"
               ],
               "query": [
-                {
-                  "key": "page",
-                  "value": "0",
-                  "description": "Página actual"
-                },
                 {
                   "key": "keyword",
                   "value": null,
@@ -867,6 +860,11 @@
                   "key": "typeId",
                   "value": null,
                   "description": "Id del tipo",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0",
                   "disabled": true
                 }
               ]
@@ -2524,7 +2522,7 @@
                 },
                 {
                   "key": "movementType",
-                  "value": "MOVEMENT_LINE_CHANGE",
+                  "value": "CHANGE",
                   "disabled": true
                 },
                 {

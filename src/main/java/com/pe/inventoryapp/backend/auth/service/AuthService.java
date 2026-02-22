@@ -1,17 +1,18 @@
 package com.pe.inventoryapp.backend.auth.service;
 
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
+import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
   Long findUserIdByEmail(String email);
 
-  void updateUserPassword(String token, ChangePasswordRequest changePasswordRequest);
+  String processUserForgotPasswordAndReturnRequestId(String email);
 
-  void processUserForgotPassword(String email);
+  String validateAndActivateResetToken(ValidateTokenRequest validateTokenRequest);
 
-  void validateAndActivateResetToken(String token);
+  void updateUserPassword(ChangePasswordRequest changePasswordRequest);
 
   void logout(HttpServletResponse response);
 }

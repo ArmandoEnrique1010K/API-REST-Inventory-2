@@ -111,8 +111,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // *Strict bloquea cookies en requests cross-site, incluso en enlaces normales, lo que puede causar problemas de usabilidad en algunos casos (como redirecciones después del login). Lax permite cookies en solicitudes cross-site solo para métodos seguros (GET) y en enlaces normales, lo que mejora la compatibilidad sin comprometer significativamente la seguridad. 
 
     //*  ALTERNAR ESTAS CONFIGURACIONES PARA TRABAJAR EN POSTMAN O DESDE EL FRONTEND
-    // jwtCookie.setAttribute("SameSite", "Strict");
-    jwtCookie.setAttribute("SameSite", "Lax");
+    jwtCookie.setAttribute("SameSite", "Strict");
+    // jwtCookie.setAttribute("SameSite", "Lax");
+
     response.addCookie(jwtCookie);
 
     // Respuesta de autenticación exitosa

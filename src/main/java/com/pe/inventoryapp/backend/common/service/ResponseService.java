@@ -4,11 +4,14 @@ import java.util.Map;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
+import com.pe.inventoryapp.backend.common.model.response.CommonResponseWithSecretField;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.model.response.ErrorWithFieldsResponse;
 
 public interface ResponseService {
   CommonResponse generateSucessfullResponse(ResponseStatus code, String message);
+
+  CommonResponseWithSecretField generateSucessfullResponseWithSecretField(ResponseStatus code, String message, String secretField);
 
   CommonResponse generateErrorResponse(ResponseStatus code, String message);
 

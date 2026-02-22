@@ -57,4 +57,6 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       @Param("modelId") Long modelId,
       @Param("userId") Long userId,
       @Param("stockLotReceiverId") Long stockLotReceiverId);
+
+  // TODO: CREAR UN METODO PARA LIMITAR LA CANTIDAD DE MOVIMIENTOS EN LA BASE DE DATOS A 2000 MOVIMIENTOS
 }
