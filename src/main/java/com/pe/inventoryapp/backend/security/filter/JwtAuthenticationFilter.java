@@ -101,15 +101,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         .signWith(SECRET_KEY)
         .compact();
 
-    //TODO: HABILITAR LAS COOKIES EN EL FRONTEND
     // Configuración de cookies
     Cookie jwtCookie = new Cookie("ACCESS_TOKEN", token);
     jwtCookie.setHttpOnly(true); // NO accesible por JS
-    jwtCookie.setSecure(true); // HTTPS (false solo en local)
+    jwtCookie.setSecure(true); // HTTPS
     jwtCookie.setPath("/");
     jwtCookie.setMaxAge(TOKEN_EXPIRATION); 
-    jwtCookie.setAttribute("SameSite", "Strict");
+    
+    // *Strict bloquea cookies en requests cross-site, incluso en enlaces normales, lo que puede causar problemas de usabilidad en algunos casos (como redirecciones después del login). Lax permite cookies en solicitudes cross-site solo para métodos seguros (GET) y en enlaces normales, lo que mejora la compatibilidad sin comprometer significativamente la seguridad. 
 
+    //*  ALTERNAR ESTAS CONFIGURACIONES PARA TRABAJAR EN POSTMAN O DESDE EL FRONTEND
+    // jwtCookie.setAttribute("SameSite", "Strict");
+    jwtCookie.setAttribute("SameSite", "Lax");
     response.addCookie(jwtCookie);
 
     // Respuesta de autenticación exitosa

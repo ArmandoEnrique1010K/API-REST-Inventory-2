@@ -21,6 +21,7 @@ import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.annotation.PostConstruct;
 
 @Configuration
@@ -108,6 +109,8 @@ public class InitialData {
       return locationRepository.save(location);
     });
 
+    Dotenv dotenv = Dotenv.load();
+
     // El usuario por defecto (primer usuario de la app)
     if (userRepository.findById(1L).isEmpty()) {
 
@@ -120,13 +123,14 @@ public class InitialData {
 
       System.out.println(allRoles);
 
+      // TODO: EL PRIMER USUARIO SE DEBE ESTABLECER MEDIANTE UNA VARIABLE DE ENTORNO
       User user = new User();
       user.setFirstname("Primer usuario");
       user.setLastname("del sistema");
       user.setDni(12345678);
-      user.setEmail("correo@example.com");
+      user.setEmail(dotenv.get("FIRST_USER_EMAIL"));
       user.setActive(true);
-      user.setPassword(passwordEncoder.encode("12345"));
+      user.setPassword(passwordEncoder.encode(dotenv.get("FIRST_USER_PASSWORD")));
       user.setRoles(allRoles);
 
       userRepository.save(user);
