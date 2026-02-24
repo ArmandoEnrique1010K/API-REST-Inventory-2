@@ -70,6 +70,7 @@ entity Model #d0ffb0{
     Integer totalQuantityAvailable
     Integer totalQuantityReceived
     Integer totalQuantityDelivered
+    Integer totalQuantityTaken
     LocalDateTime createdAt
     LocalDateTime updatedAt
     boolean status

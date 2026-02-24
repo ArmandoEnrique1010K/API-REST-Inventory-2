@@ -19,6 +19,8 @@ import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
+import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.PasswordResetTokenRepository;
 import com.pe.inventoryapp.backend.user.repository.UserPasswordOtpRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -34,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
   private final MailerSendService mailerSendService;
   private final UserPasswordOtpRepository userPasswordOtpRepository;
   private final PasswordResetTokenRepository passwordResetTokenRepository;
-  
+
   public AuthServiceImpl(
       UserRepository userRepository, 
       PasswordEncoder passwordEncoder, 
@@ -65,14 +67,18 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional
   public String processUserForgotPasswordAndReturnRequestId(String email) {
-
-    // DEVUELVE UN ERROR FALSO, SIMULA QUE EL USUARIO EXISTE EN EL SISTEMA A PESAR DE QUE NO EXISTA, PARA EVITAR FILTRAR USUARIOS POR SU EMAIL
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.CREATED, "Si el correo existe, se le enviará un código de verificación al correo"));
-
     // Genera el token de 6 digitos
     String otp = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
     String requestId = UUID.randomUUID().toString();
+
+    // DEVUELVE UN ERROR FALSO, SIMULA QUE EL USUARIO EXISTE EN EL SISTEMA A PESAR DE QUE NO EXISTA, PARA EVITAR FILTRAR USUARIOS POR SU EMAIL
+    User user = userRepository.findByEmail(email).orElse(null);
+    // No debe devolver una excepción, ya que no se quiere filtrar usuarios por su email, por lo que se simula un proceso exitoso aunque el usuario no exista
+
+    if (user == null) {
+      return requestId; // DEBE TERMINAR EL PROCESO
+    }
+
     UserPasswordOtp entity = new UserPasswordOtp();
     entity.setUser(user);
     entity.setRequestId(requestId);
@@ -96,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
 
     // Si alguien llegara a quebrantar el requestId
     UserPasswordOtp entity = userPasswordOtpRepository.findByRequestId(requestId)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.CREATED,
+        .orElseThrow(() -> new BusinessException(ResponseStatus.CONFLICT,
             "Ha ocurrido un grave error, vuelva a solicitar un token"));
 
     // Da un error si ya está activo el token
@@ -184,21 +190,6 @@ public class AuthServiceImpl implements AuthService {
     // passwordResetTokenRepository.save(passwordResetToken);
   }
 
-  // =======================
-  // PRIVATE HELPERS
-  // =======================
-
-  // UTILIDAD DE HASH
-  public static String sha256(String value) {
-      try {
-          MessageDigest md = MessageDigest.getInstance("SHA-256");
-          byte[] hash = md.digest(value.getBytes(StandardCharsets.UTF_8));
-          return HexFormat.of().formatHex(hash);
-      } catch (Exception e) {
-          throw new IllegalStateException("Hash error");
-      }
-  }
-
   @Override
   public void logout(HttpServletResponse response) {
     Cookie cookie = new Cookie("ACCESS_TOKEN", null);
@@ -208,5 +199,37 @@ public class AuthServiceImpl implements AuthService {
     cookie.setMaxAge(0); // elimina la cookie
 
     response.addCookie(cookie);
+  }
+
+  // =======================
+  // PRIVATE HELPERS
+  // =======================
+
+  // UTILIDAD DE HASH
+  public static String sha256(String value) {
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA-256");
+      byte[] hash = md.digest(value.getBytes(StandardCharsets.UTF_8));
+      return HexFormat.of().formatHex(hash);
+    } catch (Exception e) {
+      throw new IllegalStateException("Hash error");
+    }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public DetailUserResponse getCurrentSession(Long id) {
+    if (id == null) {
+      return UserMapper.builder()
+          .buildDetailUserResponse();
+    } else {
+      User user = userRepository.findById(id)
+          .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "Usuario no encontrado"));
+
+      return UserMapper.builder()
+          .setUser(user)
+          .buildDetailUserResponse();
+
+    }
   }
 }

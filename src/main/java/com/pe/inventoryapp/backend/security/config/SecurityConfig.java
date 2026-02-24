@@ -79,6 +79,7 @@ public class SecurityConfig {
 						.permitAll()
 						.requestMatchers(HttpMethod.PUT, "/api/auth/change-password")
 						.permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/auth/current-session").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
 
 						// ROLES
@@ -301,6 +302,7 @@ public class SecurityConfig {
 								"/api/auth/forgot-password",
 								"/api/auth/validate-token",
 								"/api/auth/change-password",
+								"/api/auth/current-session",
 								"/api/auth/logout"
 						)
 				).build();
@@ -312,15 +314,15 @@ public class SecurityConfig {
 
 		//*  ALTERNAR ESTAS CONFIGURACIONES PARA TRABAJAR EN POSTMAN O DESDE EL FRONTEND
 		// Configuracion de CORS para permitir solicitudes desde cualquier origen, con cualquier método y encabezados
-		config.setAllowedOrigins(List.of("*"));
-		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
-		config.setAllowedHeaders(List.of("*"));
+		// config.setAllowedOrigins(List.of("*"));
+		// config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
+		// config.setAllowedHeaders(List.of("*"));
 
-		// config.setAllowedOrigins(List.of("http://localhost:5173"));
-		// config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", // "DELETE"));
-		// config.setAllowedHeaders(List.of("Authorization", "Content-Type", // "X-XSRF-TOKEN"));
-		// config.setExposedHeaders(List.of("Set-Cookie"));
-		
+		config.setAllowedOrigins(List.of("http://localhost:5173"));
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH"));
+		config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+		config.setExposedHeaders(List.of("Set-Cookie"));
+	
 		config.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

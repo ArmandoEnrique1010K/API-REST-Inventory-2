@@ -1,8 +1,10 @@
 package com.pe.inventoryapp.backend.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,8 +15,11 @@ import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponseWithSecretField;
+import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
+import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -30,11 +35,13 @@ public class AuthController {
   private final AuthService authService;
   private final ResponseService responseService;
   private final ValidationService validationService;
+  private final AuthenticationContextService authenticationContextService;
 
-  public AuthController (AuthService authService, ResponseService responseService, ValidationService validationService) {
+  public AuthController (AuthService authService, ResponseService responseService, ValidationService validationService, AuthenticationContextService authenticationContextService) {
     this.authService = authService;
     this.responseService = responseService;
     this.validationService = validationService; 
+    this.authenticationContextService = authenticationContextService; 
   }
 
   // Nota: El endpoint POST "/" ya esta siendo manejado por Spring Security
@@ -85,6 +92,27 @@ public class AuthController {
         "Ha cerrado sesión correctamente");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  //* OBTIENE LA SESION ACTUAL DEL USUARIO, SI NO HAY SESION DEVUELVE UN USUARIO VACIO
+
+  @GetMapping("/current-session")
+  public ResponseEntity<?> getCurrentSession(Authentication authentication) {
+
+    System.out.println("AUTENTICACIÓN: " +authentication);
+
+    if (authentication == null || !authentication.isAuthenticated()) {
+      CommonResponse response = responseService.generateErrorResponse(ResponseStatus.SUCCESS,
+          "No hay una sesión activa");
+      return ResponseEntity.status(response.status()).body(response); 
+      }
+
+    Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    DetailUserResponse user = authService.getCurrentSession(username);
+
+    DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
 }
 
 // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
