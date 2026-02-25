@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 
@@ -290,22 +289,24 @@ public class SecurityConfig {
 						authenticationManager, responseService, userRepository))
 				
 
-				//*  ALTERNAR ESTAS CONFIGURACIONES PARA TRABAJAR EN POSTMAN O DESDE EL FRONTEND
 				// Configuracion de CSRF
-				// .csrf(csrf -> csrf.disable())
+				.csrf(csrf -> csrf.disable())
 
-				.csrf(csrf -> csrf
-						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-						.csrfTokenRequestHandler(csrfTokenRequestHandler())
-						.ignoringRequestMatchers(
-								"/api/auth/login",
-								"/api/auth/forgot-password",
-								"/api/auth/validate-token",
-								"/api/auth/change-password",
-								"/api/auth/current-session",
-								"/api/auth/logout"
-						)
-				).build();
+				// * ADVERTENCIA: NO HABILITAR CSRF PORQUE SE ESTA TRABAJANDO CON JWT Y COOKIES, SI SE HABILITA CSRF SE DEBE CONFIGURAR PARA QUE IGNORE LAS RUTAS DE AUTH, PERO AUN ASI PUEDE CAUSAR PROBLEMAS CON EL FRONTEND SI NO SE CONFIGURA CORRECTAMENTE
+
+
+				// .csrf(csrf -> csrf
+				// 		.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+				// 		.csrfTokenRequestHandler(csrfTokenRequestHandler())
+				// 		.ignoringRequestMatchers(
+				// 				"/api/auth/login",
+				// 				"/api/auth/forgot-password",
+				// 				"/api/auth/validate-token",
+				// 				"/api/auth/change-password",
+				// 				"/api/auth/current-session",
+				// 				"/api/auth/logout"
+				// 		)
+				.build();
 	}
 
 	@Bean
