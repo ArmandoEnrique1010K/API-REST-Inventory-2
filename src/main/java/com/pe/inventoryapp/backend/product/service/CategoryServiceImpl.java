@@ -42,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   @Transactional(readOnly = true)
   public List<CategoryResponse> findAllCategories() {
-    List<Category> categories = (List<Category>) categoryRepository.findAll();
+    List<Category> categories = (List<Category>) categoryRepository.findAllAndSortById();
 
     return categories.stream()
         .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse())

@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.product.controller;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,10 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.product.model.request.ProductCreateRequest;
@@ -48,6 +52,27 @@ public class ProductController {
         "Se registro el producto");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  // Este método lista todos los productos (recordar que cada producto tiene distintos modelos)
+  @GetMapping
+  public ResponseEntity<?> listAllProducts(
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String name,
+      @RequestParam(required = false) Boolean status,
+      @RequestParam(required = false) Long categoryId,
+      @RequestParam(required = false) Long typeId) {
+            Pageable pageable = PageRequest.of(page, 20);
+
+            PageResponse<ProductResponse> products = productService.searchAllProductsByParams(pageable, name, status, categoryId, typeId);
+
+                DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, products);
+
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  }
+
+
+
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getProduct(@PathVariable Long id) {

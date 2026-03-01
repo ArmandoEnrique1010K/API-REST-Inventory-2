@@ -1,10 +1,15 @@
 package com.pe.inventoryapp.backend.product.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
+import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -56,11 +61,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // Buscar la categoria por su ID
-    Category category = categoryRepository.findById(idCategory).orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
+    Category category = categoryRepository.findById(idCategory)
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
 
     Type type = typeRepository.findById(idType)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
-
 
     Product product = new Product();
     product.setName(name);
@@ -89,6 +94,41 @@ public class ProductServiceImpl implements ProductService {
     model.setProduct(product);
 
     modelRepository.save(model);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public PageResponse<ProductResponse> searchAllProductsByParams(Pageable pageable, String name, Boolean status, Long categoryId, Long typeId) {
+
+    if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+      throw new BusinessException(
+          ResponseStatus.NOT_FOUND,
+          "La categoria no existe");
+    }
+
+    if (typeId != null && !typeRepository.existsById(typeId)) {
+      throw new BusinessException(
+          ResponseStatus.NOT_FOUND,
+          "El tipo no existe");
+    }
+
+    Page<Product> products = productRepository.findAllByParams(pageable, name,  status, categoryId, typeId);
+
+    List<ProductResponse> result = products.getContent().stream().map(
+        product -> ProductMapper.builder()
+            .setProduct(product).buildProductResponse())
+        .toList();
+
+    PageResponse<ProductResponse> pageResponse = new PageResponse<>(
+        result,
+        products.getNumber(),
+        products.getSize(),
+        products.getTotalElements(),
+        products.getTotalPages(),
+        products.isFirst(),
+        products.isLast());
+
+    return pageResponse;
   }
 
   @Override
@@ -134,10 +174,10 @@ public class ProductServiceImpl implements ProductService {
     Category category = categoryRepository.findById(
         categoryId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
-    
+
     Long typeId = productUpdateRequest.getTypeId();
 
-    if (typeId == null){
+    if (typeId == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
