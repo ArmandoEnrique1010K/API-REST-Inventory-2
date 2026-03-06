@@ -39,7 +39,7 @@ public class TypeServiceImpl implements TypeService {
   @Override
   @Transactional(readOnly = true)
   public List<TypeResponse> listAllTypes() {
-    List<Type> types = (List<Type>) typeRepository.findAll();
+    List<Type> types = (List<Type>) typeRepository.findAllAndSortById();
 
     return types.stream().map(type -> TypeMapper.builder().setType(type).buildTypeListResponse())
         .collect(Collectors.toList());
