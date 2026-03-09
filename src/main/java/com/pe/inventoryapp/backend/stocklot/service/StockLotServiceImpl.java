@@ -67,7 +67,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Integer quantity = stockLotReceiveRequest.getQuantity();
 
-    Long modelId = stockLotReceiveRequest.getIdModel();
+    Long modelId = stockLotReceiveRequest.getModelId();
 
     if (modelId == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -81,7 +81,7 @@ public class StockLotServiceImpl implements StockLotService {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
     }
 
-    Long id_company = stockLotReceiveRequest.getIdCompany();
+    Long id_company = stockLotReceiveRequest.getCompanyId();
 
     if (id_company == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -425,7 +425,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Integer quantity = stockLotTransferRequest.getQuantity();
 
-    Long id_stock_lot_receiver = stockLotTransferRequest.getIdStockLotReceiver();
+    Long id_stock_lot_receiver = stockLotTransferRequest.getStockLotReceiverId();
 
     if (idStockLotEmitter == null || id_stock_lot_receiver == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);

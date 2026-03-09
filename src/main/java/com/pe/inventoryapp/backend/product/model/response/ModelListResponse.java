@@ -21,4 +21,9 @@ public class ModelListResponse {
   private Integer totalQuantityReceived;
   private Integer totalQuantityDelivered;
   private boolean status;
+
+  private Long productId;
+  private String productName;
+  private String typeName;
+  private String categoryName;
 }

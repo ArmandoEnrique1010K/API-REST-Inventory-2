@@ -30,7 +30,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
           AND (:status IS NULL OR m.status = :status)
           AND (:categoryId IS NULL OR p.category.id = :categoryId)
           AND (:typeId IS NULL OR p.type.id = :typeId)
-          ORDER BY m.updatedAt DESC
+          ORDER BY m.id DESC
       """)
   Page<Model> findAllByParams(
       Pageable pageable,
@@ -43,6 +43,8 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
       @Param("categoryId") Long categoryId,
       @Param("typeId") Long typeId);
 
+
+  @Query("SELECT m FROM Model m WHERE m.product.id = :productId ORDER BY m.id DESC")
   List<Model> findAllByProductId(Long productId);
 
   // Método para verificar que el nombre de modelo sea unico dentro de la lista de

@@ -190,7 +190,7 @@ public class SecurityConfig {
 						// STOCK LOT
 						.requestMatchers(HttpMethod.POST, "/api/stock-lots")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.GET, "/api/stock-lots/")
+						.requestMatchers(HttpMethod.GET, "/api/stock-lots")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.GET, "/api/stock-lots/exclude/*/company/*/model/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")

@@ -70,7 +70,7 @@ public class ModelServiceImpl implements ModelService {
     model.setTotalQuantityReceived(0);
     model.setTotalQuantityTaken(0);
     model.setTotalQuantityDelivered(0);
-    model.setStatus(false);
+    model.setStatus(true);
     model.setProduct(product);
 
     modelRepository.save(model);

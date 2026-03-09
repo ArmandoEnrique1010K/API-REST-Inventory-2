@@ -14,7 +14,7 @@ public class StockLotDomainService {
     String time = now.getHour() + ":" + now.getMinute() + ":" + now.getSecond();
 
     // Genera automaticamente el batch
-    String batch = "LOT-" + productName.replace(" ", "-") + modelName.replace(" ", "-") + "-" + date + "-" + time;
+    String batch = "LOT_" + productName.replace(" ", "-") + '_' + modelName.replace(" ", "-") + "_" + date + "_" + time;
 
     return batch;
   }

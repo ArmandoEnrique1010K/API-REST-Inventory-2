@@ -60,14 +60,19 @@ public class ModelMapper {
 
     return new ModelListResponse(
       model.getId(),
-      model.getName().trim(),
+      model.getName(),
       model.getImageUrl(),
       model.getEntryDate(),
       model.getCaducityDate(),
       model.getTotalQuantityAvailable(),
       model.getTotalQuantityReceived(),
       model.getTotalQuantityDelivered(),
-      model.isStatus()
+      model.isStatus(),
+
+      model.getProduct().getId(),
+      model.getProduct().getName(),
+      model.getProduct().getType().getName(),
+      model.getProduct().getCategory().getName()
     );
   }
 }

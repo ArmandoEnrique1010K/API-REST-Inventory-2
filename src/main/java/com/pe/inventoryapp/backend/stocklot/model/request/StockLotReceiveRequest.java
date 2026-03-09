@@ -27,8 +27,8 @@ public class StockLotReceiveRequest {
   private String comment;
 
   @NotNull(message = "Seleccione un modelo del producto")
-  private Long idModel;
+  private Long modelId;
 
   @NotNull(message = "Seleccione una empresa")
-  private Long idCompany;
+  private Long companyId;
 }
