@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
@@ -22,7 +24,6 @@ import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 
-
 @Service
 public class ModelServiceImpl implements ModelService {
   private final ProductRepository productRepository;
@@ -30,23 +31,26 @@ public class ModelServiceImpl implements ModelService {
   private final CategoryRepository categoryRepository;
   private final ModelRepository modelRepository;
   private final ModelDomainService modelDomainService;
+  private final CloudinaryService cloudinaryService;
 
   public ModelServiceImpl(
       ProductRepository productRepository,
       TypeRepository typeRepository,
       CategoryRepository categoryRepository,
       ModelRepository modelRepository,
-      ModelDomainService modelDomainService) {
+      ModelDomainService modelDomainService,
+      CloudinaryService cloudinaryService) {
     this.productRepository = productRepository;
     this.typeRepository = typeRepository;
     this.categoryRepository = categoryRepository;
     this.modelRepository = modelRepository;
     this.modelDomainService = modelDomainService;
+    this.cloudinaryService = cloudinaryService;
   }
 
   @Override
   @Transactional
-  public void saveModelInProductId(ModelRequest modelRequest, Long productId) {
+  public void saveModelInProductId(ModelRequest modelRequest, MultipartFile file, Long productId) {
     String name = modelRequest.getName().trim();
 
     modelDomainService.verifyModelNameAvailableByProductId(name, productId);
@@ -61,9 +65,19 @@ public class ModelServiceImpl implements ModelService {
     product.setQuantityModels(product.getQuantityModels() + 1);
     productRepository.save(product);
 
+    // CONFIGURACION DE CLOUDINARY
+    String urlImage = "";
+
+    if (file != null && !file.isEmpty()) {
+      urlImage = cloudinaryService.uploadImage(file);
+      System.out.println("SE SUBIO UNA IMAGEN A CLOUDINARY");
+    } else {
+      System.out.println("EL USUARIO NO SUBIO UNA IMAGEN, COLOCANDO IMAGEN POR DEFECTO");
+    }
+
     Model model = new Model();
     model.setName(name);
-    model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
+    model.setImageUrl(modelDomainService.resolveImageUrl(urlImage));
     model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
     model.setCaducityDate(modelRequest.getCaducityDate());
     model.setTotalQuantityAvailable(0);
@@ -167,7 +181,7 @@ public class ModelServiceImpl implements ModelService {
     modelDomainService.verifyModelNameAvailableByProductIdExcludingId(newName, productId, id);
 
     model.setName(newName);
-    model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
+    // model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
     model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
     model.setCaducityDate(modelRequest.getCaducityDate());
     modelRepository.save(model);

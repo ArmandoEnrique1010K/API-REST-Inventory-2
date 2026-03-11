@@ -112,6 +112,14 @@
 		<version>1.4.1</version>  <!-- o la versión que esté vigente -->
 	</dependency>
 
+	<!-- Cloudinary -->
+	    <dependency>
+        <groupId>com.cloudinary</groupId>
+        <artifactId>cloudinary-http5</artifactId>
+        <version>2.3.0</version>
+    </dependency>
+
+
   <!--dotenv-java-->
 	<dependency>
     <groupId>io.github.cdimascio</groupId>
