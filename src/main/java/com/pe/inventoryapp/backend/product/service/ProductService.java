@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.product.service;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.request.ProductCreateRequest;
@@ -8,7 +9,7 @@ import com.pe.inventoryapp.backend.product.model.request.ProductUpdateRequest;
 import com.pe.inventoryapp.backend.product.model.response.ProductResponse;
 
 public interface ProductService {
-  void saveProduct(ProductCreateRequest productRequest);
+  void saveProduct(ProductCreateRequest productRequest, MultipartFile file);
 
   PageResponse<ProductResponse> searchAllProductsByParams(
       Pageable pageable,

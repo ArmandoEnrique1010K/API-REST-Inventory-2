@@ -6,9 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
+import com.pe.inventoryapp.backend.common.model.response.CloudinaryImageResponse;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
@@ -31,6 +33,7 @@ public class ProductServiceImpl implements ProductService {
   private final ModelRepository modelRepository;
   private final ProductDomainService productDomainService;
   private final ModelDomainService modelDomainService;
+  private final CloudinaryDomainService cloudinaryDomainService;
 
   public ProductServiceImpl(
       ProductRepository productRepository,
@@ -38,18 +41,20 @@ public class ProductServiceImpl implements ProductService {
       CategoryRepository categoryRepository,
       ModelRepository modelRepository,
       ProductDomainService productDomainService,
-      ModelDomainService modelDomainService) {
+      ModelDomainService modelDomainService,
+      CloudinaryDomainService cloudinaryDomainService){
     this.productRepository = productRepository;
     this.typeRepository = typeRepository;
     this.categoryRepository = categoryRepository;
     this.modelRepository = modelRepository;
     this.productDomainService = productDomainService;
     this.modelDomainService = modelDomainService;
+    this.cloudinaryDomainService = cloudinaryDomainService;
   }
 
   @Override
   @Transactional
-  public void saveProduct(ProductCreateRequest productCreateRequest) {
+  public void saveProduct(ProductCreateRequest productCreateRequest, MultipartFile file) {
     String name = productCreateRequest.getName().trim();
     productDomainService.verifyProductNameAvailable(name);
 
@@ -78,10 +83,23 @@ public class ProductServiceImpl implements ProductService {
     product.setType(type);
     productRepository.save(product);
 
+    // CONFIGURACIÓN DE CLOUDINARY
+    String urlImage = "";
+    String publicImageId = "";
+
+    if (file != null && !file.isEmpty()) {
+      CloudinaryImageResponse image = cloudinaryDomainService.uploadImage(file);
+      urlImage = image.imageUrl();
+      publicImageId = image.publicId();
+    }
+
+
+
     // GUARDAR EL MODELO DEL PRODUCTO
     Model model = new Model();
     model.setName(productCreateRequest.getModelName());
-    model.setImageUrl(modelDomainService.resolveImageUrl(productCreateRequest.getModelImageUrl()));
+    model.setImageUrl(modelDomainService.resolveImageUrl(urlImage));
+    model.setPublicImageId(publicImageId);
     model.setEntryDate(modelDomainService.resolveAnyLocalDate(productCreateRequest.getModelEntryDate()));
 
     // Nota: CaducityDate puede ser nulo

@@ -31,6 +31,7 @@ public class ModelMapper {
       model.getId(),
       model.getName(),
       model.getImageUrl(),
+      model.getPublicImageId(),
       model.getEntryDate(),
       model.getCaducityDate(),
       model.getTotalQuantityAvailable(),

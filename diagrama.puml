@@ -65,6 +65,7 @@ entity Model #d0ffb0{
     Long id
     String name
     String imageUrl
+    String publicImageId
     LocalDate entryDate
     LocalDate caducityDate
     Integer totalQuantityAvailable

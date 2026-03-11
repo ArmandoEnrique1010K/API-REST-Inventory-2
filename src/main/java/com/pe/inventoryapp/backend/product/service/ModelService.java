@@ -29,7 +29,7 @@ public interface ModelService {
 
   ModelDetailsResponse findModelById(Long id);
 
-  void updateModelById(Long id, ModelRequest modelRequest);
+  void updateModelById(Long id, ModelRequest modelRequest, MultipartFile file);
 
   void changeStatusModelById(Long id);
 }

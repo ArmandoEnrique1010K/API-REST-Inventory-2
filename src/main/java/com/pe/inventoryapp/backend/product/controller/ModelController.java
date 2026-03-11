@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,9 +49,12 @@ public class ModelController {
   }
 
   // Tambien se debe subir una imagen con Cloudinary
-  @PostMapping("/product/{id}")
-  public ResponseEntity<CommonResponse> registerModelInProduct(@PathVariable Long id,
-      @Valid @ModelAttribute ModelRequest modelRequest, BindingResult result, @RequestParam("file") MultipartFile file
+  @PostMapping(value = "/product/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<CommonResponse> registerModelInProduct(
+      @PathVariable Long id,
+      @Valid @ModelAttribute ModelRequest modelRequest, 
+      BindingResult result, 
+      @RequestParam(value = "file", required = false) MultipartFile file
       ) {
     validationService.validateFieldsAndThrowResponse(result);
     modelService.saveModelInProductId(modelRequest, file, id);
@@ -99,11 +103,15 @@ public class ModelController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  @PutMapping("/{id}")
-  public ResponseEntity<CommonResponse> updateModel(@PathVariable Long id, @Valid @RequestBody ModelRequest modelRequest,
-      BindingResult result) {
+  @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<CommonResponse> updateModel(
+    @PathVariable Long id, 
+    @Valid @ModelAttribute ModelRequest modelRequest,
+      BindingResult result,
+    @RequestParam(value = "file", required = false) MultipartFile file
+    ) {
     validationService.validateFieldsAndThrowResponse(result);
-    modelService.updateModelById(id, modelRequest);
+    modelService.updateModelById(id, modelRequest,file);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
     "Se actualizo los datos del modelo del producto");

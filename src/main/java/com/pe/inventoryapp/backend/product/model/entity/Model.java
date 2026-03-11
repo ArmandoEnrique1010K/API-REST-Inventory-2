@@ -43,6 +43,7 @@ public class Model {
 
   // TODO: EN ALGUN FUTURO CREAR UNA ENTIDAD PARA RELACIONAR VARIAS IMAGENES HACIA UN MODELO
   private String imageUrl;
+  private String publicImageId;
 
   // Fecha de entrada del producto
   private LocalDate entryDate;

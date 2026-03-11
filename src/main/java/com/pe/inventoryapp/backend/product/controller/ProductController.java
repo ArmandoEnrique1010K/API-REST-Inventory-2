@@ -2,9 +2,11 @@ package com.pe.inventoryapp.backend.product.controller;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
@@ -42,11 +46,13 @@ public class ProductController {
     this.validationService = validationService;
   }
 
-  @PostMapping
-  public ResponseEntity<CommonResponse> registerProduct(@Valid @RequestBody ProductCreateRequest productCreateRequest,
-      BindingResult result) {
+  @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<CommonResponse> registerProduct(
+    @Valid @ModelAttribute ProductCreateRequest productCreateRequest,
+      BindingResult result,
+    @RequestParam(value = "file", required = false) MultipartFile file) {
     validationService.validateFieldsAndThrowResponse(result);
-    productService.saveProduct(productCreateRequest);
+    productService.saveProduct(productCreateRequest, file);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
         "Se registro el producto");

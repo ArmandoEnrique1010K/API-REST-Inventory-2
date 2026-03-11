@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
+import com.pe.inventoryapp.backend.common.model.response.CloudinaryImageResponse;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.entity.Product;
@@ -31,7 +32,7 @@ public class ModelServiceImpl implements ModelService {
   private final CategoryRepository categoryRepository;
   private final ModelRepository modelRepository;
   private final ModelDomainService modelDomainService;
-  private final CloudinaryService cloudinaryService;
+  private final CloudinaryDomainService cloudinaryDomainService;
 
   public ModelServiceImpl(
       ProductRepository productRepository,
@@ -39,13 +40,13 @@ public class ModelServiceImpl implements ModelService {
       CategoryRepository categoryRepository,
       ModelRepository modelRepository,
       ModelDomainService modelDomainService,
-      CloudinaryService cloudinaryService) {
+      CloudinaryDomainService cloudinaryDomainService) {
     this.productRepository = productRepository;
     this.typeRepository = typeRepository;
     this.categoryRepository = categoryRepository;
     this.modelRepository = modelRepository;
     this.modelDomainService = modelDomainService;
-    this.cloudinaryService = cloudinaryService;
+    this.cloudinaryDomainService = cloudinaryDomainService;
   }
 
   @Override
@@ -67,9 +68,12 @@ public class ModelServiceImpl implements ModelService {
 
     // CONFIGURACION DE CLOUDINARY
     String urlImage = "";
+    String publicImageId = "";
 
     if (file != null && !file.isEmpty()) {
-      urlImage = cloudinaryService.uploadImage(file);
+      CloudinaryImageResponse image = cloudinaryDomainService.uploadImage(file);
+      urlImage = image.imageUrl();
+      publicImageId = image.publicId();
       System.out.println("SE SUBIO UNA IMAGEN A CLOUDINARY");
     } else {
       System.out.println("EL USUARIO NO SUBIO UNA IMAGEN, COLOCANDO IMAGEN POR DEFECTO");
@@ -78,6 +82,7 @@ public class ModelServiceImpl implements ModelService {
     Model model = new Model();
     model.setName(name);
     model.setImageUrl(modelDomainService.resolveImageUrl(urlImage));
+    model.setPublicImageId(publicImageId);
     model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
     model.setCaducityDate(modelRequest.getCaducityDate());
     model.setTotalQuantityAvailable(0);
@@ -156,7 +161,7 @@ public class ModelServiceImpl implements ModelService {
 
   @Override
   @Transactional
-  public void updateModelById(Long id, ModelRequest modelRequest) {
+  public void updateModelById(Long id, ModelRequest modelRequest, MultipartFile file) {
     if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
@@ -179,6 +184,24 @@ public class ModelServiceImpl implements ModelService {
 
     String newName = modelRequest.getName().trim();
     modelDomainService.verifyModelNameAvailableByProductIdExcludingId(newName, productId, id);
+
+    // Implementación de Cloudinary
+    // Solamente si el usuario ha subido una nueva imagen
+    if (file != null && !file.isEmpty()) {
+      CloudinaryImageResponse image = cloudinaryDomainService.uploadImage(file);
+
+      // Debe borrar la imagen por el publicImageId (El ID que se asocia a la imagen
+      // desde Cloudinary)
+      cloudinaryDomainService.deleteImage(model.getPublicImageId());
+
+      model.setImageUrl(image.imageUrl());
+      model.setPublicImageId(image.publicId());
+      System.out.println("SE SUBIO UNA IMAGEN A CLOUDINARY, ELIMINANDO LA IMAGEN ANTERIOR Y REEMPLAZANDOLO POR LA NUEVA");
+    } else {
+      System.out.println("EL USUARIO NO SUBIO UNA IMAGEN, SE MANTIENE LA IMAGEN ANTERIOR");
+    }
+
+
 
     model.setName(newName);
     // model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
