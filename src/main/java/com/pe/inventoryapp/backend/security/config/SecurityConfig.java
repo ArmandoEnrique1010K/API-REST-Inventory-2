@@ -158,7 +158,7 @@ public class SecurityConfig {
 						// SUBREGION
 						.requestMatchers(HttpMethod.POST, "/api/subregions")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
-						.requestMatchers(HttpMethod.GET, "/api/subregions")
+						.requestMatchers(HttpMethod.GET, "/api/subregions/region/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.GET, "/api/subregions/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")

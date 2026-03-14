@@ -18,5 +18,5 @@ public class SubregionRequest {
   private String name;
 
   @NotNull(message = "Seleccione una region")
-  private Long idRegion;
+  private Long regionId;
 }

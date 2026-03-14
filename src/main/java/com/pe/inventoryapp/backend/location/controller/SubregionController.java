@@ -41,7 +41,7 @@ public class SubregionController {
   }
 
   @PostMapping
-  public ResponseEntity<CommonResponse> registerSubregion(@PathVariable Long id, @Valid @RequestBody SubregionRequest subRegionRequest,
+  public ResponseEntity<CommonResponse> registerSubregion(@Valid @RequestBody SubregionRequest subRegionRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     subregionService.saveSubregion(subRegionRequest);

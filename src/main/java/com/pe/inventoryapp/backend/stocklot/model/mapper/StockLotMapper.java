@@ -30,6 +30,7 @@ public class StockLotMapper {
         stockLot.getId(),
         stockLot.getBatch(),
         stockLot.getQuantityAvailable(),
+        stockLot.getQuantityReceived(),
         stockLot.getCreatedAt(),
         stockLot.getModel().getId(),
         stockLot.getModel().getName(),

@@ -37,7 +37,7 @@ public class SubregionServiceImpl implements SubregionService{
   @Transactional
   public void saveSubregion(SubregionRequest subregionRequest) {
     String name = subregionRequest.getName().trim();
-    Long regionId = subregionRequest.getIdRegion();
+    Long regionId = subregionRequest.getRegionId();
     
     subregionDomainService.verifySubregionNameAvailableByRegionId(name, regionId);
 
@@ -90,11 +90,15 @@ public class SubregionServiceImpl implements SubregionService{
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
+    if (id == 1L) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "Esta subregión no se puede editar");
+    }
+
     Subregion subregion = subregionRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La subregión no existe"));
 
     String name = subregionRequest.getName().trim();
-    Long idRegion = subregion.getRegion().getId();
+    Long idRegion = subregionRequest.getRegionId();
 
     if (idRegion == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);

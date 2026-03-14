@@ -17,4 +17,6 @@ public class LocationResponse {
 
     private Long subregionId;
     private String subregionName;
+
+    private Long regionId;
 }

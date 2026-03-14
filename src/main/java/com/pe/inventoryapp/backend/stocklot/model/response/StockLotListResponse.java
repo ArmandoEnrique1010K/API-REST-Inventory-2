@@ -15,6 +15,7 @@ public class StockLotListResponse {
   private Long id;
   private String batch;
   private Integer quantityAvailable;
+  private Integer quantityReceived;
   private LocalDateTime createdAt;
 
   private Long modelId;

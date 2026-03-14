@@ -17,7 +17,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
       WHERE (:name IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :name, '%')))
       AND (:regionId IS NULL OR l.subregion.region.id = :regionId)
       AND (:subregionId IS NULL OR l.subregion.id = :subregionId)
-      AND (:status IS NULL OR l.status = :status) ORDER BY l.id ASC
+      AND (:status IS NULL OR l.status = :status) ORDER BY l.id DESC
       """)
   Page<Location> findAllByParams(
       Pageable pageable,

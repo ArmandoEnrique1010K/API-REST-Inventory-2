@@ -15,13 +15,12 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 // TODO: ESTO PODRIA SER UNA CLASE DE TIPO DOMINIO DE SERVICIO
 @Service
-public class MailerSendServiceImpl implements MailerSendService {
+public class MailerSendDomainService  {
 
-  private static final Logger log = LoggerFactory.getLogger(MailerSendServiceImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(MailerSendDomainService.class);
   // TODO: DESINSTALAR DOTENV Y REEMPLAZARLO POR EL SISTEMA CLASICO DE SPRING BOOT
   // PARA CARGAR VARIABLES DE ENTORNO
 
-  @Override
   public void sendResetPasswordToken(String toEmail, String token) {
     // Configuración de MailerSend
     MailerSend ms = new MailerSend();
@@ -67,3 +66,5 @@ public class MailerSendServiceImpl implements MailerSendService {
 // * Ejemplo: Si comentas o eliminas una variable de entorno, se queda con el
 // ultimo valor asignado
 // * La unica solución es reasignar el valor de la variable de entorno
+
+// LA SOLUCIÓN ES QUE CUANDO SE CAMBIA EL VALOR DE UNA VARIABLE DE ENTORNO O SE AGREGA UNA NUEVA, EL COMANDO DE EJECUCIÓN DE LA API REST QUE SE OBTIENE DESDE VSCODE AL HACER CLIC EN EL ICONO DE LA EXTENSION "SPRING BOOT DASHBOARD" CAMBIA.

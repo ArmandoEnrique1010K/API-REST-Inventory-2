@@ -38,7 +38,7 @@ public class LocationServiceImpl implements LocationService {
   @Transactional
   public void saveLocation(LocationRequest locationRequest) {
     String name = locationRequest.getName().trim();
-    Long idSubregion = locationRequest.getIdSubregion();
+    Long idSubregion = locationRequest.getSubregionId();
 
     if (idSubregion == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -120,6 +120,10 @@ public class LocationServiceImpl implements LocationService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
+    if (id == 1L) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "Esta ubicación no se puede editar");
+    }
+
     Location location = locationRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
 
@@ -128,7 +132,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     String newName = locationRequest.getName().trim();
-    Long idSubregion = locationRequest.getIdSubregion();
+    Long idSubregion = locationRequest.getSubregionId();
 
     if (idSubregion == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);

@@ -33,20 +33,20 @@ public class AuthServiceImpl implements AuthService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final MailerSendService mailerSendService;
+  private final MailerSendDomainService mailerSendDomainService;
   private final UserPasswordOtpRepository userPasswordOtpRepository;
   private final PasswordResetTokenRepository passwordResetTokenRepository;
 
   public AuthServiceImpl(
       UserRepository userRepository, 
       PasswordEncoder passwordEncoder, 
-      MailerSendService mailerSendService,
+      MailerSendDomainService mailerSendDomainService,
       UserPasswordOtpRepository userPasswordOtpRepository,
       PasswordResetTokenRepository passwordResetTokenRepository
   ) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
-    this.mailerSendService = mailerSendService;
+    this.mailerSendDomainService = mailerSendDomainService;
     this.userPasswordOtpRepository = userPasswordOtpRepository;
     this.passwordResetTokenRepository = passwordResetTokenRepository;
   }
@@ -88,7 +88,7 @@ public class AuthServiceImpl implements AuthService {
     entity.setExpiresAt(LocalDateTime.now().plusMinutes(5));
 
     userPasswordOtpRepository.save(entity);
-    mailerSendService.sendResetPasswordToken(user.getEmail(), otp);
+    mailerSendDomainService.sendResetPasswordToken(user.getEmail(), otp);
 
     return requestId;
   }

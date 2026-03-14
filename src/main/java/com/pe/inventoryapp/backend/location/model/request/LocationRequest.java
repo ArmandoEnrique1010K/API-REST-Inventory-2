@@ -23,5 +23,5 @@ public class LocationRequest {
   private String address;
 
   @NotNull(message = "Seleccione una subregion")
-  private Long idSubregion;
+  private Long subregionId;
 }

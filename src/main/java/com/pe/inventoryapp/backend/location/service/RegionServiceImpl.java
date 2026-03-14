@@ -41,7 +41,7 @@ public class RegionServiceImpl implements RegionService {
   @Override
   @Transactional(readOnly = true)
   public List<RegionResponse> findAllRegions() {
-    List<Region> regions = (List<Region>) regionRepository.findAll();
+    List<Region> regions = (List<Region>) regionRepository.findAllAndSortById();
 
     return regions.stream()
         .map(region -> RegionMapper.builder().setRegion(region).buildRegionResponse())

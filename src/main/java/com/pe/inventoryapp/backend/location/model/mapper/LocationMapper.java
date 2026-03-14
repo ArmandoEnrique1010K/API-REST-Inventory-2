@@ -30,6 +30,7 @@ public class LocationMapper {
                 location.getAddress(),
                 location.isStatus(),
                 location.getSubregion().getId(),
-                location.getSubregion().getName());
+                location.getSubregion().getName(),
+                location.getSubregion().getRegion().getId());
     }
 }
