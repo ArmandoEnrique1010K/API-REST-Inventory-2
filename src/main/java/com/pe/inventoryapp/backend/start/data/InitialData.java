@@ -123,7 +123,7 @@ public class InitialData {
 
       System.out.println(allRoles);
 
-      // TODO: EL PRIMER USUARIO SE DEBE ESTABLECER MEDIANTE UNA VARIABLE DE ENTORNO
+      // EL CORREO Y LA CONSTRASEÑA DEL PRIMER USUARIO SE ESTABLECE MEDIANTE UNA VARIABLE DE ENTORNO
       User user = new User();
       user.setFirstname("Primer usuario");
       user.setLastname("del sistema");

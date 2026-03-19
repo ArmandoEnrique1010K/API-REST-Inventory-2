@@ -17,6 +17,7 @@ import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
+import com.pe.inventoryapp.backend.user.model.response.RolesByUserResponse;
 import com.pe.inventoryapp.backend.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -85,6 +86,15 @@ public class UserController {
     DataResponse<List<ListUsersByRoleUserResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
+
+  @GetMapping("/{id}/roles")
+  public ResponseEntity<?> getUserRoles(@PathVariable Long id) {
+    RolesByUserResponse user = userService.getRolesByUser(id);
+
+    DataResponse<RolesByUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+    return ResponseEntity.status(response.status()).body(response);
+  }
+  
   
 
   @GetMapping("/profile")

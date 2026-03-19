@@ -11,6 +11,7 @@ import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
+import com.pe.inventoryapp.backend.user.model.response.RolesByUserResponse;
 
 public interface UserService {
   void registerUser(RegisterRequest registerRequest);
@@ -20,6 +21,8 @@ public interface UserService {
   List<ListUsersByRoleUserResponse> findAllUsersByRoleUserAndName(String name);
 
   DetailUserResponse findUserById(Long id);
+
+  RolesByUserResponse getRolesByUser(Long idUser);
 
   void updateUserProfileById(Long id, ProfileRequest profileRequest);
 

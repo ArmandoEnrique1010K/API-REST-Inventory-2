@@ -92,6 +92,7 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN")
 						.requestMatchers(HttpMethod.GET, "/api/users/role/user")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/users/*/roles").hasAnyAuthority("ROLE_ADMIN") // Solamente un administrador podra ver los roles asignados del usuario por ID
 						.requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/users/*/roles")
@@ -278,12 +279,11 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/model-delivery-order-subregion/delivery-order/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
-						// TODO: ELIMINAR LOS SIGUIENTES ENDPOINTS
 						// ENDPOINTS DE PRUEBA 
 						.requestMatchers(HttpMethod.GET, "/api").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/dotenv").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/database").permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/csrf").permitAll()
+						// .requestMatchers(HttpMethod.GET, "/api/dotenv").permitAll()
+						// .requestMatchers(HttpMethod.GET, "/api/database").permitAll()
+						// .requestMatchers(HttpMethod.GET, "/api/csrf").permitAll()
 						.anyRequest().denyAll())
 				.addFilter(new JwtAuthenticationFilter(
 						authenticationManager(), authService, responseService))

@@ -22,7 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                     LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
                     LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
                     CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
-                ) AND u.active = true ORDER BY u.id DESC
+                ) ORDER BY u.id DESC
             """)
     Page<User> findAllByName(
             @Param("name") String name,

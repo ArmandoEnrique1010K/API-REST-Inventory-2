@@ -23,6 +23,7 @@ import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
+import com.pe.inventoryapp.backend.user.model.response.RolesByUserResponse;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -123,6 +124,24 @@ public class UserServiceImpl implements UserService {
         .setUser(user)
         .buildDetailUserResponse();
   }
+
+  @Override
+  public RolesByUserResponse getRolesByUser(Long idUser) {
+        if (idUser == null) {
+      throw new BusinessException(
+          ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    User user = userRepository.findById(idUser)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.NOT_FOUND,
+            "El usuario no existe"));
+
+    return UserMapper.builder()
+        .setUser(user)
+        .buildRolesByUserResponse();
+  }
+
 
   @Override
   @Transactional

@@ -454,7 +454,6 @@ public class StockLotServiceImpl implements StockLotService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // TODO: VERIFICAR SI VALIDA QUE AMBOS LOTES DE STOCK CORRESPONDAN A LA MISMA EMPRESA
     if (!stockLotEmitter.getCompany().getId().equals(stockLotReceiver.getCompany().getId())) {
       throw new BusinessException(
           ResponseStatus.CONFLICT,

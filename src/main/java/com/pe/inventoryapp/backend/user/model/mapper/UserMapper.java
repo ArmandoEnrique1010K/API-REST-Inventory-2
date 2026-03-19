@@ -7,6 +7,7 @@ import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
+import com.pe.inventoryapp.backend.user.model.response.RolesByUserResponse;
 
 public class UserMapper {
   private User user;
@@ -98,6 +99,18 @@ public class UserMapper {
         user.getEmail(),
         user.getDni()
     );
+  }
+
+  public RolesByUserResponse buildRolesByUserResponse() {
+    if (user == null ) {
+      throw new RuntimeException("Debe pasar la entidad User");
+    }
+
+    return new RolesByUserResponse(
+        user.getRoles().stream().anyMatch(role -> "ROLE_OPERATOR".equals(role.getName())), 
+        user.getRoles().stream().anyMatch(role -> "ROLE_SECRETARY".equals(role.getName())),
+        user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()))
+      );
   }
 
 }

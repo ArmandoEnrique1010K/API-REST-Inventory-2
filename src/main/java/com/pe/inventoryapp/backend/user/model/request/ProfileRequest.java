@@ -24,7 +24,7 @@ public class ProfileRequest {
 
   @NotBlank(message = "El correo es obligatorio")
   @Email(message = "El correo no tiene el formato adecuado")
-  @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|hotmail\\.com|outlook\\.com)$", message = "El correo debe pertenecer a Gmail, Hotmail u Outlook")
+  @Pattern(regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|hotmail\\.com|outlook\\.com)$", message = "Debe pertenecer a Gmail, Hotmail u Outlook")
   private String email;
 
   @NotNull(message = "El DNI es obligatorio")

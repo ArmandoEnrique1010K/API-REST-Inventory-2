@@ -13,7 +13,6 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
-// TODO: ESTO PODRIA SER UNA CLASE DE TIPO DOMINIO DE SERVICIO
 @Service
 public class MailerSendDomainService  {
 
