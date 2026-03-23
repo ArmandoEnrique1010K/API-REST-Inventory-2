@@ -132,6 +132,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     String newName = locationRequest.getName().trim();
+    String address = locationRequest.getAddress().trim();
     Long idSubregion = locationRequest.getSubregionId();
 
     if (idSubregion == null) {
@@ -145,6 +146,7 @@ public class LocationServiceImpl implements LocationService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La subregión no existe"));
 
     location.setName(newName);
+    location.setAddress(address);
     location.setSubregion(subregion);
     locationRepository.save(location);
   }

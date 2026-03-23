@@ -21,5 +21,5 @@ public class DeliveryOrderRequest {
   private LocalDateTime limitDate;
 
   @NotNull
-  private Long idClient;
+  private Long userIdClient;
 }

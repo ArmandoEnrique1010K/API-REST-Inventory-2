@@ -23,7 +23,7 @@ public class DeliveryLineDetailsResponse {
   private LocalDateTime updatedAt;
   private LineStatus lineStatus;
 
-  private String userUpdaterName;
+  private String userUpdaterFullname;
 
   private Long locationId;
   private String locationName;

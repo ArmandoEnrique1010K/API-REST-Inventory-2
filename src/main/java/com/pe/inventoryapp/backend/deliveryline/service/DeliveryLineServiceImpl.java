@@ -103,7 +103,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Override
   public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_model_deliveryOrder, Long id_user) {
 
-    Long id_location = deliveryLineRequest.getIdLocation();
+    Long id_location = deliveryLineRequest.getLocationId();
 
     if (id_location == null || id_model_deliveryOrder == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -373,7 +373,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     Movement movement = new Movement();
     movement.setQuantity(quantityBalance);
-    movement.setComment(movementDomainService.generateComment(deliveryLineUpdateRequest.getComment(),
+    movement.setComment(movementDomainService.generateComment(deliveryLineUpdateRequest.getMovementComment(),
         "Un usuario altero los datos de la linea de entrega"));
 
     // Si el balance es un número positivo se considera un MOVEMENT_LINE_ALTER, si es negativo se
@@ -586,7 +586,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       stockLot = new StockLot();
 
       stockLot.setBatch(stockLotDomainService.resolveBatch(deliveryLine.getModel().getProduct().getName(),
-          deliveryLine.getModel().getName()));
+          deliveryLine.getModel().getName(), company.getName()));
       stockLot.setQuantityReceived(deliveredQuantity);
       stockLot.setQuantityAvailable(deliveredQuantity);
       stockLot.setQuantityDelivered(0);
@@ -770,7 +770,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // 3° REGISTRARLO COMO MOVIMIENTO
     Movement movement = new Movement();
     movement.setQuantity(lostQuantity);
-    movement.setComment(movementDomainService.generateComment(deliveryLineAlterRequest.getComment(),
+    movement.setComment(movementDomainService.generateComment(deliveryLineAlterRequest.getMovementComment(),
         "Se ha descontado una cantidad de la linea de entrega con ID: " + deliveryLine.getId()));
     movement.setMovementType(MovementType.MOVEMENT_LINE_LOST);
 
@@ -962,7 +962,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     // ===== Lotes =====
-    List<Long> stockLotIds = deliveryLineAllocateRequest.getIdStockLots();
+    List<Long> stockLotIds = deliveryLineAllocateRequest.getStockLotsIds();
 
     if (stockLotIds == null || stockLotIds.isEmpty()) {
       throw new BusinessException(

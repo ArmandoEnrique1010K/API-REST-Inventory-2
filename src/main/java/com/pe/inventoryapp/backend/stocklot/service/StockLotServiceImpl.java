@@ -75,7 +75,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Model model = modelRepository.findById(
         modelId)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
 
     if (model.isStatus() == false) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
@@ -92,7 +92,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     // Guarda el nuevo lote de stock
     StockLot stockLot = new StockLot();
-    stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName()));
+    stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName(), company.getName()));
     stockLot.setQuantityReceived(quantity);
     stockLot.setQuantityAvailable(quantity);
 
@@ -372,7 +372,7 @@ public class StockLotServiceImpl implements StockLotService {
           "No existen pérdidas registradas para este lote de stock");
     }
 
-    int maxRecoverable = quantityLost - quantityRecovered;
+    int maxRecoverable = quantityLost;
 
     if (quantity > maxRecoverable) {
       throw new BusinessException(

@@ -23,7 +23,7 @@ public class DeliveryLineRequest {
   private Integer requiredQuantity;
 
   @NotNull(message = "Seleccione una ubicación")
-  private Long idLocation;
+  private Long locationId;
   
   @Nullable
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

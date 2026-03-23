@@ -86,7 +86,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	@Override
 	@Transactional
 	public void saveDeliveryOrder(DeliveryOrderRequest deliveryOrderRequest, Long id_user) {
-		Long id_client = deliveryOrderRequest.getIdClient();
+		Long id_client = deliveryOrderRequest.getUserIdClient();
 
 		if (id_user == null || id_client == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -525,7 +525,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		movement.setQuantity(quantity);
 		movement.setComment(
 				movementDomainService.generateComment(
-						commentRequest.getComment(),
+						commentRequest.getMovementComment(),
 						"Se canceló la orden de entrega de la factura #" + order.getBatch()));
 		movement.setMovementType(MovementType.MOVEMENT_LINE_CANCELED);
 		movement.setUser(user);
@@ -573,7 +573,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 			// Crea el nuevo lote de stock
 			StockLot stockLot = new StockLot();
-			stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName()));
+			stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName(), company.getName()));
 			stockLot.setQuantityReceived(restoredQuantity);
 			stockLot.setQuantityAvailable(restoredQuantity);
 			stockLot.setQuantityDelivered(0);
@@ -590,7 +590,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			Movement movement = new Movement();
 			movement.setQuantity(restoredQuantity);
 			movement.setComment(movementDomainService.generateComment(
-					deliveryOrderComentRequest.getComment(),
+					deliveryOrderComentRequest.getMovementComment(),
 					"Devolución de productos de la factura #" + deliveryOrder.getBatch()));
 			movement.setMovementType(MovementType.MOVEMENT_STOCK_REFUND);
 			movement.setUser(user);

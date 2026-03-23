@@ -23,5 +23,5 @@ public class DeliveryLineAlterRequest {
     regexp = "^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ .,;:()\\-_/]*$",
     message = "El comentario contiene caracteres no permitidos"
   )
-  private String comment;
+  private String movementComment;
 }

@@ -20,8 +20,8 @@ public class DeliveryOrderDetailsResponse {
   private LocalDateTime priorityDate;
   private String createdByUser;
   private String updatedByUser;
-  private String userClientName;
+  private String userClientFullname;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
-  private OrderStatus preparationStatus;
+  private OrderStatus orderStatus;
 }

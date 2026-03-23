@@ -20,5 +20,5 @@ public class DeliveryLineAllocateRequest {
 
   // Lista de Ids, se pasan como valor desde el formulario como: [1, 2, 3]
   @NotNull(message = "Seleccione al menos un lote")
-  private List<Long> idStockLots;
+  private List<Long> stockLotsIds;
 }
