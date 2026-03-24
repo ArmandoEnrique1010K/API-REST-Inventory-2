@@ -101,8 +101,8 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public List<ListUsersByRoleUserResponse> findAllUsersByRoleUserAndName(String name) {
-    List<User> users = (List<User>) userRepository.findAllFirstTenUsersByRoleUserAndName(name); 
+  public List<ListUsersByRoleUserResponse> findFirstTenUsersByName(String name) {
+    List<User> users = (List<User>) userRepository.findAllFirstTenUsersByName(name); 
       
     return users.stream().map(user -> UserMapper.builder().setUser(user).buildListUsersByRoleUserResponse()).collect(Collectors.toList());
   }

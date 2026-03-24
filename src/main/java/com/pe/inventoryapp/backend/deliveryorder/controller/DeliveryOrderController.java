@@ -84,7 +84,10 @@ public class DeliveryOrderController {
         pageable, batch,
         startDate, endDate, status, userClientName);
 
-    return ResponseEntity.status(200).body(deliveryOrders);
+    DataResponse<PageResponse<DeliveryOrderListResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        deliveryOrders);
+
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/in-progress")
@@ -100,7 +103,11 @@ public class DeliveryOrderController {
     PageResponse<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllActiveDeliveryOrdersByParams(
         pageable, batch, startDate, endDate, userClientName);
 
-    return ResponseEntity.status(200).body(deliveryOrders);
+    DataResponse<PageResponse<DeliveryOrderListResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
+        deliveryOrders);
+
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   // Este endpoint se utiliza para listar todas las ordenes de entrega por el
@@ -121,7 +128,11 @@ public class DeliveryOrderController {
     PageResponse<DeliveryOrderClientListResponse> deliveryOrders = deliveryOrderService
         .findAllDeliveryOrderByClientId(pageable, id_user_authenticated, batch, startDate, endDate, status);
 
-    return ResponseEntity.status(200).body(deliveryOrders);
+    DataResponse<PageResponse<DeliveryOrderClientListResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
+        deliveryOrders);
+
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   // Obtiene una orden de entrega por id
@@ -141,9 +152,11 @@ public class DeliveryOrderController {
 
     DeliveryOrderClientDetailsResponse deliveryOrderDetailsResponse = deliveryOrderService
         .findDeliveryOrderByIdAndValidateUserClient(id, id_user_authenticated);
+        
     DataResponse<DeliveryOrderClientDetailsResponse> response = responseService.generateDataResponse(
         ResponseStatus.SUCCESS,
         deliveryOrderDetailsResponse);
+
     return ResponseEntity.status(response.status()).body(response);
   }
 

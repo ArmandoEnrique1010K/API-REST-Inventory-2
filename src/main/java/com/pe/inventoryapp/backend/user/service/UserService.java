@@ -18,7 +18,7 @@ public interface UserService {
 
   PageResponse<ListUsersResponse> findAllUsersByParams(String name, List<Long> roleIds,  Pageable pageable);
 
-  List<ListUsersByRoleUserResponse> findAllUsersByRoleUserAndName(String name);
+  List<ListUsersByRoleUserResponse> findFirstTenUsersByName(String name);
 
   DetailUserResponse findUserById(Long id);
 

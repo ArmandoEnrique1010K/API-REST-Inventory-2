@@ -15,11 +15,9 @@ import com.pe.inventoryapp.backend.user.repository.UserRepository;
 public class RoleServiceImpl implements RoleService{
 
   private final RoleRepository roleRepository;
-  private final UserRepository userRepository;
 
-  public RoleServiceImpl(RoleRepository roleRepository, UserRepository userRepository){
+  public RoleServiceImpl(RoleRepository roleRepository){
     this.roleRepository = roleRepository;
-    this.userRepository = userRepository;    
   }
 
   @Override

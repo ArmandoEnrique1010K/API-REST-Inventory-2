@@ -82,7 +82,7 @@ public class UserController {
 
   @GetMapping("/role/user")
   public ResponseEntity<?> listFirstTenUsersByKeyword(@RequestParam(required = true) String name) {
-    List<ListUsersByRoleUserResponse> users = userService.findAllUsersByRoleUserAndName(name);
+    List<ListUsersByRoleUserResponse> users = userService.findFirstTenUsersByName(name);
     DataResponse<List<ListUsersByRoleUserResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
