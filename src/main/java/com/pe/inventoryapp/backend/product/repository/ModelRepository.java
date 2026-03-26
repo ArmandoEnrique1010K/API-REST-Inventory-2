@@ -43,6 +43,25 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
       @Param("categoryId") Long categoryId,
       @Param("typeId") Long typeId);
 
+  // Query para listar todos los modelos y productos que esten activos, sin parametros
+  @Query("""
+          SELECT m
+          FROM Model m
+          JOIN m.product p
+          WHERE (
+            :keyword IS NULL OR
+            LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+            LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
+          AND m.status = TRUE
+          ORDER BY m.id DESC
+      """)
+  Page<Model> findAllActivesByName(
+      Pageable pageable,
+      @Param("keyword") String keyword);
+
+
+
 
   @Query("SELECT m FROM Model m WHERE m.product.id = :productId ORDER BY m.id DESC")
   List<Model> findAllByProductId(Long productId);

@@ -10,6 +10,7 @@ import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.product.model.request.ModelRequest;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
 
 public interface ModelService {
   void saveModelInProductId(ModelRequest modelRequest, MultipartFile file, Long productId);
@@ -24,6 +25,11 @@ public interface ModelService {
       Boolean status,
       Long categoryId,
       Long typeId);
+
+  PageResponse<ModelSearchResponse> searchAllModelsByName(
+    Pageable pageable,
+    String keyword
+  );
 
   List<ModelListResponse> findAllModelsByProductId(Long productId);
 

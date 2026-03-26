@@ -144,8 +144,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				deliveryOrders.getSize(),
 				deliveryOrders.getTotalElements(),
 				deliveryOrders.getTotalPages(),
-				deliveryOrders.hasNext(),
-				deliveryOrders.hasPrevious());
+				deliveryOrders.isFirst(),
+				deliveryOrders.isLast());
 
 		return pageResponse;
 	}
@@ -172,8 +172,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				deliveryOrders.getSize(),
 				deliveryOrders.getTotalElements(),
 				deliveryOrders.getTotalPages(),
-				deliveryOrders.hasNext(),
-				deliveryOrders.hasPrevious());
+				deliveryOrders.isFirst(),
+				deliveryOrders.isLast());
 
 		return pageResponse;
 	}
@@ -206,8 +206,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				deliveryOrders.getSize(),
 				deliveryOrders.getTotalElements(),
 				deliveryOrders.getTotalPages(),
-				deliveryOrders.hasNext(),
-				deliveryOrders.hasPrevious());
+				deliveryOrders.isFirst(),
+				deliveryOrders.isLast());
 
 		return pageResponse;
 	}

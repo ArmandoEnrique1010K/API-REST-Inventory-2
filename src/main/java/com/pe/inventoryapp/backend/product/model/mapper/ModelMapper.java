@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.product.model.mapper;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
 
 
 public class ModelMapper {
@@ -76,4 +77,21 @@ public class ModelMapper {
       model.getProduct().getCategory().getName()
     );
   }
+
+  public ModelSearchResponse buildModelSearchResponse() {
+    if (model == null) {
+      throw new RuntimeException("Debe pasar la entidad Model");
+    }
+
+    return new ModelSearchResponse(
+        model.getId(),
+        model.getName(),
+        model.getImageUrl(),
+        model.getProduct().getName(),
+        model.getProduct().getType().getName(),
+        model.getProduct().getCategory().getName());
+
+  }
+
+
 }

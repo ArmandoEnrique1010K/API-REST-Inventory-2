@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +28,7 @@ import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.product.model.request.ModelRequest;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
 import com.pe.inventoryapp.backend.product.service.ModelService;
 
 import jakarta.validation.Valid;
@@ -93,6 +93,20 @@ public class ModelController {
         .generateDataResponse(ResponseStatus.SUCCESS, models);
 
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  }
+
+  @GetMapping("/search")
+  public ResponseEntity<?> listActiveModelsByName(
+    @RequestParam(defaultValue = "0") Integer page,
+    @RequestParam(required = false) String keyword
+  ) {
+    Pageable pageable = PageRequest.of(page, 10);
+    PageResponse<ModelSearchResponse> models = modelService.searchAllModelsByName(pageable, keyword);
+    DataResponse<PageResponse<ModelSearchResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, models);
+
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+
   }
 
   @GetMapping("/{id}")

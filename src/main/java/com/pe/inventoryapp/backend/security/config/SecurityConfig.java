@@ -139,6 +139,9 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.GET, "/api/models")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+						.requestMatchers(HttpMethod.GET, "/api/models/search")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+
 						.requestMatchers(HttpMethod.GET, "/api/models/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/models/*")

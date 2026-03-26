@@ -20,6 +20,7 @@ import com.pe.inventoryapp.backend.product.model.mapper.ModelMapper;
 import com.pe.inventoryapp.backend.product.model.request.ModelRequest;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
@@ -130,6 +131,27 @@ public class ModelServiceImpl implements ModelService {
   }
 
   @Override
+  public PageResponse<ModelSearchResponse> searchAllModelsByName(Pageable pageable, String keyword) {
+    Page<Model> models = modelRepository.findAllActivesByName(pageable, keyword);
+
+    List<ModelSearchResponse> result = models.getContent().stream().map(
+        model -> ModelMapper.builder()
+            .setModel(model).buildModelSearchResponse())
+        .toList();
+
+    PageResponse<ModelSearchResponse> pageResponse = new PageResponse<>(
+        result,
+        models.getNumber(),
+        models.getSize(),
+        models.getTotalElements(),
+        models.getTotalPages(),
+        models.isFirst(),
+        models.isLast());
+
+    return pageResponse;
+  }
+
+  @Override
   public List<ModelListResponse> findAllModelsByProductId(Long productId) {
     if (productId == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -223,5 +245,6 @@ public class ModelServiceImpl implements ModelService {
     model.setStatus(!model.isStatus());
     modelRepository.save(model);
   }
+
 
 }
