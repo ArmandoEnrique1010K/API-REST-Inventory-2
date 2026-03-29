@@ -14,25 +14,22 @@ import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepositor
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
-import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_RegionDomainService;
-import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_SubregionDomainService;
 
 @Service
 public class DeliveryOrderDomainService {
 
   private final DeliveryLineRepository deliveryLineRepository;
   private final Model_DeliveryOrderRepository model_DeliveryOrderRepository;
-  private final Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService;
-  private final Model_DeliveryOrder_SubregionDomainService model_DeliveryOrder_SubregionDomainService;
+  // private final DeliveryOrderSummaryDomainService deliveryOrderSummaryDomainService;
 
   public DeliveryOrderDomainService(DeliveryLineRepository deliveryLineRepository,
-      Model_DeliveryOrderRepository model_DeliveryOrderRepository,
-      Model_DeliveryOrder_RegionDomainService model_DeliveryOrder_RegionDomainService,
-      Model_DeliveryOrder_SubregionDomainService model_DeliveryOrder_SubregionDomainService) {
+      Model_DeliveryOrderRepository model_DeliveryOrderRepository
+      // ,
+      // DeliveryOrderSummaryDomainService deliveryOrderSummaryDomainService
+    ) {
     this.deliveryLineRepository = deliveryLineRepository;
     this.model_DeliveryOrderRepository = model_DeliveryOrderRepository;
-    this.model_DeliveryOrder_RegionDomainService = model_DeliveryOrder_RegionDomainService;
-    this.model_DeliveryOrder_SubregionDomainService = model_DeliveryOrder_SubregionDomainService;
+    // this.deliveryOrderSummaryDomainService = deliveryOrderSummaryDomainService;
   }
 
   // Verifica que todas las lineas de entrega que pertenecen a una orden de
@@ -69,12 +66,8 @@ public class DeliveryOrderDomainService {
   public void recalculateSummaries(DeliveryOrder deliveryOrder, Model model) {
     model_DeliveryOrderRepository
         .recalculateRequiredQuantities(deliveryOrder.getId());
-
-    model_DeliveryOrder_RegionDomainService
-        .recalculateSummatoryModel_DeliveryOrderRegionsByDeliveryOrder(deliveryOrder.getId(), model.getId());
-
-    model_DeliveryOrder_SubregionDomainService
-        .recalculateSummatoryModel_DeliveryOrderSubregionsByDeliveryOrder(deliveryOrder.getId(), model.getId());
+  // deliveryOrderSummaryDomainService.getSummary(deliveryOrder.getId());
+    
   }
 
 }

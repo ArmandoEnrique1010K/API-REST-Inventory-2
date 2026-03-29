@@ -4,8 +4,6 @@ import java.util.List;
 
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
-import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Region;
-import com.pe.inventoryapp.backend.summary.model.entity.Model_DeliveryOrder_Subregion;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -48,10 +46,4 @@ public class Model_DeliveryOrder {
 
   @OneToMany(mappedBy = "model_DeliveryOrder")
   private List<DeliveryLine> deliveryLines;
-
-  @OneToMany(mappedBy = "model_DeliveryOrder")
-  private List<Model_DeliveryOrder_Region> model_DeliveryOrder_Regions;
-
-  @OneToMany(mappedBy = "model_DeliveryOrder")
-  private List<Model_DeliveryOrder_Subregion> model_DeliveryOrder_Subregions;
 }

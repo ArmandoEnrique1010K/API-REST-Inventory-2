@@ -274,13 +274,9 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/movements/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
-						// MODEL - DELIVERY ORDER - REGION
-						.requestMatchers(HttpMethod.GET, "/api/model-delivery-order-region/delivery-order/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+						// SUMMARY
+						.requestMatchers(HttpMethod.GET, "/api/delivery-order-summary/delivery-order/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
-						// MODEL - DELIVERY ORDER - SUBREGION
-						.requestMatchers(HttpMethod.GET, "/api/model-delivery-order-subregion/delivery-order/*")
-						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
 						// ENDPOINTS DE PRUEBA 
 						.requestMatchers(HttpMethod.GET, "/api").permitAll()

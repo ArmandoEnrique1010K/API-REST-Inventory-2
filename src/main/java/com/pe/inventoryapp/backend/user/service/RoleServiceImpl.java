@@ -9,7 +9,6 @@ import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.mapper.RoleMapper;
 import com.pe.inventoryapp.backend.user.model.response.RoleResponse;
 import com.pe.inventoryapp.backend.user.repository.RoleRepository;
-import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
 @Service
 public class RoleServiceImpl implements RoleService{
