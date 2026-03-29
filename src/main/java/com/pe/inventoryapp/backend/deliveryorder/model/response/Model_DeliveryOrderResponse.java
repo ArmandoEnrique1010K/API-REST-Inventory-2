@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 public class Model_DeliveryOrderResponse {
   private Long id;
   private Integer requiredQuantityTotal;
-  
   private Long modelId;
   private String modelName;
   private String modelImageUrl;
+  private String productName;
 }

@@ -40,8 +40,11 @@ public interface Model_DeliveryOrderRepository extends JpaRepository<Model_Deliv
         AND md.model.id = :modelId
         AND md.status = true
       """)
-  Optional<Model_DeliveryOrder> findByModelIdAndDeliveryOrderId(Long modelId, Long deliveryOrderId);
+  Optional<Model_DeliveryOrder> findByModelIdAndDeliveryOrderId(
+      @Param("modelId") Long modelId,
+      @Param("deliveryOrderId") Long deliveryOrderId);
 
+      
   @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query("""
       UPDATE Model_DeliveryOrder mdo

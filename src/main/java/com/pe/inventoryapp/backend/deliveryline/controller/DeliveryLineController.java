@@ -56,17 +56,17 @@ public class DeliveryLineController {
     this.authenticationContextService = authenticationContextService;
   }
 
-  @PostMapping("/model-delivery-order/{modelDeliveryOrderId}")
+  @PostMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
       Authentication authentication,
-      @PathVariable Long modelDeliveryOrderId,
+      @PathVariable Long deliveryOrderId,
       @Valid @RequestBody DeliveryLineRequest deliveryLineRequest,
       BindingResult result) {
 
     Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.saveDeliveryLine(deliveryLineRequest, modelDeliveryOrderId, id_user_authenticated);
+    deliveryLineService.saveDeliveryLine(deliveryLineRequest, deliveryOrderId, id_user_authenticated);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
         "Se registro una linea de entrega en una orden de entrega");

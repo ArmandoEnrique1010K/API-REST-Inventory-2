@@ -89,6 +89,7 @@ public class ModelMapper {
         model.getImageUrl(),
         model.getProduct().getName(),
         model.getProduct().getType().getName(),
+        model.getProduct().getCategory().getId(),
         model.getProduct().getCategory().getName());
 
   }

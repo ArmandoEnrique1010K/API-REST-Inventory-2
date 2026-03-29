@@ -238,12 +238,12 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET,
 								"/api/models-delivery-orders/models/deliveryOrder/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
-						.requestMatchers(HttpMethod.DELETE, "/api/models-delivery-orders/*")
+						.requestMatchers(HttpMethod.PATCH, "/api/models-delivery-orders/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
 						// DELIVERY LINE
 						.requestMatchers(HttpMethod.POST,
-								"/api/delivery-lines/model-delivery-order/*")
+								"/api/delivery-lines/delivery-order/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET, "/api/delivery-lines/delivery-order/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")

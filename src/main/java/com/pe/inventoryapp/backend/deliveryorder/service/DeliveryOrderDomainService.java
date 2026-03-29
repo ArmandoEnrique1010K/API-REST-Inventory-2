@@ -13,6 +13,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_RegionDomainService;
 import com.pe.inventoryapp.backend.summary.service.Model_DeliveryOrder_SubregionDomainService;
 
@@ -65,15 +66,15 @@ public class DeliveryOrderDomainService {
         .orElse(null); // o lanza excepción
   }
 
-  public void recalculateSummaries(DeliveryOrder deliveryOrder) {
+  public void recalculateSummaries(DeliveryOrder deliveryOrder, Model model) {
     model_DeliveryOrderRepository
         .recalculateRequiredQuantities(deliveryOrder.getId());
 
     model_DeliveryOrder_RegionDomainService
-        .recalculateSummatoryModel_DeliveryOrderRegionsByDeliveryOrder(deliveryOrder.getId());
+        .recalculateSummatoryModel_DeliveryOrderRegionsByDeliveryOrder(deliveryOrder.getId(), model.getId());
 
     model_DeliveryOrder_SubregionDomainService
-        .recalculateSummatoryModel_DeliveryOrderSubregionsByDeliveryOrder(deliveryOrder.getId());
+        .recalculateSummatoryModel_DeliveryOrderSubregionsByDeliveryOrder(deliveryOrder.getId(), model.getId());
   }
 
 }

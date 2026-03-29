@@ -27,7 +27,8 @@ public class Model_DeliveryOrderMapper {
         model_DeliveryOrder.getRequiredQuantityTotal(),
         model_DeliveryOrder.getModel().getId(),
         model_DeliveryOrder.getModel().getName(),
-        model_DeliveryOrder.getModel().getImageUrl()
+        model_DeliveryOrder.getModel().getImageUrl(),
+        model_DeliveryOrder.getModel().getProduct().getName()
       );
     }
   }

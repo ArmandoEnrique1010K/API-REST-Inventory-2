@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
@@ -48,7 +49,6 @@ import com.pe.inventoryapp.backend.stocklot.service.StockLotDomainService;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class DeliveryLineServiceImpl implements DeliveryLineService {
@@ -101,13 +101,20 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   // TODO: EXAMINAR MINUCIOSAMENTE EL FUNCIONAMIENTO DE CADA UNO DE LOS SERVICIOS
   @Override
-  public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long id_model_deliveryOrder, Long id_user) {
+  @Transactional
+  public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long deliveryOrderId, Long id_user) {
 
     Long id_location = deliveryLineRequest.getLocationId();
 
-    if (id_location == null || id_model_deliveryOrder == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    Long id_model = deliveryLineRequest.getModelId();
+
+    if (id_location == null || deliveryOrderId == null || id_user == null || id_model == null) {
+      // TODO: APLICAR EN TODOS LOS SERVICIOS QUE EN LUGAR DE RETORNAR INTERNAL_SERVER_ERROR, UN BAD_REQUEST
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
+
+    Model model = modelRepository.findById(id_model).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
 
     User user = userRepository.findById(id_user).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
@@ -116,23 +123,36 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         id_location).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
 
+    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+    // Verificar si existe la relación, de lo contrario, lanzar una excepción
+    Model_DeliveryOrder modelDeliveryOrder = model_DeliveryOrderRepository
+        .findByModelIdAndDeliveryOrderId(id_model, deliveryOrderId)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.CONFLICT,
+            "La relación entre orden de entrega y modelo no existe"));
+            
+            
+
+
     // Obtener el producto y orden de entrega desde Product_DeliveryOrder
-    Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository.findById(id_model_deliveryOrder)
-        .orElseThrow(
-            () -> new BusinessException(ResponseStatus.NOT_FOUND,
-                "La relación de producto y orden de entrega no existe"));
+    // Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository.findById(id_model_deliveryOrder)
+    //     .orElseThrow(
+    //         () -> new BusinessException(ResponseStatus.NOT_FOUND,
+    //             "La relación de producto y orden de entrega no existe"));
 
-    Long id_deliveryOrder = model_DeliveryOrder.getDeliveryOrder().getId();
-    Long id_model = model_DeliveryOrder.getModel().getId();
+    // Long id_deliveryOrder = model_DeliveryOrder.getDeliveryOrder().getId();
+    // Long id_model = model_DeliveryOrder.getModel().getId();
 
-    if (id_deliveryOrder == null || id_model == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
+    // if (id_deliveryOrder == null || id_model == null) {
+    //   throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    // }
 
     // Regla: no permitir duplicados por ubicación, excepto de las lineas de entrega
     // con estado MOVEMENT_LINE_CANCELED
     boolean exists = deliveryLineRepository
-        .existsDuplicate(id_deliveryOrder, id_model, id_location);
+        .existsDuplicate(deliveryOrderId, id_model, id_location);
 
     if (exists) {
       throw new BusinessException(
@@ -156,14 +176,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Actualizar los usuarios creador y actualizador
     deliveryLine.setUserCreator(user);
     deliveryLine.setUserUpdater(user);
-    deliveryLine.setModel(model_DeliveryOrder.getModel());
-    deliveryLine.setModel_DeliveryOrder(model_DeliveryOrder);
-    deliveryLine.setDeliveryOrder(model_DeliveryOrder.getDeliveryOrder());
+    deliveryLine.setModel(model);
+    deliveryLine.setModel_DeliveryOrder(modelDeliveryOrder);
+
+    deliveryLine.setDeliveryOrder(deliveryOrder);
 
     deliveryLineRepository.save(deliveryLine);
 
-    // Actualizar la orden de entrega
-    DeliveryOrder deliveryOrder = model_DeliveryOrder.getDeliveryOrder();
     // 1° actualizar la fecha limite de deliveryOrder comparando todas las lineas de
     // entrega y tomar el valor con la fecha más cercana que no haya sido entregada
     deliveryOrder.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(deliveryOrder.getId()));
@@ -175,7 +194,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // 3° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE
     // ENTREGA POR ORDEN DE ENTREGA Y PRODUCTO
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder);
+    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
 
     // Integer totalRequired =
     // deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Model(id_deliveryOrder,
@@ -207,6 +226,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public PageResponse<DeliveryLineListResponse> findAllDeliveryLinesByDeliveryOrderIdPageable(
       Long deliveryOrderId,
       Integer minRequiredQuantity,
@@ -274,6 +294,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   // ESTE MÉTODO SIRVE PARA CAMBIAR LA CANTIDAD REQUERIDA Y LA FECHA LIMITE,
   // ADEMÁS DE AÑADIR UN BREVE COMENTARIO
   @Override
+  @Transactional
   public void updateDeliveryLineById(Long id, DeliveryLineUpdateRequest deliveryLineUpdateRequest, Long id_user) {
     if (id == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -367,7 +388,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     model_DeliveryOrderRepository.save(model_DeliveryOrder);
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder);
+    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
 
     // recalculateProductDeliveryOrderRegions(model_DeliveryOrder.getId());
 
@@ -419,6 +440,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   }
 
   @Override
+  @Transactional
   public void cancelDeliveryLineById(Long id, Long id_user_authenticated) {
     if (id == null || id_user_authenticated == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -507,7 +529,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // modelRepository.save(model);
 
     // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder);
+    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
 
     // model_DeliveryOrder.setRequiredQuantityTotal(
     // deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(deliveryOrder.getId(),
@@ -611,6 +633,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   // MÉTODO PARA ENTREGAR UNA LINEA DE ENTREGA POR ID
   @Override
+  @Transactional
   public void sendDeliveryLineById(Long id, Long id_user_authenticated) {
 
     if (id == null || id_user_authenticated == null) {
@@ -666,6 +689,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   // LINEA DE
   // ENTREGA
   @Override
+  @Transactional
   public void lostDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user) {
     if (id == null || id_user == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
@@ -788,6 +812,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   // Servicio para retornar cantidad entregada de una linea de entrega
   @Override
+  @Transactional
   public void returnDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest,
       Long id_user_authenticated) {
 
@@ -873,7 +898,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrderRepository.save(deliveryOrder);
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder);
+    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model_DeliveryOrder.getModel());
 
     Model model = modelRepository.findById(model_DeliveryOrder.getModel().getId()).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
@@ -1086,11 +1111,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrderRepository.save(deliveryOrder);
 
     // ===== Recalcular regiones =====
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder);
+    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
 
   }
 
   @Override
+  @Transactional
   public void missingDeliveryLineById(Long id, Long id_user_authenticated) {
     if (id == null || id_user_authenticated == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);

@@ -16,5 +16,6 @@ public class ModelSearchResponse {
   private String imageUrl;
   private String productName;
   private String typeName;
+  private Long categoryId;
   private String categoryName;
 }

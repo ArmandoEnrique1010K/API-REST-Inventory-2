@@ -118,6 +118,8 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       @Param("deliveryOrderId") Long deliveryOrderId,
       @Param("modelId") Long modelId,
       @Param("locationId") Long locationId);
+
+      
   @Query("""
       SELECT COUNT(dl) = 0
       FROM DeliveryLine dl

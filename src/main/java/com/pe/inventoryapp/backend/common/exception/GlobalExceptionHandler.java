@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<CommonResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
     return buildCommonError(
         ResponseStatus.BAD_REQUEST,
-        "El identificador único es invalido, debe ser un número entero");
+        "Error en la URL al realizar la petición al servidor");
   }
 
 

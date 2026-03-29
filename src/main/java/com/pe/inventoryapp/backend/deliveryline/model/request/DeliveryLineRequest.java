@@ -24,9 +24,15 @@ public class DeliveryLineRequest {
 
   @NotNull(message = "Seleccione una ubicación")
   private Long locationId;
-  
+
+  @NotNull(message = "Seleccione un modelo de producto")
+  private Long modelId;
+
   @Nullable
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
   @FutureOrPresent(message = "La fecha de entrega debe ser en el presente o en el futuro")
   private LocalDateTime limitDate;
+
+
+
 }
