@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.location.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,7 @@ import com.pe.inventoryapp.backend.location.model.entity.Subregion;
 import com.pe.inventoryapp.backend.location.model.mapper.LocationMapper;
 import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
 import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
+import com.pe.inventoryapp.backend.location.model.response.SearchLocationResponse;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
@@ -166,5 +168,14 @@ public class LocationServiceImpl implements LocationService {
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
     location.setStatus(!location.isStatus());
     locationRepository.save(location);
+  }
+
+  @Override
+  public List<SearchLocationResponse> findFirstTenLocationsByNameAndRegionIdAndSubregionId(String name, Long regionId, Long subregionId) {
+    List<Location> locations = (List<Location>) locationRepository.findAllFirstTenLocationsByParams(name, regionId, subregionId); 
+      
+    return locations.stream().map(location -> LocationMapper.builder().setLocation(location).buildSearchLocationResponse()).collect(Collectors.toList());
+
+
   }
 }

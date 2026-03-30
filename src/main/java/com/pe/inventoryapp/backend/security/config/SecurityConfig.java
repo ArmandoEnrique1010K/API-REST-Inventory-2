@@ -142,6 +142,10 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/models/search")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
+						// Listar los primeros 10 modelos
+						.requestMatchers(HttpMethod.GET, "/api/models/search/models")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+
 						.requestMatchers(HttpMethod.GET, "/api/models/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.PUT, "/api/models/*")
@@ -180,6 +184,7 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.PATCH, "/api/locations/*/status")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
+						.requestMatchers(HttpMethod.GET, "/api/locations/search/region/*/subregion/*").hasAnyAuthority("ROLE_OPERATOR", "ROLE_ADMIN", "ROLE_SECRETARY")
 
 						// COMPANY
 						.requestMatchers(HttpMethod.POST, "/api/companies")

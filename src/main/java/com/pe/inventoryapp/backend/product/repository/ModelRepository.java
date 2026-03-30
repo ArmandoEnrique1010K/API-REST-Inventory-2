@@ -62,6 +62,22 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
 
 
 
+  // Lista de los primeros 10 modelos que coincidan con el parametro
+  @Query("""
+      SELECT m 
+      FROM Model m 
+      JOIN m.product p
+      WHERE m.status = true AND p.status = true
+      AND (
+        :keyword IS NULL OR 
+        LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+        LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+      ORDER BY m.id DESC LIMIT 10
+      """)
+  List<Model> findAllFirstTenModelsByParams(@Param("keyword") String keyword);
+
+
 
   @Query("SELECT m FROM Model m WHERE m.product.id = :productId ORDER BY m.id DESC")
   List<Model> findAllByProductId(Long productId);

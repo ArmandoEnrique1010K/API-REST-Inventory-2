@@ -29,6 +29,7 @@ public class DeliveryOrderMapper {
           deliveryOrder.getId(),
           deliveryOrder.getBatch(),
           deliveryOrder.getLimitDate(),
+          deliveryOrder.getPriorityDate(),
           deliveryOrder.getUserClient().getFirstname() + " " + deliveryOrder.getUserClient().getLastname(),
           deliveryOrder.getOrderStatus());
     }

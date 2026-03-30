@@ -26,8 +26,9 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
           OR LOWER(d.userClient.firstname) LIKE LOWER(CONCAT('%', :userClientName, '%'))
           OR LOWER(d.userClient.lastname) LIKE LOWER(CONCAT('%', :userClientName, '%')))
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
-          AND ((:startDate IS NULL OR :endDate IS NULL) OR d.priorityDate BETWEEN :startDate AND :endDate)
-          AND d.orderStatus != 'ORDER_CANCELED'
+          AND (:startDate IS NULL OR d.priorityDate >= :startDate)
+          AND (:endDate IS NULL OR d.priorityDate <= :endDate)
+        AND d.orderStatus != 'ORDER_CANCELED'
         ORDER BY d.createdAt DESC
       """)
   Page<DeliveryOrder> findAllByParams(
@@ -40,6 +41,7 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
 
   // Busca todas las ordenes que estan activas (estado Ready e InProgress) (PARA
   // OPERADORES)
+  // Recordar que debe tomar un rango de fechas
   @Query("""
         SELECT d
         FROM DeliveryOrder d
@@ -48,7 +50,8 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
           OR LOWER(d.userClient.firstname) LIKE LOWER(CONCAT('%', :userClientName, '%'))
           OR LOWER(d.userClient.lastname) LIKE LOWER(CONCAT('%', :userClientName, '%')))
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
-          AND ((:startDate IS NULL OR :endDate IS NULL) OR d.limitDate BETWEEN :startDate AND :endDate)
+          AND (:startDate IS NULL OR d.priorityDate >= :startDate)
+          AND (:endDate IS NULL OR d.priorityDate <= :endDate)
         ORDER BY d.createdAt DESC
       """)
   Page<DeliveryOrder> findAllActiveByParams(
@@ -61,7 +64,8 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
   // Busca todas las ordenes por id del cliente y parametros (PARA CLIENTES EN
   // GENERAL Y USUARIOS QUE NO SON EMPLEADOS)
 
-  // Este método no debe listar todas las ordenes que tengan el estado MOVEMENT_LINE_CANCELED
+  // Este método no debe listar todas las ordenes que tengan el estado
+  // MOVEMENT_LINE_CANCELED
   @Query("""
         SELECT d
         FROM DeliveryOrder d
@@ -69,7 +73,8 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
           AND d.orderStatus != 'ORDER_CANCELED'
           AND (:status IS NULL OR d.orderStatus = :status)
           AND (:batch IS NULL OR d.batch LIKE CONCAT('%', :batch, '%'))
-          AND ((:startDate IS NULL OR :endDate IS NULL) OR d.limitDate BETWEEN :startDate AND :endDate)
+          AND (:startDate IS NULL OR d.priorityDate >= :startDate)
+          AND (:endDate IS NULL OR d.priorityDate <= :endDate)
         ORDER BY d.createdAt DESC
       """)
 

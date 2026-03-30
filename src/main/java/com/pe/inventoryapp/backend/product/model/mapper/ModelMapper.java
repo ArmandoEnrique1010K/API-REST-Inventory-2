@@ -4,6 +4,7 @@ import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
+import com.pe.inventoryapp.backend.product.model.response.SearchFirstTenModelsResponse;
 
 
 public class ModelMapper {
@@ -91,8 +92,18 @@ public class ModelMapper {
         model.getProduct().getType().getName(),
         model.getProduct().getCategory().getId(),
         model.getProduct().getCategory().getName());
-
   }
 
+  public SearchFirstTenModelsResponse buildSearchFirstTenModelsResponse() {
+    if (model == null) {
+      throw new RuntimeException("Debe pasar la entidad Model");
+    }
 
+    return new SearchFirstTenModelsResponse(
+        model.getId(),
+        model.getProduct().getName() + " " + model.getName()
+      );
+  }
 }
+
+

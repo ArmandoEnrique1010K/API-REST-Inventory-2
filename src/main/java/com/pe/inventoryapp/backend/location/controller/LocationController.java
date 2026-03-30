@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.validation.BindingResult;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -18,6 +21,7 @@ import jakarta.validation.Valid;
 
 import com.pe.inventoryapp.backend.location.service.LocationService;
 import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
+import com.pe.inventoryapp.backend.location.model.response.SearchLocationResponse;
 import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
@@ -69,6 +73,17 @@ public class LocationController {
         locations);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
+
+  @GetMapping("/search/region/{regionId}/subregion/{subregionId}")
+  public ResponseEntity<?> listFirstTenLocationsByKeyword(@RequestParam(required = true) String name, @PathVariable Long regionId, @PathVariable Long subregionId) {
+    List<SearchLocationResponse> locations = locationService.findFirstTenLocationsByNameAndRegionIdAndSubregionId(name, regionId, 
+        subregionId);
+    DataResponse<List<SearchLocationResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+        locations);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  }
+
+
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getLocation(@PathVariable Long id) {

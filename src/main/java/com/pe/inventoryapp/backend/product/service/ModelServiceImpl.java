@@ -21,6 +21,7 @@ import com.pe.inventoryapp.backend.product.model.request.ModelRequest;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
+import com.pe.inventoryapp.backend.product.model.response.SearchFirstTenModelsResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
@@ -246,5 +247,10 @@ public class ModelServiceImpl implements ModelService {
     modelRepository.save(model);
   }
 
+  @Override
+  public List<SearchFirstTenModelsResponse> findFirstTenModelsByKeyword(String keyword) {
+    List<Model> models = (List<Model>) modelRepository.findAllFirstTenModelsByParams(keyword);
+    return models.stream().map(model -> ModelMapper.builder().setModel(model).buildSearchFirstTenModelsResponse()).collect(Collectors.toList());
+  }
 
 }
