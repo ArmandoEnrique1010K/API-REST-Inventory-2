@@ -84,4 +84,29 @@ public class CategoryServiceImpl implements CategoryService {
 
     categoryRepository.save(category);
   }
+
+
+  @Override
+  public void changeStatusCategoryById(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    Category category = categoryRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
+
+    category.setStatus(!category.isStatus());
+    categoryRepository.save(category);
+  }
+
+
+  @Override
+  public List<CategoryResponse> findAllActiveCategories() {
+    List<Category> categories = (List<Category>) categoryRepository.findAllActivesAndSortById();
+
+    return categories.stream()
+        .map(category -> CategoryMapper.builder().setCategory(category).buildCategoriesResponse())
+        .collect(Collectors.toList());
+
+  }
 }

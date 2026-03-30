@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class TypeResponse {
   private Long id;
   private String name;
+  private boolean status;
 }

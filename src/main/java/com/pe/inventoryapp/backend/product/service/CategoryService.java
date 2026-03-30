@@ -10,7 +10,11 @@ public interface CategoryService {
 
   List<CategoryResponse> findAllCategories();
 
+  List<CategoryResponse> findAllActiveCategories();
+
   CategoryResponse findCategoryById(Long id);
 
   void updateCategoryById(Long id, CategoryRequest categoryRequest);
+
+  void changeStatusCategoryById(Long id);
 }

@@ -13,6 +13,8 @@ public interface TypeRepository extends JpaRepository<Type, Long> {
   @Query("SELECT t FROM Type t ORDER BY t.id DESC")
   List<Type> findAllAndSortById();
 
+  @Query("SELECT t FROM Type t WHERE t.status = true ORDER BY t.id DESC")
+  List<Type> findAllActivesAndSortById();
 
   boolean existsByName(String name);
   boolean existsByNameAndIdNot(String name, Long id);

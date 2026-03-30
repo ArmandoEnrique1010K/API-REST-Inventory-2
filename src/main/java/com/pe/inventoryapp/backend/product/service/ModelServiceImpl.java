@@ -85,7 +85,9 @@ public class ModelServiceImpl implements ModelService {
     model.setName(name);
     model.setImageUrl(modelDomainService.resolveImageUrl(urlImage));
     model.setPublicImageId(publicImageId);
-    model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
+    // model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
+    model.setEntryDate(modelRequest.getEntryDate());
+
     model.setCaducityDate(modelRequest.getCaducityDate());
     model.setTotalQuantityAvailable(0);
     model.setTotalQuantityReceived(0);
@@ -175,9 +177,9 @@ public class ModelServiceImpl implements ModelService {
     Model model = modelRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
 
-    if (model.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "El modelo se encuentra inactivo");
-    }
+    // if (model.isStatus() == false) {
+    //   throw new BusinessException(ResponseStatus.CONFLICT, "El modelo se encuentra inactivo");
+    // }
 
     return ModelMapper.builder().setModel(model).buildModelResponse();
   }
@@ -228,7 +230,8 @@ public class ModelServiceImpl implements ModelService {
 
     model.setName(newName);
     // model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
-    model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
+    // model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
+    model.setEntryDate(modelRequest.getEntryDate());
     model.setCaducityDate(modelRequest.getCaducityDate());
     modelRepository.save(model);
   }
@@ -242,6 +245,14 @@ public class ModelServiceImpl implements ModelService {
 
     Model model = modelRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
+
+      // Verificar si el producto esta activo, si no esta activo debe devolver una excepción
+      Product product = productRepository.findById(model.getProduct().getId())
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
+
+      if (!product.isStatus()) {
+        throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra inactivo");
+      }
 
     model.setStatus(!model.isStatus());
     modelRepository.save(model);

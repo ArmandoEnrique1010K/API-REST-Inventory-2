@@ -19,6 +19,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -60,6 +61,15 @@ public class TypeController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
+  @GetMapping("/active")
+  public ResponseEntity<?> listAllActiveTypes() {
+    List<TypeResponse> types = typeService.findAllActiveTypes();
+    DataResponse<List<TypeResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        types);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  }
+
+
   @GetMapping("/{id}")
   public ResponseEntity<?> getType(@PathVariable Long id) {
     TypeResponse type = typeService.findTypeById(id);
@@ -78,4 +88,14 @@ public class TypeController {
         "Se actualizo el nombre del tipo");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+    @PatchMapping("/{id}/status")
+  public ResponseEntity<CommonResponse> changeStatusType(@PathVariable Long id) {
+    typeService.changeStatusTypeById(id);
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha cambiado el estado del tipo");
+
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
 }

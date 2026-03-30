@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ public class ModelRequest {
   @Size(min = 4, max = 40, message = "El nombre debe tener entre 4 y 40 caracteres")
   private String name;
 
+  @NotNull(message = "Introduzca una fecha")
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   @PastOrPresent(message = "La fecha de entrada no puede ser futura")
   private LocalDate entryDate;

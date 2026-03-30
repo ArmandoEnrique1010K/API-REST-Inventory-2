@@ -16,6 +16,7 @@ import com.pe.inventoryapp.backend.product.service.CategoryService;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,6 +57,14 @@ public class CategoryController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
+  @GetMapping("/active")
+  public ResponseEntity<?> listAllActiveCategories() {
+    List<CategoryResponse> categories = categoryService.findAllActiveCategories();
+    DataResponse<List<CategoryResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        categories);
+    return ResponseEntity.status(dataResponse.status()).body(dataResponse);
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<?> getCategory(@PathVariable Long id) {
     CategoryResponse category = categoryService.findCategoryById(id);
@@ -75,4 +84,14 @@ public class CategoryController {
         "Se actualizo el nombre de la categoria");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  @PatchMapping("/{id}/status")
+  public ResponseEntity<CommonResponse> changeStatusCategory(@PathVariable Long id) {
+    categoryService.changeStatusCategoryById(id);
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+        "Se ha cambiado el estado de la categoria");
+
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
 }

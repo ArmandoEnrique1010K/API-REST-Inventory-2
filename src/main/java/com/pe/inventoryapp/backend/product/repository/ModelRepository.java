@@ -53,7 +53,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
             LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
             LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
           )
-          AND m.status = TRUE
+          AND m.status = TRUE AND p.status = TRUE
           ORDER BY m.id DESC
       """)
   Page<Model> findAllActivesByName(
@@ -63,6 +63,10 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
 
 
   // Lista de los primeros 10 modelos que coincidan con el parametro
+
+  // TODO: VERIFICAR SI CUMPLE CON LA CONDICION DE QUE FILTRE TODOS LOS MODELOS ACTIVOS DE UN PRODUCTO (TOMANDO EN CUENTA QUE SI UN PRODUCTO NO TIENE MODELOS ACTIVOS, NO DEBE FILTRAR NINGUNO)
+  // WHERE m.status = true AND p.status = true
+
   @Query("""
       SELECT m 
       FROM Model m 
@@ -78,7 +82,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
   List<Model> findAllFirstTenModelsByParams(@Param("keyword") String keyword);
 
 
-
+  // Listar todos los modelos que pertenecen a un producto
   @Query("SELECT m FROM Model m WHERE m.product.id = :productId ORDER BY m.id DESC")
   List<Model> findAllByProductId(Long productId);
 

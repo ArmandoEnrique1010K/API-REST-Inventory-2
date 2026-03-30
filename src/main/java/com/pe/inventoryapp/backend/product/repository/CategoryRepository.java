@@ -11,6 +11,9 @@ public interface CategoryRepository extends CrudRepository<Category, Long> {
   @Query("SELECT c FROM Category c ORDER BY c.id DESC")
   List<Category> findAllAndSortById();
 
+  @Query("SELECT c FROM Category c WHERE c.status = true ORDER BY c.id DESC")
+  List<Category> findAllActivesAndSortById();
+
   boolean existsByName(String name);
   boolean existsByNameAndIdNot(String name, Long id);
 }

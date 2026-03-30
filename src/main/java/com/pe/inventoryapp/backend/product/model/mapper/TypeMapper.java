@@ -28,7 +28,8 @@ public class TypeMapper {
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new TypeResponse(
         type.getId(),
-        type.getName()
+        type.getName(),
+        type.isStatus()
       );
   }
 }

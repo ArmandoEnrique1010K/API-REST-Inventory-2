@@ -50,7 +50,8 @@ public class ProductCreateRequest {
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   @PastOrPresent(message = "La fecha de entrada no puede ser futura")
-  @Nullable
+  // @Nullable // permite valor null
+  @NotNull(message = "Introduzca una fecha")
   private LocalDate modelEntryDate;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")

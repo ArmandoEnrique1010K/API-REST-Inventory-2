@@ -100,8 +100,8 @@ public class ProductServiceImpl implements ProductService {
     model.setName(productCreateRequest.getModelName());
     model.setImageUrl(modelDomainService.resolveImageUrl(urlImage));
     model.setPublicImageId(publicImageId);
-    model.setEntryDate(modelDomainService.resolveAnyLocalDate(productCreateRequest.getModelEntryDate()));
-
+    // model.setEntryDate(modelDomainService.resolveAnyLocalDate(productCreateRequest.getModelEntryDate()));
+    model.setEntryDate(productCreateRequest.getModelEntryDate());
     // Nota: CaducityDate puede ser nulo
     model.setCaducityDate(productCreateRequest.getModelCaducityDate());
     model.setTotalQuantityAvailable(0);
@@ -159,9 +159,9 @@ public class ProductServiceImpl implements ProductService {
     Product product = productRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
-    if (product.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra desactivado");
-    }
+    // if (product.isStatus() == false) {
+    //   throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra desactivado");
+    // }
 
     return ProductMapper.builder().setProduct(product).buildProductResponse();
   }
@@ -212,7 +212,7 @@ public class ProductServiceImpl implements ProductService {
     productRepository.save(product);
   }
 
-  // Cambia el estado del producto a false y lo guarda
+  // Cambia el estado del producto a false o a true y lo guarda
   @Override
   @Transactional
   public void changeStatusProductById(Long id) {
@@ -223,7 +223,17 @@ public class ProductServiceImpl implements ProductService {
     Product product = productRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
-    product.setStatus(!product.isStatus());
+    boolean oldStatus = product.isStatus(); // estado anterior
+
+    // Cambias el estado del producto
+    product.setStatus(!oldStatus);
+
+    // SOLO si pasó de true → false
+    if (oldStatus && !product.isStatus()) {
+      product.getModels().forEach(model -> model.setStatus(false));
+      modelRepository.saveAll(product.getModels());
+    }
+
     productRepository.save(product);
   }
 }

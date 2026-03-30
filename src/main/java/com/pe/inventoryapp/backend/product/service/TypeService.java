@@ -9,8 +9,11 @@ public interface TypeService {
   void saveType(TypeRequest typeRequest);
 
   List<TypeResponse> listAllTypes();
+  List<TypeResponse> findAllActiveTypes();
 
   TypeResponse findTypeById(Long id);
 
   void updateTypeById(Long id, TypeRequest typeRequest);
+
+  void changeStatusTypeById(Long id);
 }

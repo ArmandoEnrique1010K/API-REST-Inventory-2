@@ -69,8 +69,31 @@ public class TypeServiceImpl implements TypeService {
     }
 
     Type type = typeRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
+        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
 
     return TypeMapper.builder().setType(type).buildTypeListResponse();
+  }
+
+  @Override
+  public List<TypeResponse> findAllActiveTypes() {
+    List<Type> types = (List<Type>) typeRepository.findAllActivesAndSortById();
+
+    return types.stream()
+        .map(
+            type -> TypeMapper.builder().setType(type).buildTypeListResponse())
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void changeStatusTypeById(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    Type type = typeRepository.findById(id).orElseThrow(
+        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
+
+    type.setStatus(!type.isStatus());
+    typeRepository.save(type);
   }
 }
