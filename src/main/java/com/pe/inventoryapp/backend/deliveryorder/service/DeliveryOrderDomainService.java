@@ -63,8 +63,6 @@ public class DeliveryOrderDomainService {
   public void recalculateSummaries(DeliveryOrder deliveryOrder, Model model) {
     model_DeliveryOrderRepository
         .recalculateRequiredQuantities(deliveryOrder.getId());
-  // deliveryOrderSummaryDomainService.getSummary(deliveryOrder.getId());
-    
   }
 
 }

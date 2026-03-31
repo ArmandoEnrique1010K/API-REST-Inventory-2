@@ -342,7 +342,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		restoreStock(stockToRestore, deliveryOrder, user, deliveryOrderComentRequest);
 
-		// TODO: URGENTE, PENDIENTE ESTE METODO, RECALCULAR LAS SUMATORIAS DE TODAS LAS LINEAS DE ENTREGA
 		// deliveryOrderDomainService.recalculateSummaries(deliveryOrder, modelRepository.findById(1));
 
 		// Nota: Este método tambien contiene la logica para guardarlo en el repositorio
