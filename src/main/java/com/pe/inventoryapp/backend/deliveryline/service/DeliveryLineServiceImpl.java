@@ -568,8 +568,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movementRepository.save(movement);
   }
 
-
-
   // Método auxiliar para almacenar un lote de stock temporal con la cantidad
   // entregada de la linea de entrega que se esta cancelando, para luego ser
   // asignado a otra linea de entrega que lo requiera, pero solamente si hay
@@ -636,20 +634,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Override
   @Transactional
   public void sendDeliveryLineById(Long id, Long id_user_authenticated) {
+    User user = getUser(id_user_authenticated);
+    DeliveryLine deliveryLine = getDeliveryLine(id);
 
-    if (id == null || id_user_authenticated == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-    User user = userRepository.findById(
-        id_user_authenticated)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-
-    DeliveryLine deliveryLine = deliveryLineRepository.findById(id).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
-
-    if (deliveryLine == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
 
     // Solamente podra declarar entregada si la linea de entrega se encuentra lista
     if (deliveryLine.getLineStatus() != LineStatus.LINE_READY) {
@@ -660,17 +647,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
-    // TODO: VERIFICAR SI AL ENTREGAR UNA LINEA DE ENTREGA, SE ALTERARA LA CANTIDAD
-    // ENTREGADA DEL PRODUCTO
-    Model model = modelRepository.findById(deliveryLine.getModel().getId()).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+    Model model = deliveryLine.getModel();
+    int deliveredQty = deliveryLine.getDeliveredQuantity();
 
-    // Actualizara los campos porque se ha entregado el modelo del producto
-    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() - deliveryLine.getDeliveredQuantity());
-
-    // La cantidad tomada ahora pasa a ser la cantidad entregada
-    model.setTotalQuantityTaken(model.getTotalQuantityTaken() - deliveryLine.getDeliveredQuantity());
-    model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() + deliveryLine.getDeliveredQuantity());
+    // SOLO transición lógica
+    model.setTotalQuantityTaken(model.getTotalQuantityTaken() - deliveredQty);
+    model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() + deliveredQty);
     modelRepository.save(model);
 
     Movement movement = new Movement();
@@ -681,9 +663,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setStockLotReceiver(null);
     movement.setStockLotEmitter(null);
     movement.setDeliveryLine(deliveryLine);
-    movement.setModel(deliveryLine.getModel());
+    movement.setModel(model);
     movementRepository.save(movement);
-
   }
 
   // ESTO ES UN MOVIMIENTO EXTRAER UNA CANTIDAD Y REPORTARLA COMO PERDIDA DE UNA
@@ -743,7 +724,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Validar que no se pierda más de lo entregado
     if (deliveredQuantity - lostQuantity < 0) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
-          "La cantidad perdida es mayor a la cantidad entregada");
+          "La cantidad perdida es mayor a la cantidad preparada");
     }
 
     // Ajuste de cantidades en la línea:
@@ -775,7 +756,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // // Obtener modelo del producto
     // Model model = modelRepository.findById(modelId).orElseThrow(
-    //     () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+    // () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto
+    // no existe"));
 
     // // Lógica clave:
     // // Se descuenta del "taken" (cantidad retirada del stock)
@@ -824,7 +806,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Usuario que ejecuta la operación
     User user = userRepository.findById(id_user_authenticated)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
-        
+
     // Obtener la línea de entrega
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
@@ -850,7 +832,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     if (deliveryOrder == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
-    
+
     // Obtener relación modelo - orden de entrega
     Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository.findById(
         deliveryOrderId).orElseThrow(
@@ -860,10 +842,25 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-
     // ---------------------------
     // ACTUALIZACIÓN DE LA LÍNEA
     // ---------------------------
+
+    // Validar que no tenga el estado CANCELED O DELIVERED
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED ||
+      deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
+      throw new BusinessException(
+        ResponseStatus.DEFAULT_RESOURCE,
+        "La linea de entrega no puede ser devuelta");
+    }
+
+    // Validar que no haya cantidad negativa
+    // Validar que no se intente devolver más de lo entregado
+    if (returnedQuantity > deliveryLine.getDeliveredQuantity()) {
+      throw new BusinessException(
+          ResponseStatus.BAD_REQUEST,
+          "La cantidad a devolver no puede ser mayor a la cantidad preparada");
+    }
 
     // Recalcular estado en base a la nueva cantidad entregada
     // (lo que queda después de devolver)
@@ -897,8 +894,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Recalcular cantidad total requerida (aunque aquí no cambia directamente,
     // se recalcula por consistencia)
     // model_DeliveryOrder.setRequiredQuantityTotal(
-    //     deliveryLineRepository.sumRequiredQuantityByDeliveryOrderIdAndModelId(deliveryOrder.getId(),
-    //         model_DeliveryOrder.getModel().getId()));
+    // deliveryLineRepository.sumRequiredQuantityByDeliveryOrderIdAndModelId(deliveryOrder.getId(),
+    // model_DeliveryOrder.getModel().getId()));
 
     // model_DeliveryOrderRepository.save(model_DeliveryOrder);
 
@@ -918,7 +915,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrderRepository.save(deliveryOrder);
 
     // Recalcular agregaciones (regiones, subregiones, etc.)
-    // deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model_DeliveryOrder.getModel());
+    // deliveryOrderDomainService.recalculateSummaries(deliveryOrder,
+    // model_DeliveryOrder.getModel());
 
     // ---------------------------
     // AJUSTE DEL MODELO (INVENTARIO)
@@ -928,13 +926,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Se reduce la cantidad "taken" porque ahora regresa al stock
     // (a diferencia de pérdida, aquí sí vuelve al inventario)
-    
-    
-    
+
     model.setTotalQuantityTaken(model.getTotalQuantityTaken() - returnedQuantity);
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + returnedQuantity);
 
-    
     modelRepository.save(model);
 
     // ---------------------------
@@ -958,79 +953,69 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // No hay emisor/receptor directo porque es una reversión lógica
     movement.setStockLotReceiver(null);
     movement.setStockLotEmitter(null);
-    
+
     movement.setDeliveryLine(deliveryLine);
 
     movementRepository.save(movement);
   }
 
-
-
-  // Servicio para entregar una cantidad a una linea de entrega
-  @Transactional
-  @Override
-  public void allocateDeliveryLineById(Long id, DeliveryLineAllocateRequest deliveryLineAllocateRequest,
-      Long id_user_authenticated) {
-
-    if (id == null || id_user_authenticated == null) {
+  private User getUser(Long userId) {
+    if (userId == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // ===== Usuario =====
-    User user = userRepository.findById(id_user_authenticated)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El usuario no existe"));
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.NOT_FOUND,
+            "El usuario no existe"));
+  }
 
-    // ===== Línea de entrega =====
-    DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
-
-    // ===== Orden de entrega =====
-    Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
-
-    if (deliveryOrderId == null) {
+  private DeliveryLine getDeliveryLine(Long id) {
+    if (id == null) {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
-        deliveryOrderId)
-        .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+    return deliveryLineRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.NOT_FOUND,
+            "La linea de entrega no existe"));
+  }
 
-    // ==== Modelo =====
-    Long modelId = deliveryLine.getModel().getId();
+  private int validateQuantity(
+      DeliveryLine deliveryLine,
+      DeliveryLineAllocateRequest request) {
 
-    if (modelId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    Model model = modelRepository.findById(modelId).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
-
-    // ===== Relación producto-orden =====
-    Long id_model_deliveryOrder = deliveryLine.getModel_DeliveryOrder().getId();
-
-    if (id_model_deliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository.findById(
-        id_model_deliveryOrder).orElseThrow(
-            () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
-
-    // ===== Cantidad =====
-    Integer quantity = deliveryLineAllocateRequest.getQuantity();
+    Integer quantity = request.getQuantity();
 
     if (quantity == null || quantity <= 0) {
-      throw new BusinessException(ResponseStatus.BAD_REQUEST, "Cantidad inválida");
+      throw new BusinessException(
+          ResponseStatus.BAD_REQUEST,
+          "Cantidad inválida");
     }
 
     if (quantity > deliveryLine.getPendingQuantity()) {
       throw new BusinessException(
           ResponseStatus.BAD_REQUEST,
-          "La cantidad supera lo pendiente de la línea");
+          "La cantidad supera a la cantidad pendiente");
     }
 
-    // ===== Lotes =====
-    List<Long> stockLotIds = deliveryLineAllocateRequest.getStockLotsIds();
+    // 🚨 Validación clave que te faltaba
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED) {
+
+      throw new BusinessException(
+          ResponseStatus.DEFAULT_RESOURCE,
+          "La línea no permite asignación de stock");
+    }
+
+    return quantity;
+  }
+
+  private List<StockLot> validateStockLots(
+      DeliveryLineAllocateRequest request,
+      Model model) {
+
+    List<Long> stockLotIds = request.getStockLotsIds();
 
     if (stockLotIds == null || stockLotIds.isEmpty()) {
       throw new BusinessException(
@@ -1038,31 +1023,57 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           "Debe seleccionar al menos un lote");
     }
 
-    List<StockLot> stockLots = stockLotRepository.findAllById(stockLotIds);
+    List<StockLot> stockLots = stockLotRepository.findAllByIdForUpdate(stockLotIds);
 
+    // Validar existencia completa
     if (stockLots.size() != stockLotIds.size()) {
       throw new BusinessException(
           ResponseStatus.NOT_FOUND,
           "Uno o más lotes no existen");
     }
 
+    // Validar que todos pertenezcan al modelo
     for (StockLot stockLot : stockLots) {
-      if (!stockLot.getModel().getId().equals(modelId)) {
+
+      if (!stockLot.getModel().getId().equals(model.getId())) {
         throw new BusinessException(
             ResponseStatus.BAD_REQUEST,
-            "El lote no pertenece al producto de la línea");
+            "El lote no pertenece al modelo");
+      }
+
+      // 🚨 Validación clave: evitar usar lotes sin stock
+      if (stockLot.getQuantityAvailable() <= 0) {
+        throw new BusinessException(
+            ResponseStatus.BAD_REQUEST,
+            "Uno de los lotes no tiene stock disponible");
+      }
+
+      // 🚨 Validación avanzada (opcional pero recomendable)
+      if (Boolean.TRUE.equals(stockLot.isZeroStock())) {
+        throw new BusinessException(
+            ResponseStatus.BAD_REQUEST,
+            "Uno de los lotes está marcado como sin stock");
       }
     }
 
-    // ===== Validar stock total =====
+    return stockLots;
+  }
+
+  @Transactional
+  public void allocateStock(
+      Model model,
+      DeliveryLine deliveryLine,
+      List<StockLot> stockLots,
+      int quantity,
+      User user) {
+
+    int remaining = quantity;
     int totalAvailable = stockLots.stream()
         .mapToInt(StockLot::getQuantityAvailable)
         .sum();
 
     if (totalAvailable < quantity) {
-      throw new BusinessException(
-          ResponseStatus.BAD_REQUEST,
-          "Stock insuficiente para la cantidad solicitada");
+      throw new BusinessException(ResponseStatus.BAD_REQUEST, "Stock inconsistente");
     }
     // ==== Movimiento =====
     Movement movement = new Movement();
@@ -1076,33 +1087,33 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     movementRepository.save(movement);
 
-    // ===== Asignar stock por lotes =====
-    int remaining = quantity;
-
     for (StockLot stockLot : stockLots) {
 
       if (remaining == 0)
         break;
 
       int available = stockLot.getQuantityAvailable();
-
       if (available <= 0)
         continue;
 
       int used = Math.min(available, remaining);
 
-      // 1. Actualizar stock
+      // 🔴 1. ACTUALIZAR LOTE
       stockLot.setQuantityAvailable(available - used);
+      stockLot.setQuantityDelivered(stockLot.getQuantityDelivered() + used);
+
       stockLotRepository.save(stockLot);
 
-      // 2. Relación DeliveryLine ↔ StockLot
+      // 🔴 2. RELACIÓN DELIVERY
+      // saveDeliveryRelation(stockLot, deliveryLine, used);
       StockLot_DeliveryLine dlRelation = new StockLot_DeliveryLine();
       dlRelation.setStockLot(stockLot);
       dlRelation.setDeliveryLine(deliveryLine);
       dlRelation.setQuantityUsed(used);
       stockLot_DeliveryLineRepository.save(dlRelation);
 
-      // 3. Relación Movement ↔ StockLot
+      // 🔴 3. RELACIÓN MOVIMIENTO
+      // saveMovementRelation(movement, stockLot, used);
       Movement_StockLot mRelation = new Movement_StockLot();
       mRelation.setMovement(movement);
       mRelation.setStockLot(stockLot);
@@ -1112,6 +1123,75 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       remaining -= used;
     }
 
+    if (remaining > 0) {
+      throw new BusinessException(ResponseStatus.BAD_REQUEST, "Stock inconsistente");
+    }
+
+    // 🔴 4. ACTUALIZAR MODELO (UNA SOLA VEZ)
+    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() - quantity);
+    model.setTotalQuantityTaken(model.getTotalQuantityTaken() + quantity);
+
+    modelRepository.save(model);
+  }
+
+  // Servicio para entregar una cantidad a una linea de entrega
+  @Transactional
+  @Override
+  public void allocateDeliveryLineById(Long id, DeliveryLineAllocateRequest deliveryLineAllocateRequest,
+      Long id_user_authenticated) {
+
+    // ===== VALIDACIONES =====
+    User user = getUser(id_user_authenticated);
+    DeliveryLine deliveryLine = getDeliveryLine(id);
+    Model model = deliveryLine.getModel();
+
+    int quantity = validateQuantity(deliveryLine, deliveryLineAllocateRequest);
+
+    List<StockLot> stockLots = validateStockLots(deliveryLineAllocateRequest, model);
+
+    // ===== Orden de entrega =====
+    // Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
+
+    // if (deliveryOrderId == null) {
+    // throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    // }
+
+    // DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
+    // deliveryOrderId)
+    // .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden
+    // de entrega no existe"));
+
+    DeliveryOrder deliveryOrder = deliveryLine.getDeliveryOrder();
+
+    // ===== Relación producto-orden =====
+    // Long id_model_deliveryOrder = deliveryLine.getModel_DeliveryOrder().getId();
+
+    // if (id_model_deliveryOrder == null) {
+    // throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+    // }
+
+    // Model_DeliveryOrder model_DeliveryOrder =
+    // model_DeliveryOrderRepository.findById(
+    // id_model_deliveryOrder).orElseThrow(
+    // () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion
+    // producto-orden de entrega no existe"));
+
+    // ===== Validar stock total =====
+    // Disminuye la cantidad total disponible del lote del stock
+    // TODO: ESTO PODRIA NO SER NECESARIO
+    // int totalAvailable = stockLots.stream()
+    // .mapToInt(StockLot::getQuantityAvailable)
+    // .sum();
+
+    // if (totalAvailable < quantity) {
+    // throw new BusinessException(
+    // ResponseStatus.BAD_REQUEST,
+    // "Stock insuficiente para la cantidad solicitada");
+    // }
+
+    // ===== Asignar stock por lotes =====
+    allocateStock(model, deliveryLine, stockLots, quantity, user);
+
     // ===== Actualizar línea =====
     deliveryLine.setDeliveredQuantity(
         deliveryLine.getDeliveredQuantity() + quantity);
@@ -1120,27 +1200,25 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     if (deliveryLine.getPendingQuantity() == 0) {
       deliveryLine.setLineStatus(LineStatus.LINE_READY);
+    } else {
+      deliveryLine.setLineStatus(LineStatus.LINE_PENDING);
     }
-    // ===== Alterar campos del producto =====
-    // model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() +
-    // quantity);
-    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() - quantity);
-    model.setTotalQuantityTaken(model.getTotalQuantityTaken() + quantity);
-    modelRepository.save(model);
-
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
     // ===== Recalcular producto-orden =====
-    Integer totalQuantitySumatory = deliveryLineRepository.sumRequiredQuantityByDeliveryOrderIdAndModelId(
-        deliveryOrder.getId(), modelId);
+    // Integer totalQuantitySumatory =
+    // deliveryLineRepository.sumRequiredQuantityByDeliveryOrderIdAndModelId(
+    // deliveryOrder.getId(), model.getId());
 
-    System.out.println("Total quantity sumatory: " + totalQuantitySumatory);
+    // System.out.println("Total quantity sumatory: " + totalQuantitySumatory);
 
-    model_DeliveryOrder.setRequiredQuantityTotal(
-        totalQuantitySumatory);
+    // TODO: ESTO SOBRA PORQUE NO SE VA A ACTUALIZAR LA CANTIDAD REQUERIDA TOTAL DE
+    // UNA RELACION ORDEN - MODELO DE PRODUCTO CUANDO SE ENTREGA DESDE EL ALMACEN
+    // model_DeliveryOrder.setRequiredQuantityTotal(
+    // totalQuantitySumatory);
 
-    model_DeliveryOrderRepository.save(model_DeliveryOrder);
+    // model_DeliveryOrderRepository.save(model_DeliveryOrder);
 
     // ===== Recalcular orden =====
     deliveryOrder.setPriorityDate(
@@ -1155,7 +1233,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrderRepository.save(deliveryOrder);
 
     // ===== Recalcular regiones =====
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
+    // deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
 
   }
 
