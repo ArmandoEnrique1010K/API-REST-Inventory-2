@@ -280,13 +280,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // TODO: ES PROBABLE QUE SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED,
-    // DEVUELVA UN THROW
-    if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
-      throw new BusinessException(
-          ResponseStatus.CONFLICT,
-          "La linea de entrega se encuentra cancelada");
-    }
+    // SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED, NO DEBE
+    // DEVOLVER UN THROW
+    // if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
+    //   throw new BusinessException(
+    //       ResponseStatus.CONFLICT,
+    //       "La linea de entrega se encuentra cancelada");
+    // }
 
     return DeliveryLineMapper.builder().setDeliveryLine(deliveryLine).buildDeliveryLineDetailsResponse();
   }

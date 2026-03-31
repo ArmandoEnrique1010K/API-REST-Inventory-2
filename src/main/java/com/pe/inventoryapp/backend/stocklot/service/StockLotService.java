@@ -43,5 +43,7 @@ public interface StockLotService {
 
   void transferStockLot(Long idStockLotEmitter, StockLotTransferRequest stockLotTransferRequest, Long id_user);
 
+  List<StockLotSameProductListResponse> findAllActivesStockLotsByModelId(Long modelId);
+
   // void sumAvailableQuantityByProductId(Long productId);
 }

@@ -50,14 +50,11 @@ public class DeliveryOrderDomainService {
 
   // Tomar la fecha mas cercana que no haya sido entregada
   public LocalDateTime getClosestLimitDate(Long idDeliveryOrder) {
-
-    // TODO: VERIFICAR SI LO QUE DICE EL COMENTARIO ES CIERTO
     // 1° encontrar todas las lineas de entrega correspondientes a la orden de
     // entrega
     // 2° tomar las fechas limites de cada linea de entrega cuyo estado sea
-    // INPROGRESS
+    // LINE_PENDING O LINE_EXCEEDED
     // 3° devolver la fecha más cercana que no haya sido entregada
-
     return deliveryLineRepository
         .findClosestLimitDate(idDeliveryOrder)
         .orElse(null); // o lanza excepción

@@ -14,7 +14,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Long> {
   // Page<DeliveryOrder> findByPreparationStatus(PreparationStatus status);
 
-  // TODO: PODRIA ELEGIR LA FECHA LIMITE EN UN UNICO PARAMETRO PARA QUE LO BUSQUE
+  // TODO: EN UNA FUTURA ACTUALIZACION PODRIA ELEGIR LA FECHA LIMITE EN UN UNICO PARAMETRO PARA QUE LO BUSQUE
   // POR UN DIA Y NO POR UN RANGO DE DIAS
   // Busca todas las ordenes por los siguientes parametros (PARA SECRETARIOS Y
   // ADMINISTRADORES)

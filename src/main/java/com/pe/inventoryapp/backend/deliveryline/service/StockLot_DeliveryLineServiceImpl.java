@@ -21,7 +21,7 @@ public class StockLot_DeliveryLineServiceImpl implements StockLot_DeliveryLineSe
 
   @Override
   public List<StockLot_DeliveryLineResponse> findAllByDeliveryLineId(Long id) {
-    List<StockLot_DeliveryLine> stockLotDeliveryLines = (List<StockLot_DeliveryLine>) stockLotDeliveryLineRepository.findAllByDeliveryLineId(id);
+    List<StockLot_DeliveryLine> stockLotDeliveryLines = (List<StockLot_DeliveryLine>) stockLotDeliveryLineRepository.findAllByDeliveryLineIdOrderByCreatedAtDesc(id);
 
     return stockLotDeliveryLines.stream().map(stockLotDeliveryLine -> StockLot_DeliveryLineMapper.builder().setStockLot_DeliveryLine(stockLotDeliveryLine).buildStockLot_DeliveryLineResponse()).collect(Collectors.toList());
   }

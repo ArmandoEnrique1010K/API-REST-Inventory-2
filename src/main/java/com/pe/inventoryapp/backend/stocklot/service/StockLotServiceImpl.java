@@ -190,7 +190,6 @@ public class StockLotServiceImpl implements StockLotService {
         .toList();
   }
 
-  // TODO: SI ZEROSTOCK ES TRUE, IGUALMENTE NO DEBE MOSTRAR UN ERROR CUANDO SE OBTIENE EL LOTE DE STOCK
   @Override
   @Transactional(readOnly = true)
   public StockLotDetailsResponse findStockLotById(Long stockLotId) {
@@ -500,5 +499,13 @@ public class StockLotServiceImpl implements StockLotService {
     movement.setModel(modelReceiver);
     movement.setUser(user);
     movementRepository.save(movement);
+  }
+
+  @Override
+  public List<StockLotSameProductListResponse> findAllActivesStockLotsByModelId(Long modelId) {
+    List<StockLot> stockLots = stockLotRepository.findAllActivesByModelId(modelId);
+    return stockLots.stream()
+        .map(stockLot -> StockLotMapper.builder().setStockLot(stockLot).buildStockLotSameProductListResponse())
+        .toList();
   }
 }

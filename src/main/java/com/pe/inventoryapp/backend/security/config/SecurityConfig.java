@@ -211,6 +211,8 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.GET, "/api/stock-lots")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+						.requestMatchers(HttpMethod.GET, "/api/stock-lots/model/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.GET, "/api/stock-lots/exclude/*/company/*/model/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						.requestMatchers(HttpMethod.GET, "/api/stock-lots/*")
@@ -280,7 +282,7 @@ public class SecurityConfig {
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 						
 						// STOCK LOT - DELIVERY LINE
-						.requestMatchers(HttpMethod.PUT, "/api/stock-lot-delivery-lines/delivery-line/*")
+						.requestMatchers(HttpMethod.GET, "/api/stock-lot-delivery-lines/delivery-line/*")
 						.hasAnyAuthority("ROLE_ADMIN","ROLE_SECRETARY", "ROLE_OPERATOR")
 
 						// MOVEMENTS

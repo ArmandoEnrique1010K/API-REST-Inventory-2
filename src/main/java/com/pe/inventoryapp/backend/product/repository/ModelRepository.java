@@ -63,9 +63,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
 
 
   // Lista de los primeros 10 modelos que coincidan con el parametro
-
-  // TODO: VERIFICAR SI CUMPLE CON LA CONDICION DE QUE FILTRE TODOS LOS MODELOS ACTIVOS DE UN PRODUCTO (TOMANDO EN CUENTA QUE SI UN PRODUCTO NO TIENE MODELOS ACTIVOS, NO DEBE FILTRAR NINGUNO)
-  // WHERE m.status = true AND p.status = true
+  // El producto y el modelo deben sus estados en true
 
   @Query("""
       SELECT m 

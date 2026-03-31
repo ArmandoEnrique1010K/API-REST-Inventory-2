@@ -57,6 +57,21 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long> {
       Pageable pageable);
 
 
+
+      // METODO PARA OBTENER UNA LISTA DE LOS LOTES DE ENTREGA QUE PERTENECEN A UN MISMO MODELO Y QUE ESTEN EN ZEROSTOCK EN FALSE
+      @Query("""
+              SELECT sl 
+              FROM StockLot sl
+              JOIN sl.model m
+              WHERE m.id = :modelId
+              AND sl.zeroStock = false
+              ORDER BY sl.createdAt DESC
+              """)
+      List<StockLot> findAllActivesByModelId(
+        @Param("modelId") Long modelId
+      );
+
+
   // METODO EN EL REPOSITORIO PARA LISTAR TODOS LOS LOTES DE STOCK QUE PERTENEZCAN
   // AL MISMO MODELO, PERO CON LA CONDICION DE QUE PIDA COMO REQUISITO UN ID DE UN
   // LOTE DE STOCK PARA QUE SEA OMITIDO DE LA LISTA, ADEMÁS LOS LOTES DE STOCK NO DEBEN TENER LA CANTIDAD DISPONIBLE EN 0

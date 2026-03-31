@@ -16,7 +16,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long> {
 
   // Listar todas las lineas de entrega que pertenezcan a una orden de entrega
-  // TODO: VERIFICAR SI OMITE LAS LINEAS CANCELADAS
+  // Omitiendo las lineas canceladas
   @Query("""
       SELECT dl FROM DeliveryLine dl
       JOIN FETCH dl.model
