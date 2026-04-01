@@ -138,7 +138,9 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
       // Token no valido
       CommonResponse commonResponse = responseService.generateErrorResponse(ResponseStatus.UNAUTHORIZED, 
-        "El token JWT no es valido (error de token)");
+        // "El token JWT no es valido (error de token)"
+        "Ha ocurrido un error, recargue la página para volver a iniciar sesión"
+      );
 
       response.setStatus(commonResponse.status());
       response.setContentType("application/json");

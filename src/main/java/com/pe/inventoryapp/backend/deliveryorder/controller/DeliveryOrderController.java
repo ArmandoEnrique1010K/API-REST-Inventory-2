@@ -26,6 +26,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderLis
 import com.pe.inventoryapp.backend.deliveryorder.service.DeliveryOrderService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 
+import io.micrometer.common.lang.Nullable;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -112,7 +113,6 @@ public class DeliveryOrderController {
 
   // Este endpoint se utiliza para listar todas las ordenes de entrega por el
   // usuario que ha iniciado sesión
-  //* EL ENDPOINT SE PODRIA UTILIZAR SOLAMENTE EN USUARIOS QUE TENGA EL ROL DE USER
   @GetMapping("/client")
   public ResponseEntity<?> listAllDeliveryOrdersByClient(Authentication authentication,
       @RequestParam(defaultValue = "0") Integer page,
@@ -145,7 +145,6 @@ public class DeliveryOrderController {
   }
 
   // Endpoint para obtener una orden de entrega para un cliente
-  //* UTILIZAR EL ENDPOINT EN USUARIOS QUE TENGA EL ROL DE USER
   @GetMapping("/{id}/client")
   public ResponseEntity<?> getDeliveryOrderForClient(Authentication authentication, @PathVariable Long id) {
     Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
@@ -162,7 +161,7 @@ public class DeliveryOrderController {
 
   @PatchMapping("/{id}")
   public ResponseEntity<?> changeLimitDateDeliveryOrder(Authentication authentication, @PathVariable Long id,
-      @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime limitDate) {
+      @RequestParam @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime limitDate) {
     Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
 
     deliveryOrderService.changeLimitDate(id, limitDate, id_user);

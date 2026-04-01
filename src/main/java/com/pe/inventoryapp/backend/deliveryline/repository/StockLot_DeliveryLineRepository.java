@@ -15,4 +15,6 @@ public interface StockLot_DeliveryLineRepository extends JpaRepository<StockLot_
       ORDER BY sd.createdAt DESC
       """)
   List<StockLot_DeliveryLine> findAllByDeliveryLineIdOrderByCreatedAtDesc(Long deliveryLineId);
+
+  // List<StockLot_DeliveryLine> findAllByDeliveryLineId(Long deliveryLineId);
 }

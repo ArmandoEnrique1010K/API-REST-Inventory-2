@@ -144,5 +144,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND dl.lineStatus != 'LINE_CANCELED'
       """)
   boolean allLinesAreCanceled(@Param("deliveryOrderId") Long deliveryOrderId);
+
+  boolean existsByDeliveryOrderIdAndLineStatusIn(Long deliveryOrderId, List<LineStatus> statuses);
 }
 

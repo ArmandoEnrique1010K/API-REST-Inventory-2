@@ -52,7 +52,8 @@ public class Model_DeliveryOrderServiceImpl implements Model_DeliveryOrderServic
                     "La orden de entrega ha sido cancelada");
         }
 
-        if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_DELIVERED) {
+        // TODO: VERIFICAR AQUI
+        if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_DELIVERED || deliveryOrder.getOrderStatus() == OrderStatus.ORDER_PARTIALLY_DELIVERED) {
             throw new BusinessException(ResponseStatus.CONFLICT,
                     "La orden de entrega ha sido entregada");
         }

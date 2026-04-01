@@ -160,7 +160,6 @@ public class DeliveryLineController {
   }
 
 
-  // TODO: PROBAR ESTE ENDPOINT
   @PutMapping("/{id}/lost")
   public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
@@ -173,7 +172,6 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  // TODO: PROBAR ESTE ENDPOINT
   @PutMapping("/{id}/return")
   public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,

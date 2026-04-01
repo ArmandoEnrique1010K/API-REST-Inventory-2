@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,8 @@ import com.pe.inventoryapp.backend.user.repository.UserRepository;
 @Service
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
-	private final DeliveryOrderRepository deliveryOrderRepository;
+	private final Model_DeliveryOrderDomainService model_DeliveryOrderDomainService;
+  private final DeliveryOrderRepository deliveryOrderRepository;
 	private final DeliveryLineRepository deliveryLineRepository;
 	private final UserRepository userRepository;
 	private final CompanyRepository companyRepository;
@@ -70,7 +72,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			ModelRepository modelRepository,
 			DeliveryOrderDomainService deliveryOrderDomainService,
 			StockLotDomainService stockLotDomainService,
-			MovementDomainService movementDomainService) {
+			MovementDomainService movementDomainService, Model_DeliveryOrderDomainService model_DeliveryOrderDomainService) {
 		this.deliveryOrderRepository = deliveryOrderRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
@@ -80,7 +82,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.modelRepository = modelRepository;
 		this.deliveryOrderDomainService = deliveryOrderDomainService;
 		this.stockLotDomainService = stockLotDomainService;
-		this.movementDomainService = movementDomainService;	
+		this.movementDomainService = movementDomainService;
+    this.model_DeliveryOrderDomainService = model_DeliveryOrderDomainService;
 	};
 
 	@Override
@@ -252,31 +255,31 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		// Si el usuario tiene solamente el rol de USER, entonces solamente podra ver
 		// una orden cuyo userClient sea el mismo usuario que ha iniciado sesión
-		boolean isOnlyUserRole = user.getRoles().size() == 1 &&
-				user.getRoles().stream()
-						.anyMatch(r -> "ROLE_USER".equals(r.getName()));
+		// boolean isOnlyUserRole = user.getRoles().size() == 1 &&
+		// user.getRoles().stream()
+		// .anyMatch(r -> "ROLE_USER".equals(r.getName()));
 
-		if (isOnlyUserRole) {
-			if (deliveryOrder.getUserClient().getId().equals(user.getId())) {
-				return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
-						.buildDeliveryOrderClientDetailsResponse();
-			} else {
-				throw new BusinessException(
-						ResponseStatus.CONFLICT,
-						"El usuario no es el cliente de la orden de entrega");
-			}
+		// if (isOnlyUserRole) {
+		if (deliveryOrder.getUserClient().getId().equals(user.getId())) {
+			return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
+					.buildDeliveryOrderClientDetailsResponse();
 		} else {
 			throw new BusinessException(
 					ResponseStatus.CONFLICT,
-					"El usuario no tiene el rol de cliente");
+					"El usuario no es el cliente de la orden de entrega");
 		}
+		// } else {
+		// throw new BusinessException(
+		// ResponseStatus.CONFLICT,
+		// "El usuario no tiene el rol de cliente");
+		// }
 	}
 
 	// Cambia la fecha limite de una orden de entrega
 	@Override
 	@Transactional
 	public void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user) {
-		if (id == null || limitDate == null || id_user == null) {
+		if (id == null || id_user == null) {
 			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
 		}
 
@@ -286,6 +289,19 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
+		if (limitDate == null) {
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"La fecha límite es obligatoria");
+		}
+
+		if (deliveryOrder.getPriorityDate() != null && deliveryOrder.getPriorityDate().isAfter(limitDate)) {
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"La fecha límite de entrega no puede ser anterior a la fecha límite prioritaria");
+		}
+
+		// CAMBIO DE LA FECHA LIMITE
 		deliveryOrder.setLimitDate(limitDate);
 		deliveryOrder.setUserUpdater(user);
 
@@ -306,17 +322,21 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id).orElseThrow(
 				() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		// Verifica que la orden de entrega no tenga el estado de MOVEMENT_LINE_DELIVERED o MOVEMENT_LINE_CANCELED,
+		// Verifica que la orden de entrega no tenga el estado de
+		// MOVEMENT_LINE_DELIVERED o MOVEMENT_LINE_CANCELED,
+
 		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_DELIVERED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ya ha sido entregada");
 		}
+
 
 		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ha sido cancelada");
 		}
 
+		
 		// Lista de las lineas de entrega asociadas a la orden de entrega
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
 
@@ -325,27 +345,43 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			throw new BusinessException(ResponseStatus.NOT_FOUND, "No hay lineas de entrega");
 		}
 
+		// Verifica si quedan lineas de entrega con estado de READY, PENDING O EXCEEDED
+
+		// EJEMPLO: CUANDO PULSA EL BOTON DE CANCELAR ORDEN POR 2° VEZ
+		boolean hasCancelableLines = deliveryLines.stream()
+				.anyMatch(dl -> dl.getLineStatus() == LineStatus.LINE_READY ||
+						dl.getLineStatus() == LineStatus.LINE_PENDING ||
+						dl.getLineStatus() == LineStatus.LINE_EXCEEDED);
+
+		if (!hasCancelableLines) {
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"No hay líneas pendientes para cancelar");
+		}
+
 		// Si las lineas de entrega tienen el estado READY, PENDING o EXCEEDED, entonces
 		// se cancelan solamente esas lineas de entrega y se restaura el stock de los
 		// modelos de productos asociados a esas lineas de entrega, además se crean
-		// movimientos de tipo MOVEMENT_LINE_CANCELED por cada linea de entrega cancelada y por
+		// movimientos de tipo MOVEMENT_LINE_CANCELED por cada linea de entrega
+		// cancelada y por
 		// cada producto restaurado
-
-		// Verifica si existe al menos una línea de entrega con estado MOVEMENT_LINE_DELIVERED o
-		// MOVEMENT_LINE_MISSING
-		// Devuelve false si no hay ninguna línea de entrega con esos estados
-		boolean hasDeliveredOrMissing = deliveryLines.stream().anyMatch(dl -> dl.getLineStatus() == LineStatus.LINE_DELIVERED ||
-				dl.getLineStatus() == LineStatus.LINE_MISSING);
 
 		Map<Long, Integer> stockToRestore = cancelDeliveryLines(deliveryLines, deliveryOrder, user,
 				deliveryOrderComentRequest);
 
 		restoreStock(stockToRestore, deliveryOrder, user, deliveryOrderComentRequest);
 
-		// deliveryOrderDomainService.recalculateSummaries(deliveryOrder, modelRepository.findById(1));
+		// Verifica si existe al menos una línea de entrega con estado
+		// MOVEMENT_LINE_DELIVERED o
+		// MOVEMENT_LINE_MISSING
+		// Devuelve false si no hay ninguna línea de entrega con esos estados
+		// boolean hasDeliveredOrMissing = deliveryLines.stream()
+		// .anyMatch(dl -> dl.getLineStatus() == LineStatus.LINE_DELIVERED ||
+		// dl.getLineStatus() == LineStatus.LINE_MISSING);
 
 		// Nota: Este método tambien contiene la logica para guardarlo en el repositorio
-		updateDeliveryOrderStatus(deliveryOrder, user, hasDeliveredOrMissing);
+		// updateDeliveryOrderStatus(deliveryOrder, user, hasDeliveredOrMissing);
+		updateDeliveryOrderStatus(deliveryOrder, user, deliveryLines);
 	}
 
 	@Override
@@ -371,17 +407,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					"La orden de entrega ha sido cancelada");
 		}
 
-		boolean allCompleted = deliveryOrder.getDeliveryLines().stream()
-				.allMatch(l -> l.getLineStatus() == LineStatus.LINE_DELIVERED ||
-						l.getLineStatus() == LineStatus.LINE_CANCELED ||
-						l.getLineStatus() == LineStatus.LINE_MISSING);
-
-		if (!allCompleted) {
-			throw new BusinessException(
-					ResponseStatus.CONFLICT,
-					"No todas las líneas están completadas");
-		}
-
+		// DEBE HABER AL MENOS UNA LINEA DE ENTREGA COMO MINIMO
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
 
 		if (deliveryLines.isEmpty()) {
@@ -392,19 +418,21 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// TENGAN EL ESTADO READY, ADEMÁS DEL ESTADO MOVEMENT_LINE_DELIVERED
 		deliveryOrderDomainService.assertAllLinesInAllowedStates(
 				deliveryLines,
-				EnumSet.of(LineStatus.LINE_READY, LineStatus.LINE_DELIVERED, LineStatus.LINE_CANCELED, LineStatus.LINE_MISSING));
+				EnumSet.of(LineStatus.LINE_READY, LineStatus.LINE_DELIVERED, LineStatus.LINE_CANCELED,
+						LineStatus.LINE_MISSING));
 
 		// Ninguna linea de entrega debe tener el estado "PENDING", "EXCEEDED"
-		// Estados permitidos: "READY", "MOVEMENT_LINE_DELIVERED", "MOVEMENT_LINE_CANCELED", "MOVEMENT_LINE_MISSING"
+		// Estados permitidos: "READY", "MOVEMENT_LINE_DELIVERED",
+		// "MOVEMENT_LINE_CANCELED", "MOVEMENT_LINE_MISSING"
 
 		Map<Long, Integer> deliveredByModel = processDeliveredLines(deliveryLines, deliveryOrder, user);
 
 		// SE ACTUALIZARA LA CANTIDAD TOTAL DEL MODELO DEL PRODUCTO QUE SE ENTREGO
 		applyDeliveredStock(deliveredByModel);
 
-		// NOTA: NO SE RECALCULARAN SUMATORIAS, PORQUE NO IMPLICA QUE SE VAN A ALTERAR LAS CANTIDADES
+		// NOTA: NO SE RECALCULARAN SUMATORIAS, PORQUE NO IMPLICA QUE SE VAN A ALTERAR
+		// LAS CANTIDADES
 		// recalculateSummaries(deliveryOrder);
-
 
 		// Calcular la sumatoria de las cantidades de los modelos de productos de las
 		// lineas de entrega que tienen el estado READY y acumularlas en el
@@ -424,7 +452,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			DeliveryOrderComentRequest commentRequest) {
 
 		// Estados permitidos que debe tener la linea de entrega
-		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.LINE_READY, LineStatus.LINE_PENDING, LineStatus.LINE_EXCEEDED);
+		EnumSet<LineStatus> cancelableStates = EnumSet.of(LineStatus.LINE_READY, LineStatus.LINE_PENDING,
+				LineStatus.LINE_EXCEEDED);
 
 		// UNA ORDEN DE ENTREGA TIENE VARIOS MODELOS DE PRODUCTOS A LA VEZ
 		// La nueva cantidad de los modelos de los productos y sus cantidades se
@@ -432,6 +461,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// Key: ID del modelo, Value: canitdad
 		Map<Long, Integer> stockToRestore = new HashMap<>();
 		List<Movement> movements = new ArrayList<>();
+
+
+		// Solamente las lineas actualizadas
+		List<DeliveryLine> updatedLines = new ArrayList<>();
 
 		// Solamente alterara el estado de las lineas de entrega que tengan los estados
 		// mencionados, las demás lineas de entrega no se alteran
@@ -452,63 +485,46 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 						Integer::sum);
 			}
 
-			// CREAR UN METODO EN EL DOMINIO DE DELIVERYLINE
-			// line.cancel(user);
-			// line.setDeliveredQuantity(0);
-			// line.setPendingQuantity(0);
-			// line.setLineStatus(LineStatus.LINE_CANCELED);
-			// line.setLimitDate(null);
-			// line.setUserUpdater(user);
-			// deliveryLineRepository.save(line);
-
 			// Cancelación de la línea (idealmente método de dominio)
 			cancelLine(line, user);
 
+			updatedLines.add(line); // solo las modificadas
+
 			// Movimiento
-			movements.add(buildCancelMovement(
-					line,
-					order,
-					user,
-					quantityToRestore,
-					commentRequest));
-
-			// Model model = modelRepository.findById(line.getModel().getId()).orElseThrow(
-			// 		() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
-
-			// model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantityToRestore);
-			// model.setTotalQuantityTaken(model.getTotalQuantityTaken() - quantityToRestore);
-			
-			// CREAR UN METODO EN EL DOMINIO DE MOVEMENT
-			// movements.add(createCancelMovement(
-			// line, order, user, quantityToRestore, commentRequest));
-			
-			// Movement movement = new Movement();
-			// movement.setQuantity(quantityToRestore);
-			// movement.setComment(movementDomainService.generateComment(
-			// 		commentRequest.getComment(),
-			// 		"Se cancelo la orden de entrega de la factura #" + order.getBatch()));
-			// movement.setMovementType(MovementType.MOVEMENT_LINE_CANCELED);
-			// movement.setUser(user);
-			// movement.setStockLotReceiver(null);
-			// movement.setStockLotEmitter(null);
-			// movement.setDeliveryLine(line);
-			// movement.setModel(line.getModel());
-
-			// AÑADIR A LA LISTA
-			// movements.add(movement);
+			if (quantityToRestore > 0) {
+				movements.add(buildCancelMovement(
+						line,
+						order,
+						user,
+						quantityToRestore,
+						commentRequest));
+			}
 		}
 
-		deliveryLineRepository.saveAll(lines);
+		if (!updatedLines.isEmpty()) {
+			deliveryLineRepository.saveAll(updatedLines);
+		}
 
 		// GUARDAR TODOS LOS MOVIMIENTOS
-		movementRepository.saveAll(movements);
+		if (!movements.isEmpty()) {
+			movementRepository.saveAll(movements);
+		}
+
+		Set<Long> modelIds = updatedLines.stream()
+				.map(dl -> dl.getModel().getId())
+				.collect(Collectors.toSet());
+
+		for (Long modelId : modelIds) {
+			model_DeliveryOrderDomainService.recalculateSummaries(order.getId(), modelId);
+		}
 
 		return stockToRestore;
 	}
 
 	private void cancelLine(DeliveryLine line, User user) {
-		line.setDeliveredQuantity(0);
-		line.setPendingQuantity(0);
+		// TODO: ALTERAR EL REPOSITORIO PARA FILTRAR POR CANTIDADES
+		// line.setDeliveredQuantity(0);
+		// line.setPendingQuantity(0);
 		line.setLineStatus(LineStatus.LINE_CANCELED);
 		line.setLimitDate(null);
 		line.setUserUpdater(user);
@@ -544,7 +560,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		if (stockToRestore.isEmpty())
 			return;
 
-		Company company = companyRepository.findById(1L).get();
+		Company company = companyRepository.findById(1L)
+				.orElseThrow(() -> new BusinessException(
+						ResponseStatus.NOT_FOUND,
+						"La empresa no existe"));
 
 		Map<Long, Model> models = modelRepository.findAllById(stockToRestore.keySet())
 				.stream()
@@ -559,7 +578,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// (mediante el método entrySet) permitiendo modificar los valores con el método
 		// setValue
 
-
 		for (Map.Entry<Long, Integer> entry : stockToRestore.entrySet()) {
 			Model model = models.get(entry.getKey());
 			Integer restoredQuantity = entry.getValue();
@@ -568,12 +586,21 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			if (restoredQuantity <= 0)
 				continue;
 
+			// Validacion en caso de que la cantidad tomada del modelo sea menor que la
+			// cantidad que se va a restaurar
+			if (model.getTotalQuantityTaken() < restoredQuantity) {
+				throw new BusinessException(
+						ResponseStatus.CONFLICT,
+						"Stock inconsistente: cantidad tomada insuficiente");
+			}
+
 			// StockLot lot = createStockLot(model, qty, company);
 			// stockLots.add(lot);
 
 			// Crea el nuevo lote de stock
 			StockLot stockLot = new StockLot();
-			stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName(), company.getName()));
+			stockLot.setBatch(
+					stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName(), company.getName()));
 			stockLot.setQuantityReceived(restoredQuantity);
 			stockLot.setQuantityAvailable(restoredQuantity);
 			stockLot.setQuantityDelivered(0);
@@ -600,20 +627,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			movement.setModel(model);
 			movements.add(movement);
 
-			// model.increaseAvailable(qty);
-			Model findedModel = modelRepository.findById(model.getId())
-					.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
-
 			// Debe actualizar los campos que contiene la sumatoria
 			// No altera los campos de quantityReceived, quantityDelivered, quantityLost ni
 			// quantityRecovered
-			findedModel.setTotalQuantityAvailable(
-					findedModel.getTotalQuantityAvailable() + stockToRestore.get(findedModel.getId()));
+			model.setTotalQuantityAvailable(
+					model.getTotalQuantityAvailable() + restoredQuantity);
 
-			findedModel.setTotalQuantityTaken(
-				findedModel.getTotalQuantityTaken() - stockToRestore.get(findedModel.getId())
-			);
-			modelRepository.save(findedModel);
+			model.setTotalQuantityTaken(
+					model.getTotalQuantityTaken() - restoredQuantity);
+
 		}
 
 		stockLotRepository.saveAll(stockLots);
@@ -624,13 +646,26 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	private void updateDeliveryOrderStatus(
 			DeliveryOrder order,
 			User user,
-			boolean hasDeliveredOrMissing) {
+			List<DeliveryLine> deliveryLines) {
 
-		// Actualiza la orden de entrega
-		order.setOrderStatus(
-				hasDeliveredOrMissing
-						? OrderStatus.ORDER_DELIVERED
-						: OrderStatus.ORDER_CANCELED);
+		boolean allCanceled = deliveryLines.stream()
+				.allMatch(dl -> dl.getLineStatus() == LineStatus.LINE_CANCELED);
+
+		boolean anyDeliveredOrMissing = deliveryLines.stream()
+				.anyMatch(dl -> dl.getLineStatus() == LineStatus.LINE_DELIVERED ||
+						dl.getLineStatus() == LineStatus.LINE_MISSING);
+
+		if (allCanceled) {
+			order.setOrderStatus(OrderStatus.ORDER_CANCELED);
+		} else if (anyDeliveredOrMissing) {
+			order.setOrderStatus(OrderStatus.ORDER_PARTIALLY_DELIVERED);
+		} else {
+			//* Esto nunca deberia pasar
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"Estado inconsistente en las líneas de entrega");
+		}
+
 		order.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(order.getId()));
 		order.setUserUpdater(user);
 
@@ -647,10 +682,18 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		for (DeliveryLine deliveryLine : deliveryLines) {
 
+			// Solamente van a entrar al bloque todas las lineas que tengan el estado de
+			// LINE_READY
 			if (deliveryLine.getLineStatus() != LineStatus.LINE_READY)
 				continue;
 
 			int qty = deliveryLine.getDeliveredQuantity();
+
+			if (deliveryLine.getDeliveredQuantity() != deliveryLine.getRequiredQuantity()) {
+				throw new BusinessException(
+						ResponseStatus.CONFLICT,
+						"Una de las lineas de entrega no cumple con la cantidad requerida para ser entregada");
+			}
 
 			deliveredByModel.merge(
 					deliveryLine.getModel().getId(),

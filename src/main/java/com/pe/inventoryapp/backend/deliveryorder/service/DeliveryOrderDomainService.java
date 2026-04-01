@@ -11,15 +11,12 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
-import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.product.model.entity.Model;
 
 @Service
 public class DeliveryOrderDomainService {
 
   private final DeliveryLineRepository deliveryLineRepository;
-  private final Model_DeliveryOrderRepository model_DeliveryOrderRepository;
   // private final DeliveryOrderSummaryDomainService deliveryOrderSummaryDomainService;
 
   public DeliveryOrderDomainService(DeliveryLineRepository deliveryLineRepository,
@@ -28,7 +25,6 @@ public class DeliveryOrderDomainService {
       // DeliveryOrderSummaryDomainService deliveryOrderSummaryDomainService
     ) {
     this.deliveryLineRepository = deliveryLineRepository;
-    this.model_DeliveryOrderRepository = model_DeliveryOrderRepository;
     // this.deliveryOrderSummaryDomainService = deliveryOrderSummaryDomainService;
   }
 
@@ -44,7 +40,7 @@ public class DeliveryOrderDomainService {
     if (invalid) {
       throw new BusinessException(
           ResponseStatus.CONFLICT,
-          "No puedes entregar esta orden de entrega");
+          "No puedes entregar esta orden de entrega, hay lineas de entrega que estan pendientes");
     }
   }
 
@@ -59,10 +55,4 @@ public class DeliveryOrderDomainService {
         .findClosestLimitDate(idDeliveryOrder)
         .orElse(null); // o lanza excepción
   }
-
-  public void recalculateSummaries(DeliveryOrder deliveryOrder, Model model) {
-    model_DeliveryOrderRepository
-        .recalculateRequiredQuantities(deliveryOrder.getId());
-  }
-
 }

@@ -31,6 +31,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrde
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.deliveryorder.service.DeliveryOrderDomainService;
+import com.pe.inventoryapp.backend.deliveryorder.service.Model_DeliveryOrderDomainService;
 import com.pe.inventoryapp.backend.location.model.entity.Location;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
@@ -66,6 +67,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   private final DeliveryOrderDomainService deliveryOrderDomainService;
   private final StockLotDomainService stockLotDomainService;
   private final MovementDomainService movementDomainService;
+  private final Model_DeliveryOrderDomainService model_DeliveryOrderDomainService;
 
   public DeliveryLineServiceImpl(
       DeliveryLineRepository deliveryLineRepository,
@@ -81,7 +83,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       CompanyRepository companyRepository,
       DeliveryOrderDomainService deliveryOrderDomainService,
       StockLotDomainService stockLotDomainService,
-      MovementDomainService movementDomainService) {
+      MovementDomainService movementDomainService,
+    Model_DeliveryOrderDomainService model_DeliveryOrderDomainService) {
     this.deliveryLineRepository = deliveryLineRepository;
     this.modelRepository = modelRepository;
     this.locationRepository = locationRepository;
@@ -96,9 +99,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     this.deliveryOrderDomainService = deliveryOrderDomainService;
     this.stockLotDomainService = stockLotDomainService;
     this.movementDomainService = movementDomainService;
+    this.model_DeliveryOrderDomainService = model_DeliveryOrderDomainService;
   }
 
-  // TODO: EXAMINAR MINUCIOSAMENTE EL FUNCIONAMIENTO DE CADA UNO DE LOS SERVICIOS
   @Override
   @Transactional
   public void saveDeliveryLine(DeliveryLineRequest deliveryLineRequest, Long deliveryOrderId, Long id_user) {
@@ -125,6 +128,15 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
+
+
+    // NO PUEDES AGREGAR NUEVAS LINEAS DE ENTREGA A UNA ORDEN DE ENTREGA QUE FUE ENTREGADA O CANCELADA
+    if (deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_DELIVERED) || 
+    deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_CANCELED) || deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_PARTIALLY_DELIVERED)) {
+      throw new BusinessException(
+          ResponseStatus.CONFLICT,
+          "No puedes agregar líneas a una orden que ya fue procesada o cerrada");
+    }
 
     // Verificar si existe la relación, de lo contrario, lanzar una excepción
     Model_DeliveryOrder modelDeliveryOrder = model_DeliveryOrderRepository
@@ -192,7 +204,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // 3° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE
     // ENTREGA POR ORDEN DE ENTREGA Y PRODUCTO
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
+    model_DeliveryOrderDomainService.recalculateSummaries(deliveryOrder.getId(), model.getId());
 
     // Integer totalRequired =
     // deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Model(id_deliveryOrder,
@@ -278,13 +290,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED, NO DEBE
-    // DEVOLVER UN THROW
-    // if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
-    // throw new BusinessException(
-    // ResponseStatus.CONFLICT,
-    // "La linea de entrega se encuentra cancelada");
-    // }
+    // SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED,  DEBE DEVOLVER UNA EXCEPCION
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
+    throw new BusinessException(
+    ResponseStatus.CONFLICT,
+    "La linea de entrega se encuentra cancelada");
+    }
 
     return DeliveryLineMapper.builder().setDeliveryLine(deliveryLine).buildDeliveryLineDetailsResponse();
   }
@@ -318,8 +329,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // LOGICA QUE VERIFIQUE QUE EL ESTADO DE LA LINEA DE ENTREGA NO TENGA EL ESTADO
     // MOVEMENT_LINE_DELIVERED NI MOVEMENT_LINE_CANCELED
-    if (deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED
-        || deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_MISSING) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
           "La linea de entrega no puede ser modificada");
     }
@@ -387,7 +399,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     model_DeliveryOrderRepository.save(model_DeliveryOrder);
 
     // RECALCULAR LA SUMATORIA DE CANTIDADES POR REGION
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
+    model_DeliveryOrderDomainService.recalculateSummaries(deliveryOrder.getId(), model.getId());
 
     // recalculateProductDeliveryOrderRegions(model_DeliveryOrder.getId());
 
@@ -485,57 +497,36 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
+
     if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega ya ha sido cancelada");
     }
 
+    if (deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_MISSING) {
+      throw new BusinessException(
+          ResponseStatus.DEFAULT_RESOURCE,
+          "No se puede cancelar una línea finalizada");
+    }
+
+
     // La cantidad que esta preparada se le considera como cancelada
     Integer quantityCanceled = deliveryLine.getDeliveredQuantity();
 
-    // CREAR UN NUEVO LOTE DE STOCK CON LA CANTIDAD ENTREGADA DE LA LINEA DE ENTREGA
-    // QUE SE ESTA CANCELANDO, PERO SOLAMENTE SI HAY CANTIDAD ENTREGADA
-    if (quantityCanceled > 0) {
-      // throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
-      // "No se puede cancelar esta línea porque ya hay una cantidad a entregar");
-      // TODO: VERIFICAR EL FUNCIONAMIENTO DEL METODO
-      storageTempStockLot(deliveryLine, deliveryLine.getDeliveredQuantity());
-    }
+    // DEVOLVER A STOCK Y GUARDAR LA NUEVA CANTIDAD
+    returnStockToInventory(deliveryLine, quantityCanceled);
 
-    deliveryLine.setPendingQuantity(0);
-    deliveryLine.setDeliveredQuantity(0);
+
+    // deliveryLine.setPendingQuantity(0);
+    // deliveryLine.setDeliveredQuantity(0);
     deliveryLine.setLimitDate(null);
     deliveryLine.setLineStatus(LineStatus.LINE_CANCELED);
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
-    // TODO: VERIFICAR ESTO
-    // * Debe eliminar la cantidad que fue tomada
-    Model model = model_DeliveryOrder.getModel();
-    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + deliveryLine.getDeliveredQuantity());
-    model.setTotalQuantityTaken(model.getTotalQuantityTaken() - deliveryLine.getDeliveredQuantity());
-    modelRepository.save(model);
 
-    // TODO: EL PROBLEMA ESTA RELACIONADO CON EL CAMPO QUANTITYDELIVERED
-    // NOTA: RECUERDA QUE TOTALQUANTITYDELIVERED REPRESENTA LA CANTIDAD QUE HA SIDO
-    // ENTREGADA AL CLIENTE
-
-    // Model model = deliveryLine.getModel();
-
-    // model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() +
-    // quantityCanceled);
-    // model.setTotalQuantityDelivered(model.getTotalQuantityDelivered() -
-    // quantityCanceled);
-
-    // modelRepository.save(model);
-
-    // RECALCULAR LAS CANTIDADES TOTALES EN PRODUCT_DELIVERYORDER
-    deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
-
-    // model_DeliveryOrder.setRequiredQuantityTotal(
-    // deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Product(deliveryOrder.getId(),
-    // model_DeliveryOrder.getModel().getId()));
-
-    // model_DeliveryOrderRepository.save(model_DeliveryOrder);
+    // RECALCULAR LAS CANTIDADES TOTALES EN LA RELACION DE MODEL - DELIVERY ORDER
+    model_DeliveryOrderDomainService.recalculateSummaries(deliveryOrder.getId(), deliveryLine.getModel().getId());
 
     // RECALCULAR LA FECHA PRIORITARIA DE ENTREGA
     deliveryOrder.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(deliveryOrder.getId()));
@@ -543,17 +534,41 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Operacion para verificar si todas las lineas de entrega de una orden de
     // entrega han sido entregadas, es decir si todas tiene el estado READY
 
-    if (deliveryLineRepository.allLinesAreCanceled(deliveryOrderId)) {
+
+
+    // if (deliveryLineRepository.allLinesAreCanceled(deliveryOrderId)) {
+    //   deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
+    // } else {
+    //   if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
+    //     deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+    //   } else {
+    //     deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
+    //   }
+    // }
+
+    boolean allCanceled = deliveryLineRepository.allLinesAreCanceled(deliveryOrderId);
+    boolean allReady = deliveryLineRepository.allLinesAreReady(deliveryOrderId);
+
+    // Si existe al menos una linea entregada o perdida
+    boolean anyDeliveredOrMissing = deliveryLineRepository.existsByDeliveryOrderIdAndLineStatusIn(
+        deliveryOrderId,
+        List.of(LineStatus.LINE_DELIVERED, LineStatus.LINE_MISSING));
+
+    if (allCanceled) {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
+    } else if (anyDeliveredOrMissing) {
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_PARTIALLY_DELIVERED);
+    } else if (allReady) {
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
     } else {
-      if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
-        deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
-      } else {
-        deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
-      }
+      deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
+    
+
 
     deliveryOrderRepository.save(deliveryOrder);
+
+
 
     // NUEVO MOVIMIENTO DE CANCELACIÓN DE LINEA DE ENTREGA
     Movement movement = new Movement();
@@ -567,6 +582,28 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setModel(deliveryLine.getModel());
     movementRepository.save(movement);
   }
+
+
+  // METODO AUXILIAR PARA DEVOLVER STOCK AL INVENTARIO
+  private void returnStockToInventory(
+      DeliveryLine deliveryLine,
+      int quantity) {
+    if (quantity <= 0)
+      return;
+
+    storageTempStockLot(deliveryLine, quantity);
+
+    Model model = deliveryLine.getModel();
+
+    model.setTotalQuantityAvailable(
+        model.getTotalQuantityAvailable() + quantity);
+
+    model.setTotalQuantityTaken(
+        model.getTotalQuantityTaken() - quantity);
+
+    modelRepository.save(model);
+  }
+
 
   // Método auxiliar para almacenar un lote de stock temporal con la cantidad
   // entregada de la linea de entrega que se esta cancelando, para luego ser
@@ -636,7 +673,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   public void sendDeliveryLineById(Long id, Long id_user_authenticated) {
     User user = getUser(id_user_authenticated);
     DeliveryLine deliveryLine = getDeliveryLine(id);
-
 
     // Solamente podra declarar entregada si la linea de entrega se encuentra lista
     if (deliveryLine.getLineStatus() != LineStatus.LINE_READY) {
@@ -848,10 +884,11 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Validar que no tenga el estado CANCELED O DELIVERED
     if (deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED ||
-      deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
+        deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_MISSING) {
       throw new BusinessException(
-        ResponseStatus.DEFAULT_RESOURCE,
-        "La linea de entrega no puede ser devuelta");
+          ResponseStatus.DEFAULT_RESOURCE,
+          "La linea de entrega no puede ser devuelta");
     }
 
     // Validar que no haya cantidad negativa
@@ -890,7 +927,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // ACTUALIZACIÓN RELACIÓN MODELO - ORDEN
     // ---------------------------
 
-    // TODO: PODRIA SERVIR ESTO EN OTRA PARTE
     // Recalcular cantidad total requerida (aunque aquí no cambia directamente,
     // se recalcula por consistencia)
     // model_DeliveryOrder.setRequiredQuantityTotal(
@@ -914,9 +950,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     deliveryOrderRepository.save(deliveryOrder);
 
-    // Recalcular agregaciones (regiones, subregiones, etc.)
-    // deliveryOrderDomainService.recalculateSummaries(deliveryOrder,
-    // model_DeliveryOrder.getModel());
 
     // ---------------------------
     // AJUSTE DEL MODELO (INVENTARIO)
@@ -996,12 +1029,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     if (quantity > deliveryLine.getPendingQuantity()) {
       throw new BusinessException(
           ResponseStatus.BAD_REQUEST,
-          "La cantidad supera a la cantidad pendiente");
+          "La cantidad a entregar supera a la cantidad pendiente");
     }
 
     // 🚨 Validación clave que te faltaba
     if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED ||
-        deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED) {
+        deliveryLine.getLineStatus() == LineStatus.LINE_DELIVERED ||
+        deliveryLine.getLineStatus() == LineStatus.LINE_MISSING) {
 
       throw new BusinessException(
           ResponseStatus.DEFAULT_RESOURCE,
@@ -1178,7 +1212,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // ===== Validar stock total =====
     // Disminuye la cantidad total disponible del lote del stock
-    // TODO: ESTO PODRIA NO SER NECESARIO
     // int totalAvailable = stockLots.stream()
     // .mapToInt(StockLot::getQuantityAvailable)
     // .sum();
@@ -1213,7 +1246,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // System.out.println("Total quantity sumatory: " + totalQuantitySumatory);
 
-    // TODO: ESTO SOBRA PORQUE NO SE VA A ACTUALIZAR LA CANTIDAD REQUERIDA TOTAL DE
+    // NO SE VA A ACTUALIZAR LA CANTIDAD REQUERIDA TOTAL DE
     // UNA RELACION ORDEN - MODELO DE PRODUCTO CUANDO SE ENTREGA DESDE EL ALMACEN
     // model_DeliveryOrder.setRequiredQuantityTotal(
     // totalQuantitySumatory);
@@ -1231,9 +1264,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     deliveryOrderRepository.save(deliveryOrder);
-
-    // ===== Recalcular regiones =====
-    // deliveryOrderDomainService.recalculateSummaries(deliveryOrder, model);
 
   }
 
@@ -1256,10 +1286,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Solamente podra declarar entregada si la linea de entrega se encuentra lista
     if (deliveryLine.getLineStatus() != LineStatus.LINE_DELIVERED) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE,
-          "La linea de entrega no puede ser reportada como perdida luego de la entrega");
+      throw new BusinessException(
+          ResponseStatus.DEFAULT_RESOURCE,
+          "Solo se puede marcar como MISSING una línea entregada");
     }
-
     deliveryLine.setLineStatus(LineStatus.LINE_MISSING);
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
@@ -1277,14 +1307,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setDeliveryLine(deliveryLine);
 
     movementRepository.save(movement);
-  }
-
-  private void increaseStock(Model model, int quantity) {
-    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
-  }
-
-  private void decreaseStock(Model model, int quantity) {
-    model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() - quantity);
   }
 
 }
