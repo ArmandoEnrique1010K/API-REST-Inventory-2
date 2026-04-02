@@ -20,8 +20,8 @@ import com.pe.inventoryapp.backend.product.model.mapper.ModelMapper;
 import com.pe.inventoryapp.backend.product.model.request.ModelRequest;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
-import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
-import com.pe.inventoryapp.backend.product.model.response.SearchFirstTenModelsResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelListSearchResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelListSearchFirstTenResponse;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
@@ -134,15 +134,15 @@ public class ModelServiceImpl implements ModelService {
   }
 
   @Override
-  public PageResponse<ModelSearchResponse> searchAllModelsByName(Pageable pageable, String keyword) {
+  public PageResponse<ModelListSearchResponse> searchAllModelsByName(Pageable pageable, String keyword) {
     Page<Model> models = modelRepository.findAllActivesByName(pageable, keyword);
 
-    List<ModelSearchResponse> result = models.getContent().stream().map(
+    List<ModelListSearchResponse> result = models.getContent().stream().map(
         model -> ModelMapper.builder()
-            .setModel(model).buildModelSearchResponse())
+            .setModel(model).buildModelListSearchResponse())
         .toList();
 
-    PageResponse<ModelSearchResponse> pageResponse = new PageResponse<>(
+    PageResponse<ModelListSearchResponse> pageResponse = new PageResponse<>(
         result,
         models.getNumber(),
         models.getSize(),
@@ -213,12 +213,19 @@ public class ModelServiceImpl implements ModelService {
     // Implementación de Cloudinary
     // Solamente si el usuario ha subido una nueva imagen
     if (file != null && !file.isEmpty()) {
-      CloudinaryImageResponse image = cloudinaryDomainService.uploadImage(file);
 
       // Debe borrar la imagen por el publicImageId (El ID que se asocia a la imagen
       // desde Cloudinary)
-      cloudinaryDomainService.deleteImage(model.getPublicImageId());
 
+      // 1. Si ya había imagen → eliminarla
+      if (model.getPublicImageId() != null && !model.getPublicImageId().isBlank()) {
+        cloudinaryDomainService.deleteImage(model.getPublicImageId());
+      }
+
+      // 2. Subir nueva imagen
+      CloudinaryImageResponse image = cloudinaryDomainService.uploadImage(file);
+
+      // 3. Guardar nueva imagen
       model.setImageUrl(image.imageUrl());
       model.setPublicImageId(image.publicId());
       System.out.println("SE SUBIO UNA IMAGEN A CLOUDINARY, ELIMINANDO LA IMAGEN ANTERIOR Y REEMPLAZANDOLO POR LA NUEVA");
@@ -259,9 +266,9 @@ public class ModelServiceImpl implements ModelService {
   }
 
   @Override
-  public List<SearchFirstTenModelsResponse> findFirstTenModelsByKeyword(String keyword) {
+  public List<ModelListSearchFirstTenResponse> findFirstTenModelsByKeyword(String keyword) {
     List<Model> models = (List<Model>) modelRepository.findAllFirstTenModelsByParams(keyword);
-    return models.stream().map(model -> ModelMapper.builder().setModel(model).buildSearchFirstTenModelsResponse()).collect(Collectors.toList());
+    return models.stream().map(model -> ModelMapper.builder().setModel(model).buildModelListSearchFirstTenResponse()).collect(Collectors.toList());
   }
 
 }

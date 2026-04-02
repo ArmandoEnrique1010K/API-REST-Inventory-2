@@ -35,6 +35,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     Category category = new Category();
     category.setName(name);
+    category.setStatus(true);
 
     categoryRepository.save(category);
   }

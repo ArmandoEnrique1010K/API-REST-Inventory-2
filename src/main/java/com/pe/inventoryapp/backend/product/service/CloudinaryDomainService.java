@@ -52,10 +52,28 @@ public class CloudinaryDomainService {
 
     public void deleteImage(String publicId) {
 
+        // 1. VALIDACIÓN REAL
+        if (publicId == null || publicId.isBlank()) {
+            return; // no haces nada, evitas error
+        }
+
         try {
-            cloudinary.uploader().destroy(publicId, Map.of());
+            Map result = cloudinary.uploader().destroy(publicId, Map.of());
+
+            String status = (String) result.get("result");
+
+            // 2. LOGICA SEGURA
+            if ("ok".equals(status)) {
+                System.out.println("Imagen eliminada correctamente");
+            } else if ("not found".equals(status)) {
+                System.out.println("La imagen no existía en Cloudinary");
+            } else {
+                System.out.println("Resultado inesperado: " + status);
+            }
+
         } catch (Exception e) {
-            throw new RuntimeException("Error al eliminar imagen", e);
+            // 3. NO ROMPAS TODO EL PROCESO POR ESTO
+            System.out.println("Error al eliminar imagen: " + e.getMessage());
         }
     }
 }

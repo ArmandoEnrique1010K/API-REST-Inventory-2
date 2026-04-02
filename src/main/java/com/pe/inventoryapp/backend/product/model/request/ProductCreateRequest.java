@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import io.micrometer.common.lang.Nullable;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -28,17 +28,20 @@ public class ProductCreateRequest {
   private String name;
 
   // Las medidas deben ser un numero positivo o cero, con hasta 3 dígitos enteros y 2 decimales como maximo
-  @NotNull(message = "Introduzca un valor númerico")
+  // @NotNull(message = "Introduzca un valor númerico")
+  @Nullable
   @PositiveOrZero(message = "La medida debe ser un valor positivo")
   @Digits(integer = 3, fraction = 2, message = "La longitud debe tener hasta 3 dígitos enteros y 2 decimales")
   private BigDecimal length;
 
-  @NotNull(message = "Introduzca un valor númerico")
+  // @NotNull(message = "Introduzca un valor númerico")
+  @Nullable
   @PositiveOrZero(message = "La medida debe ser un valor positivo")
   @Digits(integer = 3, fraction = 2, message = "La longitud debe tener hasta 3 dígitos enteros y 2 decimales")
   private BigDecimal width;
 
-  @NotNull(message = "Introduzca un valor númerico")
+  // @NotNull(message = "Introduzca un valor númerico")
+  @Nullable
   @PositiveOrZero(message = "La medida debe ser un valor positivo")
   @Digits(integer = 3, fraction = 2, message = "La longitud debe tener hasta 3 dígitos enteros y 2 decimales")
   private BigDecimal height;

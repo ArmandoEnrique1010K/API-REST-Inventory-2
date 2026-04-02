@@ -28,8 +28,8 @@ import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.product.model.request.ModelRequest;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
-import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
-import com.pe.inventoryapp.backend.product.model.response.SearchFirstTenModelsResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelListSearchResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelListSearchFirstTenResponse;
 import com.pe.inventoryapp.backend.product.service.ModelService;
 
 import jakarta.validation.Valid;
@@ -102,8 +102,8 @@ public class ModelController {
     @RequestParam(required = false) String keyword
   ) {
     Pageable pageable = PageRequest.of(page, 10);
-    PageResponse<ModelSearchResponse> models = modelService.searchAllModelsByName(pageable, keyword);
-    DataResponse<PageResponse<ModelSearchResponse>> dataResponse = responseService
+    PageResponse<ModelListSearchResponse> models = modelService.searchAllModelsByName(pageable, keyword);
+    DataResponse<PageResponse<ModelListSearchResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, models);
 
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
@@ -112,9 +112,9 @@ public class ModelController {
 
   @GetMapping("/search/models")
   public ResponseEntity<?> listFirstTenModelsByKeyword(@RequestParam(required = true) String keyword){
-    List<SearchFirstTenModelsResponse> models = modelService.findFirstTenModelsByKeyword(keyword);
+    List<ModelListSearchFirstTenResponse> models = modelService.findFirstTenModelsByKeyword(keyword);
 
-    DataResponse<List<SearchFirstTenModelsResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, models);
+    DataResponse<List<ModelListSearchFirstTenResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, models);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 

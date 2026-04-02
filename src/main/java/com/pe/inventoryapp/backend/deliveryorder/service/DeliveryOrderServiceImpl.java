@@ -340,13 +340,26 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// Lista de las lineas de entrega asociadas a la orden de entrega
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
 
-		// Verifica que haya al menos una linea de entrega
+		// SOLAMENTE SI NO HAY LINEAS DE ENTREGA, PODRA SER ELIMINADA LA ORDEN DE ENTREGA SIN NINGUN PROBLEMA
 		if (deliveryLines.isEmpty()) {
-			throw new BusinessException(ResponseStatus.NOT_FOUND, "No hay lineas de entrega");
+			deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
+			deliveryOrder.setUserUpdater(user);
+			deliveryOrderRepository.save(deliveryOrder);
+			return; //<-- TERMINA LA EJECUCION DEL CÓDIGO
 		}
 
-		// Verifica si quedan lineas de entrega con estado de READY, PENDING O EXCEEDED
 
+		// OTRA FORMA DE IMPLEMENTARLO
+		// EnumSet<LineStatus> cancelableStates = EnumSet.of(
+		// 		LineStatus.LINE_READY,
+		// 		LineStatus.LINE_PENDING,
+		// 		LineStatus.LINE_EXCEEDED);
+
+		// boolean hasCancelableLines = deliveryLines.stream()
+		// 		.anyMatch(dl -> cancelableStates.contains(dl.getLineStatus()));
+
+
+		// Verifica si quedan lineas de entrega con estado de READY, PENDING O EXCEEDED
 		// EJEMPLO: CUANDO PULSA EL BOTON DE CANCELAR ORDEN POR 2° VEZ
 		boolean hasCancelableLines = deliveryLines.stream()
 				.anyMatch(dl -> dl.getLineStatus() == LineStatus.LINE_READY ||

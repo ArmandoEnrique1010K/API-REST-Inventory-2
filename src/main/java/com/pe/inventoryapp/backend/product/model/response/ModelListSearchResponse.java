@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelSearchResponse {
+public class ModelListSearchResponse {
   private Long id;
   private String name;
   private String imageUrl;

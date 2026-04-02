@@ -3,8 +3,8 @@ package com.pe.inventoryapp.backend.product.model.mapper;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
-import com.pe.inventoryapp.backend.product.model.response.ModelSearchResponse;
-import com.pe.inventoryapp.backend.product.model.response.SearchFirstTenModelsResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelListSearchResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelListSearchFirstTenResponse;
 
 
 public class ModelMapper {
@@ -33,7 +33,6 @@ public class ModelMapper {
       model.getId(),
       model.getName(),
       model.getImageUrl(),
-      model.getPublicImageId(),
       model.getEntryDate(),
       model.getCaducityDate(),
       model.getTotalQuantityAvailable(),
@@ -79,12 +78,12 @@ public class ModelMapper {
     );
   }
 
-  public ModelSearchResponse buildModelSearchResponse() {
+  public ModelListSearchResponse buildModelListSearchResponse() {
     if (model == null) {
       throw new RuntimeException("Debe pasar la entidad Model");
     }
 
-    return new ModelSearchResponse(
+    return new ModelListSearchResponse(
         model.getId(),
         model.getName(),
         model.getImageUrl(),
@@ -94,12 +93,12 @@ public class ModelMapper {
         model.getProduct().getCategory().getName());
   }
 
-  public SearchFirstTenModelsResponse buildSearchFirstTenModelsResponse() {
+  public ModelListSearchFirstTenResponse buildModelListSearchFirstTenResponse() {
     if (model == null) {
       throw new RuntimeException("Debe pasar la entidad Model");
     }
 
-    return new SearchFirstTenModelsResponse(
+    return new ModelListSearchFirstTenResponse(
         model.getId(),
         model.getProduct().getName() + " " + model.getName()
       );

@@ -32,6 +32,7 @@ public class TypeServiceImpl implements TypeService {
 
     Type type = new Type();
     type.setName(name);
+    type.setStatus(true);
 
     typeRepository.save(type);
   }

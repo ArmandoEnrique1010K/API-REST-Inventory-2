@@ -16,7 +16,7 @@ public class ProductDomainService {
   }
 
   public BigDecimal normalizeDecimal(BigDecimal number) {
-    return number == null ? BigDecimal.ZERO : number;
+    return number == null ? null : number;
   }
 
   public void verifyProductNameAvailable(String name) {

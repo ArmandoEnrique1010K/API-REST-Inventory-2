@@ -16,7 +16,6 @@ public class ModelDetailsResponse {
   private Long id;
   private String name;
   private String imageUrl;
-  private String publicImageId;
   private LocalDate entryDate;
   private LocalDate caducityDate;
   private Integer totalQuantityAvailable;
