@@ -93,12 +93,14 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/users/role/user")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 						.requestMatchers(HttpMethod.GET, "/api/users/*/roles").hasAnyAuthority("ROLE_ADMIN") // Solamente un administrador podra ver los roles asignados del usuario por ID
-						.requestMatchers(HttpMethod.GET, "/api/users/profile").authenticated()
-						.requestMatchers(HttpMethod.PUT, "/api/users/profile").authenticated()
 						.requestMatchers(HttpMethod.PUT, "/api/users/*/roles")
 						.hasAnyAuthority("ROLE_ADMIN")
 						.requestMatchers(HttpMethod.PATCH, "/api/users/*/status")
 						.hasAnyAuthority("ROLE_ADMIN")
+
+						// PROFILE
+						.requestMatchers(HttpMethod.GET, "/api/profile").authenticated()
+						.requestMatchers(HttpMethod.PUT, "/api/profile").authenticated()
 
 						// CATEGORY
 						.requestMatchers(HttpMethod.POST, "/api/categories")

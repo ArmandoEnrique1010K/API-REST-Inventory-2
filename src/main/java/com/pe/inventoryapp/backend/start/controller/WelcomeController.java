@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
-import com.pe.inventoryapp.backend.user.service.UserService;
+import com.pe.inventoryapp.backend.user.service.ProfileService;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
 @RestController
 @RequestMapping("/api")
 public class WelcomeController {
-  private final UserService userService;
+  private final ProfileService profileService;
 
-  public WelcomeController(UserService userService) {
-    this.userService = userService;
+  public WelcomeController(ProfileService profileService) {
+    this.profileService = profileService;
   }
 
   @GetMapping
@@ -37,7 +37,7 @@ public class WelcomeController {
   @GetMapping("/database")
   public String testDatabase() {
     // Encontrar al primer usuario por id
-    DetailUserResponse user = userService.findUserById(1L);
+    DetailUserResponse user = profileService.findUserById(1L);
 
     if (user != null) {
       return "La base de datos funciona correctamente";

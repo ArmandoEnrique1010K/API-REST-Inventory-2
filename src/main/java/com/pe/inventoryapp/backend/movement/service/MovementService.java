@@ -15,12 +15,8 @@ public interface MovementService {
     LocalDateTime minCreatedAt,
     LocalDateTime maxCreatedAt,
     MovementType movementType,
-    Long deliveryLineId,
     String username,
-    String keyword,
-    Long modelId,
-    Long userId,
-    Long stockLotReceiverId
+    String keyword
   );
 
   MovementDetailsResponse findMovementById(Long id);

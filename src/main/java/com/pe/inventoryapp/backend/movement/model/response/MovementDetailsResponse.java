@@ -23,8 +23,12 @@ public class MovementDetailsResponse {
 
   private String userName;
 
+  private Long productId;
+  private String productName;
+
   private Long modelId;
   private String modelName;
+  private String imageUrl;
 
   private List<Long> movements_StockLots;
 
@@ -35,4 +39,6 @@ public class MovementDetailsResponse {
   private String stockLotEmitterBatch;
 
   private Long deliveryLineId;
+  private Long deliveryOrderId;
+  private String deliveryOrderBatch;
 }

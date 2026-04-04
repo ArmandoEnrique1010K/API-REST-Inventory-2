@@ -34,14 +34,10 @@ public class MovementServiceImpl implements MovementService {
 			LocalDateTime minCreatedAt,
 			LocalDateTime maxCreatedAt,
 			MovementType movementType,
-			Long deliveryLineId,
 			String username,
-			String keyword,
-			Long modelId,
-			Long userId,
-			Long stockLotReceiverId) {
+			String keyword) {
 		Page<Movement> movements = movementRepository.findAllByParams(pageable, minQuantity, maxQuantity, minCreatedAt,
-				maxCreatedAt, movementType, deliveryLineId, username, keyword, modelId, userId, stockLotReceiverId);
+				maxCreatedAt, movementType, username, keyword);
 
 		List<MovementListResponse> result = movements.getContent().stream().map(
 				movement -> MovementMapper.builder()

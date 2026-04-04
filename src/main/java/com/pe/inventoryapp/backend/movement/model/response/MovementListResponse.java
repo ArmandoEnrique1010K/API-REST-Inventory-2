@@ -22,4 +22,7 @@ public class MovementListResponse {
 
   private Long modelId;
   private String modelName;
+
+  private Long productId;
+  private String productName;
 }

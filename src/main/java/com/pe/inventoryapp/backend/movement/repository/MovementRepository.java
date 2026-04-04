@@ -38,10 +38,6 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
         LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
         LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
       )
-      AND (:deliveryLineId IS NULL OR dl.id = :deliveryLineId)
-      AND (:modelId IS NULL OR m.id = :modelId)
-      AND (:userId IS NULL OR u.id = :userId)
-      AND (:stockLotReceiverId IS NULL OR s.id = :stockLotReceiverId)
       ORDER BY mv.createdAt DESC
   """)
   Page<Movement> findAllByParams(
@@ -51,12 +47,13 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       @Param("minCreatedAt") LocalDateTime minCreatedAt,
       @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
       @Param("movementType") MovementType movementType,
-      @Param("deliveryLineId") Long deliveryLineId,
+      // @Param("deliveryLineId") Long deliveryLineId,
       @Param("username") String username,
-      @Param("keyword") String keyword,
-      @Param("modelId") Long modelId,
-      @Param("userId") Long userId,
-      @Param("stockLotReceiverId") Long stockLotReceiverId);
+      @Param("keyword") String keyword
+      // @Param("modelId") Long modelId,
+      // @Param("userId") Long userId,
+      // @Param("stockLotReceiverId") Long stockLotReceiverId
+    );
 
   // TODO: CREAR UN METODO PARA LIMITAR LA CANTIDAD DE MOVIMIENTOS EN LA BASE DE DATOS A 2000 MOVIMIENTOS
 }

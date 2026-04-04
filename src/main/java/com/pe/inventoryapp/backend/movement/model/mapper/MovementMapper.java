@@ -32,7 +32,9 @@ public class MovementMapper {
         movement.getMovementType(),
         movement.getUser().getFirstname() + " " + movement.getUser().getLastname(),
         movement.getModel().getId(),
-        movement.getModel().getName());
+        movement.getModel().getName(),
+        movement.getModel().getProduct().getId(),
+        movement.getModel().getProduct().getName());
   }
 
   public MovementDetailsResponse buildMovementDetailsResponse() {
@@ -66,6 +68,16 @@ public class MovementMapper {
             .toList()
         : List.of();
 
+    Long deliveryOrderId = movement.getDeliveryLine() != null &&
+            movement.getDeliveryLine().getDeliveryOrder() != null
+                    ? movement.getDeliveryLine().getDeliveryOrder().getId()
+                    : null;
+
+    String deliveryOrderBatch = movement.getDeliveryLine() != null &&
+            movement.getDeliveryLine().getDeliveryOrder() != null
+                    ? movement.getDeliveryLine().getDeliveryOrder().getBatch()
+                    : null;
+                    
     return new MovementDetailsResponse(
         movement.getId(),
         movement.getQuantity(),
@@ -73,13 +85,18 @@ public class MovementMapper {
         movement.getCreatedAt(),
         movement.getMovementType(),
         movement.getUser().getFirstname() + " " + movement.getUser().getLastname(),
+        movement.getModel().getProduct().getId(),
+        movement.getModel().getProduct().getName(),
         movement.getModel().getId(),
         movement.getModel().getName(),
+        movement.getModel().getImageUrl(),
         movement_StockLots,
         stockLotReceiverId,
         stockLotReceiverBatch,
         stockLotEmitterId,
         stockLotEmitterBatch,
-        deliveryLineId);
+        deliveryLineId,
+        deliveryOrderId,
+        deliveryOrderBatch);
   }
 }

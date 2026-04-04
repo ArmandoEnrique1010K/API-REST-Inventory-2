@@ -11,10 +11,8 @@ import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
-import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
-import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.model.response.RolesByUserResponse;
@@ -28,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +35,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(originPatterns = "*")
 public class UserController {
   private final UserService userService;
   private final ResponseService responseService;
@@ -97,26 +93,6 @@ public class UserController {
   
   
 
-  @GetMapping("/profile")
-  public ResponseEntity<?> getUserProfile(Authentication authentication) {
-    Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    DetailUserResponse user = userService.findUserById(username);
-    
-    DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
-    return ResponseEntity.status(response.status()).body(response);
-  }
-
-  @PutMapping("/profile")
-  public ResponseEntity<CommonResponse> updateUserProfile(Authentication authentication,
-      @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
-    Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    validationService.validateFieldsAndThrowResponse(result);
-    userService.updateUserProfileById(id_authenticated_user, profileRequest);
-
-    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-        "Su perfil ha sido actualizado correctamente");
-    return ResponseEntity.status(response.status()).body(response);
-  }
 
   @PutMapping("/{id}/roles")
   public ResponseEntity<CommonResponse> updateUserRoles(@PathVariable Long id,
@@ -139,6 +115,4 @@ public class UserController {
         "Se ha cambiado el estado del usuario");
     return ResponseEntity.status(response.status()).body(response);
   }
-
-
 }
