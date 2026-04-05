@@ -17,15 +17,11 @@ import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderR
 public class DeliveryOrderDomainService {
 
   private final DeliveryLineRepository deliveryLineRepository;
-  // private final DeliveryOrderSummaryDomainService deliveryOrderSummaryDomainService;
 
   public DeliveryOrderDomainService(DeliveryLineRepository deliveryLineRepository,
       Model_DeliveryOrderRepository model_DeliveryOrderRepository
-      // ,
-      // DeliveryOrderSummaryDomainService deliveryOrderSummaryDomainService
     ) {
     this.deliveryLineRepository = deliveryLineRepository;
-    // this.deliveryOrderSummaryDomainService = deliveryOrderSummaryDomainService;
   }
 
   // Verifica que todas las lineas de entrega que pertenecen a una orden de

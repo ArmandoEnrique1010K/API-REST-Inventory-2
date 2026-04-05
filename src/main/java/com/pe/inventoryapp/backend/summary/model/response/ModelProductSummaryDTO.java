@@ -1,17 +1,16 @@
 package com.pe.inventoryapp.backend.summary.model.response;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeliveryOrderSummaryResponse {
-  private Long deliveryOrderId;
-  private List<RegionSummaryResponse> regions;
+public class ModelProductSummaryDTO {
+  private Long modelId;
+  private String modelName;
+  private Long productId;
+  private String productName;
+  private Long totalQuantity;
 }

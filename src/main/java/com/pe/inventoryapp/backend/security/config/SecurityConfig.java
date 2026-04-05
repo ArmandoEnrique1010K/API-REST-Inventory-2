@@ -293,9 +293,12 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/movements/*")
 						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
-						// SUMMARY
-						.requestMatchers(HttpMethod.GET, "/api/delivery-order-summary/delivery-order/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
+						// MOVEMENT - STOCK LOTS
+						.requestMatchers(HttpMethod.GET, "/api/movement-stocklots/*").hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY")
 
+						// SUMMARY
+						.requestMatchers(HttpMethod.GET, "/api/summary/*")
+						.hasAnyAuthority("ROLE_ADMIN", "ROLE_SECRETARY", "ROLE_OPERATOR")
 
 						// ENDPOINTS DE PRUEBA 
 						.requestMatchers(HttpMethod.GET, "/api").permitAll()

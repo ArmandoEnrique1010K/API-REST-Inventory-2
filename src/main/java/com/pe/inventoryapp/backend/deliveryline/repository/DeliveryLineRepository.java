@@ -27,8 +27,7 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       """)
   List<DeliveryLine> findAllByDeliveryOrderId(Long orderId);
 
-
-  // Busqueda con filtros 
+  // Busqueda con filtros
   @Query("""
       SELECT  d
       FROM DeliveryLine d
@@ -48,25 +47,25 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         AND (:regionId IS NULL OR r.id = :regionId)
         AND (:modelId IS NULL OR d.model.id = :modelId)
         AND d.lineStatus != 'LINE_CANCELED'
-        ORDER BY l.id ASC  
+        ORDER BY l.id ASC
       """)
   Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
-    Long deliveryOrderId, 
-    Integer minRequiredQuantity,
-    Integer maxRequiredQuantity,
-    LocalDateTime minLimitDate, 
-    LocalDateTime maxLimitDate, 
-    LineStatus lineStatus, 
-    String location,
-    Long subregionId,
-    Long regionId,
-    Long modelId,
-    Pageable pageable);
+      Long deliveryOrderId,
+      Integer minRequiredQuantity,
+      Integer maxRequiredQuantity,
+      LocalDateTime minLimitDate,
+      LocalDateTime maxLimitDate,
+      LineStatus lineStatus,
+      String location,
+      Long subregionId,
+      Long regionId,
+      Long modelId,
+      Pageable pageable);
 
-  
   Optional<DeliveryLine> findByLocationId(Long idLocation);
 
-  // Busqueda de la fecha de entrega mas cercana (prioridad de entrega de la linea de entrega cuyo estado sea PENDING)
+  // Busqueda de la fecha de entrega mas cercana (prioridad de entrega de la linea
+  // de entrega cuyo estado sea PENDING)
   @Query("""
         SELECT MIN(dl.limitDate)
         FROM DeliveryLine dl
@@ -76,7 +75,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
         ORDER BY dl.limitDate ASC
       """)
   Optional<LocalDateTime> findClosestLimitDate(Long id);
-
 
   @Query("""
           SELECT COALESCE(SUM(dl.requiredQuantity), 0)
@@ -101,7 +99,6 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   List<Object[]> sumRequiredGroupedByRegion(
       @Param("deliveryOrderId") Long deliveryOrderId);
 
-
   @Query("""
           SELECT dl.location.subregion.id, COALESCE(SUM(dl.requiredQuantity), 0)
           FROM DeliveryLine dl
@@ -112,14 +109,15 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   List<Object[]> sumRequiredGroupedBySubregion(
       @Param("deliveryOrderId") Long deliveryOrderId);
 
-
-      // Cuando verifica que no exista duplicado, tambien debe verificar que la linea de entrega no este cancelada ('MOVEMENT_LINE_CANCELED' se considera como eliminado, borrado lógico)
-      @Query("""
+  // Cuando verifica que no exista duplicado, tambien debe verificar que la linea
+  // de entrega no este cancelada ('MOVEMENT_LINE_CANCELED' se considera como
+  // eliminado, borrado lógico)
+  @Query("""
           SELECT COUNT(dl) > 0
           FROM DeliveryLine dl
           WHERE dl.deliveryOrder.id = :deliveryOrderId
             AND dl.model.id = :modelId
-            AND dl.location.id = :locationId 
+            AND dl.location.id = :locationId
             AND dl.lineStatus <> 'LINE_CANCELED'
       """)
   boolean existsDuplicate(
@@ -127,15 +125,13 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
       @Param("modelId") Long modelId,
       @Param("locationId") Long locationId);
 
-      
   @Query("""
-      SELECT COUNT(dl) = 0
-      FROM DeliveryLine dl
-      WHERE dl.deliveryOrder.id = :deliveryOrderId
-        AND dl.lineStatus IN ('LINE_PENDING', 'LINE_EXCEEDED')
-  """)
+          SELECT COUNT(dl) = 0
+          FROM DeliveryLine dl
+          WHERE dl.deliveryOrder.id = :deliveryOrderId
+            AND dl.lineStatus IN ('LINE_PENDING', 'LINE_EXCEEDED')
+      """)
   boolean allLinesAreReady(@Param("deliveryOrderId") Long deliveryOrderId);
-
 
   @Query("""
       SELECT COUNT(dl) = 0
@@ -146,5 +142,33 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   boolean allLinesAreCanceled(@Param("deliveryOrderId") Long deliveryOrderId);
 
   boolean existsByDeliveryOrderIdAndLineStatusIn(Long deliveryOrderId, List<LineStatus> statuses);
-}
 
+  // Obtener la sumatoria total de las cantidades de una orden de entrega por
+  // subregion y modelo de producto
+
+//   @Query("""
+//           SELECT COALESCE(SUM(d.requiredQuantity), 0)
+//           FROM DeliveryOrder d
+//           WHERE d.deliveryOrder.id = :deliveryOrderId
+//             AND d.location.subregion.id = :subregionId
+//             AND d.model.id = :modelId
+//             AND d.lineStatus <> LINE_CANCELED
+//       """)
+//   Integer summaryRequiredQuantityByDeliveryOrderAndSubregionAndProductModel(
+//       @Param("deliveryOrderId") Long deliveryOrderId,
+//       @Param("subregionId") Long subregionId,
+//       @Param("modelId") Long modelId);
+
+//   @Query("""
+//           SELECT COALESCE(SUM(d.requiredQuantity), 0)
+//           FROM DeliveryOrder d
+//           WHERE d.deliveryOrder.id = :deliveryOrderId
+//             AND d.location.subregion.region.id = :regionId
+//             AND d.model.id = :modelId
+//             AND d.lineStatus <> LINE_CANCELED
+//       """)
+//   Integer summaryRequiredQuantityByDeliveryOrderAndRegionAndProductModel(
+//       @Param("deliveryOrderId") Long deliveryOrderId,
+//       @Param("regionId") Long regionId,
+//       @Param("modelId") Long modelId);
+}
