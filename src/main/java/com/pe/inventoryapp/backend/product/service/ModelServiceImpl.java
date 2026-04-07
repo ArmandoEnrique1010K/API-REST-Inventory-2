@@ -59,7 +59,7 @@ public class ModelServiceImpl implements ModelService {
     modelDomainService.verifyModelNameAvailableByProductId(name, productId);
 
     if (productId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Product product = productRepository.findById(productId)
@@ -157,7 +157,7 @@ public class ModelServiceImpl implements ModelService {
   @Override
   public List<ModelListResponse> findAllModelsByProductId(Long productId) {
     if (productId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     List<Model> models = (List<Model>) modelRepository.findAllByProductId(productId);
@@ -171,7 +171,7 @@ public class ModelServiceImpl implements ModelService {
   @Transactional(readOnly = true)
   public ModelDetailsResponse findModelById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model model = modelRepository.findById(id)
@@ -188,7 +188,7 @@ public class ModelServiceImpl implements ModelService {
   @Transactional
   public void updateModelById(Long id, ModelRequest modelRequest, MultipartFile file) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model model = modelRepository.findById(id)
@@ -247,7 +247,7 @@ public class ModelServiceImpl implements ModelService {
   @Transactional
   public void changeStatusModelById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model model = modelRepository.findById(id).orElseThrow(

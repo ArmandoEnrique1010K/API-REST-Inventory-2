@@ -111,8 +111,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Long id_model = deliveryLineRequest.getModelId();
 
     if (id_location == null || deliveryOrderId == null || id_user == null || id_model == null) {
-      // TODO: APLICAR EN TODOS LOS SERVICIOS QUE EN LUGAR DE RETORNAR
-      // INTERNAL_SERVER_ERROR, UN BAD_REQUEST
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
@@ -280,14 +278,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   public DeliveryLineDetailsResponse findDeliveryLineById(Long id) {
 
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED,  DEBE DEVOLVER UNA EXCEPCION
@@ -306,7 +304,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Transactional
   public void updateDeliveryLineById(Long id, DeliveryLineUpdateRequest deliveryLineUpdateRequest, Long id_user) {
     if (id == null || id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id_user)
@@ -318,13 +316,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Long deliveryLine_id = deliveryLine.getId();
 
     if (deliveryLine_id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Long deliveryOrder_id = deliveryLine.getDeliveryOrder().getId();
 
     if (deliveryOrder_id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // LOGICA QUE VERIFIQUE QUE EL ESTADO DE LA LINEA DE ENTREGA NO TENGA EL ESTADO
@@ -366,19 +364,19 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // SUMATORIA DE LA CANTIDAD REQUERIDA
     Model_DeliveryOrder model_DeliveryOrder = deliveryLine.getModel_DeliveryOrder();
     if (model_DeliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Long model_DeliveryOrder_id = model_DeliveryOrder.getId();
 
     if (model_DeliveryOrder_id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model model = model_DeliveryOrder.getModel();
 
     if (model == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // Llamar al método auxiliar para actualizar la linea de entrega
@@ -421,6 +419,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setModel(model);
 
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   // Nota: Tambien actualiza el estado de la orden de entrega dependiendo del
@@ -456,7 +455,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Transactional
   public void cancelDeliveryLineById(Long id, Long id_user_authenticated) {
     if (id == null || id_user_authenticated == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id_user_authenticated)
@@ -466,13 +465,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
 
     if (deliveryOrderId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
@@ -480,13 +479,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     if (deliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Long id_model_deliveryOrder = deliveryLine.getModel_DeliveryOrder().getId();
 
     if (id_model_deliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository.findById(
@@ -494,7 +493,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 
     if (model_DeliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
 
@@ -581,6 +580,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setDeliveryLine(deliveryLine);
     movement.setModel(deliveryLine.getModel());
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
 
@@ -701,6 +701,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setDeliveryLine(deliveryLine);
     movement.setModel(model);
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   // ESTO ES UN MOVIMIENTO EXTRAER UNA CANTIDAD Y REPORTARLA COMO PERDIDA DE UNA
@@ -787,7 +788,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Long modelId = model_DeliveryOrder.getModel().getId();
 
     if (modelId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // // Obtener modelo del producto
@@ -822,6 +823,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Persistir movimiento
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   // ESTRATEGIA DE ACTUALIZACIÓN
@@ -836,7 +838,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Validación básica de parámetros
     if (id == null || id_user_authenticated == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // Usuario que ejecuta la operación
@@ -848,7 +850,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // Cantidad que se va a devolver al stock
@@ -858,7 +860,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     Long deliveryOrderId = deliveryLine.getDeliveryOrder().getId();
 
     if (deliveryOrderId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(
@@ -866,7 +868,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     if (deliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // Obtener relación modelo - orden de entrega
@@ -875,7 +877,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "La relacion producto-orden de entrega no existe"));
 
     if (model_DeliveryOrder == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // ---------------------------
@@ -990,11 +992,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setDeliveryLine(deliveryLine);
 
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   private User getUser(Long userId) {
     if (userId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     return userRepository.findById(userId)
@@ -1005,7 +1008,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
   private DeliveryLine getDeliveryLine(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     return deliveryLineRepository.findById(id)
@@ -1120,6 +1123,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setUser(user);
 
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
 
     for (StockLot stockLot : stockLots) {
 
@@ -1271,7 +1275,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
   @Transactional
   public void missingDeliveryLineById(Long id, Long id_user_authenticated) {
     if (id == null || id_user_authenticated == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
     User user = userRepository.findById(
         id_user_authenticated)
@@ -1281,7 +1285,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
     if (deliveryLine == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // Solamente podra declarar entregada si la linea de entrega se encuentra lista
@@ -1307,6 +1311,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movement.setDeliveryLine(deliveryLine);
 
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
 }

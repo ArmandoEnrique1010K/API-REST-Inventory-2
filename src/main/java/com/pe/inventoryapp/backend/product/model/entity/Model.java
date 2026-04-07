@@ -41,7 +41,7 @@ public class Model {
   @Column(nullable = false)
   private String name;
 
-  // TODO: EN ALGUN FUTURO CREAR UNA ENTIDAD PARA RELACIONAR VARIAS IMAGENES HACIA UN MODELO
+  // TODO: EN UNA FUTURA ACTUALIZACION SE PODRIA CREAR UNA ENTIDAD PARA RELACIONAR VARIAS IMAGENES HACIA UN MODELO
   private String imageUrl;
   private String publicImageId;
 
@@ -64,9 +64,11 @@ public class Model {
   private Integer totalQuantityDelivered;
 
   @CreationTimestamp
+  @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @UpdateTimestamp
+  @Column(nullable = false)
   private LocalDateTime updatedAt;
 
   @NotNull

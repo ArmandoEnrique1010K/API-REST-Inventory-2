@@ -43,7 +43,7 @@ public class LocationServiceImpl implements LocationService {
     Long idSubregion = locationRequest.getSubregionId();
 
     if (idSubregion == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Subregion subregion = subregionRepository.findById(
@@ -102,7 +102,7 @@ public class LocationServiceImpl implements LocationService {
   @Transactional(readOnly = true)
   public LocationResponse findLocationById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Location location = locationRepository.findById(id)
@@ -119,7 +119,7 @@ public class LocationServiceImpl implements LocationService {
   @Transactional
   public void updateLocationById(Long id, LocationRequest locationRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (id == 1L) {
@@ -138,7 +138,7 @@ public class LocationServiceImpl implements LocationService {
     Long idSubregion = locationRequest.getSubregionId();
 
     if (idSubregion == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     locationDomainService.verifyLocationNameAvailableBySubregionIdExcludingId(newName, idSubregion, id);
@@ -157,7 +157,7 @@ public class LocationServiceImpl implements LocationService {
   @Transactional
   public void changeStatusLocationById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (id == 1L) {

@@ -55,7 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Transactional(readOnly = true)
   public CategoryResponse findCategoryById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Category category = categoryRepository.findById(id)
@@ -68,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Transactional
   public void updateCategoryById(Long id, CategoryRequest categoryRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (id == 1L) {
@@ -90,7 +90,7 @@ public class CategoryServiceImpl implements CategoryService {
   @Override
   public void changeStatusCategoryById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Category category = categoryRepository.findById(id).orElseThrow(

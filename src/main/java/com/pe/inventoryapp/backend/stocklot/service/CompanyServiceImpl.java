@@ -52,7 +52,7 @@ public class CompanyServiceImpl implements CompanyService {
   @Transactional(readOnly = true)
   public CompanyResponse findCompanyById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Company company = companyRepository.findById(id)
@@ -65,7 +65,7 @@ public class CompanyServiceImpl implements CompanyService {
   @Transactional
   public void updateCompanyById(Long id, CompanyRequest companyRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (id == 1L) {

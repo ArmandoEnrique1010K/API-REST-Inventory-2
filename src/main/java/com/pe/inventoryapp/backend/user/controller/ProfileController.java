@@ -42,8 +42,8 @@ public class ProfileController {
 
   @GetMapping
   public ResponseEntity<?> getUserProfile(Authentication authentication) {
-    Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    DetailUserResponse user = profileService.findUserById(username);
+    Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    DetailUserResponse user = profileService.findUserById(userId);
 
     DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
     return ResponseEntity.status(response.status()).body(response);

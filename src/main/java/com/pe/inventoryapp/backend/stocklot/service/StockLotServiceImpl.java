@@ -14,6 +14,7 @@ import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
+import com.pe.inventoryapp.backend.movement.service.MovementDomainService;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
@@ -39,6 +40,7 @@ public class StockLotServiceImpl implements StockLotService {
   private final MovementRepository movementRepository;
   private final ModelRepository modelRepository;
   private final StockLotDomainService stockLotDomainService;
+  private final MovementDomainService movementDomainService;
 
   public StockLotServiceImpl(
       StockLotRepository stockLotRepository,
@@ -46,20 +48,22 @@ public class StockLotServiceImpl implements StockLotService {
       UserRepository userRepository,
       MovementRepository movementRepository,
       ModelRepository modelRepository,
-      StockLotDomainService stockLotDomainService) {
+      StockLotDomainService stockLotDomainService,
+    MovementDomainService movementDomainService) {
     this.stockLotRepository = stockLotRepository;
     this.companyRepository = companyRepository;
     this.userRepository = userRepository;
     this.movementRepository = movementRepository;
     this.modelRepository = modelRepository;
     this.stockLotDomainService = stockLotDomainService;
+    this.movementDomainService = movementDomainService;
   }
 
   // REGISTRA UN NUEVO LOTE DE STOCK
   @Override
   public void saveStockLot(StockLotReceiveRequest stockLotReceiveRequest, Long id_user) {
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -70,7 +74,7 @@ public class StockLotServiceImpl implements StockLotService {
     Long modelId = stockLotReceiveRequest.getModelId();
 
     if (modelId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model model = modelRepository.findById(
@@ -84,7 +88,7 @@ public class StockLotServiceImpl implements StockLotService {
     Long id_company = stockLotReceiveRequest.getCompanyId();
 
     if (id_company == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Company company = companyRepository.findById(id_company)
@@ -139,6 +143,7 @@ public class StockLotServiceImpl implements StockLotService {
     movement.setModel(model);
 
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   @Override
@@ -194,7 +199,7 @@ public class StockLotServiceImpl implements StockLotService {
   @Transactional(readOnly = true)
   public StockLotDetailsResponse findStockLotById(Long stockLotId) {
     if (stockLotId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     StockLot stockLot = stockLotRepository.findById(stockLotId)
@@ -208,7 +213,7 @@ public class StockLotServiceImpl implements StockLotService {
   @Transactional
   public void increaseStockLot(Long idStockLot, StockLotAdjustmentRequest stockLotAdjustmentRequest, Long id_user) {
     if (id_user == null || idStockLot == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -225,7 +230,7 @@ public class StockLotServiceImpl implements StockLotService {
     Long modelId = stockLot.getModel().getId();
 
     if (modelId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model model = modelRepository.findById(
@@ -266,12 +271,13 @@ public class StockLotServiceImpl implements StockLotService {
     movement.setModel(model);
 
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   @Override
   public void decreaseStockLot(Long idStockLot, StockLotAdjustmentRequest stockLotAdjustmentRequest, Long id_user) {
     if (id_user == null || idStockLot == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -305,7 +311,7 @@ public class StockLotServiceImpl implements StockLotService {
     Long idModel = stockLot.getModel().getId();
 
     if (idModel == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Model model = modelRepository.findById(
@@ -329,13 +335,14 @@ public class StockLotServiceImpl implements StockLotService {
     movement.setUser(user);
     movement.setModel(model);
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   // Metodo para recuperar lote de stock que fue reportado como perdida
   @Override
   public void recoveryStockLot(Long idStockLot, StockLotAdjustmentRequest stockLotAdjustmentRequest, Long id_user) {
     if (id_user == null || idStockLot == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -350,7 +357,7 @@ public class StockLotServiceImpl implements StockLotService {
     Long idModel = stockLot.getModel().getId();
 
     if (idModel == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // IMPLEMENTAR UNA LOGICA PARA OBTENER EL ULTIMO MOVIMIENTO DE TIPO LOSS DE UN
@@ -410,13 +417,14 @@ public class StockLotServiceImpl implements StockLotService {
     movement.setModel(model);
     movement.setUser(user);
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   // Método para hacer una transferencia entre 2 lotes de stock
   @Override
   public void transferStockLot(Long idStockLotEmitter, StockLotTransferRequest stockLotTransferRequest, Long id_user) {
     if (id_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id_user).orElseThrow(
@@ -427,7 +435,7 @@ public class StockLotServiceImpl implements StockLotService {
     Long id_stock_lot_receiver = stockLotTransferRequest.getStockLotReceiverId();
 
     if (idStockLotEmitter == null || id_stock_lot_receiver == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (idStockLotEmitter.equals(id_stock_lot_receiver)) {
@@ -450,7 +458,7 @@ public class StockLotServiceImpl implements StockLotService {
     Long id_model_receiver = stockLotReceiver.getModel().getId();
 
     if (id_model_emitter == null || id_model_receiver == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (!stockLotEmitter.getCompany().getId().equals(stockLotReceiver.getCompany().getId())) {
@@ -499,6 +507,7 @@ public class StockLotServiceImpl implements StockLotService {
     movement.setModel(modelReceiver);
     movement.setUser(user);
     movementRepository.save(movement);
+    movementDomainService.deleteLastestMovement();
   }
 
   @Override

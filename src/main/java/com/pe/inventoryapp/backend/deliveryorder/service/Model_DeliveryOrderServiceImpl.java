@@ -39,7 +39,7 @@ public class Model_DeliveryOrderServiceImpl implements Model_DeliveryOrderServic
     @Transactional
     public void saveRelationModelInDeliveryOrder(Long idProduct, Long idDeliveryOrder) {
         if (idProduct == null || idDeliveryOrder == null) {
-            // throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+            // throw new BusinessException(ResponseStatus.BAD_REQUEST);
             throw new BusinessException(ResponseStatus.BAD_REQUEST, "Datos invalidos");
         }
 
@@ -52,7 +52,6 @@ public class Model_DeliveryOrderServiceImpl implements Model_DeliveryOrderServic
                     "La orden de entrega ha sido cancelada");
         }
 
-        // TODO: VERIFICAR AQUI
         if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_DELIVERED || deliveryOrder.getOrderStatus() == OrderStatus.ORDER_PARTIALLY_DELIVERED) {
             throw new BusinessException(ResponseStatus.CONFLICT,
                     "La orden de entrega ha sido entregada");
@@ -101,27 +100,27 @@ public class Model_DeliveryOrderServiceImpl implements Model_DeliveryOrderServic
     @Transactional
     public void deleteRelationModelDeliveryOrder(Long id) {
         if (id == null) {
-            throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(ResponseStatus.BAD_REQUEST);
         }
         Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository.findById(
                 id).orElseThrow(
                         () -> new BusinessException(ResponseStatus.NOT_FOUND,
                                 "La relacion de modelo del producto y orden de entrega no existe en el sistema"));
         if (model_DeliveryOrder == null) {
-            throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(ResponseStatus.BAD_REQUEST);
         }
 
         Long idDeliveryOrder = model_DeliveryOrder.getDeliveryOrder().getId();
 
         if (idDeliveryOrder == null) {
-            throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(ResponseStatus.BAD_REQUEST);
         }
 
         DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(idDeliveryOrder).orElseThrow(
                 () -> new BusinessException(ResponseStatus.NOT_FOUND,
                         "La orden de entrega no existe en el sistema"));
         if (deliveryOrder == null) {
-            throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(ResponseStatus.BAD_REQUEST);
         }
 
         // Solamente si hay al menos una linea de entrega asociada a una relacion de model_DeliveryOrder, ya no se podra eliminar

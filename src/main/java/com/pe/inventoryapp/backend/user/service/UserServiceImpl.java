@@ -106,9 +106,8 @@ public class UserServiceImpl implements UserService {
   @Override
   public RolesByUserResponse getRolesByUser(Long idUser) {
         if (idUser == null) {
-      throw new BusinessException(
-          ResponseStatus.INTERNAL_SERVER_ERROR);
-    }
+          throw new BusinessException(ResponseStatus.BAD_REQUEST);
+        }
 
     User user = userRepository.findById(idUser)
         .orElseThrow(() -> new BusinessException(
@@ -125,8 +124,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
     if (id == null) {
-      throw new BusinessException(
-          ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // Primero verifica si existe otro usuario con el rol de administrador para no
@@ -153,7 +151,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   public void changeStatusUserById(Long id_user, Long id_authenticated_user) {
     if (id_user == null || id_authenticated_user == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (id_user == 1L) {

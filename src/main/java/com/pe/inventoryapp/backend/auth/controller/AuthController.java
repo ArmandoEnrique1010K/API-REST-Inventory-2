@@ -35,34 +35,39 @@ public class AuthController {
   private final ValidationService validationService;
   private final AuthenticationContextService authenticationContextService;
 
-  public AuthController (AuthService authService, ResponseService responseService, ValidationService validationService, AuthenticationContextService authenticationContextService) {
+  public AuthController(AuthService authService, ResponseService responseService, ValidationService validationService,
+      AuthenticationContextService authenticationContextService) {
     this.authService = authService;
     this.responseService = responseService;
-    this.validationService = validationService; 
-    this.authenticationContextService = authenticationContextService; 
+    this.validationService = validationService;
+    this.authenticationContextService = authenticationContextService;
   }
 
   // Nota: El endpoint POST "/" ya esta siendo manejado por Spring Security
 
   @PostMapping("/forgot-password")
-  public ResponseEntity<CommonResponseWithSecretField> forgotUserPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
+  public ResponseEntity<CommonResponseWithSecretField> forgotUserPassword(
+      @Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     String requestId = authService.processUserForgotPasswordAndReturnRequestId(forgotPasswordRequest.getEmail());
 
-    //* En el campo secreto pasa el requestId
-    CommonResponseWithSecretField response = responseService.generateSucessfullResponseWithSecretField(ResponseStatus.SUCCESS, 
-      "Si el correo existe, se le enviará un código de verificación al correo", requestId);
+    // * En el campo secreto pasa el requestId
+    CommonResponseWithSecretField response = responseService.generateSucessfullResponseWithSecretField(
+        ResponseStatus.SUCCESS,
+        "Si el correo existe, se le enviará un código de verificación al correo", requestId);
     return ResponseEntity.status(response.status()).body(response);
   }
 
   @PostMapping("/validate-token")
-  public ResponseEntity<CommonResponseWithSecretField> validateUserToken(@Valid @RequestBody ValidateTokenRequest validateTokenRequest,
+  public ResponseEntity<CommonResponseWithSecretField> validateUserToken(
+      @Valid @RequestBody ValidateTokenRequest validateTokenRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     String resetToken = authService.validateAndActivateResetToken(validateTokenRequest);
 
-    CommonResponseWithSecretField response = responseService.generateSucessfullResponseWithSecretField(ResponseStatus.SUCCESS,
+    CommonResponseWithSecretField response = responseService.generateSucessfullResponseWithSecretField(
+        ResponseStatus.SUCCESS,
         "El token es válido, puede cambiar su contraseña", resetToken);
     return ResponseEntity.status(response.status()).body(response);
   }
@@ -70,7 +75,8 @@ public class AuthController {
   // SI EL USUARIO QUIERE CAMBIAR DE CONTRASEÑA
   // REQUIERE QUE EL TOKEN SEA VALIDADO
   @PutMapping("/change-password")
-  public ResponseEntity<CommonResponse>updateUserPassword(@Valid @RequestBody ChangePasswordRequest changePasswordRequest,
+  public ResponseEntity<CommonResponse> updateUserPassword(
+      @Valid @RequestBody ChangePasswordRequest changePasswordRequest,
       BindingResult result) {
 
     validationService.validateFieldsAndThrowResponse(result);
@@ -85,27 +91,44 @@ public class AuthController {
   @PostMapping("/logout")
   public ResponseEntity<CommonResponse> logout(HttpServletResponse httpServletResponse) {
     authService.logout(httpServletResponse);
-    
+
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Ha cerrado sesión correctamente");
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  //* OBTIENE LA SESION ACTUAL DEL USUARIO, SI NO HAY SESION DEVUELVE UN USUARIO VACIO
+  // VERIFICA SI HAY UNA SESION ACTIVA
+  // @GetMapping("verify-session")
+  // public ResponseEntity<CommonResponse> verifySession(Authentication authentication) {
+  //   CommonResponse response = null;
+
+  //   if (authentication == null || !authentication.isAuthenticated()) {
+  //     response = responseService.generateErrorResponse(ResponseStatus.SUCCESS,
+  //         "No hay una sesión activa");
+  //     return ResponseEntity.status(response.status()).body(response);
+  //   } else {
+  //     response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS, "Si hay una sesión activa");
+  //   }
+
+  //   return ResponseEntity.status(response.status()).body(response);
+  // }
+
+  // * OBTIENE LA SESION ACTUAL DEL USUARIO, SI NO HAY SESION DEVUELVE UN ERROR
+  // VACIO
 
   @GetMapping("/current-session")
-  public ResponseEntity<?> getCurrentSession(Authentication authentication) {
+  public ResponseEntity<?> getCurrentSession(Authentication authentication, HttpServletResponse httpServletResponse) {
 
-    System.out.println("AUTENTICACIÓN: " +authentication);
 
-    if (authentication == null || !authentication.isAuthenticated()) {
-      CommonResponse response = responseService.generateErrorResponse(ResponseStatus.SUCCESS,
-          "No hay una sesión activa");
-      return ResponseEntity.status(response.status()).body(response); 
-      }
+    // //* ESTO NUNCA PASARA PORQUE SI O SI SE REQUIERE QUE EL USUARIO INICIE SESION EN LA API REST */
+    // if (authentication == null || !authentication.isAuthenticated()) {
+    //   DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+    //   authService.logout(httpServletResponse);
+    //   return ResponseEntity.status(response.status()).body(response);
+    // }
 
-    Long username = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    DetailUserResponse user = authService.getCurrentSession(username);
+    Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    DetailUserResponse user = authService.getCurrentSession(userId);
 
     DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
     return ResponseEntity.status(response.status()).body(response);
@@ -117,5 +140,5 @@ public class AuthController {
 // 1. El usuario debe escribir su correo electronico
 // 2. El sistema enviara un token de 6 digitos al correo del usuario
 // 3. El usuario debe ingresar el token para activarlo
-// 4. El usuario debe ingresar su nueva contraseña 
+// 4. El usuario debe ingresar su nueva contraseña
 // 5. El usuario podra iniciar sesión con la nueva contraseña

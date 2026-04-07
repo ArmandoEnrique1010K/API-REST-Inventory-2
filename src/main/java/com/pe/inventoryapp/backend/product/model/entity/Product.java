@@ -47,6 +47,7 @@ public class Product {
   private Integer quantityModels;
 
   @UpdateTimestamp
+  @Column(nullable = false)
   private LocalDateTime updatedAt;
 
   @ManyToOne

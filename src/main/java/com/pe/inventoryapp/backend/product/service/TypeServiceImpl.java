@@ -50,7 +50,7 @@ public class TypeServiceImpl implements TypeService {
   @Transactional
   public void updateTypeById(Long id, TypeRequest typeRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Type type = typeRepository.findById(id)
@@ -66,7 +66,7 @@ public class TypeServiceImpl implements TypeService {
   @Override
   public TypeResponse findTypeById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Type type = typeRepository.findById(id)
@@ -88,7 +88,7 @@ public class TypeServiceImpl implements TypeService {
   @Override
   public void changeStatusTypeById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Type type = typeRepository.findById(id).orElseThrow(

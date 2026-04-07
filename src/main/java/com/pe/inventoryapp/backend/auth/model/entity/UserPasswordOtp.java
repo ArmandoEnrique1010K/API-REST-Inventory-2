@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "password_reset_otp")
+@Table(name = "otp_hashs")
 public class UserPasswordOtp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

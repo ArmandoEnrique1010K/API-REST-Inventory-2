@@ -78,7 +78,9 @@ public class SecurityConfig {
 						.permitAll()
 						.requestMatchers(HttpMethod.PUT, "/api/auth/change-password")
 						.permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/auth/current-session").permitAll()
+						// .requestMatchers(HttpMethod.GET, "/api/auth/verify-session").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/auth/current-session")
+						.authenticated()
 						.requestMatchers(HttpMethod.POST, "/api/auth/logout").authenticated()
 
 						// ROLES

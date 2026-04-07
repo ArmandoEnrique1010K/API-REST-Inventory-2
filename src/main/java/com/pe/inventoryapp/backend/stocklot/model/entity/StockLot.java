@@ -55,9 +55,11 @@ public class StockLot {
   private boolean temporary;
 
   @CreationTimestamp
+  @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @UpdateTimestamp
+  @Column(nullable = false)
   private LocalDateTime updatedAt;
 
   @ManyToOne

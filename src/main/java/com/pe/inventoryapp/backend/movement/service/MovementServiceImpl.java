@@ -60,7 +60,7 @@ public class MovementServiceImpl implements MovementService {
 	public MovementDetailsResponse findMovementById(Long id) {
 		if (id == null) {
 			throw new BusinessException(
-					ResponseStatus.INTERNAL_SERVER_ERROR);
+					ResponseStatus.BAD_REQUEST);
 		}
 
 		Movement movement = movementRepository.findById(id)

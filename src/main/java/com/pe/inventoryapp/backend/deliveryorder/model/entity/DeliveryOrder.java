@@ -48,9 +48,11 @@ public class DeliveryOrder {
   private LocalDateTime priorityDate;
 
   @CreationTimestamp
+  @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @UpdateTimestamp
+  @Column(nullable = false)
   private LocalDateTime updatedAt;
 
   @Enumerated(EnumType.STRING)

@@ -17,7 +17,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 public class MailerSendDomainService  {
 
   private static final Logger log = LoggerFactory.getLogger(MailerSendDomainService.class);
-  // TODO: DESINSTALAR DOTENV Y REEMPLAZARLO POR EL SISTEMA CLASICO DE SPRING BOOT
+  // TODO: ALTERNATIVAMENTE SE PODRIA DESINSTALAR DOTENV Y REEMPLAZARLO POR EL SISTEMA CLASICO DE SPRING BOOT
   // PARA CARGAR VARIABLES DE ENTORNO
 
   public void sendResetPasswordToken(String toEmail, String token) {

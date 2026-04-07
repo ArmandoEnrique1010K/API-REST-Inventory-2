@@ -52,7 +52,7 @@ public class RegionServiceImpl implements RegionService {
   @Transactional(readOnly = true)
   public RegionResponse findRegionById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Region region = regionRepository.findById(id)
@@ -65,7 +65,7 @@ public class RegionServiceImpl implements RegionService {
   @Transactional
   public void updateRegionById(Long id, RegionRequest regionRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (id == 1L) {

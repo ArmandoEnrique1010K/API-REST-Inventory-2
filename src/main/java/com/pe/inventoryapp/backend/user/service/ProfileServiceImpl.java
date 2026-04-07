@@ -28,8 +28,7 @@ public class ProfileServiceImpl implements ProfileService {
   @Transactional(readOnly = true)
   public DetailUserResponse findUserById(Long id) {
     if (id == null) {
-      throw new BusinessException(
-          ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id)
@@ -46,8 +45,7 @@ public class ProfileServiceImpl implements ProfileService {
   @Transactional
   public void updateUserProfileById(Long id, ProfileRequest profileRequest) {
     if (id == null) {
-      throw new BusinessException(
-          ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     User user = userRepository.findById(id)

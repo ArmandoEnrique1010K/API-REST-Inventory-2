@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
     Long idType = productCreateRequest.getTypeId();
 
     if (idCategory == null || idType == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     // Buscar la categoria por su ID
@@ -153,7 +153,7 @@ public class ProductServiceImpl implements ProductService {
   @Transactional(readOnly = true)
   public ProductResponse findProductById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Product product = productRepository.findById(id)
@@ -170,7 +170,7 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public void updateProductById(Long id, ProductUpdateRequest productUpdateRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Product product = productRepository.findById(id)
@@ -186,7 +186,7 @@ public class ProductServiceImpl implements ProductService {
     Long categoryId = productUpdateRequest.getCategoryId();
 
     if (categoryId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Category category = categoryRepository.findById(
@@ -196,7 +196,7 @@ public class ProductServiceImpl implements ProductService {
     Long typeId = productUpdateRequest.getTypeId();
 
     if (typeId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Type type = typeRepository.findById(
@@ -217,7 +217,7 @@ public class ProductServiceImpl implements ProductService {
   @Transactional
   public void changeStatusProductById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Product product = productRepository.findById(id).orElseThrow(

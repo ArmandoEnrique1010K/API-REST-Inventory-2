@@ -1,6 +1,8 @@
 package com.pe.inventoryapp.backend.movement.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,13 +49,24 @@ public interface MovementRepository extends JpaRepository<Movement, Long> {
       @Param("minCreatedAt") LocalDateTime minCreatedAt,
       @Param("maxCreatedAt") LocalDateTime maxCreatedAt,
       @Param("movementType") MovementType movementType,
-      // @Param("deliveryLineId") Long deliveryLineId,
       @Param("username") String username,
       @Param("keyword") String keyword
-      // @Param("modelId") Long modelId,
-      // @Param("userId") Long userId,
-      // @Param("stockLotReceiverId") Long stockLotReceiverId
     );
 
-  // TODO: CREAR UN METODO PARA LIMITAR LA CANTIDAD DE MOVIMIENTOS EN LA BASE DE DATOS A 2000 MOVIMIENTOS
+    @Query("SELECT COUNT(m) FROM Movement m")
+    long countAllMovements();
+
+    // Devuelve el ID del movimiento más antiguo
+    // Optional<Long> findFirstByOrderByCreatedAtAsc();
+
+    Optional<Movement> findFirstByOrderByCreatedAtAsc();
+    // * METODO PARA LIMITAR LA CANTIDAD DE MOVIMIENTOS EN LA BASE DE DATOS A 2000
+    // MOVIMIENTOS
+    @Query("SELECT m.id FROM Movement m ORDER BY m.createdAt ASC")
+    List<Long> findOldestIds(Pageable pageable);
+    // Pageable permite limitar la cantidad de resultados desde la base de datos
+    // directamente (LIMIT equivalente en SQL), sin traer todos los registros y sin
+    // crear listas manuales.
+
+    // TODO: EXISTE LA POSIBILIDAD DE LLAMAR A UN METODO DEL REPOSITORIO DESPUES DE UNA OPERACION DEL MISMO REPOSITORIO???
 }

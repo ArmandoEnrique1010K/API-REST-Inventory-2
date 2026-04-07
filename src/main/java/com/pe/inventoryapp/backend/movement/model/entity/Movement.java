@@ -13,6 +13,7 @@ import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -46,6 +47,7 @@ public class Movement {
   private String comment;
 
   @CreationTimestamp
+  @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
 
   @Enumerated(EnumType.STRING)

@@ -49,7 +49,7 @@ import com.pe.inventoryapp.backend.user.repository.UserRepository;
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 	private final Model_DeliveryOrderDomainService model_DeliveryOrderDomainService;
-  private final DeliveryOrderRepository deliveryOrderRepository;
+	private final DeliveryOrderRepository deliveryOrderRepository;
 	private final DeliveryLineRepository deliveryLineRepository;
 	private final UserRepository userRepository;
 	private final CompanyRepository companyRepository;
@@ -83,7 +83,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.deliveryOrderDomainService = deliveryOrderDomainService;
 		this.stockLotDomainService = stockLotDomainService;
 		this.movementDomainService = movementDomainService;
-    this.model_DeliveryOrderDomainService = model_DeliveryOrderDomainService;
+		this.model_DeliveryOrderDomainService = model_DeliveryOrderDomainService;
 	};
 
 	@Override
@@ -92,7 +92,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		Long id_client = deliveryOrderRequest.getUserIdClient();
 
 		if (id_user == null || id_client == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
 		User user = userRepository.findById(id_user).orElseThrow(
@@ -192,7 +192,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			OrderStatus status) {
 
 		if (id == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
 		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByUserClientId(pageable, id, batch, startDate,
@@ -219,7 +219,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	@Transactional(readOnly = true)
 	public DeliveryOrderDetailsResponse findDeliveryOrderById(Long id) {
 		if (id == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
@@ -240,7 +240,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	@Transactional(readOnly = true)
 	public DeliveryOrderClientDetailsResponse findDeliveryOrderByIdAndValidateUserClient(Long id, Long id_user) {
 		if (id == null || id_user == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
 		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
@@ -280,7 +280,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	@Transactional
 	public void changeLimitDate(Long id, LocalDateTime limitDate, Long id_user) {
 		if (id == null || id_user == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
 		User user = userRepository.findById(id_user)
@@ -313,7 +313,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	public void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest,
 			Long id_user) {
 		if (id == null || id_user == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
 		User user = userRepository.findById(id_user)
@@ -330,34 +330,31 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					"La orden de entrega ya ha sido entregada");
 		}
 
-
 		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
 			throw new BusinessException(ResponseStatus.CONFLICT,
 					"La orden de entrega ha sido cancelada");
 		}
 
-		
 		// Lista de las lineas de entrega asociadas a la orden de entrega
 		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
 
-		// SOLAMENTE SI NO HAY LINEAS DE ENTREGA, PODRA SER ELIMINADA LA ORDEN DE ENTREGA SIN NINGUN PROBLEMA
+		// SOLAMENTE SI NO HAY LINEAS DE ENTREGA, PODRA SER ELIMINADA LA ORDEN DE
+		// ENTREGA SIN NINGUN PROBLEMA
 		if (deliveryLines.isEmpty()) {
 			deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
 			deliveryOrder.setUserUpdater(user);
 			deliveryOrderRepository.save(deliveryOrder);
-			return; //<-- TERMINA LA EJECUCION DEL CÓDIGO
+			return; // <-- TERMINA LA EJECUCION DEL CÓDIGO
 		}
-
 
 		// OTRA FORMA DE IMPLEMENTARLO
 		// EnumSet<LineStatus> cancelableStates = EnumSet.of(
-		// 		LineStatus.LINE_READY,
-		// 		LineStatus.LINE_PENDING,
-		// 		LineStatus.LINE_EXCEEDED);
+		// LineStatus.LINE_READY,
+		// LineStatus.LINE_PENDING,
+		// LineStatus.LINE_EXCEEDED);
 
 		// boolean hasCancelableLines = deliveryLines.stream()
-		// 		.anyMatch(dl -> cancelableStates.contains(dl.getLineStatus()));
-
+		// .anyMatch(dl -> cancelableStates.contains(dl.getLineStatus()));
 
 		// Verifica si quedan lineas de entrega con estado de READY, PENDING O EXCEEDED
 		// EJEMPLO: CUANDO PULSA EL BOTON DE CANCELAR ORDEN POR 2° VEZ
@@ -401,7 +398,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	@Transactional
 	public void markDeliveryOrderAsDelivered(Long id, Long id_user) {
 		if (id == null || id_user == null) {
-			throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
 		User user = userRepository.findById(id_user)
@@ -475,7 +472,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		Map<Long, Integer> stockToRestore = new HashMap<>();
 		List<Movement> movements = new ArrayList<>();
 
-
 		// Solamente las lineas actualizadas
 		List<DeliveryLine> updatedLines = new ArrayList<>();
 
@@ -521,6 +517,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// GUARDAR TODOS LOS MOVIMIENTOS
 		if (!movements.isEmpty()) {
 			movementRepository.saveAll(movements);
+			movementDomainService.deleteManyLatestMovements();
 		}
 
 		Set<Long> modelIds = updatedLines.stream()
@@ -535,9 +532,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	}
 
 	private void cancelLine(DeliveryLine line, User user) {
-		// TODO: ALTERAR EL REPOSITORIO PARA FILTRAR POR CANTIDADES
-		// line.setDeliveredQuantity(0);
-		// line.setPendingQuantity(0);
+		// * NO ALTERAR EL REPOSITORIO PARA FILTRAR POR CANTIDADES
+		// NO SE VAN A ALTERAR LOS CAMPOS CON LAS CANTIDADES REQUERIDAS Y ENTREGADAS
 		line.setLineStatus(LineStatus.LINE_CANCELED);
 		line.setLimitDate(null);
 		line.setUserUpdater(user);
@@ -653,6 +649,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		stockLotRepository.saveAll(stockLots);
 		movementRepository.saveAll(movements);
+		movementDomainService.deleteManyLatestMovements();
 		modelRepository.saveAll(models.values());
 	}
 
@@ -673,7 +670,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		} else if (anyDeliveredOrMissing) {
 			order.setOrderStatus(OrderStatus.ORDER_PARTIALLY_DELIVERED);
 		} else {
-			//* Esto nunca deberia pasar
+			// * Esto nunca deberia pasar
 			throw new BusinessException(
 					ResponseStatus.CONFLICT,
 					"Estado inconsistente en las líneas de entrega");
@@ -732,6 +729,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		deliveryLineRepository.saveAll(deliveryLines);
 		movementRepository.saveAll(movements);
+		movementDomainService.deleteManyLatestMovements();
 
 		return deliveredByModel;
 	}

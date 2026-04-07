@@ -42,7 +42,7 @@ public class SubregionServiceImpl implements SubregionService{
     subregionDomainService.verifySubregionNameAvailableByRegionId(name, regionId);
 
         if (regionId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
     Region region = regionRepository.findById(
         regionId)
@@ -59,7 +59,7 @@ public class SubregionServiceImpl implements SubregionService{
   @Transactional(readOnly = true)
   public List<SubregionResponse> findAllSubregionsByRegionId(Long regionId) {
         if (regionId == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     List<Subregion> subregions = (List<Subregion>) subregionRepository.findAllByRegionId(regionId);
@@ -74,7 +74,7 @@ public class SubregionServiceImpl implements SubregionService{
   @Transactional(readOnly = true)
   public SubregionResponse findSubregionById(Long id) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     Subregion subregion = subregionRepository.findById(id)
@@ -87,7 +87,7 @@ public class SubregionServiceImpl implements SubregionService{
   @Transactional
   public void updateSubregionById(Long id, SubregionRequest subregionRequest) {
     if (id == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     if (id == 1L) {
@@ -101,7 +101,7 @@ public class SubregionServiceImpl implements SubregionService{
     Long idRegion = subregionRequest.getRegionId();
 
     if (idRegion == null) {
-      throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
     subregionDomainService.verifySubregionNameAvailableByRegionIdExcludingId(name, idRegion, id);
