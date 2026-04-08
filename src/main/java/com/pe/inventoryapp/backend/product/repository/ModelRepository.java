@@ -1,83 +1,91 @@
 package com.pe.inventoryapp.backend.product.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 
-public interface ModelRepository extends JpaRepository<Model, Long> {
+// Para implementar un Specification, añade "JpaSpecificationExecutor" seguido del nombre de la entidad
+public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecificationExecutor<Model> {
 
+  //* INVESTIGAR SOBRE SPECIFICATION EN SPRING BOOT
+
+  // ESTO ES UNA MALA PRACTICA EN SISTEMAS GRANDES
   // Query personalizado para buscar productos mediante parametros
-  @Query("""
-          SELECT m
-          FROM Model m
-          JOIN m.product p
-          WHERE (
-            :keyword IS NULL OR
-            LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-            LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-          )
-          AND (:minStock IS NULL OR m.totalQuantityAvailable >= :minStock)
-          AND (:maxStock IS NULL OR m.totalQuantityAvailable <= :maxStock)
-          AND (:minEntryDate IS NULL OR m.entryDate >= :minEntryDate)
-          AND (:maxEntryDate IS NULL OR m.entryDate <= :maxEntryDate)
-          AND (:status IS NULL OR m.status = :status)
-          AND (:categoryId IS NULL OR p.category.id = :categoryId)
-          AND (:typeId IS NULL OR p.type.id = :typeId)
-          ORDER BY m.id DESC
-      """)
-  Page<Model> findAllByParams(
-      Pageable pageable,
-      @Param("keyword") String keyword,
-      @Param("minStock") Integer minStock,
-      @Param("maxStock") Integer maxStock,
-      @Param("minEntryDate") LocalDate minEntryDate,
-      @Param("maxEntryDate") LocalDate maxEntryDate,
-      @Param("status") Boolean status,
-      @Param("categoryId") Long categoryId,
-      @Param("typeId") Long typeId);
+  // @Query("""
+  //         SELECT m
+  //         FROM Model m
+  //         JOIN m.product p
+  //         WHERE (
+  //           :keyword IS NULL OR
+  //           LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+  //           LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+  //         )
+  //         AND (:minStock IS NULL OR m.totalQuantityAvailable >= :minStock)
+  //         AND (:maxStock IS NULL OR m.totalQuantityAvailable <= :maxStock)
+  //         AND (:minEntryDate IS NULL OR m.entryDate >= :minEntryDate)
+  //         AND (:maxEntryDate IS NULL OR m.entryDate <= :maxEntryDate)
+  //         AND (:status IS NULL OR m.status = :status)
+  //         AND (:categoryId IS NULL OR p.category.id = :categoryId)
+  //         AND (:typeId IS NULL OR p.type.id = :typeId)
+  //         ORDER BY m.id DESC
+  //     """)
+  // Page<Model> findAllByParams(
+  //     Pageable pageable,
+  //     @Param("keyword") String keyword,
+  //     @Param("minStock") Integer minStock,
+  //     @Param("maxStock") Integer maxStock,
+  //     @Param("minEntryDate") LocalDate minEntryDate,
+  //     @Param("maxEntryDate") LocalDate maxEntryDate,
+  //     @Param("status") Boolean status,
+  //     @Param("categoryId") Long categoryId,
+  //     @Param("typeId") Long typeId);
+
+
+  // En lugar de un Query complejo, se tiene que utilizar un Specification 
+
+
+
+
+
 
   // Query para listar todos los modelos y productos que esten activos, sin parametros
-  @Query("""
-          SELECT m
-          FROM Model m
-          JOIN m.product p
-          WHERE (
-            :keyword IS NULL OR
-            LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-            LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-          )
-          AND m.status = TRUE AND p.status = TRUE
-          ORDER BY m.id DESC
-      """)
-  Page<Model> findAllActivesByName(
-      Pageable pageable,
-      @Param("keyword") String keyword);
+  // @Query("""
+  //         SELECT m
+  //         FROM Model m
+  //         JOIN m.product p
+  //         WHERE (
+  //           :keyword IS NULL OR
+  //           LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+  //           LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+  //         )
+  //         AND m.status = TRUE AND p.status = TRUE
+  //         ORDER BY m.id DESC
+  //     """)
+  // Page<Model> findAllActivesByName(
+  //     Pageable pageable,
+  //     @Param("keyword") String keyword);
 
 
 
   // Lista de los primeros 10 modelos que coincidan con el parametro
   // El producto y el modelo deben sus estados en true
-
-  @Query("""
-      SELECT m 
-      FROM Model m 
-      JOIN m.product p
-      WHERE m.status = true AND p.status = true
-      AND (
-        :keyword IS NULL OR 
-        LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-        LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-      )
-      ORDER BY m.id DESC LIMIT 10
-      """)
-  List<Model> findAllFirstTenModelsByParams(@Param("keyword") String keyword);
+  // @Query("""
+  //     SELECT m 
+  //     FROM Model m 
+  //     JOIN m.product p
+  //     WHERE m.status = true AND p.status = true
+  //     AND (
+  //       :keyword IS NULL OR 
+  //       LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+  //       LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+  //     )
+  //     ORDER BY m.id DESC LIMIT 10
+  //     """)
+  // List<Model> findAllFirstTenModelsByParams(@Param("keyword") String keyword);
 
 
   // Listar todos los modelos que pertenecen a un producto

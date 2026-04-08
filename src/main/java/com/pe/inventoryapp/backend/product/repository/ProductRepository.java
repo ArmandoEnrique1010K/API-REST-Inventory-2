@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 
 import com.pe.inventoryapp.backend.product.model.entity.Product;
 
+// Si un query tiene al menos 4 filtros simples, sin JOINs explicitos complejos o sin logica avanzada (GROUP BY, HAVING)
+// No necesita un Specification, pero si llegara a pasar los 10000 registros, si seria necesario implementar un Specification
 public interface ProductRepository extends JpaRepository<Product, Long> {
   @Query("""
       SELECT p

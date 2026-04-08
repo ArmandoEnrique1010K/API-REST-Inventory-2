@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +29,7 @@ import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
 import com.pe.inventoryapp.backend.product.repository.TypeRepository;
+import com.pe.inventoryapp.backend.product.repository.specifications.ModelSpecifications;
 
 @Service
 public class ModelServiceImpl implements ModelService {
@@ -113,8 +117,31 @@ public class ModelServiceImpl implements ModelService {
       throw new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe");
     }
 
-    Page<Model> models = modelRepository.findAllByParams(pageable, keyword, minStock, maxStock, minEntryDate,
-        maxEntryDate, status, categoryId, typeId);
+    // No utilizar una query
+    // Page<Model> models = modelRepository.findAllByParams(pageable, keyword,
+    // minStock, maxStock, minEntryDate,
+    // maxEntryDate, status, categoryId, typeId);
+
+    // Sino un specification
+
+    // El metodo where esta deprecado, en su lugar utiliza unrestricted
+    // Specification<Model> spec = Specification.where(null);
+    Specification<Model> spec = Specification.unrestricted();
+
+    spec = spec.and(ModelSpecifications.keywordContains(keyword));
+    spec = spec.and(ModelSpecifications.stockBetween(minStock, maxStock));
+    spec = spec.and(ModelSpecifications.entryDateBetween(minEntryDate, maxEntryDate));
+    spec = spec.and(ModelSpecifications.hasStatus(status));
+    spec = spec.and(ModelSpecifications.hasCategory(categoryId));
+    spec = spec.and(ModelSpecifications.hasType(typeId));
+
+    // Para ordenar los elementos de forma descendente de acuerdo al ID se utiliza el siguiente codigo
+    Pageable sortedPageable = PageRequest.of(
+    pageable.getPageNumber(),
+    pageable.getPageSize(),
+    Sort.by("id").descending());
+
+    Page<Model> models = modelRepository.findAll(spec, sortedPageable);
 
     List<ModelListResponse> result = models.getContent().stream().map(
         model -> ModelMapper.builder()
@@ -135,7 +162,18 @@ public class ModelServiceImpl implements ModelService {
 
   @Override
   public PageResponse<ModelListSearchResponse> searchAllModelsByName(Pageable pageable, String keyword) {
-    Page<Model> models = modelRepository.findAllActivesByName(pageable, keyword);
+    // Page<Model> models = modelRepository.findAllActivesByName(pageable, keyword);
+
+    // Otra forma de concatenar especificaciones
+    Specification<Model> spec = (ModelSpecifications.isActive())
+        .and(ModelSpecifications.keywordContains(keyword));
+
+    Pageable sortedPageable = PageRequest.of(
+        pageable.getPageNumber(),
+        pageable.getPageSize(),
+        Sort.by("id").descending());
+
+    Page<Model> models = modelRepository.findAll(spec, sortedPageable);
 
     List<ModelListSearchResponse> result = models.getContent().stream().map(
         model -> ModelMapper.builder()
@@ -178,7 +216,8 @@ public class ModelServiceImpl implements ModelService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
 
     // if (model.isStatus() == false) {
-    //   throw new BusinessException(ResponseStatus.CONFLICT, "El modelo se encuentra inactivo");
+    // throw new BusinessException(ResponseStatus.CONFLICT, "El modelo se encuentra
+    // inactivo");
     // }
 
     return ModelMapper.builder().setModel(model).buildModelResponse();
@@ -228,12 +267,11 @@ public class ModelServiceImpl implements ModelService {
       // 3. Guardar nueva imagen
       model.setImageUrl(image.imageUrl());
       model.setPublicImageId(image.publicId());
-      System.out.println("SE SUBIO UNA IMAGEN A CLOUDINARY, ELIMINANDO LA IMAGEN ANTERIOR Y REEMPLAZANDOLO POR LA NUEVA");
+      System.out
+          .println("SE SUBIO UNA IMAGEN A CLOUDINARY, ELIMINANDO LA IMAGEN ANTERIOR Y REEMPLAZANDOLO POR LA NUEVA");
     } else {
       System.out.println("EL USUARIO NO SUBIO UNA IMAGEN, SE MANTIENE LA IMAGEN ANTERIOR");
     }
-
-
 
     model.setName(newName);
     // model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
@@ -253,13 +291,14 @@ public class ModelServiceImpl implements ModelService {
     Model model = modelRepository.findById(id).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
 
-      // Verificar si el producto esta activo, si no esta activo debe devolver una excepción
-      Product product = productRepository.findById(model.getProduct().getId())
+    // Verificar si el producto esta activo, si no esta activo debe devolver una
+    // excepción
+    Product product = productRepository.findById(model.getProduct().getId())
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
-      if (!product.isStatus()) {
-        throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra inactivo");
-      }
+    if (!product.isStatus()) {
+      throw new BusinessException(ResponseStatus.CONFLICT, "El producto se encuentra inactivo");
+    }
 
     model.setStatus(!model.isStatus());
     modelRepository.save(model);
@@ -267,8 +306,22 @@ public class ModelServiceImpl implements ModelService {
 
   @Override
   public List<ModelListSearchFirstTenResponse> findFirstTenModelsByKeyword(String keyword) {
-    List<Model> models = (List<Model>) modelRepository.findAllFirstTenModelsByParams(keyword);
-    return models.stream().map(model -> ModelMapper.builder().setModel(model).buildModelListSearchFirstTenResponse()).collect(Collectors.toList());
+    // List<Model> models = (List<Model>) modelRepository.findAllFirstTenModelsByParams(keyword);
+
+    // Limita a 10 los resultados
+    // Y tambien se ordena por id de forma descendente
+    Pageable pageable = PageRequest.of(
+        0,
+        10,
+        Sort.by("id").descending());
+
+    Specification<Model> spec = (ModelSpecifications.isActive())
+        .and(ModelSpecifications.keywordContains(keyword));
+
+    List<Model> models = modelRepository.findAll(spec, pageable).getContent();
+
+    return models.stream().map(model -> ModelMapper.builder().setModel(model).buildModelListSearchFirstTenResponse())
+        .collect(Collectors.toList());
   }
 
 }

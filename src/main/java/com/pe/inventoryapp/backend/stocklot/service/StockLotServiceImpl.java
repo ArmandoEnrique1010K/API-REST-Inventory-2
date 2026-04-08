@@ -4,7 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +31,7 @@ import com.pe.inventoryapp.backend.stocklot.model.response.StockLotListResponse;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotSameProductListResponse;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.stocklot.repository.StockLotRepository;
+import com.pe.inventoryapp.backend.stocklot.repository.specifications.StockLotSpecifications;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
@@ -49,7 +53,7 @@ public class StockLotServiceImpl implements StockLotService {
       MovementRepository movementRepository,
       ModelRepository modelRepository,
       StockLotDomainService stockLotDomainService,
-    MovementDomainService movementDomainService) {
+      MovementDomainService movementDomainService) {
     this.stockLotRepository = stockLotRepository;
     this.companyRepository = companyRepository;
     this.userRepository = userRepository;
@@ -96,7 +100,8 @@ public class StockLotServiceImpl implements StockLotService {
 
     // Guarda el nuevo lote de stock
     StockLot stockLot = new StockLot();
-    stockLot.setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName(), company.getName()));
+    stockLot
+        .setBatch(stockLotDomainService.resolveBatch(model.getProduct().getName(), model.getName(), company.getName()));
     stockLot.setQuantityReceived(quantity);
     stockLot.setQuantityAvailable(quantity);
 
@@ -113,8 +118,10 @@ public class StockLotServiceImpl implements StockLotService {
     stockLotRepository.save(stockLot);
 
     // Actualiza las cantidades del stock
-    // Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByModelId(modelId);
-    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(modelId);
+    // Integer sumatoryStockQuantityReceived =
+    // stockLotRepository.sumQuantityReceivedByModelId(modelId);
+    // Integer sumatoryStockQuantityAvailable =
+    // stockLotRepository.sumQuantityAvailableByModelId(modelId);
 
     // model.setTotalQuantityReceived(sumatoryStockQuantityReceived);
     // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
@@ -124,7 +131,8 @@ public class StockLotServiceImpl implements StockLotService {
 
     modelRepository.save(model);
 
-    // MOVIMIENTO DE AGREGAR STOCK A UN MODELO DE PRODUCTO EXISTENTE EN EL ALMACEN (TIPO
+    // MOVIMIENTO DE AGREGAR STOCK A UN MODELO DE PRODUCTO EXISTENTE EN EL ALMACEN
+    // (TIPO
     // MOVEMENT_STOCK_RECEIVE)
     Movement movement = new Movement();
 
@@ -161,10 +169,31 @@ public class StockLotServiceImpl implements StockLotService {
       Long typeId,
       Long modelId,
       Pageable pageable) {
-    Page<StockLot> stockLots = stockLotRepository.findAllByParams(minQuantityReceived, 
-        maxQuantityReceived, 
-        minQuantityAvailable, maxQuantityAvailable, minCreatedAt, maxCreatedAt, keyword, 
-        companyId, categoryId, typeId, modelId,pageable);
+    // Page<StockLot> stockLots =
+    // stockLotRepository.findAllByParams(minQuantityReceived,
+    // maxQuantityReceived,
+    // minQuantityAvailable, maxQuantityAvailable, minCreatedAt, maxCreatedAt,
+    // keyword,
+    // companyId, categoryId, typeId, modelId,pageable);
+
+    Specification<StockLot> spec = Specification.unrestricted();
+    spec = spec.and(StockLotSpecifications.quantityReceivedBeetween(minQuantityReceived, maxQuantityReceived));
+    spec = spec.and(StockLotSpecifications.quantityAvailableBeetween(minQuantityAvailable, maxQuantityAvailable));
+    spec = spec.and(StockLotSpecifications.createdAtBetween(minCreatedAt, maxCreatedAt));
+    spec = spec.and(StockLotSpecifications.keywordContains(keyword));
+    spec = spec.and(StockLotSpecifications.hasCompany(companyId));
+    spec = spec.and(StockLotSpecifications.hasCategory(categoryId));
+    spec = spec.and(StockLotSpecifications.hasType(typeId));
+    spec = spec.and(StockLotSpecifications.hasModel(modelId));
+    spec = spec.and(StockLotSpecifications.isNotZeroStock());
+
+    // Ordenar los elementos de acuerdo al campo de createdAt de forma descendente
+    Pageable sortedPageable = PageRequest.of(
+    pageable.getPageNumber(),
+    pageable.getPageSize(),
+    Sort.by("createdAt").descending()
+);
+    Page<StockLot> stockLots = stockLotRepository.findAll(sortedPageable);
 
     List<StockLotListResponse> stockLotListResponse = stockLots.getContent().stream()
         .map(stockLot -> StockLotMapper.builder().setStockLot(stockLot).buildStockLotListResponse()).toList();
@@ -181,15 +210,17 @@ public class StockLotServiceImpl implements StockLotService {
     return pageResponse;
   }
 
-  // ESTE METODO SE UTILIZA EN LA LISTA DE LOTES DE STOCK QUE PERTENEZCAN A UN MISMO PRODUCTO, EXCEPTUANDO EL MISMO PRODUCTO
+  // ESTE METODO SE UTILIZA EN LA LISTA DE LOTES DE STOCK QUE PERTENEZCAN A UN
+  // MISMO PRODUCTO, EXCEPTUANDO EL MISMO PRODUCTO
   @Override
   @Transactional(readOnly = true)
   public List<StockLotSameProductListResponse> findAllStockLotsExceptOneStockLotByModelId(Long modelId, Long companyId,
       Long stockLotId) {
-    List<StockLot> stockLots = stockLotRepository.findAllByModelIdAndCompanyIdAndExcludeOneStockLotByIdAndZeroStockIsFalse(
-        modelId,
-        companyId,
-        stockLotId);
+    List<StockLot> stockLots = stockLotRepository
+        .findAllByModelIdAndCompanyIdAndExcludeOneStockLotByIdAndZeroStockIsFalse(
+            modelId,
+            companyId,
+            stockLotId);
     return stockLots.stream()
         .map(stockLot -> StockLotMapper.builder().setStockLot(stockLot).buildStockLotSameProductListResponse())
         .toList();
@@ -235,7 +266,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Model model = modelRepository.findById(
         modelId).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+            () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
 
     // Se debe pasar la cantidad en la que se quiere incrementar el stock
     int newQuantityReceived = stockLot.getQuantityReceived() + quantity;
@@ -248,8 +279,10 @@ public class StockLotServiceImpl implements StockLotService {
     stockLotRepository.save(stockLot);
 
     // Actualiza las cantidades del stock
-    // Integer sumatoryStockQuantityReceived = stockLotRepository.sumQuantityReceivedByModelId(modelId);
-    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(modelId);
+    // Integer sumatoryStockQuantityReceived =
+    // stockLotRepository.sumQuantityReceivedByModelId(modelId);
+    // Integer sumatoryStockQuantityAvailable =
+    // stockLotRepository.sumQuantityAvailableByModelId(modelId);
 
     // model.setTotalQuantityReceived(sumatoryStockQuantityReceived);
     // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
@@ -316,12 +349,13 @@ public class StockLotServiceImpl implements StockLotService {
 
     Model model = modelRepository.findById(
         idModel).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+            () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
 
     // Actualiza las cantidades del stock
-    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(idModel);
+    // Integer sumatoryStockQuantityAvailable =
+    // stockLotRepository.sumQuantityAvailableByModelId(idModel);
     // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
-    
+
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
     modelRepository.save(model);
 
@@ -397,11 +431,12 @@ public class StockLotServiceImpl implements StockLotService {
 
     stockLotRepository.save(stockLot);
 
-    Model model  = modelRepository.findById(
+    Model model = modelRepository.findById(
         idModel).orElseThrow(
-        () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+            () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
 
-    // Integer sumatoryStockQuantityAvailable = stockLotRepository.sumQuantityAvailableByModelId(idModel);
+    // Integer sumatoryStockQuantityAvailable =
+    // stockLotRepository.sumQuantityAvailableByModelId(idModel);
     // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
 
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
