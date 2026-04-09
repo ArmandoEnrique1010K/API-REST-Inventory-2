@@ -46,7 +46,7 @@ public class User  {
 
   private boolean active;
 
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
       @UniqueConstraint(columnNames = { "user_id", "role_id" })
   })

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ForgotPasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
+import com.pe.inventoryapp.backend.auth.model.response.CurrentSessionResponse;
 import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
@@ -17,8 +18,7 @@ import com.pe.inventoryapp.backend.common.model.response.CommonResponseWithSecre
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
-import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -33,14 +33,11 @@ public class AuthController {
   private final AuthService authService;
   private final ResponseService responseService;
   private final ValidationService validationService;
-  private final AuthenticationContextService authenticationContextService;
 
-  public AuthController(AuthService authService, ResponseService responseService, ValidationService validationService,
-      AuthenticationContextService authenticationContextService) {
+  public AuthController(AuthService authService, ResponseService responseService, ValidationService validationService) {
     this.authService = authService;
     this.responseService = responseService;
     this.validationService = validationService;
-    this.authenticationContextService = authenticationContextService;
   }
 
   // Nota: El endpoint POST "/" ya esta siendo manejado por Spring Security
@@ -99,18 +96,20 @@ public class AuthController {
 
   // VERIFICA SI HAY UNA SESION ACTIVA
   // @GetMapping("verify-session")
-  // public ResponseEntity<CommonResponse> verifySession(Authentication authentication) {
-  //   CommonResponse response = null;
+  // public ResponseEntity<CommonResponse> verifySession(Authentication
+  // authentication) {
+  // CommonResponse response = null;
 
-  //   if (authentication == null || !authentication.isAuthenticated()) {
-  //     response = responseService.generateErrorResponse(ResponseStatus.SUCCESS,
-  //         "No hay una sesión activa");
-  //     return ResponseEntity.status(response.status()).body(response);
-  //   } else {
-  //     response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS, "Si hay una sesión activa");
-  //   }
+  // if (authentication == null || !authentication.isAuthenticated()) {
+  // response = responseService.generateErrorResponse(ResponseStatus.SUCCESS,
+  // "No hay una sesión activa");
+  // return ResponseEntity.status(response.status()).body(response);
+  // } else {
+  // response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
+  // "Si hay una sesión activa");
+  // }
 
-  //   return ResponseEntity.status(response.status()).body(response);
+  // return ResponseEntity.status(response.status()).body(response);
   // }
 
   // * OBTIENE LA SESION ACTUAL DEL USUARIO, SI NO HAY SESION DEVUELVE UN ERROR
@@ -119,18 +118,28 @@ public class AuthController {
   @GetMapping("/current-session")
   public ResponseEntity<?> getCurrentSession(Authentication authentication, HttpServletResponse httpServletResponse) {
 
-
-    // //* ESTO NUNCA PASARA PORQUE SI O SI SE REQUIERE QUE EL USUARIO INICIE SESION EN LA API REST */
+    // //* ESTO NUNCA PASARA PORQUE SI O SI SE REQUIERE QUE EL USUARIO INICIE SESION
+    // EN LA API REST */
     // if (authentication == null || !authentication.isAuthenticated()) {
-    //   DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
-    //   authService.logout(httpServletResponse);
-    //   return ResponseEntity.status(response.status()).body(response);
+    // DataResponse<DetailUserResponse> response =
+    // responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+    // authService.logout(httpServletResponse);
+    // return ResponseEntity.status(response.status()).body(response);
     // }
 
-    Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    DetailUserResponse user = authService.getCurrentSession(userId);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-    DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
+   CurrentSessionResponse responseUser = CurrentSessionResponse.builder()
+       .email(userPrincipal.getUsername())
+       .roles(
+           userPrincipal.getAuthorities()
+               .stream()
+               .map(a -> a.getAuthority())
+               .toList())
+       .build();
+
+    DataResponse<CurrentSessionResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        responseUser);
     return ResponseEntity.status(response.status()).body(response);
   }
 

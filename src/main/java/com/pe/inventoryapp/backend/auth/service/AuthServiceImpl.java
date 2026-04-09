@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
   @Override
   @Transactional(readOnly = true)
   public Long findUserIdByEmail(String email) {
-    return userRepository.findByEmail(email)
+    return userRepository.findByEmailWithRoles(email)
         .map(User::getId)
         .orElseThrow(() -> new UsernameNotFoundException(
           // "No se encuentra un usuario con email: " + email + " en el sistema"
@@ -72,7 +72,7 @@ public class AuthServiceImpl implements AuthService {
     String requestId = UUID.randomUUID().toString();
 
     // DEVUELVE UN ERROR FALSO, SIMULA QUE EL USUARIO EXISTE EN EL SISTEMA A PESAR DE QUE NO EXISTA, PARA EVITAR FILTRAR USUARIOS POR SU EMAIL
-    User user = userRepository.findByEmail(email).orElse(null);
+    User user = userRepository.findByEmailWithRoles(email).orElse(null);
     // No debe devolver una excepción, ya que no se quiere filtrar usuarios por su email, por lo que se simula un proceso exitoso aunque el usuario no exista
 
     if (user == null) {
@@ -213,23 +213,6 @@ public class AuthServiceImpl implements AuthService {
       return HexFormat.of().formatHex(hash);
     } catch (Exception e) {
       throw new IllegalStateException("Hash error");
-    }
-  }
-
-  @Override
-  @Transactional(readOnly = true)
-  public DetailUserResponse getCurrentSession(Long id) {
-    if (id == null) {
-      return UserMapper.builder()
-          .buildDetailUserResponse();
-    } else {
-      User user = userRepository.findById(id)
-          .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "Usuario no encontrado"));
-
-      return UserMapper.builder()
-          .setUser(user)
-          .buildDetailUserResponse();
-
     }
   }
 }

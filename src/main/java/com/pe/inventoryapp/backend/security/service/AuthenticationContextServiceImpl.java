@@ -15,7 +15,8 @@ public class AuthenticationContextServiceImpl implements AuthenticationContextSe
     if (authentication == null) {
       throw new BusinessException(ResponseStatus.FORBIDDEN, "El usuario no esta autenticado");
     }
-
+    
+    System.out.println("LLAMANDO A BD 2");
     String userId = (String) authentication.getPrincipal();
     return Long.parseLong(userId);
   }

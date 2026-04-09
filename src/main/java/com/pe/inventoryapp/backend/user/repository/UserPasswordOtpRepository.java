@@ -11,6 +11,7 @@ import com.pe.inventoryapp.backend.auth.model.entity.UserPasswordOtp;
 import jakarta.transaction.Transactional;
 
 public interface UserPasswordOtpRepository extends JpaRepository<UserPasswordOtp, Long> {
+  
   Optional<UserPasswordOtp> findByRequestId(String requestId);
 
   @Modifying

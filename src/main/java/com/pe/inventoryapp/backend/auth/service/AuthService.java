@@ -17,5 +17,4 @@ public interface AuthService {
 
   void logout(HttpServletResponse response);
 
-  DetailUserResponse getCurrentSession(Long userId);
 }

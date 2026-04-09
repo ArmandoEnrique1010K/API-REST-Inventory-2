@@ -30,8 +30,8 @@ public class MailerSendDomainService  {
     String testDomain = dotenv.get("MAILERSEND_TEST_DOMAIN");
 
     // Comprueba el contenido de las variables de entorno
-    System.out.println(apiKey);
-    System.out.println(testDomain);
+    // System.out.println(apiKey);
+    // System.out.println(testDomain);
 
     ms.setToken(apiKey);
 

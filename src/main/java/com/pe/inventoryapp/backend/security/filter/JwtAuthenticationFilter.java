@@ -20,7 +20,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.auth.model.request.LoginRequest;
-import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.GlobalExceptionHandler;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
@@ -40,12 +39,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
   // No se utiliza @Autowired, ya que es un constructor
   private final AuthenticationManager authenticationManager;
-  private final AuthService authService;
   private final ResponseService responseService;
 
-  public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthService authService, ResponseService responseService) {
+  public JwtAuthenticationFilter(AuthenticationManager authenticationManager, ResponseService responseService) {
     this.authenticationManager = authenticationManager;
-    this.authService = authService;
     this.responseService = responseService;
     setFilterProcessesUrl("/api/auth/login");
   }
@@ -77,10 +74,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     // Se utiliza la entidad UserPrincipal en lugar de User de
     // org.springframework.security.core.userdetails.User
-    String username = ((UserPrincipal) authResult.getPrincipal())
-        .getUsername();
+    // String username = ((UserPrincipal) authResult.getPrincipal())
+    //     .getUsername();
 
-    Long id_user = authService.findUserIdByEmail(username);
+    // Long id_user = authService.findUserIdByEmail(username);
+    UserPrincipal userPrincipal = (UserPrincipal) authResult.getPrincipal();
+    Long id_user = userPrincipal.getId();
 
     // Generación de claims
     Map<String, Object> claims = new HashMap<>();
@@ -88,7 +87,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     claims.put("authorities", authResult.getAuthorities().stream()
         .map(GrantedAuthority::getAuthority)
         .toList());
-
+    claims.put("email", userPrincipal.getUsername());
     claims.put("id", id_user);
 
     // Generación del token

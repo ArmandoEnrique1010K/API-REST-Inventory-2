@@ -11,13 +11,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.csrf.CsrfTokenRequestHandler;
 
-import com.pe.inventoryapp.backend.auth.service.AuthService;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.security.exception.CustomAccessDeniedHandler;
 import com.pe.inventoryapp.backend.security.exception.CustomAuthenticationEntryPoint;
 import com.pe.inventoryapp.backend.security.filter.JwtAuthenticationFilter;
 import com.pe.inventoryapp.backend.security.filter.JwtValidationFilter;
-import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -29,19 +27,15 @@ import java.util.List;
 public class SecurityConfig {
 
 	private final AuthenticationConfiguration authenticationConfiguration;
-	private final UserRepository userRepository;
-	private final AuthService authService;
 	private final ResponseService responseService;
 	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-	public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, UserRepository userRepository,
-			AuthService authService, ResponseService responseService,
+	public SecurityConfig(AuthenticationConfiguration authenticationConfiguration,
+			 ResponseService responseService,
 			CustomAccessDeniedHandler customAccessDeniedHandler,
 			CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
 		this.authenticationConfiguration = authenticationConfiguration;
-		this.userRepository = userRepository;
-		this.authService = authService;
 		this.responseService = responseService;
 		this.customAccessDeniedHandler = customAccessDeniedHandler;
 		this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
@@ -309,9 +303,9 @@ public class SecurityConfig {
 						// .requestMatchers(HttpMethod.GET, "/api/csrf").permitAll()
 						.anyRequest().denyAll())
 				.addFilter(new JwtAuthenticationFilter(
-						authenticationManager(), authService, responseService))
+						authenticationManager(), responseService))
 				.addFilter(new JwtValidationFilter(
-						authenticationManager, responseService, userRepository))
+						authenticationManager, responseService))
 				
 
 				// Configuracion de CSRF
