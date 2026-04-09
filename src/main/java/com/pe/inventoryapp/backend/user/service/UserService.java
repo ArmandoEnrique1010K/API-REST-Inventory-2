@@ -14,9 +14,9 @@ import com.pe.inventoryapp.backend.user.model.response.RolesByUserResponse;
 public interface UserService {
   void registerUser(RegisterRequest registerRequest);
 
-  PageResponse<ListUsersResponse> findAllUsersByParams(String name, List<Long> roleIds,  Pageable pageable);
+  PageResponse<ListUsersResponse> findAllUsersByParams(String keyword, List<Long> roleIds,  Pageable pageable);
 
-  List<ListUsersByRoleUserResponse> findFirstTenUsersByName(String name);
+  List<ListUsersByRoleUserResponse> findFirstTenUsersByName(String keyword);
 
   RolesByUserResponse getRolesByUser(Long idUser);
 

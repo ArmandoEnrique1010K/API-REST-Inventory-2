@@ -6,7 +6,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetai
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryline.repository.StockLot_DeliveryLineRepository;
+import com.pe.inventoryapp.backend.deliveryline.repository.specifications.DeliveryLineSpecifications;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.Model_DeliveryOrder;
@@ -84,7 +88,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       DeliveryOrderDomainService deliveryOrderDomainService,
       StockLotDomainService stockLotDomainService,
       MovementDomainService movementDomainService,
-    Model_DeliveryOrderDomainService model_DeliveryOrderDomainService) {
+      Model_DeliveryOrderDomainService model_DeliveryOrderDomainService) {
     this.deliveryLineRepository = deliveryLineRepository;
     this.modelRepository = modelRepository;
     this.locationRepository = locationRepository;
@@ -127,10 +131,11 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(deliveryOrderId).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-
-    // NO PUEDES AGREGAR NUEVAS LINEAS DE ENTREGA A UNA ORDEN DE ENTREGA QUE FUE ENTREGADA O CANCELADA
-    if (deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_DELIVERED) || 
-    deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_CANCELED) || deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_PARTIALLY_DELIVERED)) {
+    // NO PUEDES AGREGAR NUEVAS LINEAS DE ENTREGA A UNA ORDEN DE ENTREGA QUE FUE
+    // ENTREGADA O CANCELADA
+    if (deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_DELIVERED) ||
+        deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_CANCELED)
+        || deliveryOrder.getOrderStatus().equals(OrderStatus.ORDER_PARTIALLY_DELIVERED)) {
       throw new BusinessException(
           ResponseStatus.CONFLICT,
           "No puedes agregar líneas a una orden que ya fue procesada o cerrada");
@@ -253,9 +258,30 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           "La orden de entrega no existe");
     }
 
-    Page<DeliveryLine> deliveryLines = deliveryLineRepository.searchAllByDeliveryOrderIdAndParams(
-        deliveryOrderId, minRequiredQuantity, maxRequiredQuantity, minLimitDate,
-        maxLimitDate, lineStatus, location, subregionId, regionId, modelId, pageable);
+    // Page<DeliveryLine> deliveryLines =
+    // deliveryLineRepository.searchAllByDeliveryOrderIdAndParams(
+    // deliveryOrderId, minRequiredQuantity, maxRequiredQuantity, minLimitDate,
+    // maxLimitDate, lineStatus, location, subregionId, regionId, modelId,
+    // pageable);
+
+    Specification<DeliveryLine> spec = (DeliveryLineSpecifications.hasDeliveryOrder(deliveryOrderId))
+        .and(DeliveryLineSpecifications.requiredQuantityBetween(minRequiredQuantity, maxRequiredQuantity))
+        .and(DeliveryLineSpecifications.limitDateBetween(minLimitDate, maxLimitDate))
+        .and(DeliveryLineSpecifications.hasLineStatus(lineStatus))
+        .and(DeliveryLineSpecifications.locationContains(location))
+        .and(DeliveryLineSpecifications.hasSubregion(subregionId))
+        .and(DeliveryLineSpecifications.hasRegion(regionId))
+        .and(DeliveryLineSpecifications.hasModel(modelId))
+        .and(DeliveryLineSpecifications.isNotCanceled());
+
+    Pageable sortedPageable = PageRequest.of(
+        pageable.getPageNumber(),
+        pageable.getPageSize(),
+        Sort.by("id").descending());
+
+    Page<DeliveryLine> deliveryLines = deliveryLineRepository.findAll(
+        spec,
+        sortedPageable);
 
     List<DeliveryLineListResponse> result = deliveryLines.getContent().stream().map(
         deliveryLine -> DeliveryLineMapper.builder()
@@ -288,11 +314,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    // SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED,  DEBE DEVOLVER UNA EXCEPCION
+    // SI LA LINEA DE ENTREGA TIENE EL ESTADO DE MOVEMENT_LINE_CANCELED, DEBE
+    // DEVOLVER UNA EXCEPCION
     if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
-    throw new BusinessException(
-    ResponseStatus.CONFLICT,
-    "La linea de entrega se encuentra cancelada");
+      throw new BusinessException(
+          ResponseStatus.CONFLICT,
+          "La linea de entrega se encuentra cancelada");
     }
 
     return DeliveryLineMapper.builder().setDeliveryLine(deliveryLine).buildDeliveryLineDetailsResponse();
@@ -496,7 +523,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-
     if (deliveryLine.getLineStatus() == LineStatus.LINE_CANCELED) {
       throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "La linea de entrega ya ha sido cancelada");
     }
@@ -508,13 +534,11 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           "No se puede cancelar una línea finalizada");
     }
 
-
     // La cantidad que esta preparada se le considera como cancelada
     Integer quantityCanceled = deliveryLine.getDeliveredQuantity();
 
     // DEVOLVER A STOCK Y GUARDAR LA NUEVA CANTIDAD
     returnStockToInventory(deliveryLine, quantityCanceled);
-
 
     // deliveryLine.setPendingQuantity(0);
     // deliveryLine.setDeliveredQuantity(0);
@@ -522,7 +546,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setLineStatus(LineStatus.LINE_CANCELED);
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
-
 
     // RECALCULAR LAS CANTIDADES TOTALES EN LA RELACION DE MODEL - DELIVERY ORDER
     model_DeliveryOrderDomainService.recalculateSummaries(deliveryOrder.getId(), deliveryLine.getModel().getId());
@@ -533,16 +556,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Operacion para verificar si todas las lineas de entrega de una orden de
     // entrega han sido entregadas, es decir si todas tiene el estado READY
 
-
-
     // if (deliveryLineRepository.allLinesAreCanceled(deliveryOrderId)) {
-    //   deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
     // } else {
-    //   if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
-    //     deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
-    //   } else {
-    //     deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
-    //   }
+    // if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+    // } else {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
+    // }
     // }
 
     boolean allCanceled = deliveryLineRepository.allLinesAreCanceled(deliveryOrderId);
@@ -562,12 +583,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     } else {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
-    
-
 
     deliveryOrderRepository.save(deliveryOrder);
-
-
 
     // NUEVO MOVIMIENTO DE CANCELACIÓN DE LINEA DE ENTREGA
     Movement movement = new Movement();
@@ -582,7 +599,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movementRepository.save(movement);
     movementDomainService.deleteLastestMovement();
   }
-
 
   // METODO AUXILIAR PARA DEVOLVER STOCK AL INVENTARIO
   private void returnStockToInventory(
@@ -603,7 +619,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     modelRepository.save(model);
   }
-
 
   // Método auxiliar para almacenar un lote de stock temporal con la cantidad
   // entregada de la linea de entrega que se esta cancelando, para luego ser
@@ -951,7 +966,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     }
 
     deliveryOrderRepository.save(deliveryOrder);
-
 
     // ---------------------------
     // AJUSTE DEL MODELO (INVENTARIO)

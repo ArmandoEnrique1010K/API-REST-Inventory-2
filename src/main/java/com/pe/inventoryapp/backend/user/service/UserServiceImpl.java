@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserRespon
 import com.pe.inventoryapp.backend.user.model.response.ListUsersResponse;
 import com.pe.inventoryapp.backend.user.model.response.RolesByUserResponse;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
+import com.pe.inventoryapp.backend.user.repository.specifications.UserSpecifications;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,11 +33,10 @@ public class UserServiceImpl implements UserService {
   private final PasswordEncoder passwordEncoder;
   private final UserDomainService userDomainService;
 
-  public UserServiceImpl (
-    UserRepository userRepository,
-    PasswordEncoder passwordEncoder,
-    UserDomainService userDomainService
-  ){
+  public UserServiceImpl(
+      UserRepository userRepository,
+      PasswordEncoder passwordEncoder,
+      UserDomainService userDomainService) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.userDomainService = userDomainService;
@@ -63,25 +66,37 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional(readOnly = true)
   public PageResponse<ListUsersResponse> findAllUsersByParams(
-    String name, List<Long> roleIds, Pageable pageable) {
+      String keyword, List<Long> roleIds, Pageable pageable) {
     Page<User> users = null;
 
-    // Si existe alguna busqueda por roles, debe asegurarse que busque por los roles seleccionados
+    // Si existe alguna busqueda por roles, debe asegurarse que busque por los roles
+    // seleccionados
     if (roleIds == null || roleIds.isEmpty()) {
-      users = userRepository.findAllByName(name, pageable);
+      Specification<User> spec = (UserSpecifications.keywordContains(keyword));
+
+      Pageable sortedPageable = PageRequest.of(
+          pageable.getPageNumber(),
+          pageable.getPageSize(),
+          Sort.by("id").descending());
+
+      users = userRepository.findAll(spec, sortedPageable);
     } else {
-      users = userRepository.findAllByParamsAndHavingRoles(
-          name,
-          roleIds,
-          roleIds.size(),
-          pageable);
+      Specification<User> spec = (UserSpecifications.keywordContains(keyword))
+          .and(UserSpecifications.isActive())
+          .and(UserSpecifications.hasExactRoles(roleIds));
+      Pageable sortedPageable = PageRequest.of(
+          pageable.getPageNumber(),
+          pageable.getPageSize(),
+          Sort.by("id").descending());
+
+      users = userRepository.findAll(spec, sortedPageable);
     }
 
     List<ListUsersResponse> result = users.getContent().stream()
-            .map(user -> UserMapper.builder()
-                .setUser(user)
-                .buildListUserResponse())
-            .toList();
+        .map(user -> UserMapper.builder()
+            .setUser(user)
+            .buildListUserResponse())
+        .toList();
 
     PageResponse<ListUsersResponse> pageResponse = new PageResponse<>(
         result,
@@ -90,24 +105,33 @@ public class UserServiceImpl implements UserService {
         users.getTotalElements(),
         users.getTotalPages(),
         users.isFirst(),
-        users.isLast()
-    );
+        users.isLast());
 
     return pageResponse;
   }
 
   @Override
-  public List<ListUsersByRoleUserResponse> findFirstTenUsersByName(String name) {
-    List<User> users = (List<User>) userRepository.findAllFirstTenUsersByName(name); 
-      
-    return users.stream().map(user -> UserMapper.builder().setUser(user).buildListUsersByRoleUserResponse()).collect(Collectors.toList());
+  public List<ListUsersByRoleUserResponse> findFirstTenUsersByName(String keyword) {
+
+    Pageable pageable = PageRequest.of(
+        0,
+        10,
+        Sort.by("id").descending());
+
+    Specification<User> spec = (UserSpecifications.keywordContains(keyword))
+        .and(UserSpecifications.isActive());
+
+    List<User> users = userRepository.findAll(spec, pageable).getContent();
+
+    return users.stream().map(user -> UserMapper.builder().setUser(user).buildListUsersByRoleUserResponse())
+        .collect(Collectors.toList());
   }
 
   @Override
   public RolesByUserResponse getRolesByUser(Long idUser) {
-        if (idUser == null) {
-          throw new BusinessException(ResponseStatus.BAD_REQUEST);
-        }
+    if (idUser == null) {
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
+    }
 
     User user = userRepository.findById(idUser)
         .orElseThrow(() -> new BusinessException(
@@ -118,8 +142,6 @@ public class UserServiceImpl implements UserService {
         .setUser(user)
         .buildRolesByUserResponse();
   }
-
-
 
   @Override
   public void updateUserRolesById(Long id, RolesRequest rolesRequest) {
@@ -162,18 +184,19 @@ public class UserServiceImpl implements UserService {
 
     User user = userRepository.findById(
         id_user).orElseThrow(
-        () -> new BusinessException(
-            ResponseStatus.NOT_FOUND,
-            "El usuario no existe"));
+            () -> new BusinessException(
+                ResponseStatus.NOT_FOUND,
+                "El usuario no existe"));
 
     User userLogged = userRepository.findById(
         id_authenticated_user).orElseThrow(
-        () -> new BusinessException(
-            ResponseStatus.NOT_FOUND,
-            "El usuario no existe"));
-    
+            () -> new BusinessException(
+                ResponseStatus.NOT_FOUND,
+                "El usuario no existe"));
+
     userDomainService
-        .verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")), id_user);
+        .verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")),
+            id_user);
 
     if (user.equals(userLogged)) {
       throw new BusinessException(
@@ -183,7 +206,5 @@ public class UserServiceImpl implements UserService {
     user.setActive(!user.isActive());
     userRepository.save(user);
   }
-
-
 
 }

@@ -11,7 +11,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
+import com.pe.inventoryapp.backend.deliveryline.service.DeliveryLineDomainService;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
@@ -31,6 +35,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderCli
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
+import com.pe.inventoryapp.backend.deliveryorder.repository.specifications.DeliveryOrderSpecifications;
 import com.pe.inventoryapp.backend.movement.model.data.MovementType;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
@@ -59,6 +64,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 	private final DeliveryOrderDomainService deliveryOrderDomainService;
 	private final StockLotDomainService stockLotDomainService;
 	private final MovementDomainService movementDomainService;
+	private final DeliveryLineDomainService deliveryLineDomainService;
 
 	private static final long BATCH_START = 10000L;
 
@@ -72,7 +78,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			ModelRepository modelRepository,
 			DeliveryOrderDomainService deliveryOrderDomainService,
 			StockLotDomainService stockLotDomainService,
-			MovementDomainService movementDomainService, Model_DeliveryOrderDomainService model_DeliveryOrderDomainService) {
+			MovementDomainService movementDomainService, Model_DeliveryOrderDomainService model_DeliveryOrderDomainService, DeliveryLineDomainService deliveryLineDomainService) {
 		this.deliveryOrderRepository = deliveryOrderRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
@@ -84,6 +90,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.stockLotDomainService = stockLotDomainService;
 		this.movementDomainService = movementDomainService;
 		this.model_DeliveryOrderDomainService = model_DeliveryOrderDomainService;
+		this.deliveryLineDomainService = deliveryLineDomainService;
 	};
 
 	@Override
@@ -133,8 +140,25 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			LocalDateTime endDate,
 			OrderStatus status,
 			String userClientName) {
-		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByParams(pageable, batch, startDate, endDate,
-				status, userClientName);
+
+		Specification<DeliveryOrder> spec = (DeliveryOrderSpecifications.hasStatus(status))
+				.and(DeliveryOrderSpecifications.userClientNameContains(userClientName))
+				.and(DeliveryOrderSpecifications.batchContains(batch))
+				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate))
+				.and(DeliveryOrderSpecifications.isNotCanceled());
+
+		Pageable sortedPageable = PageRequest.of(
+				pageable.getPageNumber(),
+				pageable.getPageSize(),
+				Sort.by("createdAt").descending());
+
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
+				spec,
+				sortedPageable);
+
+		// Page<DeliveryOrder> deliveryOrders =
+		// deliveryOrderRepository.findAllByParams(pageable, batch, startDate, endDate,
+		// status, userClientName);
 
 		List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -161,8 +185,21 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			LocalDateTime startDate,
 			LocalDateTime endDate,
 			String userClientName) {
-		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable, batch, startDate,
-				endDate, userClientName);
+		// Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable, batch, startDate,
+		// 		endDate, userClientName);
+		Specification<DeliveryOrder> spec = (DeliveryOrderSpecifications.isActiveForOperator())
+				.and(DeliveryOrderSpecifications.userClientNameContains(userClientName))
+				.and(DeliveryOrderSpecifications.batchContains(batch))
+				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate));
+
+		Pageable sortedPageable = PageRequest.of(
+				pageable.getPageNumber(),
+				pageable.getPageSize(),
+				Sort.by("createdAt").descending());
+
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
+				spec,
+				sortedPageable);
 
 		List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -195,8 +232,20 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
-		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllByUserClientId(pageable, id, batch, startDate,
-				endDate, status);
+		Specification<DeliveryOrder> spec =
+				(DeliveryOrderSpecifications.hasUserClient(id))
+				.and(DeliveryOrderSpecifications.isNotCanceled())
+				.and(DeliveryOrderSpecifications.hasStatus(status))
+				.and(DeliveryOrderSpecifications.batchContains(batch))
+				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate));
+		Pageable sortedPageable = PageRequest.of(
+				pageable.getPageNumber(),
+				pageable.getPageSize(),
+				Sort.by("createdAt").descending());
+
+		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
+				spec,
+				sortedPageable);
 
 		List<DeliveryOrderClientListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -336,7 +385,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		}
 
 		// Lista de las lineas de entrega asociadas a la orden de entrega
-		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
+		List<DeliveryLine> deliveryLines = deliveryLineDomainService.findAllByDeliveryOrderId(id);
 
 		// SOLAMENTE SI NO HAY LINEAS DE ENTREGA, PODRA SER ELIMINADA LA ORDEN DE
 		// ENTREGA SIN NINGUN PROBLEMA
@@ -418,7 +467,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		}
 
 		// DEBE HABER AL MENOS UNA LINEA DE ENTREGA COMO MINIMO
-		List<DeliveryLine> deliveryLines = deliveryLineRepository.findAllByDeliveryOrderId(id);
+		List<DeliveryLine> deliveryLines = deliveryLineDomainService.findAllByDeliveryOrderId(id);
 
 		if (deliveryLines.isEmpty()) {
 			throw new BusinessException(ResponseStatus.CONFLICT, "No hay líneas de entrega");

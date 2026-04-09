@@ -11,7 +11,7 @@ import com.pe.inventoryapp.backend.product.model.entity.Model;
 // Para implementar un Specification, añade "JpaSpecificationExecutor" seguido del nombre de la entidad
 public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecificationExecutor<Model> {
 
-  //* INVESTIGAR SOBRE SPECIFICATION EN SPRING BOOT
+  //* INVESTIGACION SOBRE SPECIFICATION EN SPRING BOOT
 
   // ESTO ES UNA MALA PRACTICA EN SISTEMAS GRANDES
   // Query personalizado para buscar productos mediante parametros

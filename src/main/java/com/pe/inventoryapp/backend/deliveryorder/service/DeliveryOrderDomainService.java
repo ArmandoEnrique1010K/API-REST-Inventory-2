@@ -11,15 +11,13 @@ import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
-import com.pe.inventoryapp.backend.deliveryorder.repository.Model_DeliveryOrderRepository;
 
 @Service
 public class DeliveryOrderDomainService {
 
   private final DeliveryLineRepository deliveryLineRepository;
 
-  public DeliveryOrderDomainService(DeliveryLineRepository deliveryLineRepository,
-      Model_DeliveryOrderRepository model_DeliveryOrderRepository
+  public DeliveryOrderDomainService(DeliveryLineRepository deliveryLineRepository
     ) {
     this.deliveryLineRepository = deliveryLineRepository;
   }

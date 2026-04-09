@@ -4,63 +4,62 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 
-public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long> {
-
+public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long>, JpaSpecificationExecutor<DeliveryLine> {
   // Listar todas las lineas de entrega que pertenezcan a una orden de entrega
   // Omitiendo las lineas canceladas
-  @Query("""
-      SELECT dl FROM DeliveryLine dl
-      JOIN FETCH dl.model
-      JOIN FETCH dl.location l
-      JOIN FETCH l.subregion sr
-      JOIN FETCH sr.region
-      WHERE dl.deliveryOrder.id = :orderId AND dl.lineStatus != 'LINE_CANCELED'
-      """)
-  List<DeliveryLine> findAllByDeliveryOrderId(Long orderId);
+//   @Query("""
+//       SELECT dl FROM DeliveryLine dl
+//       JOIN FETCH dl.model
+//       JOIN FETCH dl.location l
+//       JOIN FETCH l.subregion sr
+//       JOIN FETCH sr.region
+//       WHERE dl.deliveryOrder.id = :orderId AND dl.lineStatus != 'LINE_CANCELED'
+//       """)
+//   List<DeliveryLine> findAllByDeliveryOrderId(Long orderId);
+
 
   // Busqueda con filtros
-  @Query("""
-      SELECT  d
-      FROM DeliveryLine d
-      JOIN d.model m
-      JOIN d.location l
-      JOIN l.subregion sr
-      JOIN sr.region r
-      JOIN d.deliveryOrder do
-      WHERE do.id = :deliveryOrderId
-        AND (:minRequiredQuantity IS NULL OR d.requiredQuantity >= :minRequiredQuantity)
-        AND (:maxRequiredQuantity IS NULL OR d.requiredQuantity <= :maxRequiredQuantity)
-        AND (:minLimitDate IS NULL OR d.limitDate >= :minLimitDate)
-        AND (:maxLimitDate IS NULL OR d.limitDate <= :maxLimitDate)
-        AND (:lineStatus IS NULL OR d.lineStatus = :lineStatus)
-        AND (:location IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :location, '%')))
-        AND (:subregionId IS NULL OR sr.id = :subregionId)
-        AND (:regionId IS NULL OR r.id = :regionId)
-        AND (:modelId IS NULL OR d.model.id = :modelId)
-        AND d.lineStatus != 'LINE_CANCELED'
-        ORDER BY l.id ASC
-      """)
-  Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
-      Long deliveryOrderId,
-      Integer minRequiredQuantity,
-      Integer maxRequiredQuantity,
-      LocalDateTime minLimitDate,
-      LocalDateTime maxLimitDate,
-      LineStatus lineStatus,
-      String location,
-      Long subregionId,
-      Long regionId,
-      Long modelId,
-      Pageable pageable);
+//   @Query("""
+//       SELECT  d
+//       FROM DeliveryLine d
+//       JOIN d.model m
+//       JOIN d.location l
+//       JOIN l.subregion sr
+//       JOIN sr.region r
+//       JOIN d.deliveryOrder do
+//       WHERE do.id = :deliveryOrderId
+//         AND (:minRequiredQuantity IS NULL OR d.requiredQuantity >= :minRequiredQuantity)
+//         AND (:maxRequiredQuantity IS NULL OR d.requiredQuantity <= :maxRequiredQuantity)
+//         AND (:minLimitDate IS NULL OR d.limitDate >= :minLimitDate)
+//         AND (:maxLimitDate IS NULL OR d.limitDate <= :maxLimitDate)
+//         AND (:lineStatus IS NULL OR d.lineStatus = :lineStatus)
+//         AND (:location IS NULL OR LOWER(l.name) LIKE LOWER(CONCAT('%', :location, '%')))
+//         AND (:subregionId IS NULL OR sr.id = :subregionId)
+//         AND (:regionId IS NULL OR r.id = :regionId)
+//         AND (:modelId IS NULL OR d.model.id = :modelId)
+//         AND d.lineStatus != 'LINE_CANCELED'
+//         ORDER BY d.id DESC
+//       """)
+//   Page<DeliveryLine> searchAllByDeliveryOrderIdAndParams(
+//       Long deliveryOrderId,
+//       Integer minRequiredQuantity,
+//       Integer maxRequiredQuantity,
+//       LocalDateTime minLimitDate,
+//       LocalDateTime maxLimitDate,
+//       LineStatus lineStatus,
+//       String location,
+//       Long subregionId,
+//       Long regionId,
+//       Long modelId,
+//       Pageable pageable);
 
   Optional<DeliveryLine> findByLocationId(Long idLocation);
 
@@ -142,33 +141,4 @@ public interface DeliveryLineRepository extends JpaRepository<DeliveryLine, Long
   boolean allLinesAreCanceled(@Param("deliveryOrderId") Long deliveryOrderId);
 
   boolean existsByDeliveryOrderIdAndLineStatusIn(Long deliveryOrderId, List<LineStatus> statuses);
-
-  // Obtener la sumatoria total de las cantidades de una orden de entrega por
-  // subregion y modelo de producto
-
-//   @Query("""
-//           SELECT COALESCE(SUM(d.requiredQuantity), 0)
-//           FROM DeliveryOrder d
-//           WHERE d.deliveryOrder.id = :deliveryOrderId
-//             AND d.location.subregion.id = :subregionId
-//             AND d.model.id = :modelId
-//             AND d.lineStatus <> LINE_CANCELED
-//       """)
-//   Integer summaryRequiredQuantityByDeliveryOrderAndSubregionAndProductModel(
-//       @Param("deliveryOrderId") Long deliveryOrderId,
-//       @Param("subregionId") Long subregionId,
-//       @Param("modelId") Long modelId);
-
-//   @Query("""
-//           SELECT COALESCE(SUM(d.requiredQuantity), 0)
-//           FROM DeliveryOrder d
-//           WHERE d.deliveryOrder.id = :deliveryOrderId
-//             AND d.location.subregion.region.id = :regionId
-//             AND d.model.id = :modelId
-//             AND d.lineStatus <> LINE_CANCELED
-//       """)
-//   Integer summaryRequiredQuantityByDeliveryOrderAndRegionAndProductModel(
-//       @Param("deliveryOrderId") Long deliveryOrderId,
-//       @Param("regionId") Long regionId,
-//       @Param("modelId") Long modelId);
 }
