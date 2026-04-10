@@ -11,6 +11,7 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 
 public class MovementSpecifications {
@@ -137,15 +138,22 @@ public class MovementSpecifications {
   public static Specification<Movement> fetchRelations() {
     return (root, query, cb) -> {
 
-      if (query != null) {
-        root.fetch("model").fetch("product");
-        root.fetch("user");
-        root.fetch("deliveryLine", jakarta.persistence.criteria.JoinType.LEFT);
-        root.fetch("stockLotReceiver", jakarta.persistence.criteria.JoinType.LEFT);
+      // ⚠️ SOLO aplicar fetch si NO es count query
+      if (query != null && query.getResultType() != Long.class) {
 
+        // Model + Product
+        var model = root.fetch("model", JoinType.INNER);
+        model.fetch("product", JoinType.INNER);
+
+        // User
+        root.fetch("user", JoinType.INNER);
+
+        root.fetch("deliveryLine", JoinType.LEFT);
+        root.fetch("stockLotReceiver", JoinType.LEFT);
+        root.fetch("stockLotEmitter", JoinType.LEFT);
+        
         query.distinct(true);
       }
-
       return cb.conjunction();
     };
   }

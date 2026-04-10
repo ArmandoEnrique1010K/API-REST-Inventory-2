@@ -77,12 +77,27 @@ public class UserSpecifications {
       var join = root.join("roles");
 
       if (query != null) {
+        // Evita duplicados
+        query.distinct(true);
+
+        // Agrupar por usuario
         query.groupBy(root.get("id"));
 
+        // Subquery: contar TODOS los roles del usuario
+        var subquery = query.subquery(Long.class);
+        var subRoot = subquery.from(User.class);
+        var subJoin = subRoot.join("roles");
+
+        subquery.select(cb.countDistinct(subJoin.get("id")))
+            .where(cb.equal(subRoot.get("id"), root.get("id")));
+            
+        // HAVING:
+        // 1. Tiene exactamente N roles totales
+        // 2. Todos están dentro de la lista
         query.having(
-            cb.equal(
-                cb.countDistinct(join.get("id")),
-                roleIds.size()));
+            cb.and(
+                cb.equal(cb.countDistinct(join.get("id")), roleIds.size()),
+                cb.equal(subquery, roleIds.size())));
       }
 
       return join.get("id").in(roleIds);

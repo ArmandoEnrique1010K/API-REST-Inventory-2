@@ -32,7 +32,5 @@ public class TokenCleanupScheduler {
 
     int passwordResetTokensDeleted = passwordResetTokenRepository.deleteAllExpiredOrUsedTokens(LocalDateTime.now());
     log.info("Número de PasswordResetToken eliminados: " + passwordResetTokensDeleted);    
-
-    userPasswordOtpRepository.deleteAllExpiredOrVerifiedTokens(LocalDateTime.now());
   }
 }

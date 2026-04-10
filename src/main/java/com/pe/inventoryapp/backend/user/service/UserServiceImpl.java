@@ -133,7 +133,7 @@ public class UserServiceImpl implements UserService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    User user = userRepository.findById(idUser)
+    User user = userRepository.findByIdWithRoles(idUser)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
             "El usuario no existe"));
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
     // dejar el sistema sin administradores
     userDomainService.verifyUserByRoleAdminExist(rolesRequest.getAdmin(), id);
 
-    User user = userRepository.findById(id)
+    User user = userRepository.findByIdWithRoles(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
             "El usuario no existe"));
@@ -165,6 +165,7 @@ public class UserServiceImpl implements UserService {
 
     List<Role> roles = userDomainService
         .getRoles(rolesRequest.getAdmin(), rolesRequest.getSecretary(), rolesRequest.getOperator());
+    //* En la consola he notado que se hace una query adicional para borrar la relacion anterior del usuario con los roles, recordar que se hace 4 queries de tipo insert 
     user.setRoles(roles);
     userRepository.save(user);
   }

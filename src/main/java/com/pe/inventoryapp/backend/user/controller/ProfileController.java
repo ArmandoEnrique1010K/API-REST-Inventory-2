@@ -14,7 +14,7 @@ import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.service.ProfileService;
@@ -27,23 +27,23 @@ public class ProfileController {
   private final ProfileService profileService;
   private final ResponseService responseService;
   private final ValidationService validationService;
-  private final AuthenticationContextService authenticationContextService;
 
   public ProfileController(
       ProfileService profileService,
       ResponseService responseService,
-      ValidationService validationService,
-      AuthenticationContextService authenticationContextService) {
+      ValidationService validationService) {
     this.profileService = profileService;
     this.responseService = responseService;
     this.validationService = validationService;
-    this.authenticationContextService = authenticationContextService;
-  }
+  };
 
   @GetMapping
   public ResponseEntity<?> getUserProfile(Authentication authentication) {
-    Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    DetailUserResponse user = profileService.findUserById(userId);
+    // Long userId = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+
+    DetailUserResponse user = profileService.findUserById(userPrincipal.getId());
 
     DataResponse<DetailUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
     return ResponseEntity.status(response.status()).body(response);
@@ -52,9 +52,11 @@ public class ProfileController {
   @PutMapping
   public ResponseEntity<CommonResponse> updateUserProfile(Authentication authentication,
       @Valid @RequestBody ProfileRequest profileRequest, BindingResult result) {
-    Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
     validationService.validateFieldsAndThrowResponse(result);
-    profileService.updateUserProfileById(id_authenticated_user, profileRequest);
+    profileService.updateUserProfileById(userPrincipal.getId(), profileRequest);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Su perfil ha sido actualizado correctamente");

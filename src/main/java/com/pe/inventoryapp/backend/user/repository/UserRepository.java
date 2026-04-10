@@ -2,6 +2,10 @@ package com.pe.inventoryapp.backend.user.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -9,94 +13,113 @@ import org.springframework.data.repository.query.Param;
 
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
+
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
-    // Busca al usuario mediante su email, firstname, lastname y/o dni desde un
-    // parametro
-    // @Query("""
-    // SELECT u
-    // FROM User u
-    // WHERE (
-    // :name IS NULL OR
-    // LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
-    // ) ORDER BY u.id DESC
-    // """)
-    // Page<User> findAllByName(
-    // @Param("name") String name,
-    // Pageable pageable);
+        // Busca al usuario mediante su email, firstname, lastname y/o dni desde un
+        // parametro
+        // @Query("""
+        // SELECT u
+        // FROM User u
+        // WHERE (
+        // :name IS NULL OR
+        // LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
+        // ) ORDER BY u.id DESC
+        // """)
+        // Page<User> findAllByName(
+        // @Param("name") String name,
+        // Pageable pageable);
 
-    // Tambien lo debe buscar por roles, si ha marcado 2 roles, debe asegurarse que
-    // el usuario tenga esos 2 roles
-    // @Query("""
-    // SELECT u
-    // FROM User u
-    // JOIN u.roles r
-    // WHERE (
-    // :name IS NULL OR
-    // LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
-    // )
-    // AND r.id IN :roleIds
-    // GROUP BY u.id
-    // HAVING COUNT(DISTINCT r.id) = :rolesCount AND u.active = true ORDER BY u.id
-    // DESC
-    // """)
-    // Page<User> findAllByParamsAndHavingRoles(
-    // @Param("name") String name,
-    // @Param("roleIds") List<Long> roleIds,
-    // @Param("rolesCount") long rolesCount,
-    // Pageable pageable);
+        // Tambien lo debe buscar por roles, si ha marcado 2 roles, debe asegurarse que
+        // el usuario tenga esos 2 roles
+        // @Query("""
+        // SELECT u
+        // FROM User u
+        // JOIN u.roles r
+        // WHERE (
+        // :name IS NULL OR
+        // LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
+        // )
+        // AND r.id IN :roleIds
+        // GROUP BY u.id
+        // HAVING COUNT(DISTINCT r.id) = :rolesCount AND u.active = true ORDER BY u.id
+        // DESC
+        // """)
+        // Page<User> findAllByParamsAndHavingRoles(
+        // @Param("name") String name,
+        // @Param("roleIds") List<Long> roleIds,
+        // @Param("rolesCount") long rolesCount,
+        // Pageable pageable);
 
-    // Obtener un usuario por su email
-    // Optional<User> findByEmail(String email);
+        /**
+         * Sobrescribe el método findAll de JpaSpecificationExecutor
+         * para agregar carga optimizada de la relación "roles".
+         *
+         * 🔥 EntityGraph:
+         * - Evita el problema N+1 (múltiples queries)
+         * - Hace un JOIN automático para traer roles en la misma consulta
+         *
+         * @param spec     filtro dinámico (puede ser null)
+         * @param pageable paginación + ordenamiento
+         * @return página de usuarios con roles ya cargados
+         */
+        @EntityGraph(attributePaths = { "roles" })
+        Page<User> findAll(
+                        Specification<User> spec,
+                        Pageable pageable);
 
-    @Query("""
-            SELECT u FROM User u
-            JOIN FETCH u.roles
-            WHERE u.email = :email
-            """)
-    Optional<User> findByEmailWithRoles(String email);
+        // Obtener un usuario por su email
+        // Optional<User> findByEmail(String email);
 
-    // Obtener un usuario por ID con roles
-    @Query("""
-            SELECT u FROM User u
-            LEFT JOIN FETCH u.roles
-            WHERE u.id = :id
-            """)
+        @Query("""
+                        SELECT u FROM User u
+                        JOIN FETCH u.roles
+                        WHERE u.email = :email
+                        """)
+        Optional<User> findByEmailWithRoles(String email);
 
-    Optional<User> findByIdWithRoles(Long id);
+        // Obtener un usuario por ID con roles
+        /* QUITE LEFT JOIN FETCH Y COLOQUE JOIN FETCH */
+        @Query("""
+                        SELECT u FROM User u
+                        JOIN FETCH u.roles
+                        WHERE u.id = :id
+                        """)
 
-    // “¿Existe algún usuario que tenga el rol con nombre name y cuyo id sea
-    // distinto al id dado?”
-    @Query("""
-                SELECT COUNT(u) > 0
-                FROM User u
-                JOIN u.roles r
-                WHERE r.name = :name
-                AND u.id <> :id
-            """)
-    boolean existsByRoleNameAndIdNot(@Param("name") String name,
-            @Param("id") Long id);
+        Optional<User> findByIdWithRoles(Long id);
 
-    boolean existsByEmail(String email);
+        // “¿Existe algún usuario que tenga el rol con nombre name y cuyo id sea
+        // distinto al id dado?”
+        @Query("""
+                            SELECT COUNT(u) > 0
+                            FROM User u
+                            JOIN u.roles r
+                            WHERE r.name = :name
+                            AND u.id <> :id
+                        """)
+        boolean existsByRoleNameAndIdNot(@Param("name") String name,
+                        @Param("id") Long id);
 
-    // Lista los primeros 10 usuarios que coincidan con el parametro de busqueda
-    // @Query("""
-    // SELECT u
-    // FROM User u
-    // JOIN u.roles r
-    // WHERE u.active = true
-    // AND (
-    // :name IS NULL OR
-    // LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
-    // CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
-    // ) ORDER BY u.id DESC LIMIT 10
-    // """)
-    // List<User> findAllFirstTenUsersByName(String name);
+        boolean existsByEmail(String email);
+
+        // Lista los primeros 10 usuarios que coincidan con el parametro de busqueda
+        // @Query("""
+        // SELECT u
+        // FROM User u
+        // JOIN u.roles r
+        // WHERE u.active = true
+        // AND (
+        // :name IS NULL OR
+        // LOWER(u.firstname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // LOWER(u.lastname) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // LOWER(u.email) LIKE LOWER(CONCAT('%', :name, '%')) OR
+        // CAST(u.dni AS string) LIKE CONCAT('%', :name, '%')
+        // ) ORDER BY u.id DESC LIMIT 10
+        // """)
+        // List<User> findAllFirstTenUsersByName(String name);
 }

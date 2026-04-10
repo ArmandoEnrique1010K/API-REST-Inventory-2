@@ -10,7 +10,7 @@ import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
 import com.pe.inventoryapp.backend.user.model.response.ListUsersByRoleUserResponse;
@@ -39,20 +39,16 @@ public class UserController {
   private final UserService userService;
   private final ResponseService responseService;
   private final ValidationService validationService;
-  private final AuthenticationContextService authenticationContextService;
 
   public UserController(
       UserService userService, 
       ResponseService responseService,
-      ValidationService validationService,
-      AuthenticationContextService authenticationContextService
+      ValidationService validationService
   ){
     this.userService = userService;
     this.responseService = responseService;
     this.validationService = validationService;
-    this.authenticationContextService = authenticationContextService;
   }
-
 
   @PostMapping("/register")
   public ResponseEntity<CommonResponse> registerUser(@Valid @RequestBody RegisterRequest registerRequest,
@@ -108,8 +104,11 @@ public class UserController {
   // Nota: no usar un código de estado 204, porque no se puede devolver un body
   @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusUser(Authentication authentication, @PathVariable Long id) {
-    Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    userService.changeStatusUserById(id, id_authenticated_user);
+
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
+    // Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    userService.changeStatusUserById(id, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cambiado el estado del usuario");

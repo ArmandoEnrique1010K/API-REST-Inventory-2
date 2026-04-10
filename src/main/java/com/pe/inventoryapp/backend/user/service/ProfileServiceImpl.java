@@ -31,7 +31,7 @@ public class ProfileServiceImpl implements ProfileService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    User user = userRepository.findById(id)
+    User user = userRepository.findByIdWithRoles(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
             "El usuario no existe"));
