@@ -141,13 +141,15 @@ public class LocationServiceImpl implements LocationService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    locationDomainService.verifyLocationNameAvailableBySubregionIdExcludingId(newName, idSubregion, id);
+    if (!location.getName().equals(newName)){
+      locationDomainService.verifyLocationNameAvailableBySubregionIdExcludingId(newName, idSubregion, id);
+      location.setName(newName);
+    }
 
     Subregion subregion = subregionRepository.findById(
         idSubregion)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La subregión no existe"));
 
-    location.setName(newName);
     location.setAddress(address);
     location.setSubregion(subregion);
     locationRepository.save(location);

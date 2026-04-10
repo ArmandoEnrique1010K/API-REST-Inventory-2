@@ -141,6 +141,10 @@ public class ModelServiceImpl implements ModelService {
     pageable.getPageSize(),
     Sort.by("id").descending());
 
+    //* Cuando usas Page, Spring Data JPA automáticamente ejecuta 2 queries
+    //* SELECT ... FROM modelos JOIN ... LIMIT ?, ? → Cuenta el total de registros
+    //* SELECT count(m1_0.id) FROM modelos m1_0 WHERE ... → Cuenta el total de
+    // registros
     Page<Model> models = modelRepository.findAll(spec, sortedPageable);
 
     List<ModelListResponse> result = models.getContent().stream().map(
@@ -247,7 +251,12 @@ public class ModelServiceImpl implements ModelService {
     }
 
     String newName = modelRequest.getName().trim();
-    modelDomainService.verifyModelNameAvailableByProductIdExcludingId(newName, productId, id);
+
+    if (!model.getName().equals(newName)){
+      modelDomainService.verifyModelNameAvailableByProductIdExcludingId(newName, productId, id);
+      model.setName(newName);
+    }
+
 
     // Implementación de Cloudinary
     // Solamente si el usuario ha subido una nueva imagen
@@ -273,7 +282,6 @@ public class ModelServiceImpl implements ModelService {
       System.out.println("EL USUARIO NO SUBIO UNA IMAGEN, SE MANTIENE LA IMAGEN ANTERIOR");
     }
 
-    model.setName(newName);
     // model.setImageUrl(modelDomainService.resolveImageUrl(modelRequest.getImageUrl()));
     // model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
     model.setEntryDate(modelRequest.getEntryDate());

@@ -17,17 +17,16 @@ import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
 
 @Service
-public class SubregionServiceImpl implements SubregionService{
+public class SubregionServiceImpl implements SubregionService {
 
   private final SubregionRepository subregionRepository;
   private final RegionRepository regionRepository;
   private final SubregionDomainService subregionDomainService;
 
   public SubregionServiceImpl(
-    SubregionRepository subregionRepository,
-    RegionRepository regionRepository,
-    SubregionDomainService subregionDomainService
-  ) {
+      SubregionRepository subregionRepository,
+      RegionRepository regionRepository,
+      SubregionDomainService subregionDomainService) {
     this.subregionRepository = subregionRepository;
     this.regionRepository = regionRepository;
     this.subregionDomainService = subregionDomainService;
@@ -38,10 +37,10 @@ public class SubregionServiceImpl implements SubregionService{
   public void saveSubregion(SubregionRequest subregionRequest) {
     String name = subregionRequest.getName().trim();
     Long regionId = subregionRequest.getRegionId();
-    
+
     subregionDomainService.verifySubregionNameAvailableByRegionId(name, regionId);
 
-        if (regionId == null) {
+    if (regionId == null) {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
     Region region = regionRepository.findById(
@@ -58,7 +57,7 @@ public class SubregionServiceImpl implements SubregionService{
   @Override
   @Transactional(readOnly = true)
   public List<SubregionResponse> findAllSubregionsByRegionId(Long regionId) {
-        if (regionId == null) {
+    if (regionId == null) {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
@@ -104,7 +103,9 @@ public class SubregionServiceImpl implements SubregionService{
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    subregionDomainService.verifySubregionNameAvailableByRegionIdExcludingId(name, idRegion, id);
+    if(!subregion.getName().equals(name)){
+      subregionDomainService.verifySubregionNameAvailableByRegionIdExcludingId(name, idRegion, id);
+    }
 
     Region region = regionRepository.findById(
         idRegion)

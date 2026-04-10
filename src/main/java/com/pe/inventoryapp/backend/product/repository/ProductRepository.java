@@ -14,10 +14,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
   @Query("""
       SELECT p
       FROM Product p
+      JOIN FETCH p.category c
+      JOIN FETCH p.type t
       WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')))
         AND (:status IS NULL OR p.status = :status)
-        AND (:categoryId IS NULL OR p.category.id = :categoryId)
-        AND (:typeId IS NULL OR p.type.id = :typeId)
+        AND (:categoryId IS NULL OR c.id = :categoryId)
+        AND (:typeId IS NULL OR t.id = :typeId)
         ORDER BY p.id DESC
       """)
   Page<Product> findAllByParams(

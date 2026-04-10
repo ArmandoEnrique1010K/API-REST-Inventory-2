@@ -76,7 +76,10 @@ public class RegionServiceImpl implements RegionService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La región no existe"));
 
     String newName = regionRequest.getName().trim();
-    regionDomainService.verifyRegionNameAvailableExcludingId(newName, id);
+
+    if (!region.getName().equals(newName)) {
+      regionDomainService.verifyRegionNameAvailableExcludingId(newName, id);
+    }
 
     region.setName(newName);
     regionRepository.save(region);

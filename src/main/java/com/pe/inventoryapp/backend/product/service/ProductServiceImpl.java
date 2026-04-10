@@ -181,7 +181,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     String newName = productUpdateRequest.getName().trim();
-    productDomainService.verifyProductNameAvailableExcludingId(newName, id);
+
+    // Solo validar si realmente cambia
+    if (!product.getName().equals(newName)) {
+      productDomainService.verifyProductNameAvailableExcludingId(newName, id);
+      product.setName(newName);
+    }
 
     Long categoryId = productUpdateRequest.getCategoryId();
 
@@ -189,6 +194,9 @@ public class ProductServiceImpl implements ProductService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
+    //* Si no cambias categoryId o typeId, hibernate ya tiene esa relación en el contexto de persistencia, por lo tanto no hace una query extra
+
+    //* Si lo llega a cambiar, hiberate necesique validar que existe para aquello hace la query de SELECT * FROM category WHERE id = ?
     Category category = categoryRepository.findById(
         categoryId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe"));
@@ -203,7 +211,6 @@ public class ProductServiceImpl implements ProductService {
         typeId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe"));
 
-    product.setName(newName);
     product.setLength(productDomainService.normalizeDecimal(productUpdateRequest.getLength()));
     product.setWidth(productDomainService.normalizeDecimal(productUpdateRequest.getWidth()));
     product.setHeight(productDomainService.normalizeDecimal(productUpdateRequest.getHeight()));
