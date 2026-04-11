@@ -4,11 +4,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 
@@ -66,7 +73,7 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long>, JpaSp
         @Query("""
                         SELECT sl
                         FROM StockLot sl
-                        JOIN sl.model m
+                        JOIN FETCH sl.model m
                         WHERE m.id = :modelId
                         AND sl.zeroStock = false
                         ORDER BY sl.createdAt DESC
@@ -81,50 +88,54 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long>, JpaSp
         @Query("""
                         SELECT sl
                         FROM StockLot sl
-                        WHERE sl.model.id = :modelId
-                        AND sl.company.id = :companyId
+                        JOIN FETCH sl.model m
+                        JOIN FETCH sl.company c
+                        WHERE m.id = :modelId
+                        AND c.id = :companyId
                         AND sl.zeroStock = false
                         AND sl.id != :stockLotId
                         """)
         List<StockLot> findAllByModelIdAndCompanyIdAndExcludeOneStockLotByIdAndZeroStockIsFalse(Long modelId,
                         Long companyId, Long stockLotId);
 
-        // Obtiene la sumatoria de todos los campos quantityReceived de un producto por
-        // su id
-        @Query("""
-                            SELECT COALESCE(SUM(sl.quantityReceived), 0)
-                            FROM StockLot sl
-                            WHERE sl.model.id = :modelId
-                        """)
-        Integer sumQuantityReceivedByModelId(@Param("modelId") Long modelId);
+        // // Obtiene la sumatoria de todos los campos quantityReceived de un producto por
+        // // su id
+        // @Query("""
+        //                     SELECT COALESCE(SUM(sl.quantityReceived), 0)
+        //                     FROM StockLot sl
+        //                     WHERE sl.model.id = :modelId
+        //                 """)
+        // Integer sumQuantityReceivedByModelId(@Param("modelId") Long modelId);
 
-        // Obtiene la sumatoria de todos los campos quantityAvailable de un producto por
-        // su id
-        @Query("""
-                            SELECT COALESCE(SUM(sl.quantityAvailable), 0)
-                            FROM StockLot sl
-                            WHERE sl.model.id = :modelId
-                        """)
-        Integer sumQuantityAvailableByModelId(@Param("modelId") Long modelId);
+        // // Obtiene la sumatoria de todos los campos quantityAvailable de un producto por
+        // // su id
+        // @Query("""
+        //                     SELECT COALESCE(SUM(sl.quantityAvailable), 0)
+        //                     FROM StockLot sl
+        //                     WHERE sl.model.id = :modelId
+        //                 """)
+        // Integer sumQuantityAvailableByModelId(@Param("modelId") Long modelId);
 
-        @Query("""
-                                SELECT COALESCE(SUM(sl.quantityDelivered), 0)
-                                FROM StockLot sl
-                                WHERE sl.model.id = :modelId
-                        """)
-        Integer sumQuantityDeliveredByModelId(@Param("modelId") Long modelId);
+        // @Query("""
+        //                         SELECT COALESCE(SUM(sl.quantityDelivered), 0)
+        //                         FROM StockLot sl
+        //                         WHERE sl.model.id = :modelId
+        //                 """)
+        // Integer sumQuantityDeliveredByModelId(@Param("modelId") Long modelId);
 
         // Query para obtener un lote de stock existente de un producto cuya fecha de
         // creación no sea mayor a 24 horas, para consolidar devoluciones, y que tenga
         // cantidad disponible
         @Query("""
-                            SELECT s
-                            FROM StockLot s
-                            WHERE s.company.id = :companyId
-                              AND s.model.id = :modelId
-                              AND s.temporary = true
-                              AND s.zeroStock = false
-                              AND s.createdAt >= :limitDate
+                            SELECT sl
+                            FROM StockLot sl
+                            JOIN FETCH sl.company c
+                            JOIN FETCH sl.model m
+                            WHERE c.id = :companyId
+                              AND m.id = :modelId
+                              AND sl.temporary = true
+                              AND sl.zeroStock = false
+                              AND sl.createdAt >= :limitDate
                         """)
         Optional<StockLot> findActiveTemporaryStockLot(
                         @Param("companyId") Long companyId,
@@ -144,4 +155,18 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long>, JpaSp
         @Query("SELECT s FROM StockLot s WHERE s.id IN :ids")
         List<StockLot> findAllByIdForUpdate(@Param("ids") List<Long> ids);
 
+        // LISTAR 
+        //* EN EL CASO DE MANEJAR SUBRELACIONS COMO CATEGORY Y TYPE, SE TENDRIA QUE DEFINIR UN SPECIFICATION PARA EL MANEJO DE LAS RELACIONES
+  @EntityGraph(attributePaths = { 
+        "model", 
+        "company", 
+        "model.product",
+        "model.product.category",
+        "model.product.type"
+
+})
+  @NonNull
+  Page<StockLot> findAll(
+      @Nullable Specification<StockLot> spec,
+      @Nullable Pageable pageable);
 }

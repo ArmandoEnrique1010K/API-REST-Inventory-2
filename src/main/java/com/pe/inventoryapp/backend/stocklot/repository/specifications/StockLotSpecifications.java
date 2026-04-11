@@ -8,10 +8,15 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 
 public class StockLotSpecifications {
 
+  //TODO: AGREGAR COMENTARIOS EXPLICATIVOS SOBRE EL CONFLICTO DEL USO DE PARAMETROS OPCIONALES QUE SE RELACIONAN: CATEGORY Y TYPE
   public static Specification<StockLot> quantityReceivedBeetween(Integer min, Integer max) {
     return (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
@@ -71,7 +76,7 @@ public class StockLotSpecifications {
 
       var modelJoin = root.join("model");
       var productJoin = modelJoin.join("product");
-      
+
       List<Predicate> predicates = new ArrayList<>();
 
       for (String word : words) {
@@ -103,10 +108,10 @@ public class StockLotSpecifications {
       if (categoryId == null)
         return cb.conjunction();
 
-      var model = root.join("model");
+      var model = getOrCreateJoin(root, "model");
 
-      var product = model.join("product");
-      return cb.equal(product.get("category").get("id"), categoryId);
+      var product = getOrCreateJoin(model, "product");
+      return cb.equal(product.join("category").get("id"), categoryId);
     };
   }
 
@@ -114,10 +119,10 @@ public class StockLotSpecifications {
     return (root, query, cb) -> {
       if (typeId == null)
         return cb.conjunction();
-      var model = root.join("model");
+      var model = getOrCreateJoin(root, "model");
 
-      var product = model.join("product");
-      return cb.equal(product.get("type").get("id"), typeId);
+      var product = getOrCreateJoin(model, "product");
+      return cb.equal(product.join("type").get("id"), typeId);
     };
   }
 
@@ -126,12 +131,48 @@ public class StockLotSpecifications {
       if (modelId == null)
         return cb.conjunction();
 
-      var model = root.join("model");
+      var model = getOrCreateJoin(root, "model");
       return cb.equal(model.get("id"), modelId);
     };
   }
 
   public static Specification<StockLot> isNotZeroStock() {
     return (root, query, cb) -> cb.isFalse(root.get("zeroStock"));
+  }
+
+  // * IMPORTANTE, ESTE QUERY SIRVE PARA FORZAR JOIN EN EL SPECIFICATION,
+  // AUNQUE NO SE FILTRE SE TIENE QUE RELACIONAR HACIA UN TIPO Y CATEGORIA
+  public static Specification<StockLot> fetchRelations() {
+    return (root, query, cb) -> {
+
+      // IMPORTANTE: solo en query principal (no count)
+      // if (query != null && query.getResultType() != Long.class) {
+      //   var model = root.join("model", JoinType.LEFT);
+      //   var product = model.join("product", JoinType.LEFT);
+      //   product.join("category", JoinType.LEFT);
+      //   product.join("type", JoinType.LEFT);
+      //   root.join("company", JoinType.LEFT);
+      // }
+      if (query.getResultType() != Long.class) {
+
+        root.fetch("company", JoinType.LEFT);
+
+        var model = root.fetch("model", JoinType.LEFT);
+        var product = ((Fetch<?, ?>) model).fetch("product", JoinType.LEFT);
+
+        product.fetch("category", JoinType.LEFT);
+        product.fetch("type", JoinType.LEFT);
+      }
+
+      return cb.conjunction();
+    };
+  }
+
+  // REUTILIZA JOINS
+  public static Join<?, ?> getOrCreateJoin(From<?, ?> root, String attribute) {
+    return root.getJoins().stream()
+        .filter(j -> j.getAttribute().getName().equals(attribute))
+        .findFirst()
+        .orElseGet(() -> root.join(attribute));
   }
 }

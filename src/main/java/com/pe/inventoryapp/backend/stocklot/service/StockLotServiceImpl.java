@@ -86,7 +86,7 @@ public class StockLotServiceImpl implements StockLotService {
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
 
     if (model.isStatus() == false) {
-      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El producto se encuentra desactivado");
+      throw new BusinessException(ResponseStatus.DEFAULT_RESOURCE, "El modelo del producto se encuentra desactivado");
     }
 
     Long id_company = stockLotReceiveRequest.getCompanyId();
@@ -152,6 +152,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     movementRepository.save(movement);
     movementDomainService.deleteLastestMovement();
+    // TODO: VERIFICAR SI ES CORRECTO QUE HAYA 7 QUERIES
   }
 
   @Override
@@ -187,13 +188,16 @@ public class StockLotServiceImpl implements StockLotService {
     spec = spec.and(StockLotSpecifications.hasModel(modelId));
     spec = spec.and(StockLotSpecifications.isNotZeroStock());
 
+    // SIEMPRE AL FINAL SE TOMA LAS RELACIONES
+    spec = spec.and(StockLotSpecifications.fetchRelations());
+
     // Ordenar los elementos de acuerdo al campo de createdAt de forma descendente
     Pageable sortedPageable = PageRequest.of(
     pageable.getPageNumber(),
     pageable.getPageSize(),
     Sort.by("createdAt").descending()
 );
-    Page<StockLot> stockLots = stockLotRepository.findAll(sortedPageable);
+    Page<StockLot> stockLots = stockLotRepository.findAll(spec, sortedPageable);
 
     List<StockLotListResponse> stockLotListResponse = stockLots.getContent().stream()
         .map(stockLot -> StockLotMapper.builder().setStockLot(stockLot).buildStockLotListResponse()).toList();

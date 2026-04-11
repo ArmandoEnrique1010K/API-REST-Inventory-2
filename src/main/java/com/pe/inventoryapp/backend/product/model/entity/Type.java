@@ -2,6 +2,8 @@ package com.pe.inventoryapp.backend.product.model.entity;
 
 import java.util.List;
 
+import org.hibernate.annotations.BatchSize;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Table(name = "tipos")
+  // @BatchSize(size = 20)
 public class Type {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -24,7 +24,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderCli
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.service.DeliveryOrderService;
-import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 
 import io.micrometer.common.lang.Nullable;
 import jakarta.validation.Valid;
@@ -44,27 +44,24 @@ public class DeliveryOrderController {
   private final ResponseService responseService;
   private final ValidationService validationService;
   private final DeliveryOrderService deliveryOrderService;
-  private final AuthenticationContextService authenticationContextService;
 
   public DeliveryOrderController(
       ResponseService responseService,
       ValidationService validationService,
-      DeliveryOrderService deliveryOrderService,
-      AuthenticationContextService authenticationContextService) {
+      DeliveryOrderService deliveryOrderService) {
     this.responseService = responseService;
     this.validationService = validationService;
     this.deliveryOrderService = deliveryOrderService;
-    this.authenticationContextService = authenticationContextService;
   }
 
   @PostMapping
   public ResponseEntity<CommonResponse> registerDeliveryOrder(Authentication authentication,
       @Valid @RequestBody DeliveryOrderRequest deliveryOrderRequest,
       BindingResult result) {
-    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryOrderService.saveDeliveryOrder(deliveryOrderRequest, id_user_authenticated);
+    deliveryOrderService.saveDeliveryOrder(deliveryOrderRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
         "Se ha creado la orden de entrega");
@@ -85,7 +82,8 @@ public class DeliveryOrderController {
         pageable, batch,
         startDate, endDate, status, userClientName);
 
-    DataResponse<PageResponse<DeliveryOrderListResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<PageResponse<DeliveryOrderListResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
         deliveryOrders);
 
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
@@ -121,12 +119,12 @@ public class DeliveryOrderController {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
       @RequestParam(required = false) OrderStatus status) {
 
-    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
     Pageable pageable = PageRequest.of(page, 20);
 
     PageResponse<DeliveryOrderClientListResponse> deliveryOrders = deliveryOrderService
-        .findAllDeliveryOrderByClientId(pageable, id_user_authenticated, batch, startDate, endDate, status);
+        .findAllDeliveryOrderByClientId(pageable, userPrincipal.getId(), batch, startDate, endDate, status);
 
     DataResponse<PageResponse<DeliveryOrderClientListResponse>> dataResponse = responseService.generateDataResponse(
         ResponseStatus.SUCCESS,
@@ -147,11 +145,11 @@ public class DeliveryOrderController {
   // Endpoint para obtener una orden de entrega para un cliente
   @GetMapping("/{id}/client")
   public ResponseEntity<?> getDeliveryOrderForClient(Authentication authentication, @PathVariable Long id) {
-    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
     DeliveryOrderClientDetailsResponse deliveryOrderDetailsResponse = deliveryOrderService
-        .findDeliveryOrderByIdAndValidateUserClient(id, id_user_authenticated);
-        
+        .findDeliveryOrderByIdAndValidateUserClient(id, userPrincipal.getId());
+
     DataResponse<DeliveryOrderClientDetailsResponse> response = responseService.generateDataResponse(
         ResponseStatus.SUCCESS,
         deliveryOrderDetailsResponse);
@@ -162,9 +160,9 @@ public class DeliveryOrderController {
   @PatchMapping("/{id}")
   public ResponseEntity<?> changeLimitDateDeliveryOrder(Authentication authentication, @PathVariable Long id,
       @RequestParam @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime limitDate) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-    deliveryOrderService.changeLimitDate(id, limitDate, id_user);
+    deliveryOrderService.changeLimitDate(id, limitDate, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cambiado la fecha de entrega");
@@ -174,10 +172,10 @@ public class DeliveryOrderController {
   @PutMapping("/{id}/cancel")
   public ResponseEntity<CommonResponse> cancelDeliveryOrder(Authentication authentication, @PathVariable Long id,
       @Valid @RequestBody DeliveryOrderComentRequest deliveryOrderComentRequest, BindingResult result) {
-    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
-  
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryOrderService.processDeliveryOrderCancellation(id, deliveryOrderComentRequest, id_user_authenticated);
+    deliveryOrderService.processDeliveryOrderCancellation(id, deliveryOrderComentRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cancelado la orden de entrega, todos los modelos de los productos que aun no fuerón entregados serán devueltos inmediatamente");
@@ -186,9 +184,9 @@ public class DeliveryOrderController {
 
   @PatchMapping("/{id}/send")
   public ResponseEntity<CommonResponse> sendDeliveryOrder(Authentication authentication, @PathVariable Long id) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-    deliveryOrderService.markDeliveryOrderAsDelivered(id, id_user);
+    deliveryOrderService.markDeliveryOrderAsDelivered(id, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha enviado la orden de entrega al cliente");

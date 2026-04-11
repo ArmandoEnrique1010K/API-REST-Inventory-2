@@ -165,7 +165,9 @@ public class UserServiceImpl implements UserService {
 
     List<Role> roles = userDomainService
         .getRoles(rolesRequest.getAdmin(), rolesRequest.getSecretary(), rolesRequest.getOperator());
-    //* En la consola he notado que se hace una query adicional para borrar la relacion anterior del usuario con los roles, recordar que se hace 4 queries de tipo insert 
+    // * En la consola he notado que se hace una query adicional para borrar la
+    // relacion anterior del usuario con los roles, recordar que se hace 4 queries
+    // de tipo insert
     user.setRoles(roles);
     userRepository.save(user);
   }

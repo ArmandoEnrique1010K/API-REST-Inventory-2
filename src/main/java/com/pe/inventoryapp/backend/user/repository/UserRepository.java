@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
@@ -69,9 +71,13 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
          * @return página de usuarios con roles ya cargados
          */
         @EntityGraph(attributePaths = { "roles" })
+        @NonNull
         Page<User> findAll(
-                        Specification<User> spec,
-                        Pageable pageable);
+                        @Nullable Specification<User> spec,
+                        @Nullable Pageable pageable);
+
+                //* EN LA CONSOLA SE VE UN LEFT JOIN POR CADA RELACION DE CADA ENTIDAD, RECORDAR QUE EXISTE UNA TABLA INTERMEDIA ENTRE USER Y ROLES PORQUE ES UNA RELACION MANY TO MANY
+
 
         // Obtener un usuario por su email
         // Optional<User> findByEmail(String email);
@@ -106,6 +112,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
                         @Param("id") Long id);
 
         boolean existsByEmail(String email);
+
+        //* NO HAY SOLUCION AL PROBLEMA DE LAS 2 QUERIES AL UTILIZAR EL METODO FINDALL SOBREESCRITO DE ESTE REPOSITORIO, SIEMPRE SE HARAN 2 QUERIES, 1 PARA OBTENER LOS DATOS Y EL OTRO PARA CONTAR LA CANTIDAD DE LOS DATOS*/
+
 
         // Lista los primeros 10 usuarios que coincidan con el parametro de busqueda
         // @Query("""

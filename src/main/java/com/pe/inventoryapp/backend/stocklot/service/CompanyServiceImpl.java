@@ -77,8 +77,10 @@ public class CompanyServiceImpl implements CompanyService {
 
     String newName = companyRequest.getName().trim();
 
-    companyDomainService.verifyCompanyNameAvailableExcludingId(newName, id);
-    company.setName(newName);
+    if (!company.getName().equals(newName)){
+      companyDomainService.verifyCompanyNameAvailableExcludingId(newName, id);
+      company.setName(newName);
+    }
 
     companyRepository.save(company);
   }

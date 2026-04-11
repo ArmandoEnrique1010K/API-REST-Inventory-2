@@ -24,7 +24,6 @@ import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
-import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
 import com.pe.inventoryapp.backend.stocklot.model.request.StockLotAdjustmentRequest;
 import com.pe.inventoryapp.backend.stocklot.model.request.StockLotReceiveRequest;
 import com.pe.inventoryapp.backend.stocklot.model.request.StockLotTransferRequest;
@@ -32,6 +31,7 @@ import com.pe.inventoryapp.backend.stocklot.model.response.StockLotDetailsRespon
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotListResponse;
 import com.pe.inventoryapp.backend.stocklot.model.response.StockLotSameProductListResponse;
 import com.pe.inventoryapp.backend.stocklot.service.StockLotService;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 
 import jakarta.validation.Valid;
 
@@ -41,26 +41,25 @@ public class StockLotController {
   private final StockLotService stockLotService;
   private final ValidationService validationService;
   private final ResponseService responseService;
-  private final AuthenticationContextService authenticationContextService;
 
   public StockLotController(
       StockLotService stockLotService,
       ValidationService validationService,
-      ResponseService responseService,
-      AuthenticationContextService authenticationContextService) {
+      ResponseService responseService) {
     this.stockLotService = stockLotService;
     this.validationService = validationService;
     this.responseService = responseService;
-    this.authenticationContextService = authenticationContextService;
   }
 
   @PostMapping
   public ResponseEntity<CommonResponse> registerStockLot(Authentication authentication,
       @Valid @RequestBody StockLotReceiveRequest stockLotReceiveRequest,
       BindingResult result) {
-    Long id = authenticationContextService.extractUserIdFromAuthentication(authentication);
+
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
     validationService.validateFieldsAndThrowResponse(result);
-    stockLotService.saveStockLot(stockLotReceiveRequest, id);
+    stockLotService.saveStockLot(stockLotReceiveRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
         "Se registro el lote de stock");
@@ -130,9 +129,9 @@ public class StockLotController {
   public ResponseEntity<CommonResponse> increaseStockLot(Authentication authentication, @PathVariable Long id,
       @Valid @RequestBody StockLotAdjustmentRequest stockLotAdjustmentRequest,
       BindingResult result) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
     validationService.validateFieldsAndThrowResponse(result);
-    stockLotService.increaseStockLot(id, stockLotAdjustmentRequest, id_user);
+    stockLotService.increaseStockLot(id, stockLotAdjustmentRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se aumento la cantidad del lote de stock");
@@ -143,9 +142,9 @@ public class StockLotController {
   public ResponseEntity<CommonResponse> decreaseStockLot(Authentication authentication, @PathVariable Long id,
       @Valid @RequestBody StockLotAdjustmentRequest stockLotAdjustmentRequest,
       BindingResult result) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
     validationService.validateFieldsAndThrowResponse(result);
-    stockLotService.decreaseStockLot(id, stockLotAdjustmentRequest, id_user);
+    stockLotService.decreaseStockLot(id, stockLotAdjustmentRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se reporto una perdida en la cantidad del lote de stock");
@@ -156,9 +155,9 @@ public class StockLotController {
   public ResponseEntity<CommonResponse> recoveryStockLot(Authentication authentication, @PathVariable Long id,
       @Valid @RequestBody StockLotAdjustmentRequest stockLotAdjustmentRequest,
       BindingResult result) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
     validationService.validateFieldsAndThrowResponse(result);
-    stockLotService.recoveryStockLot(id, stockLotAdjustmentRequest, id_user);
+    stockLotService.recoveryStockLot(id, stockLotAdjustmentRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se recupero una parte de la cantidad dañada del lote de stock");
@@ -169,9 +168,9 @@ public class StockLotController {
   public ResponseEntity<CommonResponse> transferStockLot(Authentication authentication, @PathVariable Long idEmitter,
       @Valid @RequestBody StockLotTransferRequest stockLotTransferRequest,
       BindingResult result) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
     validationService.validateFieldsAndThrowResponse(result);
-    stockLotService.transferStockLot(idEmitter, stockLotTransferRequest, id_user);
+    stockLotService.transferStockLot(idEmitter, stockLotTransferRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se hizo una transferencia entre 2 lotes de stocks del mismo modelo del producto");

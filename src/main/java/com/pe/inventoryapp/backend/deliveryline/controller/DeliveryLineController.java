@@ -32,7 +32,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.request.DeliveryLineUpdate
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryline.model.response.DeliveryLineListResponse;
 import com.pe.inventoryapp.backend.deliveryline.service.DeliveryLineService;
-import com.pe.inventoryapp.backend.security.service.AuthenticationContextService;
+import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 
 import jakarta.validation.Valid;
 
@@ -43,17 +43,14 @@ public class DeliveryLineController {
   private final ResponseService responseService;
   private final ValidationService validationService;
   private final DeliveryLineService deliveryLineService;
-  private final AuthenticationContextService authenticationContextService;
 
-  public DeliveryLineController (
-  ResponseService responseService,
-  ValidationService validationService,
-  DeliveryLineService deliveryLineService,
-  AuthenticationContextService authenticationContextService ) {
+  public DeliveryLineController(
+      ResponseService responseService,
+      ValidationService validationService,
+      DeliveryLineService deliveryLineService) {
     this.responseService = responseService;
     this.validationService = validationService;
     this.deliveryLineService = deliveryLineService;
-    this.authenticationContextService = authenticationContextService;
   }
 
   @PostMapping("/delivery-order/{deliveryOrderId}")
@@ -63,21 +60,19 @@ public class DeliveryLineController {
       @Valid @RequestBody DeliveryLineRequest deliveryLineRequest,
       BindingResult result) {
 
-    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.saveDeliveryLine(deliveryLineRequest, deliveryOrderId, id_user_authenticated);
+    deliveryLineService.saveDeliveryLine(deliveryLineRequest, deliveryOrderId, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
         "Se registro una linea de entrega en una orden de entrega");
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  
-
   @GetMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
-      @PathVariable Long deliveryOrderId, 
+      @PathVariable Long deliveryOrderId,
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) Integer minRequiredQuantity,
       @RequestParam(required = false) Integer maxRequiredQuantity,
@@ -87,13 +82,13 @@ public class DeliveryLineController {
       @RequestParam(required = false) String location,
       @RequestParam(required = false) Long subregionId,
       @RequestParam(required = false) Long regionId,
-      @RequestParam(required = false) Long modelId
-    ) {
+      @RequestParam(required = false) Long modelId) {
     Pageable pageable = PageRequest.of(page, 20);
     PageResponse<DeliveryLineListResponse> deliveryOrders = deliveryLineService
         .findAllDeliveryLinesByDeliveryOrderIdPageable(
             deliveryOrderId,
-            minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, subregionId, regionId, modelId, pageable);
+            minRequiredQuantity, maxRequiredQuantity, minLimitDate, maxLimitDate, lineStatus, location, subregionId,
+            regionId, modelId, pageable);
     DataResponse<PageResponse<DeliveryLineListResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, deliveryOrders);
 
@@ -103,32 +98,31 @@ public class DeliveryLineController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getDeliveryLine(@PathVariable Long id) {
     DeliveryLineDetailsResponse deliveryLine = deliveryLineService.findDeliveryLineById(id);
-    DataResponse<DeliveryLineDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<DeliveryLineDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         deliveryLine);
     return ResponseEntity.status(response.status()).body(response);
   }
 
-
   @PutMapping("/{id}")
-  public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id, @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
-    BindingResult result) {
-    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+  public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id,
+      @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
+      BindingResult result) {
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
     validationService.validateFieldsAndThrowResponse(result);
 
-    deliveryLineService.updateDeliveryLineById(id, deliveryLineUpdateRequest, id_user_authenticated);
+    deliveryLineService.updateDeliveryLineById(id, deliveryLineUpdateRequest, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se actualizo la linea de entrega");
     return ResponseEntity.status(response.status()).body(response);
   }
 
-
   @PatchMapping("/{id}/cancel")
   public ResponseEntity<?> cancelDeliveryLine(Authentication authentication, @PathVariable Long id) {
-    Long id_user_authenticated = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-    deliveryLineService.cancelDeliveryLineById(id, id_user_authenticated);
+    deliveryLineService.cancelDeliveryLineById(id, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cancelado la linea de entrega");
@@ -141,8 +135,8 @@ public class DeliveryLineController {
   public ResponseEntity<CommonResponse> sendDeliveryLine(Authentication authentication,
       @PathVariable Long id) {
 
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    deliveryLineService.sendDeliveryLineById(id, id_user);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    deliveryLineService.sendDeliveryLineById(id, userPrincipal.getId());
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha entregado la linea de entrega");
     return ResponseEntity.status(response.status()).body(response);
@@ -152,21 +146,20 @@ public class DeliveryLineController {
   public ResponseEntity<CommonResponse> missingDeliveryLine(Authentication authentication,
       @PathVariable Long id) {
 
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
-    deliveryLineService.missingDeliveryLineById(id, id_user);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    deliveryLineService.missingDeliveryLineById(id, userPrincipal.getId());
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha marcado la linea de entrega como perdida en la entrega");
     return ResponseEntity.status(response.status()).body(response);
   }
 
-
   @PutMapping("/{id}/lost")
   public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
       @PathVariable Long id) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.lostDeliveryLineById(id, deliveryLineAlterRequest, id_user);
+    deliveryLineService.lostDeliveryLineById(id, deliveryLineAlterRequest, userPrincipal.getId());
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha reportado la perdida de la linea de entrega");
     return ResponseEntity.status(response.status()).body(response);
@@ -176,9 +169,9 @@ public class DeliveryLineController {
   public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
       @PathVariable Long id) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.returnDeliveryLineById(id, deliveryLineAlterRequest, id_user);
+    deliveryLineService.returnDeliveryLineById(id, deliveryLineAlterRequest, userPrincipal.getId());
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha devuelto una parte de la linea de entrega");
     return ResponseEntity.status(response.status()).body(response);
@@ -188,14 +181,12 @@ public class DeliveryLineController {
   public ResponseEntity<CommonResponse> allocateStockInDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAllocateRequest deliveryLineAllocateRequest, BindingResult result,
       @PathVariable Long id) {
-    Long id_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
     validationService.validateFieldsAndThrowResponse(result);
-    deliveryLineService.allocateDeliveryLineById(id, deliveryLineAllocateRequest, id_user);
+    deliveryLineService.allocateDeliveryLineById(id, deliveryLineAllocateRequest, userPrincipal.getId());
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha asignado cantidad en toda o una parte de la linea de entrega");
     return ResponseEntity.status(response.status()).body(response);
   }
-
-
 
 }
