@@ -6,6 +6,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,16 +35,16 @@ public class Model_DeliveryOrder {
 
   private boolean status;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "delivery_order_id")
   @NotNull
   private DeliveryOrder deliveryOrder;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "model_id")
   @NotNull
   private Model model;
 
-  @OneToMany(mappedBy = "model_DeliveryOrder")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "model_DeliveryOrder")
   private List<DeliveryLine> deliveryLines;
 }

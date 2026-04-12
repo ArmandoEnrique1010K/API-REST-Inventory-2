@@ -180,6 +180,7 @@ public class DeliveryLineSpecifications {
   }
 
   // ⚡ FETCH (equivalente a JOIN FETCH)
+  //* AQUI HACE UN FETCH HACIA LA RELACION DE REGION
   public static Specification<DeliveryLine> fetchAllRelations() {
     return (root, query, cb) -> {
 

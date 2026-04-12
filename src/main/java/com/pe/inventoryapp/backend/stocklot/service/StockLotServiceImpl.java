@@ -152,7 +152,6 @@ public class StockLotServiceImpl implements StockLotService {
 
     movementRepository.save(movement);
     movementDomainService.deleteLastestMovement();
-    // TODO: VERIFICAR SI ES CORRECTO QUE HAYA 7 QUERIES
   }
 
   @Override
@@ -246,13 +245,14 @@ public class StockLotServiceImpl implements StockLotService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    StockLot stockLot = stockLotRepository.findByIdAndJoins(stockLotId)
+    // TODO: SOLAMENTE SI SE QUIERE OPTIMIZAR UN FINDBYID, UTILIZA ESTE METODO COMENTADO
+    // StockLot stockLot = stockLotRepository.findByIdAndJoins(stockLotId)
+    StockLot stockLot = stockLotRepository.findById(stockLotId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe en el sistema"));
 
     return StockLotMapper.builder().setStockLot(stockLot).buildStockLotDetailsResponse();
   }
 
-  // TODO: CONTINUAR AQUI
   // Método para incrementar la cantidad del lote de stock
   @Override
   @Transactional
@@ -267,11 +267,16 @@ public class StockLotServiceImpl implements StockLotService {
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
     // Encontrar el id del stockLot
-    StockLot stockLot = stockLotRepository.findByIdAndJoins(
+    StockLot stockLot = stockLotRepository.findById(
         idStockLot).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
     // Obtener el id del producto desde el stockLot
+
+    //* AQUI NO HAY RIESGO DE HACER UN QUERY MÁS PORQUE SE OBTIENE EL ID DEL MODELO DESDE EL LOTE DE STOCK, SI FUERA PARA OBTENER EL NOMBRE DEL MODELO, AHI SI OCURRIRIA UN QUERY ADICIONAL EN CONSOLA
+
+    //* Hibernate usa proxies para evitar queries innecesarias, Hibernate no carga
+    // la entidad, solo la referencia… hasta que la necesitas
     Long modelId = stockLot.getModel().getId();
 
     if (modelId == null) {
@@ -281,6 +286,10 @@ public class StockLotServiceImpl implements StockLotService {
     Model model = modelRepository.findById(
         modelId).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo del producto no existe"));
+
+    //* EL CASO EN EL QUE SE QUIERA EVITAR 1 QUERY ADICIONAL, PERO SE OMITE LA PARTE EN QUE SE VALIDA DE QUE EL ID DE MODELO EXISTA
+    // Model model = stockLot.getModel();
+
 
     // Se debe pasar la cantidad en la que se quiere incrementar el stock
     int newQuantityReceived = stockLot.getQuantityReceived() + quantity;
@@ -332,7 +341,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
-    StockLot stockLot = stockLotRepository.findByIdAndJoins(
+    StockLot stockLot = stockLotRepository.findById(
         idStockLot).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
@@ -398,7 +407,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
-    StockLot stockLot = stockLotRepository.findByIdAndJoins(
+    StockLot stockLot = stockLotRepository.findById(
         idStockLot).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
@@ -494,10 +503,10 @@ public class StockLotServiceImpl implements StockLotService {
     }
 
     // Encontrar el modelo por id de stockLot
-    StockLot stockLotEmitter = stockLotRepository.findByIdAndJoins(
+    StockLot stockLotEmitter = stockLotRepository.findById(
         idStockLotEmitter).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock emisor no existe"));
-    StockLot stockLotReceiver = stockLotRepository.findByIdAndJoins(id_stock_lot_receiver).orElseThrow(
+    StockLot stockLotReceiver = stockLotRepository.findById(id_stock_lot_receiver).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock receptor no existe"));
 
     int newAvailableEmitter = stockLotEmitter.getQuantityAvailable() - quantity;

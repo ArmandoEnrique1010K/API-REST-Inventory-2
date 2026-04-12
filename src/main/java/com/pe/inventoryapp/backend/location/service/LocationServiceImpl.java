@@ -69,17 +69,17 @@ public class LocationServiceImpl implements LocationService {
       Long regionId,
       Long subregionId,
       Boolean status) {
-    if (regionId != null && !regionRepository.existsById(regionId)) {
-      throw new BusinessException(
-          ResponseStatus.NOT_FOUND,
-          "La región no existe");
-    }
+    // if (regionId != null && !regionRepository.existsById(regionId)) {
+    //   throw new BusinessException(
+    //       ResponseStatus.NOT_FOUND,
+    //       "La región no existe");
+    // }
 
-    if (subregionId != null && !subregionRepository.existsById(subregionId)) {
-      throw new BusinessException(
-          ResponseStatus.NOT_FOUND,
-          "La subregión no existe");
-    }
+    // if (subregionId != null && !subregionRepository.existsById(subregionId)) {
+    //   throw new BusinessException(
+    //       ResponseStatus.NOT_FOUND,
+    //       "La subregión no existe");
+    // }
 
     Page<Location> locations = locationRepository.findAllByParams(pageable, name, regionId, subregionId, status);
 

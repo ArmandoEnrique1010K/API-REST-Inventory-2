@@ -1,7 +1,17 @@
 package com.pe.inventoryapp.backend.deliveryorder.repository;
 
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 
 public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Long>, JpaSpecificationExecutor<DeliveryOrder> {
@@ -83,4 +93,28 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
 
   // Busca una orden por su batch
   // Optional<DeliveryOrder> findByBatch(String batch);
+
+
+      //* RECORDAR QUE AQUI SE ESCRIBE EL NOMBRE DEL CAMPO QUE CONTIENE LA RELACION @MANYTOONE QUE SE ENCUENTRA EN LA ENTIDAD DELIVERYORDER
+      @EntityGraph(attributePaths = {
+                  "userCreator",
+                  "userUpdater",
+                  "userClient"
+      })
+      @NonNull
+      Page<DeliveryOrder> findAll(
+                  @Nullable Specification<DeliveryOrder> spec,
+                  @Nullable Pageable pageable);
+
+      
+                  @Query("""
+                      SELECT do FROM DeliveryOrder do
+                                JOIN FETCH do.userCreator uc
+                                JOIN FETCH do.userUpdater uu
+                                JOIN FETCH do.userClient ul
+                                WHERE do.id = :id
+
+                      """)
+                  Optional<DeliveryOrder> findByIdAndJoins(Long id);
+
 }

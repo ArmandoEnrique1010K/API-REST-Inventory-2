@@ -63,7 +63,7 @@ public class StockLot {
   @Column(nullable = false)
   private LocalDateTime updatedAt;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "model_id")
   @NotNull
   private Model model;
@@ -74,7 +74,7 @@ public class StockLot {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "stockLot")
   private List<StockLot_DeliveryLine> stockLotDeliveryLines;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "company_id")
   @NotNull
   private Company company;

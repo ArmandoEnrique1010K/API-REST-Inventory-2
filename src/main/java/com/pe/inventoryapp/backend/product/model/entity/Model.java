@@ -87,7 +87,7 @@ public class Model {
   @OneToMany(fetch = FetchType.LAZY,mappedBy = "model")
   private List<StockLot> stockLots;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_id")
   @NotNull
   private Product product;

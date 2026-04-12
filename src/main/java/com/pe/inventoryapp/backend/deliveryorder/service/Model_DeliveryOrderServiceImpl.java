@@ -124,11 +124,18 @@ public class Model_DeliveryOrderServiceImpl implements Model_DeliveryOrderServic
         }
 
         // Solamente si hay al menos una linea de entrega asociada a una relacion de model_DeliveryOrder, ya no se podra eliminar
-        if (model_DeliveryOrder.getDeliveryLines().size() > 0 ) {
+        // if (model_DeliveryOrder.getDeliveryLines().size() > 0 ) {
+        //     throw new BusinessException(
+        //             ResponseStatus.CONFLICT,
+        //             "La relacion de modelo del producto y orden de entrega no puede ser eliminada porque hay cantidades requeridas pendientes");
+        // };
+
+        if (model_DeliveryOrderRepository.existsDeliveryLines(idDeliveryOrder, model_DeliveryOrder.getModel().getId())){
             throw new BusinessException(
                     ResponseStatus.CONFLICT,
                     "La relacion de modelo del producto y orden de entrega no puede ser eliminada porque hay cantidades requeridas pendientes");
-        };
+
+        }
 
         if (model_DeliveryOrder.isStatus() == false) {
             throw new BusinessException(

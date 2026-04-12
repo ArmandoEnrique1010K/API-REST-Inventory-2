@@ -111,7 +111,9 @@ public class StockLotSpecifications {
       var model = getOrCreateJoin(root, "model");
 
       var product = getOrCreateJoin(model, "product");
-      return cb.equal(product.join("category").get("id"), categoryId);
+      var category = getOrCreateJoin(product, "category");
+
+      return cb.equal(category.get("id"), categoryId);
     };
   }
 
@@ -122,7 +124,9 @@ public class StockLotSpecifications {
       var model = getOrCreateJoin(root, "model");
 
       var product = getOrCreateJoin(model, "product");
-      return cb.equal(product.join("type").get("id"), typeId);
+      var type = getOrCreateJoin(product, "type");
+
+      return cb.equal(type.get("id"), typeId);
     };
   }
 

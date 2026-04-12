@@ -17,6 +17,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -58,38 +59,38 @@ public class DeliveryLine {
   @Enumerated(EnumType.STRING)
   private LineStatus lineStatus;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "location_id")
   @NotNull
   private Location location;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_creator_id")
   @NotNull
   private User userCreator;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_updater_id")
   @NotNull
   private User userUpdater;
 
-  @OneToMany(mappedBy = "deliveryLine")
+  @OneToMany(fetch = FetchType.LAZY,mappedBy = "deliveryLine")
   private List<StockLot_DeliveryLine> stockLotDeliveryLines;
 
-  @OneToMany(mappedBy = "deliveryLine")
+  @OneToMany(fetch = FetchType.LAZY,mappedBy = "deliveryLine")
   private List<Movement> movements;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "model_id")
   @NotNull
   private Model model;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "model_delivery_order_id")
   @NotNull
   private Model_DeliveryOrder model_DeliveryOrder;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "delivery_order_id")
   @NotNull
   private DeliveryOrder deliveryOrder;

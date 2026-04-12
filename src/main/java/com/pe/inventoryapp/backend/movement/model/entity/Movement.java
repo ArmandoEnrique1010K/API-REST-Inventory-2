@@ -76,11 +76,11 @@ public class Movement {
   @Nullable
   private DeliveryLine deliveryLine;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "model_id")
   @NotNull
   private Model model;
   
-  @OneToMany(mappedBy = "movement", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "movement", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Movement_StockLot> movement_StockLots;
 }

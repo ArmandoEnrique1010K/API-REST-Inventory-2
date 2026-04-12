@@ -14,6 +14,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -58,24 +59,24 @@ public class DeliveryOrder {
   @Enumerated(EnumType.STRING)
   private OrderStatus orderStatus;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_creator_id")
   @NotNull
   private User userCreator;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_updater_id")
   @NotNull
   private User userUpdater;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_client_id")
   @NotNull
   private User userClient;
 
-  @OneToMany(mappedBy = "deliveryOrder")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "deliveryOrder")
   private List<DeliveryLine> deliveryLines;
 
-  @OneToMany(mappedBy = "deliveryOrder")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "deliveryOrder")
   private List<Model_DeliveryOrder> model_DeliveryOrders;
 }

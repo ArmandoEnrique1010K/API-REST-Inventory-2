@@ -2,8 +2,10 @@ package com.pe.inventoryapp.backend.deliveryline.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -252,11 +254,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       Long regionId,
       Long modelId,
       Pageable pageable) {
-    if (deliveryOrderId != null && !deliveryOrderRepository.existsById(deliveryOrderId)) {
-      throw new BusinessException(
-          ResponseStatus.NOT_FOUND,
-          "La orden de entrega no existe");
-    }
+    // if (deliveryOrderId != null &&
+    // !deliveryOrderRepository.existsById(deliveryOrderId)) {
+    // throw new BusinessException(
+    // ResponseStatus.NOT_FOUND,
+    // "La orden de entrega no existe");
+    // }
 
     // Page<DeliveryLine> deliveryLines =
     // deliveryLineRepository.searchAllByDeliveryOrderIdAndParams(
@@ -272,7 +275,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .and(DeliveryLineSpecifications.hasSubregion(subregionId))
         .and(DeliveryLineSpecifications.hasRegion(regionId))
         .and(DeliveryLineSpecifications.hasModel(modelId))
-        .and(DeliveryLineSpecifications.isNotCanceled());
+        .and(DeliveryLineSpecifications.isNotCanceled())
+        .and(DeliveryLineSpecifications.fetchAllRelations());
 
     Pageable sortedPageable = PageRequest.of(
         pageable.getPageNumber(),
@@ -307,7 +311,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    DeliveryLine deliveryLine = deliveryLineRepository.findById(id)
+    DeliveryLine deliveryLine = deliveryLineRepository.findByIdAndJoins(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La linea de entrega no existe"));
 
     if (deliveryLine == null) {
@@ -566,6 +570,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // }
     // }
 
+    // * */
+
     boolean allCanceled = deliveryLineRepository.allLinesAreCanceled(deliveryOrderId);
     boolean allReady = deliveryLineRepository.allLinesAreReady(deliveryOrderId);
 
@@ -583,6 +589,25 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     } else {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
+
+    // Object[] result = deliveryLineRepository.getStatusSummary(deliveryOrderId);
+    // Long total = (Long) result[0];
+    // Long canceled = (Long) result[1];
+    // Long ready = (Long) result[2];
+    // Long deliveredOrMissing = (Long) result[3];
+
+    // if (canceled.equals(total)) {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_CANCELED);
+
+    // } else if (deliveredOrMissing > 0) {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_PARTIALLY_DELIVERED);
+
+    // } else if (ready.equals(total)) {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+
+    // } else {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
+    // }
 
     deliveryOrderRepository.save(deliveryOrder);
 
@@ -609,7 +634,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     storageTempStockLot(deliveryLine, quantity);
 
-    Model model = deliveryLine.getModel();
+    // Model model = deliveryLine.getModel();
+
+    Model model = modelRepository.findById(deliveryLine.getModel().getId()).get();
 
     model.setTotalQuantityAvailable(
         model.getTotalQuantityAvailable() + quantity);
@@ -958,12 +985,25 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // Recalcular fecha prioritaria (la más próxima)
     deliveryOrder.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(deliveryOrder.getId()));
 
+    // Object[] result = deliveryLineRepository.getStatusSummary//
+    // (deliveryOrderId);
+    // Long total = (Long) result[0];
+    // Long canceled = (Long) result[1];
+    // Long ready = (Long) result[2];
+    // Long deliveredOrMissing = (Long) result[3];
+
     // Verificar si todas las líneas están completas
     if (deliveryLineRepository.allLinesAreReady(deliveryOrderId)) {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
     } else {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
+
+    // if (ready.equals(total)) {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+    // } else {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
+    // }
 
     deliveryOrderRepository.save(deliveryOrder);
 
@@ -1083,8 +1123,19 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
           "Uno o más lotes no existen");
     }
 
+    // EL ORDEN DE LOS LOTES DE STOCKS IMPORTA
+    // Crea un map
+    Map<Long, StockLot> map = stockLots.stream()
+        .collect(Collectors.toMap(StockLot::getId, sl -> sl));
+
+    // Recorre los IDs originales, El orden lo define stockLotIds, no la BD
+    List<StockLot> ordered = stockLotIds.stream()
+        .map(map::get)
+        .toList();
+
+
     // Validar que todos pertenezcan al modelo
-    for (StockLot stockLot : stockLots) {
+    for (StockLot stockLot : ordered) {
 
       if (!stockLot.getModel().getId().equals(model.getId())) {
         throw new BusinessException(
@@ -1107,7 +1158,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       }
     }
 
-    return stockLots;
+    return ordered;
   }
 
   @Transactional
@@ -1275,11 +1326,24 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryOrder.setPriorityDate(
         deliveryOrderDomainService.getClosestLimitDate(deliveryOrder.getId()));
 
+    // Object[] result =
+    // deliveryLineRepository.getStatusSummary(deliveryOrder.getId());
+    // Integer, Long, BigInteger → todos extienden Number
+    // Long total = ((Number) result[0]).longValue();
+    // Long canceled = (Long) result[1];
+    // Long ready = ((Number) result[2]).longValue();
+    // Long deliveredOrMissing = (Long) result[3];
+
     if (deliveryLineRepository.allLinesAreReady(deliveryOrder.getId())) {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
     } else {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
+    // if (ready.equals(total)) {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+    // } else {
+    // deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
+    // }
 
     deliveryOrderRepository.save(deliveryOrder);
 

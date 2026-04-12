@@ -118,17 +118,17 @@ public class ProductServiceImpl implements ProductService {
   @Transactional(readOnly = true)
   public PageResponse<ProductResponse> searchAllProductsByParams(Pageable pageable, String name, Boolean status, Long categoryId, Long typeId) {
 
-    if (categoryId != null && !categoryRepository.existsById(categoryId)) {
-      throw new BusinessException(
-          ResponseStatus.NOT_FOUND,
-          "La categoria no existe");
-    }
+    // if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+    //   throw new BusinessException(
+    //       ResponseStatus.NOT_FOUND,
+    //       "La categoria no existe");
+    // }
 
-    if (typeId != null && !typeRepository.existsById(typeId)) {
-      throw new BusinessException(
-          ResponseStatus.NOT_FOUND,
-          "El tipo no existe");
-    }
+    // if (typeId != null && !typeRepository.existsById(typeId)) {
+    //   throw new BusinessException(
+    //       ResponseStatus.NOT_FOUND,
+    //       "El tipo no existe");
+    // }
 
     Page<Product> products = productRepository.findAllByParams(pageable, name,  status, categoryId, typeId);
 

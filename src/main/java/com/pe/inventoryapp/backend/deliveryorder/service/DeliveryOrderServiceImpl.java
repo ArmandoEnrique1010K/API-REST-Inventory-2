@@ -271,7 +271,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
-		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+		// TODO: EN ESTE CASO SI SE ESTA OPTIMIZANDO EL QUERY
+		// DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+				DeliveryOrder deliveryOrder = deliveryOrderRepository.findByIdAndJoins(id)
+
 				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
 		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
@@ -292,7 +295,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
-		DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
+		DeliveryOrder deliveryOrder = deliveryOrderRepository.findByIdAndJoins(id)
 				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
 		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
@@ -324,6 +327,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// }
 	}
 
+	// TODO: PENDIENTE
 	// Cambia la fecha limite de una orden de entrega
 	@Override
 	@Transactional
@@ -344,6 +348,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 					"La fecha límite es obligatoria");
 		}
 
+		if (limitDate.isBefore(LocalDateTime.now())) {
+			throw new BusinessException(
+					ResponseStatus.CONFLICT,
+					"La fecha límite debe ser igual o posterior a la fecha y hora actual");
+		}
+
 		if (deliveryOrder.getPriorityDate() != null && deliveryOrder.getPriorityDate().isAfter(limitDate)) {
 			throw new BusinessException(
 					ResponseStatus.CONFLICT,
@@ -357,6 +367,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrderRepository.save(deliveryOrder);
 	}
 
+	// TODO: PENDIENTE
 	@Override
 	@Transactional
 	public void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest,
@@ -439,10 +450,10 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// dl.getLineStatus() == LineStatus.LINE_MISSING);
 
 		// Nota: Este método tambien contiene la logica para guardarlo en el repositorio
-		// updateDeliveryOrderStatus(deliveryOrder, user, hasDeliveredOrMissing);
 		updateDeliveryOrderStatus(deliveryOrder, user, deliveryLines);
 	}
 
+	// TODO: PENDIENTE
 	@Override
 	@Transactional
 	public void markDeliveryOrderAsDelivered(Long id, Long id_user) {

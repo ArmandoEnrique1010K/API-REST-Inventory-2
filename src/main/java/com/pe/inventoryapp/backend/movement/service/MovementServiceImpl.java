@@ -45,10 +45,10 @@ public class MovementServiceImpl implements MovementService {
 				.and(MovementSpecifications.createdAtBetween(minCreatedAt, maxCreatedAt))
 				.and(MovementSpecifications.hasMovementType(movementType))
 				.and(MovementSpecifications.usernameContains(username))
-				.and(MovementSpecifications.keywordContains(keyword))
+				.and(MovementSpecifications.keywordContains(keyword));
 
 		// opcional si necesitas evitar N+1
-		.and(MovementSpecifications.fetchRelations());
+		// .and(MovementSpecifications.fetchRelations());
 		// spec = spec.and(MovementSpecifications.fetchRelations());
 
 		Pageable sortedPageable = PageRequest.of(

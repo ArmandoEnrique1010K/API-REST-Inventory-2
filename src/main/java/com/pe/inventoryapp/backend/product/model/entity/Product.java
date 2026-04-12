@@ -51,7 +51,7 @@ public class Product {
   @Column(nullable = false)
   private LocalDateTime updatedAt;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "category_id")
   @NotNull
   private Category category;
@@ -59,7 +59,7 @@ public class Product {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
   private List<Model> models;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "type_id")
   @NotNull
   private Type type;

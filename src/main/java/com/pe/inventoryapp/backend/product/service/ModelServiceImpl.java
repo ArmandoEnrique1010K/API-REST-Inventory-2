@@ -109,13 +109,13 @@ public class ModelServiceImpl implements ModelService {
       Integer maxStock,
       LocalDate minEntryDate, LocalDate maxEntryDate, Boolean status, Long categoryId, Long typeId) {
 
-    if (categoryId != null && !categoryRepository.existsById(categoryId)) {
-      throw new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe");
-    }
+    // if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+    //   throw new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe");
+    // }
 
-    if (typeId != null && !typeRepository.existsById(typeId)) {
-      throw new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe");
-    }
+    // if (typeId != null && !typeRepository.existsById(typeId)) {
+    //   throw new BusinessException(ResponseStatus.NOT_FOUND, "El tipo no existe");
+    // }
 
     // No utilizar una query
     // Page<Model> models = modelRepository.findAllByParams(pageable, keyword,

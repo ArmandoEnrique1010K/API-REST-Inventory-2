@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,11 +32,11 @@ public class Subregion {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "region_id")
     @NotNull
     private Region region;
 
-    @OneToMany(mappedBy = "subregion")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "subregion")
     private List<Location> locations;
 }
