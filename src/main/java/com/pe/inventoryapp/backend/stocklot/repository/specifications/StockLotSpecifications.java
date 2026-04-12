@@ -153,7 +153,7 @@ public class StockLotSpecifications {
       //   product.join("type", JoinType.LEFT);
       //   root.join("company", JoinType.LEFT);
       // }
-      if (query.getResultType() != Long.class) {
+      if (query != null && query.getResultType() != Long.class) {
 
         root.fetch("company", JoinType.LEFT);
 
@@ -168,7 +168,18 @@ public class StockLotSpecifications {
     };
   }
 
-  // REUTILIZA JOINS
+  /*
+   * UTILIDAD CLAVE:
+   *
+   * Evita que Hibernate genere múltiples JOIN duplicados.
+   *
+   * SIN esto:
+   * - Tendrías queries con:
+   * modelos m1, m2, m3...
+   *
+   * CON esto:
+   * - Reutiliza joins existentes
+   */
   public static Join<?, ?> getOrCreateJoin(From<?, ?> root, String attribute) {
     return root.getJoins().stream()
         .filter(j -> j.getAttribute().getName().equals(attribute))

@@ -15,7 +15,6 @@ import org.springframework.lang.Nullable;
 
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
-
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
         // Busca al usuario mediante su email, firstname, lastname y/o dni desde un
         // parametro
@@ -60,27 +59,55 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
         /**
          * Sobrescribe el método findAll de JpaSpecificationExecutor
-         * para agregar carga optimizada de la relación "roles".
          *
-         * 🔥 EntityGraph:
-         * - Evita el problema N+1 (múltiples queries)
-         * - Hace un JOIN automático para traer roles en la misma consulta
+         * IMPORTANTE:
+         * NO se utiliza @EntityGraph para relaciones @ManyToMany (como "roles")
+         * cuando se trabaja con paginación (Pageable).
+         *
+         * ¿Por qué?
+         * - Hibernate no puede paginar correctamente cuando hay JOIN FETCH de
+         * colecciones
+         * - Provoca el warning:
+         * HHH90003004: applying in memory
+         * - La paginación se hace en memoria (MUY ineficiente)
+         *
+         * Solución correcta:
+         * - Mantener la relación como LAZY
+         * - Usar @BatchSize en la entidad
+         *
+         * Resultado:
+         * - 1 query para usuarios (con LIMIT correcto)
+         * - 1 query adicional para roles (con IN ...)
+         * - Sin N+1 y sin romper paginación
          *
          * @param spec     filtro dinámico (puede ser null)
          * @param pageable paginación + ordenamiento
-         * @return página de usuarios con roles ya cargados
          */
-        @EntityGraph(attributePaths = { "roles" })
+        @EntityGraph // ← aquí no afecta porque no se definen attributePaths
         @NonNull
         Page<User> findAll(
                         @Nullable Specification<User> spec,
                         @Nullable Pageable pageable);
 
-                //* EN LA CONSOLA SE VE UN LEFT JOIN POR CADA RELACION DE CADA ENTIDAD, RECORDAR QUE EXISTE UNA TABLA INTERMEDIA ENTRE USER Y ROLES PORQUE ES UNA RELACION MANY TO MANY
+        // * EN LA CONSOLA SE VE UN LEFT JOIN POR CADA RELACION DE CADA ENTIDAD,
+        // RECORDAR QUE EXISTE UNA TABLA INTERMEDIA ENTRE USER Y ROLES PORQUE ES UNA
+        // RELACION MANY TO MANY
 
-
-        // Obtener un usuario por su email
-        // Optional<User> findByEmail(String email);
+        /**
+         * En relaciones @ManyToMany, usar JOIN FETCH rompe la paginación y duplica
+         * resultados. Como hay una tabla intermedia (por ejemplo usuarios_roles), el
+         * JOIN genera múltiples filas por cada combinación usuario-rol. Entonces
+         * Hibernate tiene que hacer DISTINCT, puede paginar en memoria (mal
+         * rendimiento) y además aparecen errores con GROUP BY o resultados inflados.
+         * 
+         * Por eso en ManyToMany normalmente se evita JOIN FETCH y se prefiere:
+         * 
+         * @BatchSize (carga por lotes)
+         * o queries separadas controladas
+         * 
+         * En corto:
+         * JOIN FETCH + ManyToMany + paginación = combinación problemática.
+         */
 
         @Query("""
                         SELECT u FROM User u
@@ -113,8 +140,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
         boolean existsByEmail(String email);
 
-        //* NO HAY SOLUCION AL PROBLEMA DE LAS 2 QUERIES AL UTILIZAR EL METODO FINDALL SOBREESCRITO DE ESTE REPOSITORIO, SIEMPRE SE HARAN 2 QUERIES, 1 PARA OBTENER LOS DATOS Y EL OTRO PARA CONTAR LA CANTIDAD DE LOS DATOS*/
-
+        // * NO HAY SOLUCION AL PROBLEMA DE LAS 2 QUERIES AL UTILIZAR EL METODO FINDALL
+        // SOBREESCRITO DE ESTE REPOSITORIO, SIEMPRE SE HARAN 2 QUERIES, 1 PARA OBTENER
+        // LOS DATOS Y EL OTRO PARA CONTAR LA CANTIDAD DE LOS DATOS*/
 
         // Lista los primeros 10 usuarios que coincidan con el parametro de busqueda
         // @Query("""

@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
@@ -57,7 +56,7 @@ public class Product {
   @NotNull
   private Category category;
 
-  @OneToMany(mappedBy = "product")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
   private List<Model> models;
 
   @ManyToOne

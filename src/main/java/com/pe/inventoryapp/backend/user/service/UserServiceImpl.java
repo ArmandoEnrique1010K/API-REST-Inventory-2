@@ -69,11 +69,19 @@ public class UserServiceImpl implements UserService {
       String keyword, List<Long> roleIds, Pageable pageable) {
     Page<User> users = null;
 
-    // Si existe alguna busqueda por roles, debe asegurarse que busque por los roles
-    // seleccionados
-    if (roleIds == null || roleIds.isEmpty()) {
-      Specification<User> spec = (UserSpecifications.keywordContains(keyword));
+    /**
+     * IMPORTANTE:
+     * - NO usamos fetchRelations()
+     * - Dejamos que Hibernate cargue roles con @BatchSize
+     * - Así mantenemos paginación real en DB
+     */
 
+    if (roleIds == null || roleIds.isEmpty()) {
+
+      System.out.println("SIN ROLES");
+
+      Specification<User> spec = (UserSpecifications.keywordContains(keyword)).and(UserSpecifications.isActive());
+      
       Pageable sortedPageable = PageRequest.of(
           pageable.getPageNumber(),
           pageable.getPageSize(),
@@ -81,9 +89,16 @@ public class UserServiceImpl implements UserService {
 
       users = userRepository.findAll(spec, sortedPageable);
     } else {
+      /**
+       * Aquí entra hasExactRoles
+       * - NO usa JOIN en la query principal
+       * - Usa subqueries
+       * - Compatible con paginación
+       */
       Specification<User> spec = (UserSpecifications.keywordContains(keyword))
           .and(UserSpecifications.isActive())
           .and(UserSpecifications.hasExactRoles(roleIds));
+
       Pageable sortedPageable = PageRequest.of(
           pageable.getPageNumber(),
           pageable.getPageSize(),
@@ -92,6 +107,11 @@ public class UserServiceImpl implements UserService {
       users = userRepository.findAll(spec, sortedPageable);
     }
 
+    /**
+     * Aquí se disparará la carga de roles
+     * - Hibernate hará 1 query adicional con IN (...)
+     * - Gracias a @BatchSize
+     */
     List<ListUsersResponse> result = users.getContent().stream()
         .map(user -> UserMapper.builder()
             .setUser(user)

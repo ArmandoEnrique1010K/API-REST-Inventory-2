@@ -178,6 +178,8 @@ public class StockLotServiceImpl implements StockLotService {
     // companyId, categoryId, typeId, modelId,pageable);
 
     Specification<StockLot> spec = Specification.unrestricted();
+
+    // 1. FILTROS (SIEMPRE PRIMERO)
     spec = spec.and(StockLotSpecifications.quantityReceivedBeetween(minQuantityReceived, maxQuantityReceived));
     spec = spec.and(StockLotSpecifications.quantityAvailableBeetween(minQuantityAvailable, maxQuantityAvailable));
     spec = spec.and(StockLotSpecifications.createdAtBetween(minCreatedAt, maxCreatedAt));
@@ -188,7 +190,14 @@ public class StockLotServiceImpl implements StockLotService {
     spec = spec.and(StockLotSpecifications.hasModel(modelId));
     spec = spec.and(StockLotSpecifications.isNotZeroStock());
 
-    // SIEMPRE AL FINAL SE TOMA LAS RELACIONES
+    /*
+     * SIEMPRE AL FINAL
+     *
+     * ¿Por qué?
+     * - fetch() modifica el query
+     * - si lo pones antes, otros specs pueden meter joins duplicados
+     * - al final, garantiza estructura limpia
+     */
     spec = spec.and(StockLotSpecifications.fetchRelations());
 
     // Ordenar los elementos de acuerdo al campo de createdAt de forma descendente
@@ -237,12 +246,13 @@ public class StockLotServiceImpl implements StockLotService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    StockLot stockLot = stockLotRepository.findById(stockLotId)
+    StockLot stockLot = stockLotRepository.findByIdAndJoins(stockLotId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe en el sistema"));
 
     return StockLotMapper.builder().setStockLot(stockLot).buildStockLotDetailsResponse();
   }
 
+  // TODO: CONTINUAR AQUI
   // Método para incrementar la cantidad del lote de stock
   @Override
   @Transactional
@@ -257,7 +267,7 @@ public class StockLotServiceImpl implements StockLotService {
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
     // Encontrar el id del stockLot
-    StockLot stockLot = stockLotRepository.findById(
+    StockLot stockLot = stockLotRepository.findByIdAndJoins(
         idStockLot).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
@@ -322,7 +332,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
-    StockLot stockLot = stockLotRepository.findById(
+    StockLot stockLot = stockLotRepository.findByIdAndJoins(
         idStockLot).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
@@ -388,7 +398,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     Integer quantity = stockLotAdjustmentRequest.getQuantity();
 
-    StockLot stockLot = stockLotRepository.findById(
+    StockLot stockLot = stockLotRepository.findByIdAndJoins(
         idStockLot).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe"));
 
@@ -484,10 +494,10 @@ public class StockLotServiceImpl implements StockLotService {
     }
 
     // Encontrar el modelo por id de stockLot
-    StockLot stockLotEmitter = stockLotRepository.findById(
+    StockLot stockLotEmitter = stockLotRepository.findByIdAndJoins(
         idStockLotEmitter).orElseThrow(
             () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock emisor no existe"));
-    StockLot stockLotReceiver = stockLotRepository.findById(id_stock_lot_receiver).orElseThrow(
+    StockLot stockLotReceiver = stockLotRepository.findByIdAndJoins(id_stock_lot_receiver).orElseThrow(
         () -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock receptor no existe"));
 
     int newAvailableEmitter = stockLotEmitter.getQuantityAvailable() - quantity;

@@ -14,6 +14,7 @@ import com.pe.inventoryapp.backend.stocklot.model.entity.StockLot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -74,16 +75,16 @@ public class Model {
   @NotNull
   private boolean status;
 
-  @OneToMany(mappedBy = "model")
+  @OneToMany(fetch = FetchType.LAZY,mappedBy = "model")
   private List<Model_DeliveryOrder> productDeliveryOrders;
 
-  @OneToMany(mappedBy = "model")
+  @OneToMany(fetch = FetchType.LAZY,mappedBy = "model")
   private List<Movement> movements;
 
-  @OneToMany(mappedBy = "model")
+  @OneToMany(fetch = FetchType.LAZY,mappedBy = "model")
   private List<DeliveryLine> deliveryLines;
 
-  @OneToMany(mappedBy = "model")
+  @OneToMany(fetch = FetchType.LAZY,mappedBy = "model")
   private List<StockLot> stockLots;
 
   @ManyToOne

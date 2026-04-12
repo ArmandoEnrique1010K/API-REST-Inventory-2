@@ -18,6 +18,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+import org.hibernate.annotations.BatchSize;
+
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
@@ -50,14 +53,44 @@ public class User  {
   @JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
       @UniqueConstraint(columnNames = { "user_id", "role_id" })
   })
+
+  /**
+   * @BatchSize
+   *
+   * Soluciona el problema N+1 en relaciones MANY TO MANY sin usar JOIN FETCH.
+   *
+   * ¿Cómo funciona?
+   *
+   * Supongamos que traes 10 usuarios:
+   *
+   * Sin @BatchSize:
+   * - 1 query para usuarios
+   * - 10 queries para roles (1 por usuario)
+   * → N+1 problem
+   *
+   * Con @BatchSize(size = 20):
+   * - 1 query para usuarios
+   * - 1 query para roles:
+   * SELECT * FROM roles WHERE user_id IN (...)
+   *
+   * IMPORTANTE:
+   * - "20" no es cantidad de usuarios
+   * - Es el tamaño del lote que Hibernate agrupa para cargar relaciones
+   *
+   * Beneficios:
+   * - Evita N+1
+   * - Compatible con paginación
+   * - No rompe SQL ni genera duplicados
+   */
+  @BatchSize(size = 20)
   private List<Role> roles;
   
-  @OneToMany(mappedBy = "user")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
   private List<Movement> movements;
 
-  @OneToMany(mappedBy = "userCreator")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "userCreator")
   private List<DeliveryOrder> deliveryOrders;
 
-  @OneToMany(mappedBy = "userCreator")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "userCreator")
   private List<DeliveryLine> deliveryLines;
 }

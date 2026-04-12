@@ -134,6 +134,7 @@ public class ModelServiceImpl implements ModelService {
     spec = spec.and(ModelSpecifications.hasStatus(status));
     spec = spec.and(ModelSpecifications.hasCategory(categoryId));
     spec = spec.and(ModelSpecifications.hasType(typeId));
+    // spec = spec.and(ModelSpecifications.fetchRelations());
 
     // Para ordenar los elementos de forma descendente de acuerdo al ID se utiliza el siguiente codigo
     Pageable sortedPageable = PageRequest.of(
@@ -328,6 +329,7 @@ public class ModelServiceImpl implements ModelService {
 
     List<Model> models = modelRepository.findAll(spec, pageable).getContent();
 
+    //* NO SE PUEDE IGNORAR EL SEGUNDO QUERY (COUNT) QUE SE HACE EN LA CONSOLA
     return models.stream().map(model -> ModelMapper.builder().setModel(model).buildModelListSearchFirstTenResponse())
         .collect(Collectors.toList());
   }
