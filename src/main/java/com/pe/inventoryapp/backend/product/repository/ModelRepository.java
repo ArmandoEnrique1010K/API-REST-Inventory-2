@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.product.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,130 +18,139 @@ import com.pe.inventoryapp.backend.product.model.entity.Model;
 // Para implementar un Specification, añade "JpaSpecificationExecutor" seguido del nombre de la entidad
 public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecificationExecutor<Model> {
 
-  // * INVESTIGACION SOBRE SPECIFICATION EN SPRING BOOT
+    // * INVESTIGACION SOBRE SPECIFICATION EN SPRING BOOT
 
-  // ESTO ES UNA MALA PRACTICA EN SISTEMAS GRANDES
-  // Query personalizado para buscar productos mediante parametros
-  // @Query("""
-  // SELECT m
-  // FROM Model m
-  // JOIN m.product p
-  // WHERE (
-  // :keyword IS NULL OR
-  // LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-  // LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-  // )
-  // AND (:minStock IS NULL OR m.totalQuantityAvailable >= :minStock)
-  // AND (:maxStock IS NULL OR m.totalQuantityAvailable <= :maxStock)
-  // AND (:minEntryDate IS NULL OR m.entryDate >= :minEntryDate)
-  // AND (:maxEntryDate IS NULL OR m.entryDate <= :maxEntryDate)
-  // AND (:status IS NULL OR m.status = :status)
-  // AND (:categoryId IS NULL OR p.category.id = :categoryId)
-  // AND (:typeId IS NULL OR p.type.id = :typeId)
-  // ORDER BY m.id DESC
-  // """)
-  // Page<Model> findAllByParams(
-  // Pageable pageable,
-  // @Param("keyword") String keyword,
-  // @Param("minStock") Integer minStock,
-  // @Param("maxStock") Integer maxStock,
-  // @Param("minEntryDate") LocalDate minEntryDate,
-  // @Param("maxEntryDate") LocalDate maxEntryDate,
-  // @Param("status") Boolean status,
-  // @Param("categoryId") Long categoryId,
-  // @Param("typeId") Long typeId);
+    // ESTO ES UNA MALA PRACTICA EN SISTEMAS GRANDES
+    // Query personalizado para buscar productos mediante parametros
+    // @Query("""
+    // SELECT m
+    // FROM Model m
+    // JOIN m.product p
+    // WHERE (
+    // :keyword IS NULL OR
+    // LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+    // LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    // )
+    // AND (:minStock IS NULL OR m.totalQuantityAvailable >= :minStock)
+    // AND (:maxStock IS NULL OR m.totalQuantityAvailable <= :maxStock)
+    // AND (:minEntryDate IS NULL OR m.entryDate >= :minEntryDate)
+    // AND (:maxEntryDate IS NULL OR m.entryDate <= :maxEntryDate)
+    // AND (:status IS NULL OR m.status = :status)
+    // AND (:categoryId IS NULL OR p.category.id = :categoryId)
+    // AND (:typeId IS NULL OR p.type.id = :typeId)
+    // ORDER BY m.id DESC
+    // """)
+    // Page<Model> findAllByParams(
+    // Pageable pageable,
+    // @Param("keyword") String keyword,
+    // @Param("minStock") Integer minStock,
+    // @Param("maxStock") Integer maxStock,
+    // @Param("minEntryDate") LocalDate minEntryDate,
+    // @Param("maxEntryDate") LocalDate maxEntryDate,
+    // @Param("status") Boolean status,
+    // @Param("categoryId") Long categoryId,
+    // @Param("typeId") Long typeId);
 
-  // En lugar de un Query complejo, se tiene que utilizar un Specification
+    // En lugar de un Query complejo, se tiene que utilizar un Specification
 
-  // Query para listar todos los modelos y productos que esten activos, sin
-  // parametros
-  // @Query("""
-  // SELECT m
-  // FROM Model m
-  // JOIN m.product p
-  // WHERE (
-  // :keyword IS NULL OR
-  // LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-  // LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-  // )
-  // AND m.status = TRUE AND p.status = TRUE
-  // ORDER BY m.id DESC
-  // """)
-  // Page<Model> findAllActivesByName(
-  // Pageable pageable,
-  // @Param("keyword") String keyword);
+    // Query para listar todos los modelos y productos que esten activos, sin
+    // parametros
+    // @Query("""
+    // SELECT m
+    // FROM Model m
+    // JOIN m.product p
+    // WHERE (
+    // :keyword IS NULL OR
+    // LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+    // LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    // )
+    // AND m.status = TRUE AND p.status = TRUE
+    // ORDER BY m.id DESC
+    // """)
+    // Page<Model> findAllActivesByName(
+    // Pageable pageable,
+    // @Param("keyword") String keyword);
 
-  // Lista de los primeros 10 modelos que coincidan con el parametro
-  // El producto y el modelo deben sus estados en true
-  // @Query("""
-  // SELECT m
-  // FROM Model m
-  // JOIN m.product p
-  // WHERE m.status = true AND p.status = true
-  // AND (
-  // :keyword IS NULL OR
-  // LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-  // LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-  // )
-  // ORDER BY m.id DESC LIMIT 10
-  // """)
-  // List<Model> findAllFirstTenModelsByParams(@Param("keyword") String keyword);
+    // Lista de los primeros 10 modelos que coincidan con el parametro
+    // El producto y el modelo deben sus estados en true
+    // @Query("""
+    // SELECT m
+    // FROM Model m
+    // JOIN m.product p
+    // WHERE m.status = true AND p.status = true
+    // AND (
+    // :keyword IS NULL OR
+    // LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+    // LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    // )
+    // ORDER BY m.id DESC LIMIT 10
+    // """)
+    // List<Model> findAllFirstTenModelsByParams(@Param("keyword") String keyword);
 
-  // Listar todos los modelos que pertenecen a un producto
-  @Query("""
-      SELECT m
-      FROM Model m
-      JOIN FETCH m.product p
-      JOIN FETCH p.category c
-      JOIN FETCH p.type t
-      WHERE p.id = :productId
-      ORDER BY m.id DESC
-      """)
-  List<Model> findAllByProductId(Long productId);
+    // Listar todos los modelos que pertenecen a un producto
+    @Query("""
+            SELECT m
+            FROM Model m
+            JOIN FETCH m.product p
+            JOIN FETCH p.category c
+            JOIN FETCH p.type t
+            WHERE p.id = :productId
+            ORDER BY m.id DESC
+            """)
+    List<Model> findAllByProductId(Long productId);
 
-  // Método para verificar que el nombre de modelo sea unico dentro de la lista de
-  // modelos de un producto por id
-  boolean existsByNameAndProductId(String name, Long productId);
+    // Método para verificar que el nombre de modelo sea unico dentro de la lista de
+    // modelos de un producto por id
+    boolean existsByNameAndProductId(String name, Long productId);
 
-  // Método para verificar que el nombre de modelo sea unico dentro de la lista de
-  // modelos de un producto por id, excluyendo un id de modelo específico (para
-  // actualizaciones)
-  boolean existsByNameAndProductIdAndIdNot(String name, Long productId, Long id);
+    // Método para verificar que el nombre de modelo sea unico dentro de la lista de
+    // modelos de un producto por id, excluyendo un id de modelo específico (para
+    // actualizaciones)
+    boolean existsByNameAndProductIdAndIdNot(String name, Long productId, Long id);
 
-  // En este caso se hace un "JOIN FETCH" hacia esas 3 entidades
-  @EntityGraph(attributePaths = { "product", "product.category", "product.type" })
-  @NonNull
-  Page<Model> findAll(
-      @Nullable Specification<Model> spec,
-      @Nullable Pageable pageable);
-  // * Para evitar las advertencias que aparecen en el IDE VSCode, se colocan las
-  // anotaciones @NonNull y @Nullable Respectivamente
+    // En este caso se hace un "JOIN FETCH" hacia esas 3 entidades
+    @EntityGraph(attributePaths = { "product", "product.category", "product.type" })
+    @NonNull
+    Page<Model> findAll(
+            @Nullable Specification<Model> spec,
+            @Nullable Pageable pageable);
+    // * Para evitar las advertencias que aparecen en el IDE VSCode, se colocan las
+    // anotaciones @NonNull y @Nullable Respectivamente
 
-  // * Recuerda que este método siempre va a traer 2 queries: la lista de
-  // elementos y el numero de elementos
+    // * Recuerda que este método siempre va a traer 2 queries: la lista de
+    // elementos y el numero de elementos
 
-  // * Puede omitir el counter si el resultado de la query tiene menos de 20
-  // registros (considerando pageSize a 20, el limite de registros por pagina),
-  // pero no si tiene exactamente 20 registros o más
+    // * Puede omitir el counter si el resultado de la query tiene menos de 20
+    // registros (considerando pageSize a 20, el limite de registros por pagina),
+    // pero no si tiene exactamente 20 registros o más
 
-  // Para listar los primeros 10
-  // @EntityGraph(attributePaths = { "product", "product.category", "product.type"
-  // })
-  // @Query("""
-  // SELECT m FROM Model m
-  // JOIN m.product p
-  // WHERE
-  // (:productName IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :productName,
-  // '%')))
-  // AND (:modelName IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :modelName,
-  // '%')))
-  // AND m.status = true
-  // ORDER BY m.id DESC
-  // """)
-  // List<Model> searchTop10(
-  // @Param("productName") String productName,
-  // @Param("modelName") String modelName,
-  // Pageable pageable
-  // );
+    // Para listar los primeros 10
+    // @EntityGraph(attributePaths = { "product", "product.category", "product.type"
+    // })
+    // @Query("""
+    // SELECT m FROM Model m
+    // JOIN m.product p
+    // WHERE
+    // (:productName IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :productName,
+    // '%')))
+    // AND (:modelName IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :modelName,
+    // '%')))
+    // AND m.status = true
+    // ORDER BY m.id DESC
+    // """)
+    // List<Model> searchTop10(
+    // @Param("productName") String productName,
+    // @Param("modelName") String modelName,
+    // Pageable pageable
+    // );
+
+    @Query("""
+            SELECT m FROM Model m
+            JOIN FETCH m.product p
+            JOIN FETCH p.category c
+            JOIN FETCH p.type t
+            WHERE m.id = :id
+            """)
+    Optional<Model> findByIdFull(Long id);
 
 }

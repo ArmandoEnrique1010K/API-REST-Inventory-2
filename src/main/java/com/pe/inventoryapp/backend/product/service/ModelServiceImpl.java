@@ -25,31 +25,23 @@ import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListSearchResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListSearchFirstTenResponse;
-import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.product.repository.ProductRepository;
-import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 import com.pe.inventoryapp.backend.product.repository.specifications.ModelSpecifications;
 
 @Service
 public class ModelServiceImpl implements ModelService {
   private final ProductRepository productRepository;
-  private final TypeRepository typeRepository;
-  private final CategoryRepository categoryRepository;
   private final ModelRepository modelRepository;
   private final ModelDomainService modelDomainService;
   private final CloudinaryDomainService cloudinaryDomainService;
 
   public ModelServiceImpl(
       ProductRepository productRepository,
-      TypeRepository typeRepository,
-      CategoryRepository categoryRepository,
       ModelRepository modelRepository,
       ModelDomainService modelDomainService,
       CloudinaryDomainService cloudinaryDomainService) {
     this.productRepository = productRepository;
-    this.typeRepository = typeRepository;
-    this.categoryRepository = categoryRepository;
     this.modelRepository = modelRepository;
     this.modelDomainService = modelDomainService;
     this.cloudinaryDomainService = cloudinaryDomainService;
@@ -217,7 +209,7 @@ public class ModelServiceImpl implements ModelService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    Model model = modelRepository.findById(id)
+    Model model = modelRepository.findByIdFull(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El modelo no existe"));
 
     // if (model.isStatus() == false) {

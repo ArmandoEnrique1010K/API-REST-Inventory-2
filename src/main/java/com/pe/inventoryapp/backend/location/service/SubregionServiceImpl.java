@@ -76,7 +76,7 @@ public class SubregionServiceImpl implements SubregionService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    Subregion subregion = subregionRepository.findById(id)
+    Subregion subregion = subregionRepository.findByIdFull(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La subregión no existe"));
 
     return SubregionMapper.builder().setSubregion(subregion).buildSubregionResponse();

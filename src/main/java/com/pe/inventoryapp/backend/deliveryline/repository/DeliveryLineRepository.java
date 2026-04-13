@@ -193,7 +193,6 @@ public interface DeliveryLineRepository
     // * IMPORTANTE: NO TOMA LA ENTIDAD "region", PARA AQUELLO SE HACE UN
     // FETCHRELATIONS EN EL SPECIFICATION (SOLAMENTE SI SE QUIERE ACCEDER AL SEGUNDO NIVEL DE RELACION DE ENTIDAD COMO EL CASO DE "region")
 
-    // TODO: SE PODRIA OMITIR EL N+1 QUERY
     @NonNull
     Page<DeliveryLine> findAll(
             @Nullable Specification<DeliveryLine> spec,

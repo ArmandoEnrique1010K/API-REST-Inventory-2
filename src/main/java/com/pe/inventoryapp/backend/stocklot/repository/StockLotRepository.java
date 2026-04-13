@@ -161,7 +161,7 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long>, JpaSp
                       JOIN FETCH sl.company c
                       WHERE sl.id = :id
             """)
-    Optional<StockLot> findByIdAndJoins(Long id);
+    Optional<StockLot> findByIdFull(Long id);
 
     /**
      * Con findById:

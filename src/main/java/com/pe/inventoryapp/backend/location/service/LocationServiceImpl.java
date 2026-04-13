@@ -18,21 +18,18 @@ import com.pe.inventoryapp.backend.location.model.request.LocationRequest;
 import com.pe.inventoryapp.backend.location.model.response.LocationResponse;
 import com.pe.inventoryapp.backend.location.model.response.SearchLocationResponse;
 import com.pe.inventoryapp.backend.location.repository.LocationRepository;
-import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
 
 @Service
 public class LocationServiceImpl implements LocationService {
   private final LocationRepository locationRepository;
   private final SubregionRepository subregionRepository;
-  private final RegionRepository regionRepository;
   private final LocationDomainService locationDomainService;
 
   public LocationServiceImpl(LocationRepository locationRepository, SubregionRepository subregionRepository,
-      RegionRepository regionRepository, LocationDomainService locationDomainService) {
+       LocationDomainService locationDomainService) {
     this.locationRepository = locationRepository;
     this.subregionRepository = subregionRepository;
-    this.regionRepository = regionRepository;
     this.locationDomainService = locationDomainService;
   }
 
@@ -105,7 +102,7 @@ public class LocationServiceImpl implements LocationService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    Location location = locationRepository.findById(id)
+    Location location = locationRepository.findByIdFull(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La ubicación no existe"));
 
     if (location.isStatus() == false) {

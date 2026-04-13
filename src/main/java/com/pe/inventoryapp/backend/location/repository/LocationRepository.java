@@ -47,4 +47,12 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
                         """)
         List<Location> findAllFirstTenLocationsByParams(String name, Long regionId, Long subregionId);
 
+    @Query("""
+            SELECT l FROM Location l
+            JOIN FETCH l.subregion s
+            JOIN FETCH s.region r
+            WHERE l.id = :id
+            """)
+        Optional<Location> findByIdFull(Long id);
+
 }

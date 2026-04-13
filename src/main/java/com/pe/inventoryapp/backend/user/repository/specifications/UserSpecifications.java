@@ -9,7 +9,6 @@ import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 
 public class UserSpecifications {

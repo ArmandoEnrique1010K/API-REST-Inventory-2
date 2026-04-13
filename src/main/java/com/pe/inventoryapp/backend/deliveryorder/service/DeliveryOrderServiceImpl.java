@@ -327,7 +327,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		// }
 	}
 
-	// TODO: PENDIENTE
 	// Cambia la fecha limite de una orden de entrega
 	@Override
 	@Transactional
@@ -367,7 +366,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrderRepository.save(deliveryOrder);
 	}
 
-	// TODO: PENDIENTE
 	@Override
 	@Transactional
 	public void processDeliveryOrderCancellation(Long id, DeliveryOrderComentRequest deliveryOrderComentRequest,
@@ -453,7 +451,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		updateDeliveryOrderStatus(deliveryOrder, user, deliveryLines);
 	}
 
-	// TODO: PENDIENTE
 	@Override
 	@Transactional
 	public void markDeliveryOrderAsDelivered(Long id, Long id_user) {

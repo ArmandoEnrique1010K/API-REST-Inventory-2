@@ -156,7 +156,7 @@ public class ProductServiceImpl implements ProductService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    Product product = productRepository.findById(id)
+    Product product = productRepository.findByIdFull(id)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El producto no existe"));
 
     // if (product.isStatus() == false) {

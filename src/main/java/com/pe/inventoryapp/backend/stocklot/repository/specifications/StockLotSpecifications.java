@@ -16,7 +16,7 @@ import jakarta.persistence.criteria.Predicate;
 
 public class StockLotSpecifications {
 
-  //TODO: AGREGAR COMENTARIOS EXPLICATIVOS SOBRE EL CONFLICTO DEL USO DE PARAMETROS OPCIONALES QUE SE RELACIONAN: CATEGORY Y TYPE
+  //* EL CONFLICTO DEL USO DE PARAMETROS OPCIONALES, EN EL CASO DE LOS IDs DE CATEGORY Y TYPE
   public static Specification<StockLot> quantityReceivedBeetween(Integer min, Integer max) {
     return (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();

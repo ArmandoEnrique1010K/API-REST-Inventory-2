@@ -10,7 +10,8 @@ import com.pe.inventoryapp.backend.deliveryline.model.entity.StockLot_DeliveryLi
 public interface StockLot_DeliveryLineRepository extends JpaRepository<StockLot_DeliveryLine, Long> {
   @Query("""
       SELECT sd FROM StockLot_DeliveryLine sd
-      JOIN sd.deliveryLine d
+      JOIN FETCH sd.deliveryLine d
+      JOIN FETCH sd.stockLot s
       WHERE d.id = :deliveryLineId
       ORDER BY sd.createdAt DESC
       """)

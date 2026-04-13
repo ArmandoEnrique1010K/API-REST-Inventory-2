@@ -19,8 +19,6 @@ import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
-import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.repository.PasswordResetTokenRepository;
 import com.pe.inventoryapp.backend.user.repository.UserPasswordOtpRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;

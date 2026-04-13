@@ -10,6 +10,14 @@ import com.pe.inventoryapp.backend.movement.model.entity.Movement_StockLot;
 
 public interface Movement_StockLotRepository extends JpaRepository<Movement_StockLot, Long> {
   // OBTENER LOTES DE STOCKS TOMADOS POR ID DE MOVIMIENTO
-  @Query("SELECT m FROM Movement_StockLot m WHERE m.movement.id = :movementId")
-  List<Movement_StockLot> findAllByMovementId(@Param("movementId") Long movementId);
+  @Query("""
+    SELECT ms 
+    FROM Movement_StockLot ms 
+    JOIN FETCH ms.movement m
+    JOIN FETCH ms.stockLot sl
+    WHERE ms.movement.id = :movementId
+  
+  """)
+  List<Movement_StockLot> findAllByMovementId(
+    @Param("movementId") Long movementId);
 }

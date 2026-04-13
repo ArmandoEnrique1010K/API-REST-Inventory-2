@@ -1,5 +1,7 @@
 package com.pe.inventoryapp.backend.product.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,4 +35,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
   boolean existsByName(String name);
   boolean existsByNameAndIdNot(String name, Long id);
+
+  @Query("""
+      SELECT p FROM Product p
+      JOIN FETCH p.category c
+      JOIN FETCH p.type t
+      WHERE p.id = :id
+      """)
+  Optional<Product> findByIdFull(Long id);
+
 }

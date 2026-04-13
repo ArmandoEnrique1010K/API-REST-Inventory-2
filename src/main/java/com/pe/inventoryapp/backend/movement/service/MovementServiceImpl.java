@@ -88,7 +88,7 @@ public class MovementServiceImpl implements MovementService {
 					ResponseStatus.BAD_REQUEST);
 		}
 
-		Movement movement = movementRepository.findById(id)
+		Movement movement = movementRepository.findByIdFull(id)
 				.orElseThrow(() -> new BusinessException(
 						ResponseStatus.NOT_FOUND,
 						"El movimiento no existe"));

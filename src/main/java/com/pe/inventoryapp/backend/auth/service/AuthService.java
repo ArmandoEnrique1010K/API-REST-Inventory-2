@@ -2,7 +2,6 @@ package com.pe.inventoryapp.backend.auth.service;
 
 import com.pe.inventoryapp.backend.auth.model.request.ChangePasswordRequest;
 import com.pe.inventoryapp.backend.auth.model.request.ValidateTokenRequest;
-import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 
 import jakarta.servlet.http.HttpServletResponse;
 

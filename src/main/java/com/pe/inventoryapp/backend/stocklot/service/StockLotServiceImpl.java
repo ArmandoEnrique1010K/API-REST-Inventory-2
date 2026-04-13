@@ -245,9 +245,9 @@ public class StockLotServiceImpl implements StockLotService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    // TODO: SOLAMENTE SI SE QUIERE OPTIMIZAR UN FINDBYID, UTILIZA ESTE METODO COMENTADO
-    // StockLot stockLot = stockLotRepository.findByIdAndJoins(stockLotId)
-    StockLot stockLot = stockLotRepository.findById(stockLotId)
+    //* SOLAMENTE SI SE QUIERE OPTIMIZAR UN FINDBYID, UTILIZA EL SIGUIENTE METODO
+    StockLot stockLot = stockLotRepository.findByIdFull(stockLotId)
+    // StockLot stockLot = stockLotRepository.findById(stockLotId)
         .orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "El lote de stock no existe en el sistema"));
 
     return StockLotMapper.builder().setStockLot(stockLot).buildStockLotDetailsResponse();

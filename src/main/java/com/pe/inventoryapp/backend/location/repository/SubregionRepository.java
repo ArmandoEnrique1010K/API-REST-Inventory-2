@@ -22,4 +22,12 @@ public interface SubregionRepository extends JpaRepository<Subregion, Long> {
 
   @Query("SELECT COUNT(s) > 0 FROM Subregion s JOIN s.region r WHERE s.name = :name AND r.id = :regionId AND s.id != :id")
   boolean existsByNameAndRegionIdAndIdNot(String name, Long regionId, Long id);
+
+  @Query("""
+      SELECT s FROM Subregion s
+      JOIN FETCH s.region r
+      WHERE s.id = :id
+      """)
+  Optional<Subregion> findByIdFull(Long id);
+
 }
