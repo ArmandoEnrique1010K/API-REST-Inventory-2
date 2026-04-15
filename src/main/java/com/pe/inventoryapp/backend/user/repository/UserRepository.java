@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -103,39 +104,40 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
          * Por eso en ManyToMany normalmente se evita JOIN FETCH y se prefiere:
          * 
          * @BatchSize (carga por lotes)
-         * o queries separadas controladas
+         *            o queries separadas controladas
          * 
-         * En corto:
-         * JOIN FETCH + ManyToMany + paginación = combinación problemática.
+         *            En corto:
+         *            JOIN FETCH + ManyToMany + paginación = combinación problemática.
          */
 
+        // QUITA LA RELACION JOIN FETCH u.roles
         @Query("""
                         SELECT u FROM User u
-                        JOIN FETCH u.roles
                         WHERE u.email = :email
                         """)
         Optional<User> findByEmailWithRoles(String email);
 
+        // QUITA LA RELACION JOIN FETCH u.roles
         // Obtener un usuario por ID con roles
         /* QUITE LEFT JOIN FETCH Y COLOQUE JOIN FETCH */
         @Query("""
                         SELECT u FROM User u
-                        JOIN FETCH u.roles
                         WHERE u.id = :id
                         """)
 
         Optional<User> findByIdWithRoles(Long id);
+
+        // JOIN u.roles r
 
         // “¿Existe algún usuario que tenga el rol con nombre name y cuyo id sea
         // distinto al id dado?”
         @Query("""
                             SELECT COUNT(u) > 0
                             FROM User u
-                            JOIN u.roles r
-                            WHERE r.name = :name
+                            WHERE u.role = :role
                             AND u.id <> :id
                         """)
-        boolean existsByRoleNameAndIdNot(@Param("name") String name,
+        boolean existsByRoleAndIdNot(@Param("role") RoleName role,
                         @Param("id") Long id);
 
         boolean existsByEmail(String email);

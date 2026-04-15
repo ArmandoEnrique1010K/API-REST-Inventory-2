@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.location.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,6 @@ import com.pe.inventoryapp.backend.location.service.SubregionService;
 
 import jakarta.validation.Valid;
 
-
 @RestController
 @RequestMapping("/api/subregions")
 public class SubregionController {
@@ -32,14 +32,15 @@ public class SubregionController {
   private final ResponseService responseService;
 
   public SubregionController(
-    SubregionService subregionService, 
-    ValidationService validationService,
+      SubregionService subregionService,
+      ValidationService validationService,
       ResponseService responseService) {
     this.subregionService = subregionService;
     this.validationService = validationService;
     this.responseService = responseService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<CommonResponse> registerSubregion(@Valid @RequestBody SubregionRequest subRegionRequest,
       BindingResult result) {
@@ -53,8 +54,9 @@ public class SubregionController {
 
   @GetMapping("/region/{id}")
   public ResponseEntity<?> listAllSubregionsByRegionId(@PathVariable Long id) {
-    List<SubregionResponse> subregions = subregionService.findAllSubregionsByRegionId(id); 
-    DataResponse<List<SubregionResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, subregions);
+    List<SubregionResponse> subregions = subregionService.findAllSubregionsByRegionId(id);
+    DataResponse<List<SubregionResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        subregions);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
@@ -65,9 +67,11 @@ public class SubregionController {
         subregion);
     return ResponseEntity.status(response.status()).body(response);
   }
-  
+
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
-  public ResponseEntity<CommonResponse> updateSubregion(@PathVariable Long id, @Valid @RequestBody SubregionRequest subregionRequest, BindingResult result) {
+  public ResponseEntity<CommonResponse> updateSubregion(@PathVariable Long id,
+      @Valid @RequestBody SubregionRequest subregionRequest, BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     subregionService.updateSubregionById(id, subregionRequest);
 

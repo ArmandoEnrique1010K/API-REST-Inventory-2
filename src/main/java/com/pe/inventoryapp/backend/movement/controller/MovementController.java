@@ -28,7 +28,7 @@ public class MovementController {
   private final MovementService movementService;
   private final ResponseService responseService;
 
-  public MovementController (MovementService movementService, ResponseService responseService){
+  public MovementController(MovementService movementService, ResponseService responseService) {
     this.movementService = movementService;
     this.responseService = responseService;
   }
@@ -40,25 +40,26 @@ public class MovementController {
       @RequestParam(required = false) Integer maxQuantity,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime minCreatedAt,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
-        @RequestParam(required = false) MovementType movementType,
-        @RequestParam(required = false) String username,
-        @RequestParam(required = false) String keyword
-    ) {
+      @RequestParam(required = false) MovementType movementType,
+      @RequestParam(required = false) String username,
+      @RequestParam(required = false) String keyword) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<MovementListResponse> movements = movementService.findAllMovements(pageable, minQuantity, maxQuantity, minCreatedAt,
-				maxCreatedAt, movementType, username, keyword); 
+    PageResponse<MovementListResponse> movements = movementService.findAllMovements(pageable, minQuantity, maxQuantity,
+        minCreatedAt,
+        maxCreatedAt, movementType, username, keyword);
 
-    DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, movements);
+    DataResponse<PageResponse<MovementListResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, movements);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getMovement(@PathVariable Long id) {
     MovementDetailsResponse movementDetailsResponse = movementService.findMovementById(id);
-    DataResponse<MovementDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<MovementDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         movementDetailsResponse);
     return ResponseEntity.status(response.status()).body(response);
   }
-  
+
 }

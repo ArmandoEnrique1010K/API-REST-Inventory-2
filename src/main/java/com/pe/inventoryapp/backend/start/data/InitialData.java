@@ -1,7 +1,5 @@
 package com.pe.inventoryapp.backend.start.data;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,9 +14,8 @@ import com.pe.inventoryapp.backend.product.model.entity.Category;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
-import com.pe.inventoryapp.backend.user.model.entity.Role;
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
 import com.pe.inventoryapp.backend.user.model.entity.User;
-import com.pe.inventoryapp.backend.user.repository.RoleRepository;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -26,7 +23,6 @@ import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class InitialData {
-  private final RoleRepository roleRepository;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final CategoryRepository categoryRepository;
@@ -36,7 +32,6 @@ public class InitialData {
   private final CompanyRepository companyRepository;
 
   public InitialData(
-      RoleRepository roleRepository,
       UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       CategoryRepository categoryRepository,
@@ -44,7 +39,6 @@ public class InitialData {
       SubregionRepository subregionRepository,
       LocationRepository locationRepository,
       CompanyRepository companyRepository) {
-    this.roleRepository = roleRepository;
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.categoryRepository = categoryRepository;
@@ -58,33 +52,33 @@ public class InitialData {
   @PostConstruct
   public void init() {
     // Roles
-    Role roleUser = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
-      Role newRole = new Role();
-      newRole.setName("ROLE_USER");
-      newRole.setLabel("Usuario");
-      return roleRepository.save(newRole);
-    });
+    // Role roleUser = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
+    //   Role newRole = new Role();
+    //   newRole.setName("ROLE_USER");
+    //   newRole.setLabel("Usuario");
+    //   return roleRepository.save(newRole);
+    // });
 
-    Role roleOperator = roleRepository.findByName("ROLE_OPERATOR").orElseGet(() -> {
-      Role newRole = new Role();
-      newRole.setName("ROLE_OPERATOR");
-      newRole.setLabel("Operador");
-      return roleRepository.save(newRole);
-    });
+    // Role roleOperator = roleRepository.findByName("ROLE_OPERATOR").orElseGet(() -> {
+    //   Role newRole = new Role();
+    //   newRole.setName("ROLE_OPERATOR");
+    //   newRole.setLabel("Operador");
+    //   return roleRepository.save(newRole);
+    // });
 
-    Role roleSecretary = roleRepository.findByName("ROLE_SECRETARY").orElseGet(() -> {
-      Role newRole = new Role();
-      newRole.setName("ROLE_SECRETARY");
-      newRole.setLabel("Secretario");
-      return roleRepository.save(newRole);
-    });
+    // Role roleSecretary = roleRepository.findByName("ROLE_SECRETARY").orElseGet(() -> {
+    //   Role newRole = new Role();
+    //   newRole.setName("ROLE_SECRETARY");
+    //   newRole.setLabel("Secretario");
+    //   return roleRepository.save(newRole);
+    // });
 
-    Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").orElseGet(() -> {
-      Role newRole = new Role();
-      newRole.setName("ROLE_ADMIN");
-      newRole.setLabel("Administrador");
-      return roleRepository.save(newRole);
-    });
+    // Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").orElseGet(() -> {
+    //   Role newRole = new Role();
+    //   newRole.setName("ROLE_ADMIN");
+    //   newRole.setLabel("Administrador");
+    //   return roleRepository.save(newRole);
+    // });
 
     // Region - Subregion - Ubicacion
     Region defaultRegion = regionRepository.findByName("Sin región").orElseGet(() -> {
@@ -115,13 +109,13 @@ public class InitialData {
     if (userRepository.findById(1L).isEmpty()) {
 
       // Agregamos todos los roles por orden de jerárquias
-      List<Role> allRoles = new ArrayList<>();
-      allRoles.add(roleUser);
-      allRoles.add(roleOperator);
-      allRoles.add(roleSecretary);
-      allRoles.add(roleAdmin);
+      // List<Role> allRoles = new ArrayList<>();
+      // allRoles.add(roleUser);
+      // allRoles.add(roleOperator);
+      // // allRoles.add(roleSecretary);
+      // allRoles.add(roleAdmin);
 
-      System.out.println(allRoles);
+      // System.out.println(allRoles);
 
       // EL CORREO Y LA CONSTRASEÑA DEL PRIMER USUARIO SE ESTABLECE MEDIANTE UNA VARIABLE DE ENTORNO
       User user = new User();
@@ -131,7 +125,8 @@ public class InitialData {
       user.setEmail(dotenv.get("FIRST_USER_EMAIL"));
       user.setActive(true);
       user.setPassword(passwordEncoder.encode(dotenv.get("FIRST_USER_PASSWORD")));
-      user.setRoles(allRoles);
+      // user.setRoles(allRoles);
+      user.setRole(RoleName.ROLE_ADMIN);
 
       userRepository.save(user);
     }

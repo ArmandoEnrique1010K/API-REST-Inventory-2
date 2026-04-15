@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.stocklot.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,7 @@ public class CompanyController {
     this.validationService = validationService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<CommonResponse> registerCompany(@Valid @RequestBody CompanyRequest companyRequest,
       BindingResult result) {
@@ -50,7 +52,7 @@ public class CompanyController {
   @GetMapping
   public ResponseEntity<?> listAllCompanies() {
     List<CompanyResponse> companies = companyService.findAllCompanies();
-    DataResponse<List<CompanyResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<List<CompanyResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         companies);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
@@ -63,6 +65,7 @@ public class CompanyController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<?> updateCompany(@PathVariable Long id, @Valid @RequestBody CompanyRequest companyRequest,
       BindingResult result) {

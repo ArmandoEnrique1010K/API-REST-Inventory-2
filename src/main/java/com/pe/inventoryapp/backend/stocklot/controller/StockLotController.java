@@ -116,7 +116,6 @@ public class StockLotController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
-
   @GetMapping("/{id}")
   public ResponseEntity<?> getStockLot(@PathVariable Long id) {
     StockLotDetailsResponse stockLotDetailsResponse = stockLotService.findStockLotById(id);

@@ -1,5 +1,9 @@
 package com.pe.inventoryapp.backend.user.model.request;
 
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
+
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -35,10 +39,16 @@ public class RegisterRequest {
   @NotBlank(message = "La contraseña es obligatoria")
   private String password;
 
-  @NotNull
-  private Boolean operator;
-  @NotNull
-  private Boolean secretary;
-  @NotNull
-  private Boolean admin;
+  @NotNull(message = "El rol es obligatorio")
+  @Enumerated(EnumType.STRING)
+  private RoleName role;
+
+  // @NotNull
+  // private Boolean user;
+  // @NotNull
+  // private Boolean operator;
+  // @NotNull
+  // private Boolean secretary;
+  // @NotNull
+  // private Boolean admin;
 }

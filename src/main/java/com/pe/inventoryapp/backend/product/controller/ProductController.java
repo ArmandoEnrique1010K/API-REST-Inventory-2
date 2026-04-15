@@ -4,6 +4,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -46,11 +47,12 @@ public class ProductController {
     this.validationService = validationService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse> registerProduct(
-    @Valid @ModelAttribute ProductCreateRequest productCreateRequest,
+      @Valid @ModelAttribute ProductCreateRequest productCreateRequest,
       BindingResult result,
-    @RequestParam(value = "file", required = false) MultipartFile file) {
+      @RequestParam(value = "file", required = false) MultipartFile file) {
     validationService.validateFieldsAndThrowResponse(result);
     productService.saveProduct(productCreateRequest, file);
 
@@ -59,7 +61,8 @@ public class ProductController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  // Este método lista todos los productos (recordar que cada producto tiene distintos modelos)
+  // Este método lista todos los productos (recordar que cada producto tiene
+  // distintos modelos)
   @GetMapping
   public ResponseEntity<?> listAllProducts(
       @RequestParam(defaultValue = "0") Integer page,
@@ -67,11 +70,12 @@ public class ProductController {
       @RequestParam(required = false) Boolean status,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long typeId) {
-            Pageable pageable = PageRequest.of(page, 20);
+    Pageable pageable = PageRequest.of(page, 20);
 
-            PageResponse<ProductResponse> products = productService.searchAllProductsByParams(pageable, name, status, categoryId, typeId);
+    PageResponse<ProductResponse> products = productService.searchAllProductsByParams(pageable, name, status,
+        categoryId, typeId);
 
-                DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
+    DataResponse<PageResponse<ProductResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, products);
 
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
@@ -85,6 +89,7 @@ public class ProductController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<CommonResponse> updateProduct(@PathVariable Long id,
       @Valid @RequestBody ProductUpdateRequest productUpdateRequest,
@@ -97,6 +102,7 @@ public class ProductController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusProduct(@PathVariable Long id) {
     productService.changeStatusProductById(id);

@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,7 +85,12 @@ public class AuthController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  // @PreAuthorize es un "reemplazo al sistema de definiciíon de endpoints y roles
+  // asignados en SecurityConfig"
+  // En cada uno de los endpoints se coloca la anotación, en este caso se verifica
+  // si el usuario esta autenticado
   // CERRAR SESION, BORRA LAS COOKIES EN EL CUAL ESTA ALMACENADO EL JWT
+  @PreAuthorize("isAuthenticated()")
   @PostMapping("/logout")
   public ResponseEntity<CommonResponse> logout(HttpServletResponse httpServletResponse) {
     authService.logout(httpServletResponse);
@@ -114,29 +120,28 @@ public class AuthController {
 
   // * OBTIENE LA SESION ACTUAL DEL USUARIO, SI NO HAY SESION DEVUELVE UN ERROR
   // VACIO
-
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/current-session")
   public ResponseEntity<?> getCurrentSession(Authentication authentication, HttpServletResponse httpServletResponse) {
 
-    // //* ESTO NUNCA PASARA PORQUE SI O SI SE REQUIERE QUE EL USUARIO INICIE SESION
-    // EN LA API REST */
-    // if (authentication == null || !authentication.isAuthenticated()) {
-    // DataResponse<DetailUserResponse> response =
-    // responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
-    // authService.logout(httpServletResponse);
-    // return ResponseEntity.status(response.status()).body(response);
-    // }
+    // * ESTO NUNCA PASARA PORQUE SI O SI SE REQUIERE QUE EL USUARIO INICIE SESION
+    // EN LA API REST
+    if (authentication == null || !authentication.isAuthenticated()) {
+      DataResponse<?> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, null);
+      authService.logout(httpServletResponse);
+      return ResponseEntity.status(response.status()).body(response);
+    }
 
     UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-   CurrentSessionResponse responseUser = CurrentSessionResponse.builder()
-       .email(userPrincipal.getUsername())
-       .roles(
-           userPrincipal.getAuthorities()
-               .stream()
-               .map(a -> a.getAuthority())
-               .toList())
-       .build();
+    CurrentSessionResponse responseUser = CurrentSessionResponse.builder()
+        .email(userPrincipal.getUsername())
+        .role(
+            userPrincipal.getAuthorities()
+                .stream()
+                .map(a -> a.getAuthority())
+                .toList())
+        .build();
 
     DataResponse<CurrentSessionResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         responseUser);

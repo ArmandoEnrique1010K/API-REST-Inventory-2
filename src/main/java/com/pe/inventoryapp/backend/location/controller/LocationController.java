@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.validation.BindingResult;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class LocationController {
     this.responseService = responseService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<CommonResponse> registerLocation(@Valid @RequestBody LocationRequest locationRequest,
       BindingResult result) {
@@ -66,7 +68,7 @@ public class LocationController {
       @RequestParam(required = false) Boolean status) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<LocationResponse> locations = locationService.searchAllLocations(pageable, name, 
+    PageResponse<LocationResponse> locations = locationService.searchAllLocations(pageable, name,
         regionId, subregionId, status);
     DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
         ResponseStatus.SUCCESS,
@@ -75,15 +77,16 @@ public class LocationController {
   }
 
   @GetMapping("/search/region/{regionId}/subregion/{subregionId}")
-  public ResponseEntity<?> listFirstTenLocationsByKeyword(@RequestParam(required = true) String name, @PathVariable Long regionId, @PathVariable Long subregionId) {
-    List<SearchLocationResponse> locations = locationService.findFirstTenLocationsByNameAndRegionIdAndSubregionId(name, regionId, 
+  public ResponseEntity<?> listFirstTenLocationsByKeyword(@RequestParam(required = true) String name,
+      @PathVariable Long regionId, @PathVariable Long subregionId) {
+    List<SearchLocationResponse> locations = locationService.findFirstTenLocationsByNameAndRegionIdAndSubregionId(name,
+        regionId,
         subregionId);
-    DataResponse<List<SearchLocationResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<List<SearchLocationResponse>> dataResponse = responseService.generateDataResponse(
+        ResponseStatus.SUCCESS,
         locations);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
-
-
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getLocation(@PathVariable Long id) {
@@ -93,6 +96,7 @@ public class LocationController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<?> updateLocation(@PathVariable Long id, @Valid @RequestBody LocationRequest locationRequest,
       BindingResult result) {
@@ -104,6 +108,7 @@ public class LocationController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusLocation(@PathVariable Long id) {
     locationService.changeStatusLocationById(id);

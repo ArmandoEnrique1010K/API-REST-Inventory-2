@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
-import com.pe.inventoryapp.backend.user.model.entity.Role;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
@@ -56,8 +55,14 @@ public class UserServiceImpl implements UserService {
     user.setDni(registerRequest.getDni());
 
     // Asigna los roles al usuario en base a las opciones marcadas
-    user.setRoles(userDomainService
-        .getRoles(registerRequest.getAdmin(), registerRequest.getSecretary(), registerRequest.getOperator()));
+    user.setRole(
+      registerRequest.getRole());
+      // userDomainService.getRoles(
+            // registerRequest.getUser(),
+            // registerRequest.getAdmin(),
+            // registerRequest.getSecretary(),
+            // registerRequest.getOperator()                  
+          // ));
 
     user.setActive(true);
     userRepository.save(user);
@@ -80,8 +85,8 @@ public class UserServiceImpl implements UserService {
 
       System.out.println("SIN ROLES");
 
-      Specification<User> spec = (UserSpecifications.keywordContains(keyword)).and(UserSpecifications.isActive());
-      
+      Specification<User> spec = (UserSpecifications.keywordContains(keyword));
+
       Pageable sortedPageable = PageRequest.of(
           pageable.getPageNumber(),
           pageable.getPageSize(),
@@ -96,7 +101,6 @@ public class UserServiceImpl implements UserService {
        * - Compatible con paginación
        */
       Specification<User> spec = (UserSpecifications.keywordContains(keyword))
-          .and(UserSpecifications.isActive())
           .and(UserSpecifications.hasExactRoles(roleIds));
 
       Pageable sortedPageable = PageRequest.of(
@@ -171,8 +175,9 @@ public class UserServiceImpl implements UserService {
 
     // Primero verifica si existe otro usuario con el rol de administrador para no
     // dejar el sistema sin administradores
-    userDomainService.verifyUserByRoleAdminExist(rolesRequest.getAdmin(), id);
+    // userDomainService.verifyUserByRoleAdminExist(rolesRequest.getAdmin(), id);
 
+    userDomainService.verifyUserByRoleAdminExist(id);
     User user = userRepository.findByIdWithRoles(id)
         .orElseThrow(() -> new BusinessException(
             ResponseStatus.NOT_FOUND,
@@ -183,12 +188,19 @@ public class UserServiceImpl implements UserService {
       throw new BusinessException(ResponseStatus.CONFLICT, "El usuario debe estar activo para cambiar sus roles");
     }
 
-    List<Role> roles = userDomainService
-        .getRoles(rolesRequest.getAdmin(), rolesRequest.getSecretary(), rolesRequest.getOperator());
+    // List<Role> roles = userDomainService
+    //     .getRoles(
+    //         rolesRequest.getUser(),
+    //         rolesRequest.getAdmin(),
+    //         rolesRequest.getSecretary(),
+    //         rolesRequest.getOperator());
     // * En la consola he notado que se hace una query adicional para borrar la
     // relacion anterior del usuario con los roles, recordar que se hace 4 queries
     // de tipo insert
-    user.setRoles(roles);
+
+    // user.setRoles(roles);
+
+    user.setRole(rolesRequest.getRole());
     userRepository.save(user);
   }
 
@@ -217,9 +229,10 @@ public class UserServiceImpl implements UserService {
                 ResponseStatus.NOT_FOUND,
                 "El usuario no existe"));
 
-    userDomainService
-        .verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")),
-            id_user);
+    // userDomainService
+    //     .verifyUserByRoleAdminExist(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")),
+    //         id_user);
+    userDomainService.verifyUserByRoleAdminExist(id_user);
 
     if (user.equals(userLogged)) {
       throw new BusinessException(

@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,7 @@ public class DeliveryLineController {
     this.deliveryLineService = deliveryLineService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<CommonResponse> registerDeliveryLine(
       Authentication authentication,
@@ -70,6 +72,8 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  // TODO: VERIFICAR SI LOS 2 ENDPOINTS SE UTILIZARAN PARA UN USUARIO CON EL ROL
+  // DE USUARIO
   @GetMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
       @PathVariable Long deliveryOrderId,
@@ -103,6 +107,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<?> updateDeliveryLine(Authentication authentication, @PathVariable Long id,
       @Valid @RequestBody DeliveryLineUpdateRequest deliveryLineUpdateRequest,
@@ -118,6 +123,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/cancel")
   public ResponseEntity<?> cancelDeliveryLine(Authentication authentication, @PathVariable Long id) {
     UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
@@ -131,6 +137,7 @@ public class DeliveryLineController {
 
   // ACTUALIZAR EL ESTADO DE LA LINEA DE ENTREGA SI FUE ENTREGADO
   // Solamente si tiene el estado READY
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/deliver")
   public ResponseEntity<CommonResponse> sendDeliveryLine(Authentication authentication,
       @PathVariable Long id) {
@@ -142,6 +149,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/missing")
   public ResponseEntity<CommonResponse> missingDeliveryLine(Authentication authentication,
       @PathVariable Long id) {
@@ -153,6 +161,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @PutMapping("/{id}/lost")
   public ResponseEntity<CommonResponse> lostDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
@@ -165,6 +174,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @PutMapping("/{id}/return")
   public ResponseEntity<CommonResponse> returnDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAlterRequest deliveryLineAlterRequest, BindingResult result,
@@ -177,6 +187,7 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @PutMapping("/{id}/allocate-stock")
   public ResponseEntity<CommonResponse> allocateStockInDeliveryLine(Authentication authentication,
       @Valid @RequestBody DeliveryLineAllocateRequest deliveryLineAllocateRequest, BindingResult result,

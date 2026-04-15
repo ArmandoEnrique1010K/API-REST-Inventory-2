@@ -13,5 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CurrentSessionResponse {
   private String email;
-  private List<String> roles;
+  // private List<String> roles;
+  private List<String> role;
 }

@@ -41,10 +41,9 @@ public class UserController {
   private final ValidationService validationService;
 
   public UserController(
-      UserService userService, 
+      UserService userService,
       ResponseService responseService,
-      ValidationService validationService
-  ){
+      ValidationService validationService) {
     this.userService = userService;
     this.responseService = responseService;
     this.validationService = validationService;
@@ -56,7 +55,8 @@ public class UserController {
     validationService.validateFieldsAndThrowResponse(result);
     userService.registerUser(registerRequest);
 
-    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED, "Se registro el usuario");
+    CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.CREATED,
+        "Se registro el usuario");
     return ResponseEntity.status(response.status()).body(response);
   }
 
@@ -68,14 +68,16 @@ public class UserController {
     Pageable pageable = PageRequest.of(page, 20);
 
     PageResponse<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
-    DataResponse<PageResponse<ListUsersResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
+    DataResponse<PageResponse<ListUsersResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, users);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/role/user")
   public ResponseEntity<?> listFirstTenUsersByKeyword(@RequestParam(required = true) String name) {
     List<ListUsersByRoleUserResponse> users = userService.findFirstTenUsersByName(name);
-    DataResponse<List<ListUsersByRoleUserResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, users);
+    DataResponse<List<ListUsersByRoleUserResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, users);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
@@ -86,9 +88,6 @@ public class UserController {
     DataResponse<RolesByUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
     return ResponseEntity.status(response.status()).body(response);
   }
-  
-  
-
 
   @PutMapping("/{id}/roles")
   public ResponseEntity<CommonResponse> updateUserRoles(@PathVariable Long id,
@@ -107,7 +106,8 @@ public class UserController {
 
     UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-    // Long id_authenticated_user = authenticationContextService.extractUserIdFromAuthentication(authentication);
+    // Long id_authenticated_user =
+    // authenticationContextService.extractUserIdFromAuthentication(authentication);
     userService.changeStatusUserById(id, userPrincipal.getId());
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,

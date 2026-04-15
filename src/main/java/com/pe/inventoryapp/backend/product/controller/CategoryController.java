@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.product.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +39,7 @@ public class CategoryController {
     this.validationService = validationService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<CommonResponse> registerCategory(@Valid @RequestBody CategoryRequest categoryRequest,
       BindingResult result) {
@@ -65,6 +67,7 @@ public class CategoryController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getCategory(@PathVariable Long id) {
     CategoryResponse category = categoryService.findCategoryById(id);
@@ -73,6 +76,7 @@ public class CategoryController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<CommonResponse> updateCategory(@PathVariable Long id,
       @Valid @RequestBody CategoryRequest categoryRequest,
@@ -85,6 +89,7 @@ public class CategoryController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusCategory(@PathVariable Long id) {
     categoryService.changeStatusCategoryById(id);

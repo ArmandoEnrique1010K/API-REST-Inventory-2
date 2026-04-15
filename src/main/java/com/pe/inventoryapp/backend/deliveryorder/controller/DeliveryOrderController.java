@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +55,7 @@ public class DeliveryOrderController {
     this.deliveryOrderService = deliveryOrderService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<CommonResponse> registerDeliveryOrder(Authentication authentication,
       @Valid @RequestBody DeliveryOrderRequest deliveryOrderRequest,
@@ -68,6 +70,7 @@ public class DeliveryOrderController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping
   public ResponseEntity<?> listAllDeliveryOrders(
       @RequestParam(defaultValue = "0") Integer page,
@@ -89,6 +92,7 @@ public class DeliveryOrderController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @GetMapping("/in-progress")
   public ResponseEntity<?> listAllPendingDeliveryOrders(
       @RequestParam(defaultValue = "0") Integer page,
@@ -134,6 +138,7 @@ public class DeliveryOrderController {
   }
 
   // Obtiene una orden de entrega por id
+  @PreAuthorize("hasRole('OPERATOR')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getDeliveryOrder(@PathVariable Long id) {
     DeliveryOrderDetailsResponse deliveryOrderDetailsResponse = deliveryOrderService.findDeliveryOrderById(id);
@@ -157,6 +162,7 @@ public class DeliveryOrderController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}")
   public ResponseEntity<?> changeLimitDateDeliveryOrder(Authentication authentication, @PathVariable Long id,
       @RequestParam @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime limitDate) {
@@ -169,6 +175,7 @@ public class DeliveryOrderController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}/cancel")
   public ResponseEntity<CommonResponse> cancelDeliveryOrder(Authentication authentication, @PathVariable Long id,
       @Valid @RequestBody DeliveryOrderComentRequest deliveryOrderComentRequest, BindingResult result) {
@@ -182,6 +189,7 @@ public class DeliveryOrderController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/send")
   public ResponseEntity<CommonResponse> sendDeliveryOrder(Authentication authentication, @PathVariable Long id) {
     UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();

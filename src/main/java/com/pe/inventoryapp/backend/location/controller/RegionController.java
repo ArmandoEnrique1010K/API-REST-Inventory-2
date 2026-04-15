@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.validation.BindingResult;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class RegionController {
     this.responseService = responseService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<CommonResponse> registerRegion(@Valid @RequestBody RegionRequest regionRequest,
       BindingResult result) {
@@ -51,7 +53,7 @@ public class RegionController {
   @GetMapping
   public ResponseEntity<?> listAllRegions() {
     List<RegionResponse> regions = regionService.findAllRegions();
-    DataResponse<List<RegionResponse>> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<List<RegionResponse>> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         regions);
     return ResponseEntity.status(response.status()).body(response);
   }
@@ -64,8 +66,10 @@ public class RegionController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
-  public ResponseEntity<CommonResponse> updateRegion(@PathVariable Long id, @Valid @RequestBody RegionRequest regionRequest,
+  public ResponseEntity<CommonResponse> updateRegion(@PathVariable Long id,
+      @Valid @RequestBody RegionRequest regionRequest,
       BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     regionService.updateRegionById(id, regionRequest);

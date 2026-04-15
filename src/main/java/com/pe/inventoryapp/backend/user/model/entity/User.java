@@ -6,12 +6,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+// import jakarta.persistence.JoinColumn;
+// import jakarta.persistence.JoinTable;
+// import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+// import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,11 +19,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-import org.hibernate.annotations.BatchSize;
+// import org.hibernate.annotations.BatchSize;
 
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
 
 @Entity
 @Builder
@@ -49,10 +50,12 @@ public class User  {
 
   private boolean active;
 
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
-      @UniqueConstraint(columnNames = { "user_id", "role_id" })
-  })
+  private RoleName role;
+
+  // @ManyToMany(fetch = FetchType.LAZY)
+  // @JoinTable(name = "usuarios_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"), uniqueConstraints = {
+  //     @UniqueConstraint(columnNames = { "user_id", "role_id" })
+  // })
 
   /**
    * @BatchSize
@@ -82,8 +85,9 @@ public class User  {
    * - Compatible con paginación
    * - No rompe SQL ni genera duplicados
    */
-  @BatchSize(size = 20)
-  private List<Role> roles;
+
+  // @BatchSize(size = 20)
+  // private List<Role> roles;
   
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
   private List<Movement> movements;

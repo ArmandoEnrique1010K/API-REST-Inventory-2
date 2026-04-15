@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -42,6 +43,7 @@ public class TypeController {
     this.validationService = validationService;
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<CommonResponse> registerType(@Valid @RequestBody TypeRequest typeRequest,
       BindingResult result) {
@@ -69,7 +71,7 @@ public class TypeController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
-
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getType(@PathVariable Long id) {
     TypeResponse type = typeService.findTypeById(id);
@@ -78,6 +80,7 @@ public class TypeController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<CommonResponse> updateType(@PathVariable Long id, @Valid @RequestBody TypeRequest typeRequest,
       BindingResult result) {
@@ -89,7 +92,8 @@ public class TypeController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-    @PatchMapping("/{id}/status")
+  @PreAuthorize("hasRole('ADMIN')")
+  @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusType(@PathVariable Long id) {
     typeService.changeStatusTypeById(id);
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,

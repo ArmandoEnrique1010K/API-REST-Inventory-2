@@ -1,5 +1,9 @@
 package com.pe.inventoryapp.backend.auth.service;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,10 +31,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         .orElseThrow(() -> new UsernameNotFoundException(
             // "El usuario con el correo " + email + " no existe en el sistema"
             "Ha ocurrido un error desconocido"));
-    var authorities = user.getRoles()
-        .stream()
-        .map(role -> new SimpleGrantedAuthority(role.getName()))
-        .toList();
+    // var authorities = user.getRoles()
+    // .stream()
+    // .map(role -> new SimpleGrantedAuthority(role.getName()))
+    // .toList();
+
+    Collection<? extends GrantedAuthority> authorities = List.of(
+        new SimpleGrantedAuthority(user.getRole().name()));
 
     return new UserPrincipal(user.getId(), user.getEmail(),
         user.getPassword(), user.isActive(), authorities);

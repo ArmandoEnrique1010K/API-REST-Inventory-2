@@ -1,18 +1,18 @@
-package com.pe.inventoryapp.backend.user.repository;
+// package com.pe.inventoryapp.backend.user.repository;
 
-import java.util.List;
-import java.util.Optional;
+// import java.util.List;
+// import java.util.Optional;
 
-import org.springframework.data.repository.CrudRepository;
+// import org.springframework.data.repository.CrudRepository;
 
-import com.pe.inventoryapp.backend.user.model.entity.Role;
+// import com.pe.inventoryapp.backend.user.model.entity.Role;
 
-public interface RoleRepository extends CrudRepository<Role, Long> {
-  Optional<Role> findByName(String name);
+// public interface RoleRepository extends CrudRepository<Role, Long> {
+//   Optional<Role> findByName(String name);
 
-  // boolean existsByName(String name);
+//   // boolean existsByName(String name);
 
-  List<Role> findAllByOrderByIdDesc();
+//   List<Role> findAllByOrderByIdDesc();
 
-  List<Role> findByNameIn(List<String> names);
-}
+//   List<Role> findByNameIn(List<String> names);
+// }

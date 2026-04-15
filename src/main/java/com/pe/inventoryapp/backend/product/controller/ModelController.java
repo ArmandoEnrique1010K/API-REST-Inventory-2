@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -50,13 +51,13 @@ public class ModelController {
   }
 
   // Tambien se debe subir una imagen con Cloudinary
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping(value = "/product/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse> registerModelInProduct(
       @PathVariable Long id,
-      @Valid @ModelAttribute ModelRequest modelRequest, 
-      BindingResult result, 
-      @RequestParam(value = "file", required = false) MultipartFile file
-      ) {
+      @Valid @ModelAttribute ModelRequest modelRequest,
+      BindingResult result,
+      @RequestParam(value = "file", required = false) MultipartFile file) {
     validationService.validateFieldsAndThrowResponse(result);
     modelService.saveModelInProductId(modelRequest, file, id);
 
@@ -98,9 +99,8 @@ public class ModelController {
 
   @GetMapping("/search")
   public ResponseEntity<?> listActiveModelsByName(
-    @RequestParam(defaultValue = "0") Integer page,
-    @RequestParam(required = false) String keyword
-  ) {
+      @RequestParam(defaultValue = "0") Integer page,
+      @RequestParam(required = false) String keyword) {
     Pageable pageable = PageRequest.of(page, 10);
     PageResponse<ModelListSearchResponse> models = modelService.searchAllModelsByName(pageable, keyword);
     DataResponse<PageResponse<ModelListSearchResponse>> dataResponse = responseService
@@ -111,36 +111,38 @@ public class ModelController {
   }
 
   @GetMapping("/search/models")
-  public ResponseEntity<?> listFirstTenModelsByKeyword(@RequestParam(required = true) String keyword){
+  public ResponseEntity<?> listFirstTenModelsByKeyword(@RequestParam(required = true) String keyword) {
     List<ModelListSearchFirstTenResponse> models = modelService.findFirstTenModelsByKeyword(keyword);
 
-    DataResponse<List<ModelListSearchFirstTenResponse>> dataResponse = responseService.generateDataResponse(ResponseStatus.SUCCESS, models);
+    DataResponse<List<ModelListSearchFirstTenResponse>> dataResponse = responseService
+        .generateDataResponse(ResponseStatus.SUCCESS, models);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getModel(@PathVariable Long id) {
     ModelDetailsResponse model = modelService.findModelById(id);
-    DataResponse<ModelDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, 
+    DataResponse<ModelDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         model);
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<CommonResponse> updateModel(
-    @PathVariable Long id, 
-    @Valid @ModelAttribute ModelRequest modelRequest,
+      @PathVariable Long id,
+      @Valid @ModelAttribute ModelRequest modelRequest,
       BindingResult result,
-    @RequestParam(value = "file", required = false) MultipartFile file
-    ) {
+      @RequestParam(value = "file", required = false) MultipartFile file) {
     validationService.validateFieldsAndThrowResponse(result);
-    modelService.updateModelById(id, modelRequest,file);
+    modelService.updateModelById(id, modelRequest, file);
 
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
-    "Se actualizo los datos del modelo del producto");
+        "Se actualizo los datos del modelo del producto");
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/status")
   public ResponseEntity<CommonResponse> changeStatusModel(@PathVariable Long id) {
     modelService.changeStatusModelById(id);
@@ -150,4 +152,3 @@ public class ModelController {
     return ResponseEntity.status(response.status()).body(response);
   }
 }
-

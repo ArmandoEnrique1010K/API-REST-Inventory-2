@@ -1,6 +1,5 @@
 package com.pe.inventoryapp.backend.user.model.mapper;
 
-import java.util.List;
 
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.request.ProfileRequest;
@@ -37,9 +36,9 @@ public class UserMapper {
     // boolean isAdmin = user.getRoles().stream().anyMatch(r ->
     // "ROLE_ADMIN".equals(r.getName()));
 
-    List<String> roles = user.getRoles().stream()
-        .map(role -> role.getLabel())
-        .toList().reversed();
+    // List<String> roles = user.getRoles().stream()
+    //     .map(role -> role.getLabel())
+    //     .toList().reversed();
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new ListUsersResponse(
@@ -49,7 +48,7 @@ public class UserMapper {
         user.getLastname()
             .trim(),
         user.getDni(),
-        roles,
+        user.getRole(),
         user.isActive());
   }
 
@@ -59,9 +58,9 @@ public class UserMapper {
       throw new RuntimeException("Debe pasar la entidad User");
     }
 
-    List<String> roles = user.getRoles().stream()
-        .map(role -> role.getLabel())
-        .toList().reversed();
+    // List<String> roles = user.getRoles().stream()
+    //     .map(role -> role.getLabel())
+    //     .toList().reversed();
 
     // Devuelve una nueva instancia de UserDto con los datos mapeados
     return new DetailUserResponse(
@@ -72,7 +71,7 @@ public class UserMapper {
         user.getEmail()
             .trim(),
         user.getDni(),
-        roles );
+        user.getRole() );
 
   }
 
@@ -107,9 +106,11 @@ public class UserMapper {
     }
 
     return new RolesByUserResponse(
-        user.getRoles().stream().anyMatch(role -> "ROLE_OPERATOR".equals(role.getName())), 
-        user.getRoles().stream().anyMatch(role -> "ROLE_SECRETARY".equals(role.getName())),
-        user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()))
+        // user.getRoles().stream().anyMatch(role -> "ROLE_USER".equals(role.getName())),
+        // user.getRoles().stream().anyMatch(role -> "ROLE_OPERATOR".equals(role.getName())), 
+        // user.getRoles().stream().anyMatch(role -> "ROLE_SECRETARY".equals(role.getName())),
+        // user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()))
+        user.getRole().toString()
       );
   }
 

@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.user.model.response;
 
-import java.util.List;
+
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,5 +17,6 @@ public class DetailUserResponse {
   private String lastname;
   private String email;
   private Integer dni;
-  private List<String> roles;
+  // private List<String> roles;
+  private RoleName role;
 }
