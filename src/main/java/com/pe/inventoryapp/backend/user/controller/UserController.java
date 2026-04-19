@@ -10,6 +10,7 @@ import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
 import com.pe.inventoryapp.backend.user.model.entity.UserPrincipal;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
 import com.pe.inventoryapp.backend.user.model.request.RolesRequest;
@@ -64,10 +65,14 @@ public class UserController {
   public ResponseEntity<?> listAllUsers(
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) String name,
-      @RequestParam(required = false) List<Long> idRoles) {
+      // @RequestParam(required = false) List<Long> idRoles
+      @RequestParam(required = false) RoleName role
+    
+    
+    ) {
     Pageable pageable = PageRequest.of(page, 20);
 
-    PageResponse<ListUsersResponse> users = userService.findAllUsersByParams(name, idRoles, pageable);
+    PageResponse<ListUsersResponse> users = userService.findAllUsersByParams(name, role, pageable);
     DataResponse<PageResponse<ListUsersResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, users);
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);

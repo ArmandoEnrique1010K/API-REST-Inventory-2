@@ -41,8 +41,6 @@ public class Model_DeliveryOrderController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  // TODO: VERIFICAR SI ESTE ENDPOINT SE UTILIZARA CUANDO UN USUARIO CON ROL DE
-  // USER HAYA INICIADO SESION
   @GetMapping("/models/deliveryOrder/{deliveryOrderId}")
   public ResponseEntity<?> listAllModelsByDeliveryOrder(@PathVariable Long deliveryOrderId) {
     List<Model_DeliveryOrderResponse> model_DeliveryOrderListResponses = model_DeliveryOrderService

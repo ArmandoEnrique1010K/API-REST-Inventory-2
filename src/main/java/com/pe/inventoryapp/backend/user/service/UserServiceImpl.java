@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.common.model.response.PageResponse;
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.model.mapper.UserMapper;
 import com.pe.inventoryapp.backend.user.model.request.RegisterRequest;
@@ -71,7 +72,7 @@ public class UserServiceImpl implements UserService {
   @Override
   @Transactional(readOnly = true)
   public PageResponse<ListUsersResponse> findAllUsersByParams(
-      String keyword, List<Long> roleIds, Pageable pageable) {
+      String keyword, RoleName role, Pageable pageable) {
     Page<User> users = null;
 
     /**
@@ -81,35 +82,46 @@ public class UserServiceImpl implements UserService {
      * - Así mantenemos paginación real en DB
      */
 
-    if (roleIds == null || roleIds.isEmpty()) {
+    // if (roleIds == null || roleIds.isEmpty()) {
 
-      System.out.println("SIN ROLES");
+    //   System.out.println("SIN ROLES");
 
-      Specification<User> spec = (UserSpecifications.keywordContains(keyword));
+    //   Specification<User> spec = (UserSpecifications.keywordContains(keyword));
 
-      Pageable sortedPageable = PageRequest.of(
-          pageable.getPageNumber(),
-          pageable.getPageSize(),
-          Sort.by("id").descending());
+    //   Pageable sortedPageable = PageRequest.of(
+    //       pageable.getPageNumber(),
+    //       pageable.getPageSize(),
+    //       Sort.by("id").descending());
 
-      users = userRepository.findAll(spec, sortedPageable);
-    } else {
-      /**
-       * Aquí entra hasExactRoles
-       * - NO usa JOIN en la query principal
-       * - Usa subqueries
-       * - Compatible con paginación
-       */
-      Specification<User> spec = (UserSpecifications.keywordContains(keyword))
-          .and(UserSpecifications.hasExactRoles(roleIds));
+    //   users = userRepository.findAll(spec, sortedPageable);
+    // } else {
+    //   /**
+    //    * Aquí entra hasExactRoles
+    //    * - NO usa JOIN en la query principal
+    //    * - Usa subqueries
+    //    * - Compatible con paginación
+    //    */
+    //   Specification<User> spec = (UserSpecifications.keywordContains(keyword))
+    //       .and(UserSpecifications.hasExactRoles(roleIds));
 
-      Pageable sortedPageable = PageRequest.of(
-          pageable.getPageNumber(),
-          pageable.getPageSize(),
-          Sort.by("id").descending());
+    //   Pageable sortedPageable = PageRequest.of(
+    //       pageable.getPageNumber(),
+    //       pageable.getPageSize(),
+    //       Sort.by("id").descending());
 
-      users = userRepository.findAll(spec, sortedPageable);
-    }
+    //   users = userRepository.findAll(spec, sortedPageable);
+    // }
+
+    Specification<User> spec = (UserSpecifications.keywordContains(keyword))
+    //.and(UserSpecifications.hasExactRoles(roleIds));
+    .and(UserSpecifications.hasRole(role));
+
+    Pageable sortedPageable = PageRequest.of(
+    pageable.getPageNumber(),
+    pageable.getPageSize(),
+    Sort.by("id").descending());
+
+    users = userRepository.findAll(spec, sortedPageable);
 
     /**
      * Aquí se disparará la carga de roles

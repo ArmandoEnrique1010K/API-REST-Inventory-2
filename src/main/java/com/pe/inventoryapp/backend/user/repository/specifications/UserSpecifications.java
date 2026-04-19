@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import com.pe.inventoryapp.backend.user.model.data.RoleName;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
 import jakarta.persistence.criteria.From;
@@ -44,6 +45,19 @@ public class UserSpecifications {
   public static Specification<User> isActive() {
     return (root, query, cb) -> cb.isTrue(root.get("active"));
   }
+
+  // Si tiene el rol
+  public static Specification<User> hasRole(RoleName role) {
+    return (root, query, cb) -> {
+
+      if (role == null) {
+        return cb.conjunction();
+      }
+
+      return cb.equal(root.get("role"), role);
+    };
+  }
+
 
   // // Filtro por roles (al menos uno)
   // public static Specification<User> hasRoles(List<Long> roleIds) {

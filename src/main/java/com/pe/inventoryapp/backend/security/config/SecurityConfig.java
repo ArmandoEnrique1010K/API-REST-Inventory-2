@@ -76,6 +76,7 @@ public class SecurityConfig {
 						// .authenticated()
 
 						.requestMatchers("/api/auth/**").permitAll()
+						.requestMatchers("/api/dashboard/**").authenticated()
 						.requestMatchers("/api/roles/**").hasRole("ADMIN")
 						.requestMatchers("/api/users/**").hasRole("ADMIN")
 						.requestMatchers("/api/profile/**").authenticated()
@@ -92,7 +93,7 @@ public class SecurityConfig {
 						.requestMatchers("/api/models-delivery-orders/**").hasRole("USER")
 						.requestMatchers("/api/delivery-lines/**").hasRole("USER")
 						.requestMatchers("/api/stock-lot-delivery-lines/**").hasRole("OPERATOR")
-						.requestMatchers("/api/movement/**").hasRole("ADMIN")
+						.requestMatchers("/api/movements/**").hasRole("ADMIN")
 						.requestMatchers("/api/movement-stocklots/**").hasRole("ADMIN")
 						.requestMatchers("/api/summary/**").hasRole("OPERATOR")
 

@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.auth.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -136,11 +137,19 @@ public class AuthController {
 
     CurrentSessionResponse responseUser = CurrentSessionResponse.builder()
         .email(userPrincipal.getUsername())
+        // .role(
+        // userPrincipal.getAuthorities()
+        // .stream()
+        // .map(a -> a.getAuthority())
+        // .toList())
+
+        // Logica para seleccionar un rol por jerarquia
         .role(
             userPrincipal.getAuthorities()
                 .stream()
-                .map(a -> a.getAuthority())
-                .toList())
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse(null))
         .build();
 
     DataResponse<CurrentSessionResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,

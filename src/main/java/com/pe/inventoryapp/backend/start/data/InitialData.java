@@ -11,7 +11,9 @@ import com.pe.inventoryapp.backend.location.repository.LocationRepository;
 import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
 import com.pe.inventoryapp.backend.product.model.entity.Category;
+import com.pe.inventoryapp.backend.product.model.entity.Type;
 import com.pe.inventoryapp.backend.product.repository.CategoryRepository;
+import com.pe.inventoryapp.backend.product.repository.TypeRepository;
 import com.pe.inventoryapp.backend.stocklot.model.entity.Company;
 import com.pe.inventoryapp.backend.stocklot.repository.CompanyRepository;
 import com.pe.inventoryapp.backend.user.model.data.RoleName;
@@ -23,6 +25,7 @@ import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class InitialData {
+  private final TypeRepository typeRepository;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final CategoryRepository categoryRepository;
@@ -35,6 +38,7 @@ public class InitialData {
       UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       CategoryRepository categoryRepository,
+      TypeRepository typeRepository,
       RegionRepository regionRepository,
       SubregionRepository subregionRepository,
       LocationRepository locationRepository,
@@ -46,6 +50,7 @@ public class InitialData {
     this.subregionRepository = subregionRepository;
     this.locationRepository = locationRepository;
     this.companyRepository = companyRepository;
+    this.typeRepository = typeRepository;
   }
 
   // Metodo que se ejecuta cada vez que se inicia la API REST
@@ -135,6 +140,7 @@ public class InitialData {
     if (!categoryRepository.existsByName("Sin categoria")) {
       Category category = new Category();
       category.setName("Sin categoria");
+      category.setStatus(true);
       categoryRepository.save(category);
     }
 
@@ -143,6 +149,13 @@ public class InitialData {
       Company company = new Company();
       company.setName("Propia de la empresa");
       companyRepository.save(company);
+    }
+
+    if(!typeRepository.existsByName("Sin tipo")) {
+      Type type = new Type();
+      type.setName("Sin tipo");
+      type.setStatus(true);
+      typeRepository.save(type);
     }
   }
 }
