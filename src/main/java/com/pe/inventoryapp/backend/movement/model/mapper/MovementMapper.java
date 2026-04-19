@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.movement.model.mapper;
 
 import java.util.List;
 
+import com.pe.inventoryapp.backend.movement.model.dto.MovementDto;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.response.MovementDetailsResponse;
 import com.pe.inventoryapp.backend.movement.model.response.MovementListResponse;
@@ -98,5 +99,23 @@ public class MovementMapper {
         deliveryLineId,
         deliveryOrderId,
         deliveryOrderBatch);
+  }
+
+  public MovementDto buildMovementDto(){
+    if (movement == null) {
+      throw new RuntimeException("Debe pasar la entidad movement");
+    }
+
+    return new MovementDto(
+      movement.getId(),
+      movement.getQuantity(),
+      movement.getMovementType(),
+      movement.getUser().getFirstname(),
+      movement.getUser().getLastname(),
+      movement.getModel().getId(),
+      movement.getModel().getName(),
+      movement.getModel().getProduct().getId(),
+      movement.getModel().getProduct().getName()
+    );
   }
 }

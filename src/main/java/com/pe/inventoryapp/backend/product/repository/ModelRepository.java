@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.product.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -152,5 +154,69 @@ public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecific
             WHERE m.id = :id
             """)
     Optional<Model> findByIdFull(Long id);
+
+    // Cantidad de modelos activos
+    @Query("""
+                SELECT COUNT(m) FROM Model m
+                WHERE m.status = true
+            """)
+    long countByModelsActive();
+
+    // Cantidad de modelos que tienen un stock bajo menor a 1000
+    @Query("""
+            SELECT COUNT(m) FROM Model m
+            WHERE m.totalQuantityAvailable <= 1000
+            """)
+    long countByLowerQuantityAvailable();
+
+    // Cantidad de productos que estan a punto de vencerse en una semana
+    // caducityDate
+    @Query("""
+            SELECT COUNT(m)
+            FROM Model m
+            WHERE m.caducityDate BETWEEN :today AND :limitDate
+            """)
+    long countByNearCaducityDate(
+            @Param("today") LocalDate today,
+            @Param("limitDate") LocalDate limitDate);
+
+    // Lista de productos con bajo stock (menores a 1000)
+    @Query("""
+            SELECT m
+            FROM Model m
+            JOIN FETCH m.product p
+            JOIN FETCH p.category
+            JOIN FETCH p.type
+            WHERE m.totalQuantityAvailable <= 1000
+            """)
+    List<Model> findLowStockModels(Pageable pageable);
+
+    // Lista de productos que estan a punto de vencerse en 1 semana
+    @Query("""
+            SELECT m
+            FROM Model m
+            JOIN FETCH m.product p
+            JOIN FETCH p.category
+            JOIN FETCH p.type
+            WHERE m.caducityDate BETWEEN :today AND :limitDate
+            """)
+    List<Model> findNearCaducityDate(
+            Pageable pageable,
+            @Param("today") LocalDate today,
+            @Param("limitDate") LocalDate limitDate);
+
+    @Query("""
+            SELECT m
+            FROM Model m
+            JOIN FETCH m.product p
+            JOIN FETCH p.category
+            JOIN FETCH p.type
+            WHERE m.status = true
+            """)
+    List<Model> findActiveModels(
+            Pageable pageable);
+
+
+
 
 }

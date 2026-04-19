@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.product.model.mapper;
 
+import com.pe.inventoryapp.backend.product.model.dto.ModelDto;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
@@ -101,6 +102,24 @@ public class ModelMapper {
     return new ModelListSearchFirstTenResponse(
         model.getId(),
         model.getProduct().getName() + " " + model.getName()
+      );
+  }
+
+  public ModelDto buildModelDto(){
+    if (model == null) {
+      throw new RuntimeException("Debe pasar la entidad Model");
+    }
+
+    return new ModelDto(
+      model.getId(),
+      model.getName(),
+      model.getTotalQuantityAvailable(),
+      model.getProduct().getId(),
+      model.getProduct().getName(),
+      model.getProduct().getCategory().getName(),
+      model.getProduct().getType().getName(),
+      model.getEntryDate(),
+      model.getCaducityDate()
       );
   }
 }

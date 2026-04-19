@@ -157,7 +157,7 @@ public interface DeliveryOrderRepository
     Double percentageByDeliveryOrder(Long deliveryOrderId);
 
     @Query("""
-            SELECT new com.pe.inventoryapp.backend.dashboard.model.dto.DeliveryOrderSummaryDto(
+            SELECT new com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto(
                 d.id,
                 d.batch,
                 d.priorityDate,
@@ -185,11 +185,11 @@ public interface DeliveryOrderRepository
             GROUP BY d.id, d.batch, d.priorityDate
             ORDER BY d.priorityDate ASC
             """)
-    List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPending();
+    List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPending(Pageable pageable);
 
 
     @Query("""
-            SELECT new com.pe.inventoryapp.backend.dashboard.model.dto.DeliveryOrderSummaryDto(
+            SELECT new com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto(
                 d.id,
                 d.batch,
                 d.priorityDate,
@@ -217,6 +217,6 @@ public interface DeliveryOrderRepository
             GROUP BY d.id, d.batch, d.priorityDate
             ORDER BY d.priorityDate ASC
             """)
-    List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPendingAndUser(Long id);
+    List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPendingAndUser(Long id, Pageable pageable);
 
 }
