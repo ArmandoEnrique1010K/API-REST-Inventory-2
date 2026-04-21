@@ -21,7 +21,7 @@ public class AdminDashboardResponse {
   private Long quantityLowStockModels;
   private Long quantityNearCaducityDateModels;
   private Long quantityMovementsToday;
-  private List<PendingDeliveryOrdersDto> deliveryOrderSummaryDto;
+  private List<PendingDeliveryOrdersDto> pendingDeliveryOrders;
   private List<ModelDto> lowStockModels;
   private List<ModelDto> recentModels;
   private List<ModelDto> expiringSoonModels;

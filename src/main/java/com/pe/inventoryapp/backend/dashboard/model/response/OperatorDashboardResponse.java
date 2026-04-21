@@ -19,7 +19,7 @@ public class OperatorDashboardResponse {
   private Long quantityModelsActive;
   private Long quantityLowStockModels;
   private Long quantityNearCaducityDateModels;
-  private List<PendingDeliveryOrdersDto> deliveryOrderSummaryDto;
+  private List<PendingDeliveryOrdersDto> pendingDeliveryOrders;
   private List<ModelDto> lowStockModels;
   private List<ModelDto> recentModels;
   private List<ModelDto> expiringSoonModels;

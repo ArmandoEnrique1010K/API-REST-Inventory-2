@@ -4,8 +4,6 @@ import static com.pe.inventoryapp.backend.security.config.TokenJwtConfig.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
@@ -79,16 +77,19 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
 
       // List<String> roles = claims.get("authorities", List.class);
 
-      List<?> rolesObj = claims.get("authorities", List.class);
-      List<String> roles = rolesObj == null ? List.of()
-          : rolesObj.stream()
-              .filter(Objects::nonNull)
-              .map(Object::toString)
-              .collect(Collectors.toList());
+      // List<?> rolesObj = claims.get("authorities", List.class);
+      // List<String> roles = rolesObj == null ? List.of()
+      //     : rolesObj.stream()
+      //         .filter(Objects::nonNull)
+      //         .map(Object::toString)
+      //         .collect(Collectors.toList());
 
-      if (roles.isEmpty()) {
-        throw new JwtException("El token no contiene roles válidos");
-      }
+        String role = claims.get("role", String.class);
+
+
+      // if (roles.isEmpty()) {
+      //   throw new JwtException("El token no contiene roles válidos");
+      // }
 
       // User user = userRepository.findByIdWithRoles(Long.parseLong(userId))
       // .orElseThrow(() -> new BusinessException(ResponseStatus.UNAUTHORIZED, "El
@@ -100,9 +101,12 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
           claims.get("email", String.class),
           null,
           true,
-          roles.stream()
-              .map(SimpleGrantedAuthority::new)
-              .toList());
+          role,
+          // roles.stream()
+          //     .map(SimpleGrantedAuthority::new)
+          //     .toList()
+            List.of(new SimpleGrantedAuthority(role))
+            );
 
       // Si el usuario no esta activo, se eliminara la sesion
       if (!userPrincipal.isEnabled()) {

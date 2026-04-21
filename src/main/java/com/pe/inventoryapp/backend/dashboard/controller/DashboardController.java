@@ -30,7 +30,9 @@ public class DashboardController {
     this.dashboardService = dashboardService;
   }
 
-  @PreAuthorize("hasRole('USER')")
+  //* EN ESTE CASO SE QUIERE IGNORAR LA JERARQUIA DE ROLES Y QUE SOLAMENTE EL USUARIO CON ESE ROL PUEDA ACCEDER AL ENDPOINT
+  // @PreAuthorize("hasRole('USER')")
+  @PreAuthorize("principal.role == 'ROLE_USER'")
   @GetMapping("/user")
   public ResponseEntity<?> getDashboardUser(Authentication authentication){
     UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
@@ -40,7 +42,7 @@ public class DashboardController {
   }
   
 
-  @PreAuthorize("hasRole('OPERATOR')")
+  @PreAuthorize("principal.role == 'ROLE_OPERATOR'")
   @GetMapping("/operator")
   public ResponseEntity<?> getDashboardOperator(Authentication authentication) {
     OperatorDashboardResponse operatorDashboardResponse = dashboardService.getSummaryByRoleOperator();
@@ -49,7 +51,7 @@ public class DashboardController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("principal.role == 'ROLE_ADMIN'")
   @GetMapping("/admin")
   public ResponseEntity<?> getDashboardAdmin(Authentication authentication) {
     AdminDashboardResponse adminDashboardResponse = dashboardService.getSummaryByRoleAdmin();
@@ -57,5 +59,4 @@ public class DashboardController {
         adminDashboardResponse);
     return ResponseEntity.status(response.status()).body(response);
   }
-
 }

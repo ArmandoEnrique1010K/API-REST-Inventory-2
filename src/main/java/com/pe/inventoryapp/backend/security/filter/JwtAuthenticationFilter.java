@@ -16,7 +16,6 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pe.inventoryapp.backend.auth.model.request.LoginRequest;
@@ -84,11 +83,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // Generación de claims
     Map<String, Object> claims = new HashMap<>();
 
-    claims.put("authorities", authResult.getAuthorities().stream()
-        .map(GrantedAuthority::getAuthority)
-        .toList());
+    // claims.put("authorities", authResult.getAuthorities().stream()
+    //     .map(GrantedAuthority::getAuthority)
+    //     .toList());
+
+    claims.put("role", userPrincipal.getRole());
+
+    
     claims.put("email", userPrincipal.getUsername());
-    claims.put("id", id_user);
+    // claims.put("id", id_user);
 
     // Generación del token
     String token = Jwts.builder()

@@ -213,7 +213,7 @@ public class DashboardServiceImpl implements DashboardService {
 
 // public class UserDashboardResponse {
 // private Long quantityDeliveryOrdersPending;
-// private DeliveryOrderSummaryDto deliveryOrderSummaryDto;
+// private DeliveryOrderSummaryDto pendingDeliveryOrders;
 // }
 
 // public class DeliveryOrderSummaryDto {
