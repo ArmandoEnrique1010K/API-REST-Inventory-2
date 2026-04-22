@@ -4,9 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -51,14 +49,15 @@ public class MovementServiceImpl implements MovementService {
 		// .and(MovementSpecifications.fetchRelations());
 		// spec = spec.and(MovementSpecifications.fetchRelations());
 
-		Pageable sortedPageable = PageRequest.of(
-				pageable.getPageNumber(),
-				pageable.getPageSize(),
-				Sort.by("createdAt").descending());
+		// Pageable sortedPageable = PageRequest.of(
+		// 		pageable.getPageNumber(),
+		// 		pageable.getPageSize(),
+		// 		Sort.by("createdAt").descending()
+		// 	);
 
 		Page<Movement> movements = movementRepository.findAll(
 				spec,
-				sortedPageable);
+				pageable);
 		;
 		// Page<Movement> movements = movementRepository.findAllByParams(pageable,
 		// minQuantity, maxQuantity, minCreatedAt,

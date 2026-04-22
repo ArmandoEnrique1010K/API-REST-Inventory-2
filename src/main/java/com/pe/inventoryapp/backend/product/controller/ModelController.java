@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -87,8 +88,12 @@ public class ModelController {
       @RequestParam(required = false) LocalDate maxEntryDate,
       @RequestParam(required = false) Boolean status,
       @RequestParam(required = false) Long categoryId,
-      @RequestParam(required = false) Long typeId) {
-    Pageable pageable = PageRequest.of(page, 20);
+      @RequestParam(required = false) Long typeId,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction
+    ) {
+      Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
     PageResponse<ModelListResponse> models = modelService.searchAllModelsByParams(pageable, keyword, minStock, maxStock,
         minEntryDate, maxEntryDate, status, categoryId, typeId);
     DataResponse<PageResponse<ModelListResponse>> dataResponse = responseService
@@ -151,4 +156,26 @@ public class ModelController {
         "Se ha cambiado el estado del modelo");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  private Sort buildSort(String sortBy, String direction) {
+
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "productName" -> "product.name";
+      case "modelName" -> "name";
+      case "categoryName" -> "product.category.name";
+      case "typeName" -> "product.type.name";
+      case "caducityDate" -> "caducityDate";
+      case "entryDate" -> "entryDate";
+      case "totalQuantityAvailable" -> "totalQuantityAvailable";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
+  }
+
 }

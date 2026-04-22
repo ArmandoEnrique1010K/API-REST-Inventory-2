@@ -11,9 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -147,14 +145,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate))
 				.and(DeliveryOrderSpecifications.isNotCanceled());
 
-		Pageable sortedPageable = PageRequest.of(
-				pageable.getPageNumber(),
-				pageable.getPageSize(),
-				Sort.by("createdAt").descending());
+		// Pageable sortedPageable = PageRequest.of(
+		// 		pageable.getPageNumber(),
+		// 		pageable.getPageSize(),
+		// 		Sort.by("createdAt").descending());
 
 		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
 				spec,
-				sortedPageable);
+				pageable);
 
 		// Page<DeliveryOrder> deliveryOrders =
 		// deliveryOrderRepository.findAllByParams(pageable, batch, startDate, endDate,
@@ -192,14 +190,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				.and(DeliveryOrderSpecifications.batchContains(batch))
 				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate));
 
-		Pageable sortedPageable = PageRequest.of(
-				pageable.getPageNumber(),
-				pageable.getPageSize(),
-				Sort.by("createdAt").descending());
+		// Pageable sortedPageable = PageRequest.of(
+		// 		pageable.getPageNumber(),
+		// 		pageable.getPageSize(),
+		// 		Sort.by("createdAt").descending());
 
 		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
 				spec,
-				sortedPageable);
+				pageable);
 
 		List<DeliveryOrderListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
@@ -238,14 +236,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				.and(DeliveryOrderSpecifications.hasStatus(status))
 				.and(DeliveryOrderSpecifications.batchContains(batch))
 				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate));
-		Pageable sortedPageable = PageRequest.of(
-				pageable.getPageNumber(),
-				pageable.getPageSize(),
-				Sort.by("createdAt").descending());
+		// Pageable sortedPageable = PageRequest.of(
+		// 		pageable.getPageNumber(),
+		// 		pageable.getPageSize(),
+		// 		Sort.by("createdAt").descending());
 
 		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
 				spec,
-				sortedPageable);
+				pageable);
 
 		List<DeliveryOrderClientListResponse> result = deliveryOrders.getContent().stream().map(
 				deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)

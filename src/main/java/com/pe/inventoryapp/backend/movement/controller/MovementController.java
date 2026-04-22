@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,8 +43,11 @@ public class MovementController {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime maxCreatedAt,
       @RequestParam(required = false) MovementType movementType,
       @RequestParam(required = false) String username,
-      @RequestParam(required = false) String keyword) {
-    Pageable pageable = PageRequest.of(page, 20);
+      @RequestParam(required = false) String keyword,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction) {
+    Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<MovementListResponse> movements = movementService.findAllMovements(pageable, minQuantity, maxQuantity,
         minCreatedAt,
@@ -60,6 +64,26 @@ public class MovementController {
     DataResponse<MovementDetailsResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         movementDetailsResponse);
     return ResponseEntity.status(response.status()).body(response);
+  }
+
+  private Sort buildSort(String sortBy, String direction) {
+
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "quantity" -> "quantity";
+      case "createdAt" -> "createdAt";
+      case "movementType" -> "movementType";
+      case "userFirstname" -> "user.firstname";
+      case "modelName" -> "model.name";
+      case "productName" -> "model.product.name";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
   }
 
 }

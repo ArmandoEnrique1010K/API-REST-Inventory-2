@@ -129,16 +129,17 @@ public class ModelServiceImpl implements ModelService {
     // spec = spec.and(ModelSpecifications.fetchRelations());
 
     // Para ordenar los elementos de forma descendente de acuerdo al ID se utiliza el siguiente codigo
-    Pageable sortedPageable = PageRequest.of(
-    pageable.getPageNumber(),
-    pageable.getPageSize(),
-    Sort.by("id").descending());
+  //   Pageable sortedPageable = PageRequest.of(
+  //   pageable.getPageNumber(),
+  //   pageable.getPageSize()
+  //   // ,Sort.by("id").descending()
+  // );
 
     //* Cuando usas Page, Spring Data JPA automáticamente ejecuta 2 queries
     //* SELECT ... FROM modelos JOIN ... LIMIT ?, ? → Cuenta el total de registros
     //* SELECT count(m1_0.id) FROM modelos m1_0 WHERE ... → Cuenta el total de
     // registros
-    Page<Model> models = modelRepository.findAll(spec, sortedPageable);
+    Page<Model> models = modelRepository.findAll(spec, pageable);
 
     List<ModelListResponse> result = models.getContent().stream().map(
         model -> ModelMapper.builder()

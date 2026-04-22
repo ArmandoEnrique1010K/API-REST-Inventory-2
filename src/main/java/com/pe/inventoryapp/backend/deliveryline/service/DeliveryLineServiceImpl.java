@@ -8,9 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -278,14 +276,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .and(DeliveryLineSpecifications.isNotCanceled())
         .and(DeliveryLineSpecifications.fetchAllRelations());
 
-    Pageable sortedPageable = PageRequest.of(
-        pageable.getPageNumber(),
-        pageable.getPageSize(),
-        Sort.by("id").descending());
+    // Pageable sortedPageable = PageRequest.of(
+    //     pageable.getPageNumber(),
+    //     pageable.getPageSize(),
+    //     Sort.by("id").descending());
 
     Page<DeliveryLine> deliveryLines = deliveryLineRepository.findAll(
         spec,
-        sortedPageable);
+        pageable);
 
     List<DeliveryLineListResponse> result = deliveryLines.getContent().stream().map(
         deliveryLine -> DeliveryLineMapper.builder()

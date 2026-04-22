@@ -24,7 +24,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
         AND (:status IS NULL OR p.status = :status)
         AND (:categoryId IS NULL OR c.id = :categoryId)
         AND (:typeId IS NULL OR t.id = :typeId)
-        ORDER BY p.id DESC
       """)
   Page<Product> findAllByParams(
     Pageable pageable, 

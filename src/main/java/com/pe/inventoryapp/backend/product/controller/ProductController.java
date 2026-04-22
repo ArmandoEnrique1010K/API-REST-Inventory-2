@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.product.controller;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -69,8 +70,13 @@ public class ProductController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Boolean status,
       @RequestParam(required = false) Long categoryId,
-      @RequestParam(required = false) Long typeId) {
-    Pageable pageable = PageRequest.of(page, 20);
+      @RequestParam(required = false) Long typeId,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction
+
+  ) {
+    Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<ProductResponse> products = productService.searchAllProductsByParams(pageable, name, status,
         categoryId, typeId);
@@ -111,4 +117,22 @@ public class ProductController {
 
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  private Sort buildSort(String sortBy, String direction) {
+
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "name" -> "name";
+      case "categoryName" -> "category.name";
+      case "typeName" -> "type.name";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
+  }
+
 }

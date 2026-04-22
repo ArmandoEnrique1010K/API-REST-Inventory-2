@@ -116,12 +116,12 @@ public class UserServiceImpl implements UserService {
     //.and(UserSpecifications.hasExactRoles(roleIds));
     .and(UserSpecifications.hasRole(role));
 
-    Pageable sortedPageable = PageRequest.of(
-    pageable.getPageNumber(),
-    pageable.getPageSize(),
-    Sort.by("id").descending());
+    // Pageable sortedPageable = PageRequest.of(
+    // pageable.getPageNumber(),
+    // pageable.getPageSize());
+    // Sort.by("id").descending());
 
-    users = userRepository.findAll(spec, sortedPageable);
+    users = userRepository.findAll(spec, pageable);
 
     /**
      * Aquí se disparará la carga de roles

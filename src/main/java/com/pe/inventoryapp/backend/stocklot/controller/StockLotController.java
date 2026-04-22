@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -79,14 +80,17 @@ public class StockLotController {
       @RequestParam(required = false) Long companyId,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long typeId,
-      @RequestParam(required = false) Long modelId) {
-    Pageable pageable = PageRequest.of(page, 20);
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction
+    ) {
+      Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<StockLotListResponse> products = stockLotService.searchAllStockLotsByParams(
         minQuantityReceived,
         maxQuantityReceived,
         minQuantityAvailable,
-        maxQuantityAvailable, minCreatedAt, maxCreatedAt, keyword, companyId, categoryId, typeId, modelId, pageable);
+        maxQuantityAvailable, minCreatedAt, maxCreatedAt, keyword, companyId, categoryId, typeId, pageable);
 
     DataResponse<PageResponse<StockLotListResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, products);
@@ -176,4 +180,25 @@ public class StockLotController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  private Sort buildSort(String sortBy, String direction) {
+
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "quantityReceived" -> "quantityReceived";
+      case "quantityAvailable" -> "quantityAvailable";
+      case "createdAt" -> "createdAt";
+      case "modelName" -> "model.name";
+      case "productName" -> "model.product.name";
+      // case "companyName" -> "company.name";
+      // case "categoryName" -> "model.product.category.name";
+      // case "typeName" -> "model.product.type.name";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
+  }
 }

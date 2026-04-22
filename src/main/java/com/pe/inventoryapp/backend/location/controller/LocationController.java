@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import jakarta.validation.Valid;
 
@@ -65,11 +66,17 @@ public class LocationController {
       @RequestParam(required = false) String name,
       @RequestParam(required = false) Long regionId,
       @RequestParam(required = false) Long subregionId,
-      @RequestParam(required = false) Boolean status) {
-    Pageable pageable = PageRequest.of(page, 20);
+      @RequestParam(required = false) Boolean status,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction
+
+  ) {
+    Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<LocationResponse> locations = locationService.searchAllLocations(pageable, name,
         regionId, subregionId, status);
+
     DataResponse<PageResponse<LocationResponse>> dataResponse = responseService.generateDataResponse(
         ResponseStatus.SUCCESS,
         locations);
@@ -116,5 +123,21 @@ public class LocationController {
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha cambiado el estado de la ubiación");
     return ResponseEntity.status(response.status()).body(response);
+  }
+
+  private Sort buildSort(String sortBy, String direction) {
+
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "name" -> "name";
+      case "regionName" -> "subregion.region.name";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
   }
 }

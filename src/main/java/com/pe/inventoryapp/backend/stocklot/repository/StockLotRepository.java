@@ -209,7 +209,6 @@ public interface StockLotRepository extends JpaRepository<StockLot, Long>, JpaSp
                   "model.product",
                   "model.product.category",
                   "model.product.type"
-
       })
       @NonNull
       Page<StockLot> findAll(

@@ -3,6 +3,7 @@ package com.pe.inventoryapp.backend.deliveryorder.controller;
 import java.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,8 +79,11 @@ public class DeliveryOrderController {
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
       @RequestParam(required = false) String userClientName,
-      @RequestParam(required = false) OrderStatus status) {
-    Pageable pageable = PageRequest.of(page, 20);
+      @RequestParam(required = false) OrderStatus status,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction) {
+    Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllDeliveryOrdersByParams(
         pageable, batch,
@@ -99,9 +103,12 @@ public class DeliveryOrderController {
       @RequestParam(required = false) String batch,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-      @RequestParam(required = false) String userClientName) {
+      @RequestParam(required = false) String userClientName,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction) {
 
-    Pageable pageable = PageRequest.of(page, 20);
+    Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<DeliveryOrderListResponse> deliveryOrders = deliveryOrderService.findAllActiveDeliveryOrdersByParams(
         pageable, batch, startDate, endDate, userClientName);
@@ -121,11 +128,15 @@ public class DeliveryOrderController {
       @RequestParam(required = false) String batch,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-      @RequestParam(required = false) OrderStatus status) {
+      @RequestParam(required = false) OrderStatus status,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction)
+  {
 
     UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-    Pageable pageable = PageRequest.of(page, 20);
+    Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<DeliveryOrderClientListResponse> deliveryOrders = deliveryOrderService
         .findAllDeliveryOrderByClientId(pageable, userPrincipal.getId(), batch, startDate, endDate, status);
@@ -200,4 +211,25 @@ public class DeliveryOrderController {
         "Se ha enviado la orden de entrega al cliente");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  // TODO: SE PODRIA DIVIDIR ENTRE 3 ORDENAMIENTOS PARA CADA LISTA
+  private Sort buildSort(String sortBy, String direction) {
+
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "batch" -> "batch";
+      case "limitDate" -> "limitDate";
+      case "priorityDate" -> "priorityDate";
+      case "userClientFirstname" -> "userClient.firstname";
+      case "orderStatus" -> "orderStatus";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
+  }
+
 }

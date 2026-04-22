@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -86,8 +87,11 @@ public class DeliveryLineController {
       @RequestParam(required = false) String location,
       @RequestParam(required = false) Long subregionId,
       @RequestParam(required = false) Long regionId,
-      @RequestParam(required = false) Long modelId) {
-    Pageable pageable = PageRequest.of(page, 20);
+      @RequestParam(required = false) Long modelId,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction) {
+    Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
     PageResponse<DeliveryLineListResponse> deliveryOrders = deliveryLineService
         .findAllDeliveryLinesByDeliveryOrderIdPageable(
             deliveryOrderId,
@@ -198,6 +202,26 @@ public class DeliveryLineController {
     CommonResponse response = responseService.generateSucessfullResponse(ResponseStatus.SUCCESS,
         "Se ha asignado cantidad en toda o una parte de la linea de entrega");
     return ResponseEntity.status(response.status()).body(response);
+  }
+
+  private Sort buildSort(String sortBy, String direction) {
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "requiredQuantity" -> "requiredQuantity";
+      case "pendingQuantity" -> "pendingQuantity";
+      case "limitDate" -> "limitDate";
+      case "lineStatus" -> "lineStatus";
+      case "locationName" -> "location.name";
+      case "modelName" -> "model.name";
+      case "productName" -> "model.product.name";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
   }
 
 }

@@ -4,9 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,7 +165,6 @@ public class StockLotServiceImpl implements StockLotService {
       Long companyId,
       Long categoryId,
       Long typeId,
-      Long modelId,
       Pageable pageable) {
     // Page<StockLot> stockLots =
     // stockLotRepository.findAllByParams(minQuantityReceived,
@@ -186,7 +183,7 @@ public class StockLotServiceImpl implements StockLotService {
     spec = spec.and(StockLotSpecifications.hasCompany(companyId));
     spec = spec.and(StockLotSpecifications.hasCategory(categoryId));
     spec = spec.and(StockLotSpecifications.hasType(typeId));
-    spec = spec.and(StockLotSpecifications.hasModel(modelId));
+    // spec = spec.and(StockLotSpecifications.hasModel(modelId));
     spec = spec.and(StockLotSpecifications.isNotZeroStock());
 
     /*
@@ -200,12 +197,12 @@ public class StockLotServiceImpl implements StockLotService {
     spec = spec.and(StockLotSpecifications.fetchRelations());
 
     // Ordenar los elementos de acuerdo al campo de createdAt de forma descendente
-    Pageable sortedPageable = PageRequest.of(
-    pageable.getPageNumber(),
-    pageable.getPageSize(),
-    Sort.by("createdAt").descending()
-);
-    Page<StockLot> stockLots = stockLotRepository.findAll(spec, sortedPageable);
+    // Pageable sortedPageable = PageRequest.of(
+    // pageable.getPageNumber(),
+    // pageable.getPageSize()
+    // Sort.by("createdAt").descending()
+// );
+    Page<StockLot> stockLots = stockLotRepository.findAll(spec, pageable);
 
     List<StockLotListResponse> stockLotListResponse = stockLots.getContent().stream()
         .map(stockLot -> StockLotMapper.builder().setStockLot(stockLot).buildStockLotListResponse()).toList();

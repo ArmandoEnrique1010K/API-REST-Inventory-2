@@ -24,6 +24,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
@@ -66,11 +67,12 @@ public class UserController {
       @RequestParam(defaultValue = "0") Integer page,
       @RequestParam(required = false) String name,
       // @RequestParam(required = false) List<Long> idRoles
-      @RequestParam(required = false) RoleName role
-    
-    
+      @RequestParam(required = false) RoleName role,
+      @RequestParam(defaultValue = "id") String sortBy,
+      @RequestParam(defaultValue = "desc") String direction
     ) {
-    Pageable pageable = PageRequest.of(page, 20);
+      Sort sort = buildSort(sortBy, direction);
+    Pageable pageable = PageRequest.of(page, 20, sort);
 
     PageResponse<ListUsersResponse> users = userService.findAllUsersByParams(name, role, pageable);
     DataResponse<PageResponse<ListUsersResponse>> dataResponse = responseService
@@ -119,4 +121,23 @@ public class UserController {
         "Se ha cambiado el estado del usuario");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  private Sort buildSort(String sortBy, String direction) {
+
+    String field = switch (sortBy) {
+      case "id" -> "id";
+      case "firstname" -> "firstname";
+      case "lastname" -> "lastname";
+      case "dni" -> "dni";
+      case "role" -> "role";
+      default -> "id";
+    };
+
+    Sort.Direction dir = direction.equalsIgnoreCase("asc")
+        ? Sort.Direction.ASC
+        : Sort.Direction.DESC;
+
+    return Sort.by(dir, field);
+  }
+
 }
