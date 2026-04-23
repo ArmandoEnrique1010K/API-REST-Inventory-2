@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDashboardResponse {
+  private String userFullname;
   private Long pendingDeliveryOrdersByUserCount;
   private List<PendingDeliveryOrdersDto> pendingDeliveryOrdersByUser;
 }

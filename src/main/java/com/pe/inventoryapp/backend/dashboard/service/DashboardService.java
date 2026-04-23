@@ -7,7 +7,7 @@ import com.pe.inventoryapp.backend.dashboard.model.response.UserDashboardRespons
 public interface DashboardService {
   UserDashboardResponse getSummaryByRoleUser(Long idUser);
 
-  OperatorDashboardResponse getSummaryByRoleOperator();
+  OperatorDashboardResponse getSummaryByRoleOperator(Long idUser);
 
-  AdminDashboardResponse getSummaryByRoleAdmin();
+  AdminDashboardResponse getSummaryByRoleAdmin(Long idUser);
 }

@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.deliveryorder.model.response;
 
 import java.time.LocalDateTime;
 
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OnTimeStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 
 import lombok.AllArgsConstructor;
@@ -24,4 +25,8 @@ public class DeliveryOrderDetailsResponse {
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
   private OrderStatus orderStatus;
+  
+  private Double percentage;
+  private LocalDateTime deliveredAt;
+  private OnTimeStatus onTimeStatus;
 }

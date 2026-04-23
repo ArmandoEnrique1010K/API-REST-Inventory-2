@@ -45,7 +45,9 @@ public class DashboardController {
   @PreAuthorize("principal.role == 'ROLE_OPERATOR'")
   @GetMapping("/operator")
   public ResponseEntity<?> getDashboardOperator(Authentication authentication) {
-    OperatorDashboardResponse operatorDashboardResponse = dashboardService.getSummaryByRoleOperator();
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    OperatorDashboardResponse operatorDashboardResponse = dashboardService.getSummaryByRoleOperator(
+        userPrincipal.getId());
     DataResponse<OperatorDashboardResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         operatorDashboardResponse);
     return ResponseEntity.status(response.status()).body(response);
@@ -54,7 +56,8 @@ public class DashboardController {
   @PreAuthorize("principal.role == 'ROLE_ADMIN'")
   @GetMapping("/admin")
   public ResponseEntity<?> getDashboardAdmin(Authentication authentication) {
-    AdminDashboardResponse adminDashboardResponse = dashboardService.getSummaryByRoleAdmin();
+    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    AdminDashboardResponse adminDashboardResponse = dashboardService.getSummaryByRoleAdmin(userPrincipal.getId());
     DataResponse<AdminDashboardResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
         adminDashboardResponse);
     return ResponseEntity.status(response.status()).body(response);

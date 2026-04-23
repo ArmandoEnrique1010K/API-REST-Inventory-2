@@ -9,7 +9,8 @@ import com.pe.inventoryapp.backend.product.model.dto.ModelDto;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.mapper.ModelMapper;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
-
+import com.pe.inventoryapp.backend.user.model.entity.User;
+import com.pe.inventoryapp.backend.user.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.pe.inventoryapp.backend.common.data.ResponseStatus;
+import com.pe.inventoryapp.backend.common.exception.BusinessException;
 import com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto;
 import com.pe.inventoryapp.backend.dashboard.model.response.AdminDashboardResponse;
 import com.pe.inventoryapp.backend.dashboard.model.response.OperatorDashboardResponse;
@@ -28,20 +31,31 @@ import com.pe.inventoryapp.backend.dashboard.model.response.UserDashboardRespons
 @Service
 public class DashboardServiceImpl implements DashboardService {
 
+    private final UserRepository userRepository;
     private final MovementRepository movementRepository;
     private final ModelRepository modelRepository;
     private final DeliveryOrderRepository deliveryOrderRepository;
 
     public DashboardServiceImpl(DeliveryOrderRepository deliveryOrderRepository, ModelRepository modelRepository,
-            MovementRepository movementRepository) {
+            MovementRepository movementRepository, UserRepository userRepository) {
         this.deliveryOrderRepository = deliveryOrderRepository;
         this.modelRepository = modelRepository;
         this.movementRepository = movementRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDashboardResponse getSummaryByRoleUser(Long idUser) {
         Long quantityDeliveryOrdersPendingByUser = deliveryOrderRepository.countByOrderStatusPendingAndUser(idUser);
+
+    User user = userRepository.findByIdWithRoles(
+                    idUser)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.NOT_FOUND,
+            "El usuario no existe"));
+
+            String userFullname = user.getFirstname() + user.getLastname();
+
 
         Pageable pageable = PageRequest.of(
                 0,
@@ -52,6 +66,7 @@ public class DashboardServiceImpl implements DashboardService {
                         idUser, pageable);
 
         UserDashboardResponse result = new UserDashboardResponse(
+                userFullname,
                 quantityDeliveryOrdersPendingByUser, // List
                 summaryDeliveryOrder);
 
@@ -59,7 +74,15 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public OperatorDashboardResponse getSummaryByRoleOperator() {
+    public OperatorDashboardResponse getSummaryByRoleOperator(Long idUser) {
+            User user = userRepository.findByIdWithRoles(
+                            idUser)
+                            .orElseThrow(() -> new BusinessException(
+                                            ResponseStatus.NOT_FOUND,
+                                            "El usuario no existe"));
+
+            String userFullname = user.getFirstname() + user.getLastname();
+
         Long quantityDeliveryOrdersPending = deliveryOrderRepository.countByOrderStatusPending();
 
         Long modelsActive = modelRepository.countByModelsActive();
@@ -114,7 +137,7 @@ public class DashboardServiceImpl implements DashboardService {
         List<ModelDto> result4 = summaryNearCaducityDate.stream()
                 .map(summary -> ModelMapper.builder().setModel(summary).buildModelDto()).collect(Collectors.toList());
 
-        OperatorDashboardResponse result = new OperatorDashboardResponse(
+        OperatorDashboardResponse result = new OperatorDashboardResponse(userFullname,
                 quantityDeliveryOrdersPending, modelsActive, lowerQuantityModels, nearCaducityDate,
                 summaryDeliveryOrder, result2, result3, result4
 
@@ -125,8 +148,15 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
   @Override
-  public AdminDashboardResponse getSummaryByRoleAdmin() {
-  
+  public AdminDashboardResponse getSummaryByRoleAdmin(Long idUser) {
+          User user = userRepository.findByIdWithRoles(
+                          idUser)
+                          .orElseThrow(() -> new BusinessException(
+                                          ResponseStatus.NOT_FOUND,
+                                          "El usuario no existe"));
+
+          String userFullname = user.getFirstname() + user.getLastname();
+
       Long quantityDeliveryOrdersPending = deliveryOrderRepository.countByOrderStatusPending();
 
       Long modelsActive = modelRepository.countByModelsActive();
@@ -200,7 +230,7 @@ public class DashboardServiceImpl implements DashboardService {
 
             List<MovementDto> result5 = lastMovementsList.stream().map(movement -> MovementMapper.builder().setMovement(movement).buildMovementDto()).collect(Collectors.toList());
 
-      AdminDashboardResponse result = new AdminDashboardResponse(
+      AdminDashboardResponse result = new AdminDashboardResponse(userFullname,
               quantityDeliveryOrdersPending, modelsActive, lowerQuantityModels, nearCaducityDate, movementsInDay,
               summaryDeliveryOrder, result2, result3, result4, result5
 

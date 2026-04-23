@@ -137,20 +137,47 @@ public interface DeliveryOrderRepository
             """)
     long countByOrderStatusPendingAndUser(Long id);
 
+    // @Query("""
+    //         SELECT COALESCE(
+    //             (
+    //                 SUM(
+    //                     CASE
+    //                         WHEN dl.lineStatus IN (
+    //                             'LINE_MISSING', 'LINE_READY', 'LINE_DELIVERED', 'LINE_CANCELED'
+    //                         )
+    //                         THEN 1
+    //                         ELSE 0
+    //                     END
+    //                 ) * 100.0
+    //             ) / COUNT(dl)
+    //         , 0)
+    //         FROM DeliveryLine dl
+    //         WHERE dl.deliveryOrder.id = :deliveryOrderId
+    //         """)
+    // Double percentageByDeliveryOrder(Long deliveryOrderId);
+
+
     @Query("""
             SELECT COALESCE(
                 (
                     SUM(
                         CASE
                             WHEN dl.lineStatus IN (
-                                'LINE_MISSING', 'LINE_READY', 'LINE_DELIVERED', 'LINE_CANCELED'
-                            )
-                            THEN 1
+                                'LINE_READY','LINE_DELIVERED','LINE_MISSING'
+                            ) THEN 1
                             ELSE 0
                         END
                     ) * 100.0
-                ) / COUNT(dl)
-            , 0)
+                ) /
+                NULLIF(
+                    SUM(
+                        CASE
+                            WHEN dl.lineStatus <> 'LINE_CANCELED' THEN 1
+                            ELSE 0
+                        END
+                    ),0
+                )
+            ,0)
             FROM DeliveryLine dl
             WHERE dl.deliveryOrder.id = :deliveryOrderId
             """)

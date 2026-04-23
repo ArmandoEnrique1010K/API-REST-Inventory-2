@@ -19,4 +19,6 @@ public class DeliveryOrderClientDetailsResponse {
   private LocalDateTime limitDate;
   private String userClientFullname;
   private OrderStatus orderStatus;
+
+  private Double percentage;
 }

@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OnTimeStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 
@@ -58,6 +59,16 @@ public class DeliveryOrder {
 
   @Enumerated(EnumType.STRING)
   private OrderStatus orderStatus;
+
+  // Porcentaje de lineas de entrega en estado READY y superiores
+  private Double percentage;
+
+  // Fecha real de entrega
+  private LocalDateTime deliveredAt;
+
+  // ¿La orden de entrega ha sido entregada a tiempo?
+  // DESCONOCIDO, A TIEMPO, TARDE
+  private OnTimeStatus onTimeStatus;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_creator_id")

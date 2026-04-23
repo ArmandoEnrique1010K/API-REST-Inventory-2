@@ -49,7 +49,10 @@ public class DeliveryOrderMapper {
           deliveryOrder.getUserClient().getFirstname() + " " + deliveryOrder.getUserClient().getLastname(),
           deliveryOrder.getCreatedAt(),
           deliveryOrder.getUpdatedAt(),
-          deliveryOrder.getOrderStatus());
+          deliveryOrder.getOrderStatus(),
+          deliveryOrder.getPercentage(),
+          deliveryOrder.getDeliveredAt(),
+          deliveryOrder.getOnTimeStatus());
     }
   }
 
@@ -76,7 +79,8 @@ public class DeliveryOrderMapper {
           deliveryOrder.getBatch(),
           deliveryOrder.getLimitDate(),
           deliveryOrder.getUserClient().getFirstname() + " " + deliveryOrder.getUserClient().getLastname(),
-          deliveryOrder.getOrderStatus());
+          deliveryOrder.getOrderStatus(),
+          deliveryOrder.getPercentage());
     }
 
   }

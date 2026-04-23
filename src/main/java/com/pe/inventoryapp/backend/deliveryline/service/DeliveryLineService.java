@@ -35,17 +35,18 @@ public interface DeliveryLineService {
   // Busca una linea por id
   DeliveryLineDetailsResponse findDeliveryLineById(Long id);
 
+  //
   void updateDeliveryLineById(Long id, DeliveryLineUpdateRequest deliveryLineUpdateRequest, Long id_user);
 
-  void cancelDeliveryLineById(Long id, Long id_user_authenticated);
+  void cancelDeliveryLineById(Long id, Long id_user_authenticated); //
 
-  void sendDeliveryLineById(Long id, Long id_user_authenticated);
+  void sendDeliveryLineById(Long id, Long id_user_authenticated); //
 
-  void lostDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user_authenticated);
+  void lostDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user_authenticated); //
 
-  void returnDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user_authenticated);
+  void returnDeliveryLineById(Long id, DeliveryLineAlterRequest deliveryLineAlterRequest, Long id_user_authenticated); //
 
-  void allocateDeliveryLineById(Long id, DeliveryLineAllocateRequest deliveryLineAllocateRequest, Long id_user_authenticated);
+  void allocateDeliveryLineById(Long id, DeliveryLineAllocateRequest deliveryLineAllocateRequest, Long id_user_authenticated); //
 
   void missingDeliveryLineById(Long id, Long id_user_authenticated);
 

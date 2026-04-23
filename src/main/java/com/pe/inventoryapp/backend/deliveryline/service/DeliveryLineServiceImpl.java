@@ -148,20 +148,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
             ResponseStatus.CONFLICT,
             "La relación entre orden de entrega y modelo no existe"));
 
-    // Obtener el producto y orden de entrega desde Product_DeliveryOrder
-    // Model_DeliveryOrder model_DeliveryOrder =
-    // model_DeliveryOrderRepository.findById(id_model_deliveryOrder)
-    // .orElseThrow(
-    // () -> new BusinessException(ResponseStatus.NOT_FOUND,
-    // "La relación de producto y orden de entrega no existe"));
-
-    // Long id_deliveryOrder = model_DeliveryOrder.getDeliveryOrder().getId();
-    // Long id_model = model_DeliveryOrder.getModel().getId();
-
-    // if (id_deliveryOrder == null || id_model == null) {
-    // throw new BusinessException(ResponseStatus.INTERNAL_SERVER_ERROR);
-    // }
-
     // Regla: no permitir duplicados por ubicación, excepto de las lineas de entrega
     // con estado MOVEMENT_LINE_CANCELED
     boolean exists = deliveryLineRepository
@@ -203,39 +189,27 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // 2° actualizar el estado a PENDING cada vez que se guarde una nueva linea de
     // entrega
     deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
+
+    // Debe recalcular el porcentaje por cada linea de entrega creada
+    deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+
+    // Estos metodos no son necesarios porque se crea una nueva linea de entrega
+    // Recordar que si una orden de entrega fue entregada, entonces ya no se le
+    // puede añadir más lineas de entrega ni modificar las existentes que fueron
+    // entregadas
+    // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
+    // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
+
+    // TODO: PODRIA SER REDUNDANTE, YA QUE AL CREAR UNA ORDEN DE ENTREGA, SE ASIGNAN
+    // ESOS VALORES INICIALES
+    // deliveryOrder.setDeliveredAt(null);
+    // deliveryOrder.setOnTimeStatus(OnTimeStatus.UNKNOWN);
+
     deliveryOrderRepository.save(deliveryOrder);
 
     // 3° CALCULAR LA SUMATORIA DE LAS CANTIDADES REQUERIDAS DE TODAS LAS LINEAS DE
     // ENTREGA POR ORDEN DE ENTREGA Y PRODUCTO
     model_DeliveryOrderDomainService.recalculateSummaries(deliveryOrder.getId(), model.getId());
-
-    // Integer totalRequired =
-    // deliveryLineRepository.sumRequiredQuantityByDeliveryOrder_Model(id_deliveryOrder,
-    // id_model);
-
-    // model_DeliveryOrder.setRequiredQuantityTotal(totalRequired);
-
-    // model_DeliveryOrderRepository.save(model_DeliveryOrder);
-
-    // // Agregar un registro en la entidad Product_DeliveryOrder_Region
-    // Integer regionTotal =
-    // deliveryLineRepository.sumRequiredByProductDeliveryOrderAndRegion(
-    // model_DeliveryOrder.getId(),
-    // location.getRegion().getId());
-
-    // Model_DeliveryOrder_Region entity = product_DeliveryOrder_RegionRepository
-    // .findByProduct_DeliveryOrderIdAndRegionId(
-    // model_DeliveryOrder.getId(),
-    // location.getRegion().getId())
-    // .orElseGet(() -> {
-    // Model_DeliveryOrder_Region e = new Model_DeliveryOrder_Region();
-    // e.setProduct_DeliveryOrder(model_DeliveryOrder);
-    // e.setRegion(location.getRegion());
-    // return e;
-    // });
-
-    // entity.setRequiredTotalQuantity(regionTotal);
-    // product_DeliveryOrder_RegionRepository.save(entity);
   }
 
   @Override
@@ -277,9 +251,9 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
         .and(DeliveryLineSpecifications.fetchAllRelations());
 
     // Pageable sortedPageable = PageRequest.of(
-    //     pageable.getPageNumber(),
-    //     pageable.getPageSize(),
-    //     Sort.by("id").descending());
+    // pageable.getPageNumber(),
+    // pageable.getPageSize(),
+    // Sort.by("id").descending());
 
     Page<DeliveryLine> deliveryLines = deliveryLineRepository.findAll(
         spec,
@@ -408,6 +382,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
+
     // Llamar al método auxiliar para actualizar la linea de entrega
     updateLineStatus(deliveryLine, deliveryOrder);
     deliveryLineRepository.save(deliveryLine);
@@ -463,13 +438,25 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       line.setPendingQuantity(required - delivered);
       line.setLineStatus(LineStatus.LINE_PENDING);
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
+      deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+
       return;
     }
 
     if (required == delivered) {
       line.setPendingQuantity(0);
       line.setLineStatus(LineStatus.LINE_READY);
-      deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+      
+      // TODO: MALA IMPLEMENTACION, NO DEBE CAMBIAR EL ESTADO DE LA ORDEN A LISTO, PORQUE SE TIENE QUE VERIFICAR CADA LINEA DE ENTREGA
+      // deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+      // deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+
+      boolean allReady = deliveryLineRepository.allLinesAreReady(deliveryOrder.getId());
+      if (allReady){
+        deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
+        deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+      }
+
       return;
     }
 
@@ -477,7 +464,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     line.setPendingQuantity(required - delivered);
     line.setLineStatus(LineStatus.LINE_EXCEEDED);
     deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
-
+    deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
   }
 
   @Override
@@ -570,7 +557,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // * */
 
-    boolean allCanceled = deliveryLineRepository.allLinesAreCanceled(deliveryOrderId);
+    boolean allCanceled = deliveryLineRepository.allLinesCanceled(deliveryOrderId);
     boolean allReady = deliveryLineRepository.allLinesAreReady(deliveryOrderId);
 
     // Si existe al menos una linea entregada o perdida
@@ -587,6 +574,12 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     } else {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
+
+    deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+
+    // TODO: ESTO PODRIA NO SER NECESARIO
+    // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
+    // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
 
     // Object[] result = deliveryLineRepository.getStatusSummary(deliveryOrderId);
     // Long total = (Long) result[0];
@@ -723,8 +716,18 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
+    // ORDEN DE ENTREGA
+    // TODO: ESTO PODRIA NO SER NECESARIO
+    // DeliveryOrder deliveryOrder = getDeliveryOrder(id);
+
+    // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
+    // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
+    // deliveryOrderRepository.save(deliveryOrder);
+
+
     Model model = deliveryLine.getModel();
     int deliveredQty = deliveryLine.getDeliveredQuantity();
+
 
     // SOLO transición lógica
     model.setTotalQuantityTaken(model.getTotalQuantityTaken() - deliveredQty);
@@ -819,6 +822,16 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     // Registrar quién hizo el cambio
     deliveryLine.setUserUpdater(user);
+    deliveryLineRepository.save(deliveryLine);
+
+    // TODO: RECALCULAR EL PORCENTAJE Y LOS DEMÁS
+    deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrderId));
+
+    // TODO: ESTO PODRIA NO SER NECESARIO
+    // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
+    // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
+    deliveryOrderRepository.save(deliveryOrder);
+
 
     // Obtener relación modelo - orden de entrega
     Model_DeliveryOrder model_DeliveryOrder = model_DeliveryOrderRepository.findById(
@@ -997,6 +1010,13 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
 
+    // TODO: VERIFICAR ESTO
+    deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+
+    // TODO: ESTO PODRIA NO SER NECESARIO
+    // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
+    // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
+
     // if (ready.equals(total)) {
     // deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
     // } else {
@@ -1069,6 +1089,17 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
             "La linea de entrega no existe"));
   }
 
+  private DeliveryOrder getDeliveryOrder(Long id) {
+    if (id == null) {
+      throw new BusinessException(ResponseStatus.BAD_REQUEST);
+    }
+
+    return deliveryOrderRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(
+            ResponseStatus.NOT_FOUND,
+            "La orden de entrega no existe"));
+  }
+
   private int validateQuantity(
       DeliveryLine deliveryLine,
       DeliveryLineAllocateRequest request) {
@@ -1130,7 +1161,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     List<StockLot> ordered = stockLotIds.stream()
         .map(map::get)
         .toList();
-
 
     // Validar que todos pertenezcan al modelo
     for (StockLot stockLot : ordered) {
@@ -1337,6 +1367,14 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     } else {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
+
+
+    deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+
+    // TODO: ESTO PODRIA NO SER NECESARIO
+    // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
+    // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
+
     // if (ready.equals(total)) {
     // deliveryOrder.setOrderStatus(OrderStatus.ORDER_READY);
     // } else {
@@ -1389,5 +1427,4 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     movementRepository.save(movement);
     movementDomainService.deleteLastestMovement();
   }
-
 }

@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OperatorDashboardResponse {
+  private String userFullname;
   private Long quantityDeliveryOrdersPending;
   private Long quantityModelsActive;
   private Long quantityLowStockModels;

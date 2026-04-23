@@ -23,6 +23,7 @@ import com.pe.inventoryapp.backend.deliveryline.model.data.LineStatus;
 import com.pe.inventoryapp.backend.deliveryline.model.entity.DeliveryLine;
 import com.pe.inventoryapp.backend.deliveryline.repository.DeliveryLineRepository;
 import com.pe.inventoryapp.backend.deliveryline.service.DeliveryLineDomainService;
+import com.pe.inventoryapp.backend.deliveryorder.model.data.OnTimeStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.data.OrderStatus;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
@@ -76,7 +77,8 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			ModelRepository modelRepository,
 			DeliveryOrderDomainService deliveryOrderDomainService,
 			StockLotDomainService stockLotDomainService,
-			MovementDomainService movementDomainService, Model_DeliveryOrderDomainService model_DeliveryOrderDomainService, DeliveryLineDomainService deliveryLineDomainService) {
+			MovementDomainService movementDomainService, Model_DeliveryOrderDomainService model_DeliveryOrderDomainService,
+			DeliveryLineDomainService deliveryLineDomainService) {
 		this.deliveryOrderRepository = deliveryOrderRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
@@ -115,6 +117,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
 		deliveryOrder.setUserCreator(user);
 		deliveryOrder.setUserUpdater(user);
+		deliveryOrder.setPercentage(0D); // 0 double
+		deliveryOrder.setDeliveredAt(null);
+		deliveryOrder.setOnTimeStatus(OnTimeStatus.UNKNOWN);
 
 		// Especifica el ID del cliente que se asignara a la orden de entrega
 		deliveryOrder.setUserClient(userClient);
@@ -146,9 +151,9 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 				.and(DeliveryOrderSpecifications.isNotCanceled());
 
 		// Pageable sortedPageable = PageRequest.of(
-		// 		pageable.getPageNumber(),
-		// 		pageable.getPageSize(),
-		// 		Sort.by("createdAt").descending());
+		// pageable.getPageNumber(),
+		// pageable.getPageSize(),
+		// Sort.by("createdAt").descending());
 
 		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
 				spec,
@@ -183,17 +188,18 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			LocalDateTime startDate,
 			LocalDateTime endDate,
 			String userClientName) {
-		// Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAllActiveByParams(pageable, batch, startDate,
-		// 		endDate, userClientName);
+		// Page<DeliveryOrder> deliveryOrders =
+		// deliveryOrderRepository.findAllActiveByParams(pageable, batch, startDate,
+		// endDate, userClientName);
 		Specification<DeliveryOrder> spec = (DeliveryOrderSpecifications.isActiveForOperator())
 				.and(DeliveryOrderSpecifications.userClientNameContains(userClientName))
 				.and(DeliveryOrderSpecifications.batchContains(batch))
 				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate));
 
 		// Pageable sortedPageable = PageRequest.of(
-		// 		pageable.getPageNumber(),
-		// 		pageable.getPageSize(),
-		// 		Sort.by("createdAt").descending());
+		// pageable.getPageNumber(),
+		// pageable.getPageSize(),
+		// Sort.by("createdAt").descending());
 
 		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
 				spec,
@@ -230,16 +236,15 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
-		Specification<DeliveryOrder> spec =
-				(DeliveryOrderSpecifications.hasUserClient(id))
+		Specification<DeliveryOrder> spec = (DeliveryOrderSpecifications.hasUserClient(id))
 				.and(DeliveryOrderSpecifications.isNotCanceled())
 				.and(DeliveryOrderSpecifications.hasStatus(status))
 				.and(DeliveryOrderSpecifications.batchContains(batch))
 				.and(DeliveryOrderSpecifications.priorityDateBetween(startDate, endDate));
 		// Pageable sortedPageable = PageRequest.of(
-		// 		pageable.getPageNumber(),
-		// 		pageable.getPageSize(),
-		// 		Sort.by("createdAt").descending());
+		// pageable.getPageNumber(),
+		// pageable.getPageSize(),
+		// Sort.by("createdAt").descending());
 
 		Page<DeliveryOrder> deliveryOrders = deliveryOrderRepository.findAll(
 				spec,
@@ -269,15 +274,14 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			throw new BusinessException(ResponseStatus.BAD_REQUEST);
 		}
 
-		// TODO: EN ESTE CASO SI SE ESTA OPTIMIZANDO EL QUERY
-		// DeliveryOrder deliveryOrder = deliveryOrderRepository.findById(id)
-				DeliveryOrder deliveryOrder = deliveryOrderRepository.findByIdAndJoins(id)
+		// EN ESTE CASO SI SE ESTA OPTIMIZANDO EL QUERY
+		DeliveryOrder deliveryOrder = deliveryOrderRepository.findByIdAndJoins(id)
 
 				.orElseThrow(() -> new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega no existe"));
 
-		if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
-			throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
-		}
+		 if (deliveryOrder.getOrderStatus() == OrderStatus.ORDER_CANCELED) {
+		 	throw new BusinessException(ResponseStatus.NOT_FOUND, "La orden de entrega ha sido cancelada");
+		 }
 
 		return DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder)
 				.buildDeliveryOrderDetailsResponse();
@@ -506,6 +510,12 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrder.setOrderStatus(OrderStatus.ORDER_DELIVERED);
 		deliveryOrder.setUserUpdater(user);
 
+		// TODO: VERIFICAR AQUI
+		// deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
+
+		deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
+		deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
+
 		deliveryOrderRepository.save(deliveryOrder);
 
 	}
@@ -733,6 +743,11 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 		order.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(order.getId()));
 		order.setUserUpdater(user);
+
+		// TODO: ESTO PODRIA NO SER NECESARIO
+		// order.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(order.getId()));
+		// deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(order);
+		// deliveryOrderDomainService.updateOnTimeStatus(order);
 
 		deliveryOrderRepository.save(order);
 	}
