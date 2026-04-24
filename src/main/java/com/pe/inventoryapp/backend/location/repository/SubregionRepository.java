@@ -30,4 +30,19 @@ public interface SubregionRepository extends JpaRepository<Subregion, Long> {
       """)
   Optional<Subregion> findByIdFull(Long id);
 
+
+  @Query("""
+              SELECT DISTINCT s
+              FROM DeliveryLine dl
+              JOIN dl.location l
+              JOIN l.subregion s
+              JOIN s.region r
+              WHERE dl.deliveryOrder.id = :deliveryOrderId
+                AND r.id = :regionId
+              ORDER BY s.name
+          """)
+  List<Subregion> findSubregionsByDeliveryOrderIdAndRegionId(
+          Long deliveryOrderId,
+          Long regionId);
+
 }

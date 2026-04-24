@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.location.model.mapper;
 
 import com.pe.inventoryapp.backend.location.model.entity.Subregion;
+import com.pe.inventoryapp.backend.location.model.response.ListSubregionResponse;
 import com.pe.inventoryapp.backend.location.model.response.SubregionResponse;
 
 public class SubregionMapper {
@@ -29,5 +30,14 @@ public class SubregionMapper {
         subregion.getName(),
         subregion.getRegion().getId(),
         subregion.getRegion().getName());
+  }
+
+  public ListSubregionResponse buildListSubregionResponse() {
+    if (subregion == null) {
+      throw new RuntimeException("Debe pasar la entidad subregion");
+    }
+    return new ListSubregionResponse(
+        subregion.getId(),
+        subregion.getName());
   }
 }

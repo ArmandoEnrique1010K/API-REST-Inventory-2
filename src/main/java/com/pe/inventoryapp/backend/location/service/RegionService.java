@@ -13,4 +13,6 @@ public interface RegionService {
   RegionResponse findRegionById(Long id);
 
   void updateRegionById(Long id, RegionRequest regionRequest);
+
+  List<RegionResponse> findAllRegionsByDeliveryOrder(Long deliveryOrderId);
 }

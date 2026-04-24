@@ -16,4 +16,16 @@ public interface RegionRepository extends JpaRepository<Region, Long> {
 
   boolean existsByName(String name);
   boolean existsByNameAndIdNot(String name, Long id);
+
+    @Query("""
+      SELECT DISTINCT r
+      FROM DeliveryLine dl
+      JOIN dl.location l
+      JOIN l.subregion s
+      JOIN s.region r
+      WHERE dl.deliveryOrder.id = :deliveryOrderId
+      ORDER BY r.name
+      """)
+  List<Region> findRegionsByDeliveryOrderId(Long deliveryOrderId);
+
 }

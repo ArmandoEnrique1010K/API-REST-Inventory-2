@@ -12,6 +12,7 @@ import com.pe.inventoryapp.backend.location.model.entity.Region;
 import com.pe.inventoryapp.backend.location.model.entity.Subregion;
 import com.pe.inventoryapp.backend.location.model.mapper.SubregionMapper;
 import com.pe.inventoryapp.backend.location.model.request.SubregionRequest;
+import com.pe.inventoryapp.backend.location.model.response.ListSubregionResponse;
 import com.pe.inventoryapp.backend.location.model.response.SubregionResponse;
 import com.pe.inventoryapp.backend.location.repository.RegionRepository;
 import com.pe.inventoryapp.backend.location.repository.SubregionRepository;
@@ -103,7 +104,7 @@ public class SubregionServiceImpl implements SubregionService {
       throw new BusinessException(ResponseStatus.BAD_REQUEST);
     }
 
-    if(!subregion.getName().equals(name)){
+    if (!subregion.getName().equals(name)) {
       subregionDomainService.verifySubregionNameAvailableByRegionIdExcludingId(name, idRegion, id);
     }
 
@@ -115,5 +116,14 @@ public class SubregionServiceImpl implements SubregionService {
     subregion.setName(name);
     subregion.setRegion(region);
     subregionRepository.save(subregion);
+  }
+
+  @Override
+  public List<ListSubregionResponse> findAllSubregionsByDeliveryOrder(Long deliveryOrderId, Long regionId) {
+    List<Subregion> subregions = (List<Subregion>) subregionRepository.findSubregionsByDeliveryOrderIdAndRegionId(deliveryOrderId, regionId);
+    return subregions.stream()
+        .map(subregion -> SubregionMapper.builder().setSubregion(subregion).buildListSubregionResponse())
+        .collect(Collectors.toList());
+
   }
 }

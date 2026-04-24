@@ -19,6 +19,7 @@ import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 import com.pe.inventoryapp.backend.common.service.ResponseService;
 import com.pe.inventoryapp.backend.common.service.ValidationService;
 import com.pe.inventoryapp.backend.location.model.request.SubregionRequest;
+import com.pe.inventoryapp.backend.location.model.response.ListSubregionResponse;
 import com.pe.inventoryapp.backend.location.model.response.SubregionResponse;
 import com.pe.inventoryapp.backend.location.service.SubregionService;
 
@@ -52,6 +53,7 @@ public class SubregionController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @GetMapping("/region/{id}")
   public ResponseEntity<?> listAllSubregionsByRegionId(@PathVariable Long id) {
     List<SubregionResponse> subregions = subregionService.findAllSubregionsByRegionId(id);
@@ -60,6 +62,7 @@ public class SubregionController {
     return ResponseEntity.status(dataResponse.status()).body(dataResponse);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getSubregion(@PathVariable Long id) {
     SubregionResponse subregion = subregionService.findSubregionById(id);
@@ -79,4 +82,14 @@ public class SubregionController {
         "Se actualizo el nombre de la subregión");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+
+    @GetMapping("/deliveryOrder/{idDeliveryOrder}/region/{idRegion}")
+  public ResponseEntity<?> listAllSubregionsByDeliveryOrderAndRegion(@PathVariable Long idDeliveryOrder, @PathVariable Long idRegion) {
+    List<ListSubregionResponse> subregions = subregionService.findAllSubregionsByDeliveryOrder(idDeliveryOrder, idRegion);
+    DataResponse<List<ListSubregionResponse>> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        subregions);
+    return ResponseEntity.status(response.status()).body(response);
+  }
+
 }

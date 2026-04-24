@@ -84,4 +84,13 @@ public class RegionServiceImpl implements RegionService {
     region.setName(newName);
     regionRepository.save(region);
   }
+
+  @Override
+  public List<RegionResponse> findAllRegionsByDeliveryOrder(Long deliveryOrderId) {
+    List<Region> regions = (List<Region>) regionRepository.findRegionsByDeliveryOrderId(deliveryOrderId);
+
+    return regions.stream()
+        .map(region -> RegionMapper.builder().setRegion(region).buildRegionResponse())
+        .collect(Collectors.toList());
+  }
 }

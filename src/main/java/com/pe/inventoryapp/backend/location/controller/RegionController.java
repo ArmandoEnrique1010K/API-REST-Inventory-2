@@ -24,6 +24,7 @@ import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.model.response.CommonResponse;
 import com.pe.inventoryapp.backend.common.model.response.DataResponse;
 
+
 @RestController
 @RequestMapping("/api/regions")
 public class RegionController {
@@ -50,6 +51,7 @@ public class RegionController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @GetMapping
   public ResponseEntity<?> listAllRegions() {
     List<RegionResponse> regions = regionService.findAllRegions();
@@ -58,6 +60,7 @@ public class RegionController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
+  @PreAuthorize("hasRole('OPERATOR')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getRegion(@PathVariable Long id) {
     RegionResponse regionResponse = regionService.findRegionById(id);
@@ -78,4 +81,13 @@ public class RegionController {
         "Se actualizo el nombre de la región");
     return ResponseEntity.status(response.status()).body(response);
   }
+
+  @GetMapping("/deliveryOrder/{id}")
+  public ResponseEntity<?> listAllRegionsByDeliveryOrder(@PathVariable Long id) {
+    List<RegionResponse> regions = regionService.findAllRegionsByDeliveryOrder(id);
+    DataResponse<List<RegionResponse>> response = responseService.generateDataResponse(ResponseStatus.SUCCESS,
+        regions);
+    return ResponseEntity.status(response.status()).body(response);
+  }
+  
 }
