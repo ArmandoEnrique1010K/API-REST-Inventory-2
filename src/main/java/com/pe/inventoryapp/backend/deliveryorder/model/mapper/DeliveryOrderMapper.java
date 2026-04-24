@@ -5,6 +5,7 @@ import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderCli
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderClientListResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderDetailsResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderListResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderSummaryResponse;
 
 public class DeliveryOrderMapper {
   private DeliveryOrder deliveryOrder;
@@ -85,4 +86,15 @@ public class DeliveryOrderMapper {
 
   }
 
+  public DeliveryOrderSummaryResponse buildDeliveryOrderSummaryResponse() {
+        if (deliveryOrder == null) {
+      throw new RuntimeException("Debe pasar la entidad DeliveryOrder");
+    } else {
+      return new DeliveryOrderSummaryResponse(
+          deliveryOrder.getId(),
+          deliveryOrder.getBatch(),
+          deliveryOrder.getPriorityDate(),
+          deliveryOrder.getPercentage());
+    }
+  }
 }

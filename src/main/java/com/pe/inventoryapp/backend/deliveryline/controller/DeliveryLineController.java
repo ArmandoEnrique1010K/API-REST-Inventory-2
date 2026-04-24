@@ -73,8 +73,6 @@ public class DeliveryLineController {
     return ResponseEntity.status(response.status()).body(response);
   }
 
-  // TODO: VERIFICAR SI LOS 2 ENDPOINTS SE UTILIZARAN PARA UN USUARIO CON EL ROL
-  // DE USUARIO
   @GetMapping("/delivery-order/{deliveryOrderId}")
   public ResponseEntity<?> listAllDeliveryLinesByDeliveryOrder(
       @PathVariable Long deliveryOrderId,

@@ -13,7 +13,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto;
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 
 public interface DeliveryOrderRepository
@@ -138,24 +137,23 @@ public interface DeliveryOrderRepository
     long countByOrderStatusPendingAndUser(Long id);
 
     // @Query("""
-    //         SELECT COALESCE(
-    //             (
-    //                 SUM(
-    //                     CASE
-    //                         WHEN dl.lineStatus IN (
-    //                             'LINE_MISSING', 'LINE_READY', 'LINE_DELIVERED', 'LINE_CANCELED'
-    //                         )
-    //                         THEN 1
-    //                         ELSE 0
-    //                     END
-    //                 ) * 100.0
-    //             ) / COUNT(dl)
-    //         , 0)
-    //         FROM DeliveryLine dl
-    //         WHERE dl.deliveryOrder.id = :deliveryOrderId
-    //         """)
+    // SELECT COALESCE(
+    // (
+    // SUM(
+    // CASE
+    // WHEN dl.lineStatus IN (
+    // 'LINE_MISSING', 'LINE_READY', 'LINE_DELIVERED', 'LINE_CANCELED'
+    // )
+    // THEN 1
+    // ELSE 0
+    // END
+    // ) * 100.0
+    // ) / COUNT(dl)
+    // , 0)
+    // FROM DeliveryLine dl
+    // WHERE dl.deliveryOrder.id = :deliveryOrderId
+    // """)
     // Double percentageByDeliveryOrder(Long deliveryOrderId);
-
 
     @Query("""
             SELECT COALESCE(
@@ -183,67 +181,76 @@ public interface DeliveryOrderRepository
             """)
     Double percentageByDeliveryOrder(Long deliveryOrderId);
 
+    // @Query("""
+    // SELECT new
+    // com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto(
+    // d.id,
+    // d.batch,
+    // d.priorityDate,
+    // COALESCE(
+    // (
+    // SUM(
+    // CASE
+    // WHEN dl.lineStatus IN (
+    // 'LINE_MISSING',
+    // 'LINE_READY',
+    // 'LINE_DELIVERED',
+    // 'LINE_CANCELED'
+    // )
+    // THEN 1
+    // ELSE 0
+    // END
+    // ) * 100.0
+    // ) / COUNT(dl)
+    // , 0.0)
+
+    // )
+    // FROM DeliveryOrder d
+    // JOIN d.deliveryLines dl
+    // WHERE d.orderStatus = 'ORDER_PENDING'
+    // GROUP BY d.id, d.batch, d.priorityDate
+    // ORDER BY d.priorityDate ASC
+    // """)
+    // List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPending(Pageable
+    // pageable);
+
     @Query("""
-            SELECT new com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto(
-                d.id,
-                d.batch,
-                d.priorityDate,
-                COALESCE(
-                    (
-                        SUM(
-                            CASE
-                                WHEN dl.lineStatus IN (
-                                   'LINE_MISSING',
-                                   'LINE_READY',
-                                   'LINE_DELIVERED',
-                                   'LINE_CANCELED'
-                                )
-                                THEN 1
-                                ELSE 0
-                            END
-                        ) * 100.0
-                    ) / COUNT(dl)
-                , 0.0)
-
-            )
-            FROM DeliveryOrder d
-            JOIN d.deliveryLines dl
-            WHERE d.orderStatus = 'ORDER_PENDING'
-            GROUP BY d.id, d.batch, d.priorityDate
-            ORDER BY d.priorityDate ASC
+            SELECT do FROM DeliveryOrder do
+            WHERE do.orderStatus = 'ORDER_PENDING'
             """)
-    List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPending(Pageable pageable);
+    List<DeliveryOrder> summaryDeliveryOrderPending(Pageable pageable);
 
+    // @Query("""
+    // SELECT new
+    // com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto(
+    // d.id,
+    // d.batch,
+    // d.priorityDate,
+    // COALESCE(
+    // (
+    // SUM(
+    // CASE
+    // WHEN dl.lineStatus IN (
+    // 'LINE_MISSING',
+    // 'LINE_READY',
+    // 'LINE_DELIVERED',
+    // 'LINE_CANCELED'
+    // )
+    // THEN 1
+    // ELSE 0
+    // END
+    // ) * 100.0
+    // ) / COUNT(dl)
+    // , 0.0)
 
-    @Query("""
-            SELECT new com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto(
-                d.id,
-                d.batch,
-                d.priorityDate,
-                COALESCE(
-                    (
-                        SUM(
-                            CASE
-                                WHEN dl.lineStatus IN (
-                                   'LINE_MISSING',
-                                   'LINE_READY',
-                                   'LINE_DELIVERED',
-                                   'LINE_CANCELED'
-                                )
-                                THEN 1
-                                ELSE 0
-                            END
-                        ) * 100.0
-                    ) / COUNT(dl)
-                , 0.0)
-
-            )
-            FROM DeliveryOrder d
-            JOIN d.deliveryLines dl
-            WHERE d.orderStatus = 'ORDER_PENDING' AND d.userClient.id = :id
-            GROUP BY d.id, d.batch, d.priorityDate
-            ORDER BY d.priorityDate ASC
-            """)
-    List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPendingAndUser(Long id, Pageable pageable);
+    // )
+    // FROM DeliveryOrder d
+    // JOIN d.deliveryLines dl
+    // WHERE d.orderStatus = 'ORDER_PENDING' AND d.userClient.id = :id
+    // GROUP BY d.id, d.batch, d.priorityDate
+    // ORDER BY d.priorityDate ASC
+    // """)
+    // List<PendingDeliveryOrdersDto> summaryDeliveryOrdersPendingAndUser(Long id,
+    // Pageable pageable);
 
 }

@@ -510,7 +510,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		deliveryOrder.setOrderStatus(OrderStatus.ORDER_DELIVERED);
 		deliveryOrder.setUserUpdater(user);
 
-		// TODO: VERIFICAR AQUI
 		// deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
 
 		deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
@@ -744,7 +743,6 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		order.setPriorityDate(deliveryOrderDomainService.getClosestLimitDate(order.getId()));
 		order.setUserUpdater(user);
 
-		// TODO: ESTO PODRIA NO SER NECESARIO
 		// order.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(order.getId()));
 		// deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(order);
 		// deliveryOrderDomainService.updateOnTimeStatus(order);

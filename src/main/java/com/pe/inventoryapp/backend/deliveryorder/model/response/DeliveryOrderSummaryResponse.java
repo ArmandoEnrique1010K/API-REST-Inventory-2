@@ -1,4 +1,4 @@
-package com.pe.inventoryapp.backend.dashboard.model.dto;
+package com.pe.inventoryapp.backend.deliveryorder.model.response;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PendingDeliveryOrdersDto {
+public class DeliveryOrderSummaryResponse {
   private Long id;
   private String batch;
   private LocalDateTime priorityDate;

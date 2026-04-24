@@ -1,5 +1,8 @@
 package com.pe.inventoryapp.backend.dashboard.service;
 
+import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
+import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderSummaryResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
 import com.pe.inventoryapp.backend.movement.model.dto.MovementDto;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
@@ -23,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
-import com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto;
 import com.pe.inventoryapp.backend.dashboard.model.response.AdminDashboardResponse;
 import com.pe.inventoryapp.backend.dashboard.model.response.OperatorDashboardResponse;
 import com.pe.inventoryapp.backend.dashboard.model.response.UserDashboardResponse;
@@ -61,14 +63,16 @@ public class DashboardServiceImpl implements DashboardService {
                 0,
                 10,
                 Sort.by("priorityDate").ascending());
-        List<PendingDeliveryOrdersDto> summaryDeliveryOrder = deliveryOrderRepository
-                .summaryDeliveryOrdersPendingAndUser(
-                        idUser, pageable);
+
+        List<DeliveryOrder> deliveryOrders = deliveryOrderRepository.summaryDeliveryOrderPending(pageable);
+        
+        List<DeliveryOrderSummaryResponse> result0 = deliveryOrders.stream().map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderSummaryResponse()).collect(Collectors.toList());
+
 
         UserDashboardResponse result = new UserDashboardResponse(
                 userFullname,
                 quantityDeliveryOrdersPendingByUser, // List
-                summaryDeliveryOrder);
+                        result0);
 
         return result;
     }
@@ -99,9 +103,12 @@ public class DashboardServiceImpl implements DashboardService {
                 0,
                 10,
                 Sort.by("priorityDate").ascending());
-        List<PendingDeliveryOrdersDto> summaryDeliveryOrder = deliveryOrderRepository.summaryDeliveryOrdersPending(
-                pageablePendingOrders);
 
+        List<DeliveryOrder> deliveryOrders = deliveryOrderRepository.summaryDeliveryOrderPending(pageablePendingOrders);
+
+        List<DeliveryOrderSummaryResponse> result0 = deliveryOrders.stream().map(deliveryOrder -> DeliveryOrderMapper
+                        .builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderSummaryResponse())
+                        .collect(Collectors.toList());
         // Lista de modelos con bajo stock
         Pageable pageableLowStock = PageRequest.of(
                 0,
@@ -139,7 +146,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         OperatorDashboardResponse result = new OperatorDashboardResponse(userFullname,
                 quantityDeliveryOrdersPending, modelsActive, lowerQuantityModels, nearCaducityDate,
-                summaryDeliveryOrder, result2, result3, result4
+                        result0, result2, result3, result4
 
         );
 
@@ -181,9 +188,11 @@ public class DashboardServiceImpl implements DashboardService {
               0,
               10,
               Sort.by("priorityDate").ascending());
-      List<PendingDeliveryOrdersDto> summaryDeliveryOrder = deliveryOrderRepository.summaryDeliveryOrdersPending(
-              pageablePendingOrders);
+      List<DeliveryOrder> deliveryOrders = deliveryOrderRepository.summaryDeliveryOrderPending(pageablePendingOrders);
 
+      List<DeliveryOrderSummaryResponse> result0 = deliveryOrders.stream().map(deliveryOrder -> DeliveryOrderMapper
+                      .builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderSummaryResponse())
+                      .collect(Collectors.toList());
       // Lista de modelos con bajo stock
       Pageable pageableLowStock = PageRequest.of(
               0,
@@ -232,7 +241,7 @@ public class DashboardServiceImpl implements DashboardService {
 
       AdminDashboardResponse result = new AdminDashboardResponse(userFullname,
               quantityDeliveryOrdersPending, modelsActive, lowerQuantityModels, nearCaducityDate, movementsInDay,
-              summaryDeliveryOrder, result2, result3, result4, result5
+                      result0, result2, result3, result4, result5
 
       );
 

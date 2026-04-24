@@ -200,7 +200,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
     // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
 
-    // TODO: PODRIA SER REDUNDANTE, YA QUE AL CREAR UNA ORDEN DE ENTREGA, SE ASIGNAN
+    // PODRIA SER REDUNDANTE, YA QUE AL CREAR UNA ORDEN DE ENTREGA, SE ASIGNAN
     // ESOS VALORES INICIALES
     // deliveryOrder.setDeliveredAt(null);
     // deliveryOrder.setOnTimeStatus(OnTimeStatus.UNKNOWN);
@@ -577,7 +577,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
 
-    // TODO: ESTO PODRIA NO SER NECESARIO
     // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
     // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
 
@@ -717,7 +716,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLineRepository.save(deliveryLine);
 
     // ORDEN DE ENTREGA
-    // TODO: ESTO PODRIA NO SER NECESARIO
     // DeliveryOrder deliveryOrder = getDeliveryOrder(id);
 
     // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
@@ -824,10 +822,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     deliveryLine.setUserUpdater(user);
     deliveryLineRepository.save(deliveryLine);
 
-    // TODO: RECALCULAR EL PORCENTAJE Y LOS DEMÁS
     deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrderId));
 
-    // TODO: ESTO PODRIA NO SER NECESARIO
     // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
     // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
     deliveryOrderRepository.save(deliveryOrder);
@@ -1010,10 +1006,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       deliveryOrder.setOrderStatus(OrderStatus.ORDER_PENDING);
     }
 
-    // TODO: VERIFICAR ESTO
     deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
 
-    // TODO: ESTO PODRIA NO SER NECESARIO
     // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
     // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
 
@@ -1371,7 +1365,6 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     deliveryOrder.setPercentage(deliveryOrderDomainService.calculateDeliveryOrderPercentage(deliveryOrder.getId()));
 
-    // TODO: ESTO PODRIA NO SER NECESARIO
     // deliveryOrderDomainService.updateDeliveryOrderDeliveredAt(deliveryOrder);
     // deliveryOrderDomainService.updateOnTimeStatus(deliveryOrder);
 

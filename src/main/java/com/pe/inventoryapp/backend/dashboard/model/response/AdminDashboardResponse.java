@@ -2,7 +2,7 @@ package com.pe.inventoryapp.backend.dashboard.model.response;
 
 import java.util.List;
 
-import com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderSummaryResponse;
 import com.pe.inventoryapp.backend.movement.model.dto.MovementDto;
 import com.pe.inventoryapp.backend.product.model.dto.ModelDto;
 
@@ -22,7 +22,7 @@ public class AdminDashboardResponse {
   private Long quantityLowStockModels;
   private Long quantityNearCaducityDateModels;
   private Long quantityMovementsToday;
-  private List<PendingDeliveryOrdersDto> pendingDeliveryOrders;
+  private List<DeliveryOrderSummaryResponse> pendingDeliveryOrders;
   private List<ModelDto> lowStockModels;
   private List<ModelDto> recentModels;
   private List<ModelDto> expiringSoonModels;
