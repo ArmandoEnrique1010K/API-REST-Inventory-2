@@ -11,11 +11,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeliveryOrderSummaryResponse {
+public class DeliveryOrderSummaryByClientResponse {
   private Long id;
   private String batch;
-  private String userClientFirstname;
-  private String userClientLastname;
   private LocalDateTime priorityDate;
   private Double percentage;
 }

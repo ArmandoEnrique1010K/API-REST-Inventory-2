@@ -130,7 +130,7 @@ public class LocationController {
     String field = switch (sortBy) {
       case "id" -> "id";
       case "name" -> "name";
-      case "regionName" -> "subregion.region.name";
+      case "subregionName" -> "subregion.name";
       default -> "id";
     };
 

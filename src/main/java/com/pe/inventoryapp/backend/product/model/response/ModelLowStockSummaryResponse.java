@@ -1,6 +1,4 @@
-package com.pe.inventoryapp.backend.product.model.dto;
-
-import java.time.LocalDate;
+package com.pe.inventoryapp.backend.product.model.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,18 +9,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ModelDto {
+public class ModelLowStockSummaryResponse {
   private Long id;
   private String modelName;
-
-  private Integer totalQuantityAvailable;
-
+  
   private Long productId;
   private String productName;
 
+  private Integer totalQuantityAvailable;
+  // TODO: AÑADIR EL CAMPO DEL STOCK MINIMO PARA MARCARLO COMO BAJO STOCK
+
   private String categoryName;
   private String typeName;
-
-  private LocalDate entryDate;
-  private LocalDate caducityDate;
 }

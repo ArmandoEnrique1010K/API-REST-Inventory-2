@@ -2,9 +2,9 @@ package com.pe.inventoryapp.backend.movement.model.mapper;
 
 import java.util.List;
 
-import com.pe.inventoryapp.backend.movement.model.dto.MovementDto;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.response.MovementDetailsResponse;
+import com.pe.inventoryapp.backend.movement.model.response.MovementsTodaySummaryResponse;
 import com.pe.inventoryapp.backend.movement.model.response.MovementListResponse;
 
 public class MovementMapper {
@@ -101,12 +101,12 @@ public class MovementMapper {
         deliveryOrderBatch);
   }
 
-  public MovementDto buildMovementDto(){
+  public MovementsTodaySummaryResponse buildMovementDto(){
     if (movement == null) {
       throw new RuntimeException("Debe pasar la entidad movement");
     }
 
-    return new MovementDto(
+    return new MovementsTodaySummaryResponse(
       movement.getId(),
       movement.getQuantity(),
       movement.getMovementType(),

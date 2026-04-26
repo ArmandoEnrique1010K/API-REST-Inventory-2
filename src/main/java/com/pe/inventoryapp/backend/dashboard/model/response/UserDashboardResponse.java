@@ -3,7 +3,7 @@ package com.pe.inventoryapp.backend.dashboard.model.response;
 
 import java.util.List;
 
-import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderSummaryResponse;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderSummaryByClientResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,5 +17,5 @@ import lombok.NoArgsConstructor;
 public class UserDashboardResponse {
   private String userFullname;
   private Long pendingDeliveryOrdersByUserCount;
-  private List<DeliveryOrderSummaryResponse> pendingDeliveryOrdersByUser;
+  private List<DeliveryOrderSummaryByClientResponse> pendingDeliveryOrdersByUser;
 }

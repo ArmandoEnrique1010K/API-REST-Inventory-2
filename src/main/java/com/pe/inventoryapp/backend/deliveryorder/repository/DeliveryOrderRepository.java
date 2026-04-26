@@ -220,6 +220,15 @@ public interface DeliveryOrderRepository
             """)
     List<DeliveryOrder> summaryDeliveryOrderPending(Pageable pageable);
 
+    @Query("""
+            SELECT do FROM DeliveryOrder do
+            JOIN FETCH do.userClient uc
+            WHERE do.orderStatus = 'ORDER_PENDING' AND uc.id = :userId
+            """)
+    List<DeliveryOrder> summaryDeliveryOrderPendingByUser(Pageable pageable, Long userId);
+
+
+
     // @Query("""
     // SELECT new
     // com.pe.inventoryapp.backend.dashboard.model.dto.PendingDeliveryOrdersDto(

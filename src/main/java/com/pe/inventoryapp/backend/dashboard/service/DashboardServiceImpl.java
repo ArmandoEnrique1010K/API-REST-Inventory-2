@@ -2,15 +2,18 @@ package com.pe.inventoryapp.backend.dashboard.service;
 
 import com.pe.inventoryapp.backend.deliveryorder.model.entity.DeliveryOrder;
 import com.pe.inventoryapp.backend.deliveryorder.model.mapper.DeliveryOrderMapper;
+import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderSummaryByClientResponse;
 import com.pe.inventoryapp.backend.deliveryorder.model.response.DeliveryOrderSummaryResponse;
 import com.pe.inventoryapp.backend.deliveryorder.repository.DeliveryOrderRepository;
-import com.pe.inventoryapp.backend.movement.model.dto.MovementDto;
 import com.pe.inventoryapp.backend.movement.model.entity.Movement;
 import com.pe.inventoryapp.backend.movement.model.mapper.MovementMapper;
+import com.pe.inventoryapp.backend.movement.model.response.MovementsTodaySummaryResponse;
 import com.pe.inventoryapp.backend.movement.repository.MovementRepository;
-import com.pe.inventoryapp.backend.product.model.dto.ModelDto;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.mapper.ModelMapper;
+import com.pe.inventoryapp.backend.product.model.response.ModelExpiringSoonSummaryResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelLowStockSummaryResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelRecentsSummaryResponse;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
@@ -56,7 +59,7 @@ public class DashboardServiceImpl implements DashboardService {
             ResponseStatus.NOT_FOUND,
             "El usuario no existe"));
 
-            String userFullname = user.getFirstname() + user.getLastname();
+            String userFullname = user.getFirstname() + " " + user.getLastname();
 
 
         Pageable pageable = PageRequest.of(
@@ -64,9 +67,9 @@ public class DashboardServiceImpl implements DashboardService {
                 10,
                 Sort.by("priorityDate").ascending());
 
-        List<DeliveryOrder> deliveryOrders = deliveryOrderRepository.summaryDeliveryOrderPending(pageable);
+        List<DeliveryOrder> deliveryOrders = deliveryOrderRepository.summaryDeliveryOrderPendingByUser(pageable, idUser);
         
-        List<DeliveryOrderSummaryResponse> result0 = deliveryOrders.stream().map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderSummaryResponse()).collect(Collectors.toList());
+        List<DeliveryOrderSummaryByClientResponse> result0 = deliveryOrders.stream().map(deliveryOrder -> DeliveryOrderMapper.builder().setDeliveryOrder(deliveryOrder).buildDeliveryOrderSummaryByClientResponse()).collect(Collectors.toList());
 
 
         UserDashboardResponse result = new UserDashboardResponse(
@@ -85,7 +88,7 @@ public class DashboardServiceImpl implements DashboardService {
                                             ResponseStatus.NOT_FOUND,
                                             "El usuario no existe"));
 
-            String userFullname = user.getFirstname() + user.getLastname();
+            String userFullname = user.getFirstname() + " " + user.getLastname();
 
         Long quantityDeliveryOrdersPending = deliveryOrderRepository.countByOrderStatusPending();
 
@@ -117,8 +120,8 @@ public class DashboardServiceImpl implements DashboardService {
 
         List<Model> summaryLowStock = modelRepository.findLowStockModels(pageableLowStock);
 
-        List<ModelDto> result2 = summaryLowStock.stream()
-                .map(summary -> ModelMapper.builder().setModel(summary).buildModelDto()).collect(Collectors.toList());
+        List<ModelLowStockSummaryResponse> result2 = summaryLowStock.stream()
+                .map(summary -> ModelMapper.builder().setModel(summary).buildModelLowStockSummaryResponse()).collect(Collectors.toList());
 
         // Modelos recientes
         Pageable pageableRecentModels = PageRequest.of(
@@ -129,8 +132,8 @@ public class DashboardServiceImpl implements DashboardService {
         List<Model> summaryRecentModels = modelRepository.findActiveModels(
                 pageableRecentModels);
 
-        List<ModelDto> result3 = summaryRecentModels.stream()
-                .map(summary -> ModelMapper.builder().setModel(summary).buildModelDto()).collect(Collectors.toList());
+        List<ModelRecentsSummaryResponse> result3 = summaryRecentModels.stream()
+                .map(summary -> ModelMapper.builder().setModel(summary).buildModelRecentsSummaryResponse()).collect(Collectors.toList());
 
         // Lista de modelos a punto de vencerse
         Pageable pageableNearCaducityDate = PageRequest.of(
@@ -141,8 +144,8 @@ public class DashboardServiceImpl implements DashboardService {
         List<Model> summaryNearCaducityDate = modelRepository.findNearCaducityDate(pageableNearCaducityDate, today,
                 nextWeek);
 
-        List<ModelDto> result4 = summaryNearCaducityDate.stream()
-                .map(summary -> ModelMapper.builder().setModel(summary).buildModelDto()).collect(Collectors.toList());
+        List<ModelExpiringSoonSummaryResponse> result4 = summaryNearCaducityDate.stream()
+                .map(summary -> ModelMapper.builder().setModel(summary).buildModelExpiringSoonSummaryResponse()).collect(Collectors.toList());
 
         OperatorDashboardResponse result = new OperatorDashboardResponse(userFullname,
                 quantityDeliveryOrdersPending, modelsActive, lowerQuantityModels, nearCaducityDate,
@@ -162,7 +165,7 @@ public class DashboardServiceImpl implements DashboardService {
                                           ResponseStatus.NOT_FOUND,
                                           "El usuario no existe"));
 
-          String userFullname = user.getFirstname() + user.getLastname();
+            String userFullname = user.getFirstname() + " " + user.getLastname();
 
       Long quantityDeliveryOrdersPending = deliveryOrderRepository.countByOrderStatusPending();
 
@@ -201,8 +204,8 @@ public class DashboardServiceImpl implements DashboardService {
 
       List<Model> summaryLowStock = modelRepository.findLowStockModels(pageableLowStock);
 
-      List<ModelDto> result2 = summaryLowStock.stream()
-              .map(summary -> ModelMapper.builder().setModel(summary).buildModelDto()).collect(Collectors.toList());
+      List<ModelLowStockSummaryResponse> result2 = summaryLowStock.stream()
+              .map(summary -> ModelMapper.builder().setModel(summary).buildModelLowStockSummaryResponse()).collect(Collectors.toList());
 
       // Modelos recientes
       Pageable pageableRecentModels = PageRequest.of(
@@ -213,8 +216,8 @@ public class DashboardServiceImpl implements DashboardService {
       List<Model> summaryRecentModels = modelRepository.findActiveModels(
               pageableRecentModels);
 
-      List<ModelDto> result3 = summaryRecentModels.stream()
-              .map(summary -> ModelMapper.builder().setModel(summary).buildModelDto()).collect(Collectors.toList());
+      List<ModelRecentsSummaryResponse> result3 = summaryRecentModels.stream()
+              .map(summary -> ModelMapper.builder().setModel(summary).buildModelRecentsSummaryResponse()).collect(Collectors.toList());
 
       // Lista de modelos a punto de vencerse
       Pageable pageableNearCaducityDate = PageRequest.of(
@@ -225,8 +228,8 @@ public class DashboardServiceImpl implements DashboardService {
       List<Model> summaryNearCaducityDate = modelRepository.findNearCaducityDate(pageableNearCaducityDate, today,
               nextWeek);
 
-      List<ModelDto> result4 = summaryNearCaducityDate.stream()
-              .map(summary -> ModelMapper.builder().setModel(summary).buildModelDto()).collect(Collectors.toList());
+      List<ModelExpiringSoonSummaryResponse> result4 = summaryNearCaducityDate.stream()
+              .map(summary -> ModelMapper.builder().setModel(summary).buildModelExpiringSoonSummaryResponse()).collect(Collectors.toList());
 
 
     // Lista de ultimos 10 movimientos realizados durante el dia de hoy
@@ -237,7 +240,7 @@ public class DashboardServiceImpl implements DashboardService {
 
             List<Movement> lastMovementsList = movementRepository.findLastMovements(pageableLastMovements, start, end);
 
-            List<MovementDto> result5 = lastMovementsList.stream().map(movement -> MovementMapper.builder().setMovement(movement).buildMovementDto()).collect(Collectors.toList());
+            List<MovementsTodaySummaryResponse> result5 = lastMovementsList.stream().map(movement -> MovementMapper.builder().setMovement(movement).buildMovementDto()).collect(Collectors.toList());
 
       AdminDashboardResponse result = new AdminDashboardResponse(userFullname,
               quantityDeliveryOrdersPending, modelsActive, lowerQuantityModels, nearCaducityDate, movementsInDay,

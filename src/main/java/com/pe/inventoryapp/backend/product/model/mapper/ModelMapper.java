@@ -1,12 +1,13 @@
 package com.pe.inventoryapp.backend.product.model.mapper;
 
-import com.pe.inventoryapp.backend.product.model.dto.ModelDto;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.model.response.ModelDetailsResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelExpiringSoonSummaryResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListSearchResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelLowStockSummaryResponse;
+import com.pe.inventoryapp.backend.product.model.response.ModelRecentsSummaryResponse;
 import com.pe.inventoryapp.backend.product.model.response.ModelListSearchFirstTenResponse;
-
 
 public class ModelMapper {
   private Model model;
@@ -19,7 +20,6 @@ public class ModelMapper {
     return new ModelMapper();
   }
 
-
   public ModelMapper setModel(Model model) {
     this.model = model;
     return this;
@@ -31,29 +31,28 @@ public class ModelMapper {
     }
 
     return new ModelDetailsResponse(
-      model.getId(),
-      model.getName(),
-      model.getImageUrl(),
-      model.getEntryDate(),
-      model.getCaducityDate(),
-      model.getTotalQuantityAvailable(),
-      model.getTotalQuantityReceived(),
-      model.getTotalQuantityDelivered(),
-      model.isStatus(),
+        model.getId(),
+        model.getName(),
+        model.getImageUrl(),
+        model.getEntryDate(),
+        model.getCaducityDate(),
+        model.getTotalQuantityAvailable(),
+        model.getTotalQuantityReceived(),
+        model.getTotalQuantityDelivered(),
+        model.isStatus(),
 
-      model.getProduct().getId(),
-      model.getProduct().getName(),
-      model.getProduct().getLength(),
-      model.getProduct().getWidth(),
-      model.getProduct().getHeight(),
-      model.getProduct().isStatus(),
+        model.getProduct().getId(),
+        model.getProduct().getName(),
+        model.getProduct().getLength(),
+        model.getProduct().getWidth(),
+        model.getProduct().getHeight(),
+        model.getProduct().isStatus(),
 
-      model.getProduct().getCategory().getId(),
-      model.getProduct().getCategory().getName(),
+        model.getProduct().getCategory().getId(),
+        model.getProduct().getCategory().getName(),
 
-      model.getProduct().getType().getId(),
-      model.getProduct().getType().getName()
-    );
+        model.getProduct().getType().getId(),
+        model.getProduct().getType().getName());
   }
 
   public ModelListResponse buildModelListResponse() {
@@ -62,21 +61,20 @@ public class ModelMapper {
     }
 
     return new ModelListResponse(
-      model.getId(),
-      model.getName(),
-      model.getImageUrl(),
-      model.getEntryDate(),
-      model.getCaducityDate(),
-      model.getTotalQuantityAvailable(),
-      model.getTotalQuantityReceived(),
-      model.getTotalQuantityDelivered(),
-      model.isStatus(),
+        model.getId(),
+        model.getName(),
+        model.getImageUrl(),
+        model.getEntryDate(),
+        model.getCaducityDate(),
+        model.getTotalQuantityAvailable(),
+        model.getTotalQuantityReceived(),
+        model.getTotalQuantityDelivered(),
+        model.isStatus(),
 
-      model.getProduct().getId(),
-      model.getProduct().getName(),
-      model.getProduct().getType().getName(),
-      model.getProduct().getCategory().getName()
-    );
+        model.getProduct().getId(),
+        model.getProduct().getName(),
+        model.getProduct().getType().getName(),
+        model.getProduct().getCategory().getName());
   }
 
   public ModelListSearchResponse buildModelListSearchResponse() {
@@ -101,27 +99,52 @@ public class ModelMapper {
 
     return new ModelListSearchFirstTenResponse(
         model.getId(),
-        model.getProduct().getName() + " " + model.getName()
-      );
+        model.getProduct().getName() + " " + model.getName());
   }
 
-  public ModelDto buildModelDto(){
+  public ModelExpiringSoonSummaryResponse buildModelExpiringSoonSummaryResponse() {
     if (model == null) {
       throw new RuntimeException("Debe pasar la entidad Model");
     }
 
-    return new ModelDto(
-      model.getId(),
-      model.getName(),
-      model.getTotalQuantityAvailable(),
-      model.getProduct().getId(),
-      model.getProduct().getName(),
-      model.getProduct().getCategory().getName(),
-      model.getProduct().getType().getName(),
-      model.getEntryDate(),
-      model.getCaducityDate()
-      );
+    return new ModelExpiringSoonSummaryResponse(
+        model.getId(),
+        model.getName(),
+        model.getProduct().getId(),
+        model.getProduct().getName(),
+        model.getProduct().getCategory().getName(),
+        model.getProduct().getType().getName(),
+        model.getCaducityDate());
   }
+
+  public ModelLowStockSummaryResponse buildModelLowStockSummaryResponse() {
+    if (model == null) {
+      throw new RuntimeException("Debe pasar la entidad Model");
+    }
+
+    return new ModelLowStockSummaryResponse(
+        model.getId(),
+        model.getName(),
+        model.getProduct().getId(),
+        model.getProduct().getName(),
+        model.getTotalQuantityAvailable(),
+        model.getProduct().getCategory().getName(),
+        model.getProduct().getType().getName());
+  }
+
+  public ModelRecentsSummaryResponse buildModelRecentsSummaryResponse() {
+    if (model == null) {
+      throw new RuntimeException("Debe pasar la entidad Model");
+    }
+
+    return new ModelRecentsSummaryResponse(
+        model.getId(),
+        model.getName(),
+        model.getProduct().getId(),
+        model.getProduct().getName(),
+        model.getEntryDate(),
+        model.getProduct().getCategory().getName(),
+        model.getProduct().getType().getName());
+  }
+
 }
-
-
