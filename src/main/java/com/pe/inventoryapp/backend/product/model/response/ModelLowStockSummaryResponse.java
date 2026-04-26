@@ -17,7 +17,7 @@ public class ModelLowStockSummaryResponse {
   private String productName;
 
   private Integer totalQuantityAvailable;
-  // TODO: AÑADIR EL CAMPO DEL STOCK MINIMO PARA MARCARLO COMO BAJO STOCK
+  private Integer minimumAvailableQuantity;
 
   private String categoryName;
   private String typeName;

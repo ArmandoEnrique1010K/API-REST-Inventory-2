@@ -97,19 +97,21 @@ public class DeliveryOrderMapper {
           deliveryOrder.getUserClient().getFirstname(),
           deliveryOrder.getUserClient().getLastname(),
           deliveryOrder.getPriorityDate(),
-          deliveryOrder.getPercentage());
+          deliveryOrder.getPercentage(),
+          deliveryOrder.getOrderStatus());
     }
   }
 
   public DeliveryOrderSummaryByClientResponse buildDeliveryOrderSummaryByClientResponse() {
-        if (deliveryOrder == null) {
+    if (deliveryOrder == null) {
       throw new RuntimeException("Debe pasar la entidad DeliveryOrder");
     } else {
       return new DeliveryOrderSummaryByClientResponse(
           deliveryOrder.getId(),
           deliveryOrder.getBatch(),
           deliveryOrder.getPriorityDate(),
-          deliveryOrder.getPercentage());
+          deliveryOrder.getPercentage(),
+          deliveryOrder.getOrderStatus());
     }
   }
 }

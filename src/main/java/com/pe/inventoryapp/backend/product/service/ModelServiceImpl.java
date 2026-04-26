@@ -90,6 +90,7 @@ public class ModelServiceImpl implements ModelService {
     model.setTotalQuantityTaken(0);
     model.setTotalQuantityDelivered(0);
     model.setStatus(true);
+    modelDomainService.applyMinimumAvailableQuantity(model, modelRequest.getMinimumAvailableQuantity());
     model.setProduct(product);
 
     modelRepository.save(model);
@@ -99,7 +100,7 @@ public class ModelServiceImpl implements ModelService {
   @Transactional(readOnly = true)
   public PageResponse<ModelListResponse> searchAllModelsByParams(Pageable pageable, String keyword, Integer minStock,
       Integer maxStock,
-      LocalDate minEntryDate, LocalDate maxEntryDate, Boolean status, Long categoryId, Long typeId) {
+      LocalDate minEntryDate, LocalDate maxEntryDate, Boolean status, Long categoryId, Long typeId, Boolean lowStock) {
 
     // if (categoryId != null && !categoryRepository.existsById(categoryId)) {
     //   throw new BusinessException(ResponseStatus.NOT_FOUND, "La categoria no existe");
@@ -126,6 +127,7 @@ public class ModelServiceImpl implements ModelService {
     spec = spec.and(ModelSpecifications.hasStatus(status));
     spec = spec.and(ModelSpecifications.hasCategory(categoryId));
     spec = spec.and(ModelSpecifications.hasType(typeId));
+    spec = spec.and(ModelSpecifications.hasLowStock(lowStock));
     // spec = spec.and(ModelSpecifications.fetchRelations());
 
     // Para ordenar los elementos de forma descendente de acuerdo al ID se utiliza el siguiente codigo
@@ -280,6 +282,7 @@ public class ModelServiceImpl implements ModelService {
     // model.setEntryDate(modelDomainService.resolveAnyLocalDate(modelRequest.getEntryDate()));
     model.setEntryDate(modelRequest.getEntryDate());
     model.setCaducityDate(modelRequest.getCaducityDate());
+    modelDomainService.applyMinimumAvailableQuantity(model, modelRequest.getMinimumAvailableQuantity());
     modelRepository.save(model);
   }
 

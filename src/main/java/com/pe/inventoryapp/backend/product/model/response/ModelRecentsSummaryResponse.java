@@ -19,6 +19,7 @@ public class ModelRecentsSummaryResponse {
   private String productName;
 
   private LocalDate entryDate;
+  private Integer totalQuantityAvailable;
 
   private String categoryName;
   private String typeName;

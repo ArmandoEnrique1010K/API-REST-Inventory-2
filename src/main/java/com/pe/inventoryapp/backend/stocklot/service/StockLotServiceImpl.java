@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.stocklot.service;
 
+import com.pe.inventoryapp.backend.product.service.ModelDomainService;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import com.pe.inventoryapp.backend.user.repository.UserRepository;
 @Service
 public class StockLotServiceImpl implements StockLotService {
 
+  private final ModelDomainService modelDomainService;
   private final StockLotRepository stockLotRepository;
   private final CompanyRepository companyRepository;
   private final UserRepository userRepository;
@@ -51,7 +53,7 @@ public class StockLotServiceImpl implements StockLotService {
       MovementRepository movementRepository,
       ModelRepository modelRepository,
       StockLotDomainService stockLotDomainService,
-      MovementDomainService movementDomainService) {
+      MovementDomainService movementDomainService, ModelDomainService modelDomainService) {
     this.stockLotRepository = stockLotRepository;
     this.companyRepository = companyRepository;
     this.userRepository = userRepository;
@@ -59,6 +61,7 @@ public class StockLotServiceImpl implements StockLotService {
     this.modelRepository = modelRepository;
     this.stockLotDomainService = stockLotDomainService;
     this.movementDomainService = movementDomainService;
+    this.modelDomainService = modelDomainService;
   }
 
   // REGISTRA UN NUEVO LOTE DE STOCK
@@ -126,6 +129,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     model.setTotalQuantityReceived(model.getTotalQuantityReceived() + quantity);
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
+    modelDomainService.refreshLowStock(model);
 
     modelRepository.save(model);
 
@@ -294,7 +298,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     stockLot.setQuantityReceived(newQuantityReceived);
     stockLot.setQuantityAvailable(newQuantityAvailable);
-    stockLot.setZeroStock(false);
+    // stockLot.setZeroStock(false);
 
     stockLotRepository.save(stockLot);
 
@@ -309,6 +313,7 @@ public class StockLotServiceImpl implements StockLotService {
 
     model.setTotalQuantityReceived(model.getTotalQuantityReceived() + quantity);
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
+    modelDomainService.refreshLowStock(model);
 
     modelRepository.save(model);
 
@@ -377,6 +382,8 @@ public class StockLotServiceImpl implements StockLotService {
     // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
 
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
+    modelDomainService.refreshLowStock(model);
+
     modelRepository.save(model);
 
     Movement movement = new Movement();
@@ -460,6 +467,8 @@ public class StockLotServiceImpl implements StockLotService {
     // model.setTotalQuantityAvailable(sumatoryStockQuantityAvailable);
 
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + quantity);
+    modelDomainService.refreshLowStock(model);
+
     modelRepository.save(model);
 
     Movement movement = new Movement();

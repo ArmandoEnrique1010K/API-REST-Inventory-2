@@ -75,6 +75,13 @@ public class Model {
   @NotNull
   private boolean status;
 
+  // Balance del bajo stock cuando llegue a esa cantidad
+  @NotNull
+  private Integer minimumAvailableQuantity;
+  
+  @NotNull
+  private boolean lowStock;
+
   @OneToMany(fetch = FetchType.LAZY,mappedBy = "model")
   private List<Model_DeliveryOrder> productDeliveryOrders;
 

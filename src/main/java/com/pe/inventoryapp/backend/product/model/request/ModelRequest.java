@@ -4,10 +4,13 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,4 +34,10 @@ public class ModelRequest {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   @Future(message = "La fecha de caducidad debe ser futura")
   private LocalDate caducityDate;
+
+    // Cantidad minima
+  @Nullable
+  @PositiveOrZero(message = "Debe ser un número positivo")
+  @Digits(integer = 10, fraction = 0, message = "Debe ser un número entero")
+  private Integer minimumAvailableQuantity;
 }

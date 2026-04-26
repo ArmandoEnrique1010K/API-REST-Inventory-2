@@ -165,7 +165,7 @@ public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecific
     // Cantidad de modelos que tienen un stock bajo menor a 1000
     @Query("""
             SELECT COUNT(m) FROM Model m
-            WHERE m.totalQuantityAvailable <= 1000
+            WHERE m.totalQuantityAvailable <= m.minimumAvailableQuantity
             """)
     long countByLowerQuantityAvailable();
 
@@ -180,15 +180,28 @@ public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecific
             @Param("today") LocalDate today,
             @Param("limitDate") LocalDate limitDate);
 
-    // Lista de productos con bajo stock (menores a 1000)
+    // Lista de productos con bajo stock
+//     @Query("""
+//             SELECT m
+//             FROM Model m
+//             JOIN FETCH m.product p
+//             JOIN FETCH p.category
+//             JOIN FETCH p.type
+//             WHERE m.totalQuantityAvailable <= m.minimumAvailableQuantity
+//             """)
+//     List<Model> findLowStockModels(Pageable pageable);
+
+    // Lista de productos con bajo stock (toma en cuenta 2 ordenamientos)
     @Query("""
-            SELECT m
-            FROM Model m
-            JOIN FETCH m.product p
-            JOIN FETCH p.category
-            JOIN FETCH p.type
-            WHERE m.totalQuantityAvailable <= 1000
-            """)
+                        SELECT m
+                        FROM Model m
+                        JOIN FETCH m.product p
+                        JOIN FETCH p.category
+                        JOIN FETCH p.type
+                        WHERE m.lowStock = true
+                        ORDER BY
+                          m.totalQuantityAvailable ASC, m.id ASC
+                    """)
     List<Model> findLowStockModels(Pageable pageable);
 
     // Lista de productos que estan a punto de vencerse en 1 semana
@@ -199,6 +212,7 @@ public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecific
             JOIN FETCH p.category
             JOIN FETCH p.type
             WHERE m.caducityDate BETWEEN :today AND :limitDate
+            ORDER BY m.caducityDate ASC
             """)
     List<Model> findNearCaducityDate(
             Pageable pageable,
@@ -212,6 +226,7 @@ public interface ModelRepository extends JpaRepository<Model, Long>, JpaSpecific
             JOIN FETCH p.category
             JOIN FETCH p.type
             WHERE m.status = true
+                ORDER BY m.createdAt DESC
             """)
     List<Model> findActiveModels(
             Pageable pageable);

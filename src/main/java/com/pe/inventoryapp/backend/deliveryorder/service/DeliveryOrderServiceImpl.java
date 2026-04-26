@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.deliveryorder.service;
 
+import com.pe.inventoryapp.backend.product.service.ModelDomainService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -52,7 +53,8 @@ import com.pe.inventoryapp.backend.user.repository.UserRepository;
 @Service
 public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
-	private final Model_DeliveryOrderDomainService model_DeliveryOrderDomainService;
+	private final ModelDomainService modelDomainService;
+  private final Model_DeliveryOrderDomainService model_DeliveryOrderDomainService;
 	private final DeliveryOrderRepository deliveryOrderRepository;
 	private final DeliveryLineRepository deliveryLineRepository;
 	private final UserRepository userRepository;
@@ -78,7 +80,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 			DeliveryOrderDomainService deliveryOrderDomainService,
 			StockLotDomainService stockLotDomainService,
 			MovementDomainService movementDomainService, Model_DeliveryOrderDomainService model_DeliveryOrderDomainService,
-			DeliveryLineDomainService deliveryLineDomainService) {
+			DeliveryLineDomainService deliveryLineDomainService, ModelDomainService modelDomainService) {
 		this.deliveryOrderRepository = deliveryOrderRepository;
 		this.deliveryLineRepository = deliveryLineRepository;
 		this.userRepository = userRepository;
@@ -91,6 +93,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 		this.movementDomainService = movementDomainService;
 		this.model_DeliveryOrderDomainService = model_DeliveryOrderDomainService;
 		this.deliveryLineDomainService = deliveryLineDomainService;
+		this.modelDomainService = modelDomainService;
 	};
 
 	@Override
@@ -708,6 +711,7 @@ public class DeliveryOrderServiceImpl implements DeliveryOrderService {
 
 			model.setTotalQuantityTaken(
 					model.getTotalQuantityTaken() - restoredQuantity);
+			modelDomainService.refreshLowStock(model);
 
 		}
 

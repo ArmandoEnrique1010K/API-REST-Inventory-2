@@ -22,4 +22,5 @@ public class ModelExpiringSoonSummaryResponse {
   private String typeName;
 
   private LocalDate caducityDate;
+  private Integer totalQuantityAvailable;
 }

@@ -89,13 +89,13 @@ public class ModelController {
       @RequestParam(required = false) Boolean status,
       @RequestParam(required = false) Long categoryId,
       @RequestParam(required = false) Long typeId,
+      @RequestParam(required = false) Boolean lowStock,
       @RequestParam(defaultValue = "id") String sortBy,
-      @RequestParam(defaultValue = "desc") String direction
-    ) {
-      Sort sort = buildSort(sortBy, direction);
+      @RequestParam(defaultValue = "desc") String direction) {
+    Sort sort = buildSort(sortBy, direction);
     Pageable pageable = PageRequest.of(page, 20, sort);
     PageResponse<ModelListResponse> models = modelService.searchAllModelsByParams(pageable, keyword, minStock, maxStock,
-        minEntryDate, maxEntryDate, status, categoryId, typeId);
+        minEntryDate, maxEntryDate, status, categoryId, typeId, lowStock);
     DataResponse<PageResponse<ModelListResponse>> dataResponse = responseService
         .generateDataResponse(ResponseStatus.SUCCESS, models);
 

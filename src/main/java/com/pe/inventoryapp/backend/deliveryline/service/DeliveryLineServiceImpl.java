@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.deliveryline.service;
 
+import com.pe.inventoryapp.backend.product.service.ModelDomainService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ import com.pe.inventoryapp.backend.user.repository.UserRepository;
 @Service
 public class DeliveryLineServiceImpl implements DeliveryLineService {
 
+  private final ModelDomainService modelDomainService;
   private final DeliveryLineRepository deliveryLineRepository;
   private final ModelRepository modelRepository;
   private final LocationRepository locationRepository;
@@ -88,7 +90,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       DeliveryOrderDomainService deliveryOrderDomainService,
       StockLotDomainService stockLotDomainService,
       MovementDomainService movementDomainService,
-      Model_DeliveryOrderDomainService model_DeliveryOrderDomainService) {
+      Model_DeliveryOrderDomainService model_DeliveryOrderDomainService, ModelDomainService modelDomainService) {
     this.deliveryLineRepository = deliveryLineRepository;
     this.modelRepository = modelRepository;
     this.locationRepository = locationRepository;
@@ -104,6 +106,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     this.stockLotDomainService = stockLotDomainService;
     this.movementDomainService = movementDomainService;
     this.model_DeliveryOrderDomainService = model_DeliveryOrderDomainService;
+    this.modelDomainService = modelDomainService;
   }
 
   @Override
@@ -634,6 +637,8 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     model.setTotalQuantityTaken(
         model.getTotalQuantityTaken() - quantity);
 
+    modelDomainService.refreshLowStock(model);
+
     modelRepository.save(model);
   }
 
@@ -1030,6 +1035,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
 
     model.setTotalQuantityTaken(model.getTotalQuantityTaken() - returnedQuantity);
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() + returnedQuantity);
+    modelDomainService.refreshLowStock(model);
 
     modelRepository.save(model);
 
@@ -1227,6 +1233,10 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
       stockLot.setQuantityAvailable(available - used);
       stockLot.setQuantityDelivered(stockLot.getQuantityDelivered() + used);
 
+      if (stockLot.getQuantityAvailable() == 0){
+        stockLot.setZeroStock(true);
+      }
+
       stockLotRepository.save(stockLot);
 
       // 🔴 2. RELACIÓN DELIVERY
@@ -1255,6 +1265,7 @@ public class DeliveryLineServiceImpl implements DeliveryLineService {
     // 🔴 4. ACTUALIZAR MODELO (UNA SOLA VEZ)
     model.setTotalQuantityAvailable(model.getTotalQuantityAvailable() - quantity);
     model.setTotalQuantityTaken(model.getTotalQuantityTaken() + quantity);
+    modelDomainService.refreshLowStock(model);
 
     modelRepository.save(model);
   }

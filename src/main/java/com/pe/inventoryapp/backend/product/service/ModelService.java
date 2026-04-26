@@ -25,7 +25,8 @@ public interface ModelService {
       LocalDate maxEntryDate,
       Boolean status,
       Long categoryId,
-      Long typeId);
+      Long typeId,
+      Boolean lowStock);
 
   PageResponse<ModelListSearchResponse> searchAllModelsByName(
     Pageable pageable,

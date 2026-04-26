@@ -40,6 +40,8 @@ public class ModelMapper {
         model.getTotalQuantityReceived(),
         model.getTotalQuantityDelivered(),
         model.isStatus(),
+        model.getMinimumAvailableQuantity(),
+        model.isLowStock(),
 
         model.getProduct().getId(),
         model.getProduct().getName(),
@@ -70,6 +72,8 @@ public class ModelMapper {
         model.getTotalQuantityReceived(),
         model.getTotalQuantityDelivered(),
         model.isStatus(),
+        model.isLowStock(),
+        model.getMinimumAvailableQuantity(),
 
         model.getProduct().getId(),
         model.getProduct().getName(),
@@ -114,7 +118,8 @@ public class ModelMapper {
         model.getProduct().getName(),
         model.getProduct().getCategory().getName(),
         model.getProduct().getType().getName(),
-        model.getCaducityDate());
+        model.getCaducityDate(), 
+        model.getTotalQuantityAvailable());
   }
 
   public ModelLowStockSummaryResponse buildModelLowStockSummaryResponse() {
@@ -128,6 +133,7 @@ public class ModelMapper {
         model.getProduct().getId(),
         model.getProduct().getName(),
         model.getTotalQuantityAvailable(),
+        model.getMinimumAvailableQuantity(),
         model.getProduct().getCategory().getName(),
         model.getProduct().getType().getName());
   }
@@ -143,6 +149,7 @@ public class ModelMapper {
         model.getProduct().getId(),
         model.getProduct().getName(),
         model.getEntryDate(),
+        model.getTotalQuantityAvailable(),
         model.getProduct().getCategory().getName(),
         model.getProduct().getType().getName());
   }

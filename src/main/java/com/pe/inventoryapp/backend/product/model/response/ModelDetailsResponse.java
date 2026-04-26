@@ -22,6 +22,8 @@ public class ModelDetailsResponse {
   private Integer totalQuantityReceived;
   private Integer totalQuantityDelivered;
   private boolean status;
+  private Integer minimumAvailableQuantity;
+  private boolean lowStock;
 
   private Long productId;
   private String productName;

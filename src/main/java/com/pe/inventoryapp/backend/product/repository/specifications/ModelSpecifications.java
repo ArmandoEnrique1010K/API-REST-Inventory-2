@@ -131,6 +131,14 @@ public class ModelSpecifications {
     };
   }
 
+  public static Specification<Model> hasLowStock(Boolean lowStock) {
+    return (root, query, cb) -> {
+      if (lowStock == null)
+        return cb.conjunction();
+      return cb.equal(root.get("lowStock"), lowStock);
+    };
+  }
+
   public static Specification<Model> fetchRelations() {
     return (root, query, cb) -> {
       if (query != null && !Long.class.equals(query.getResultType())) {

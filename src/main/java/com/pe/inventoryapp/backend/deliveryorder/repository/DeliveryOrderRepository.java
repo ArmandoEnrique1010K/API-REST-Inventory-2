@@ -19,9 +19,6 @@ public interface DeliveryOrderRepository
         extends JpaRepository<DeliveryOrder, Long>, JpaSpecificationExecutor<DeliveryOrder> {
     // Page<DeliveryOrder> findByPreparationStatus(PreparationStatus status);
 
-    // TODO: EN UNA FUTURA ACTUALIZACION PODRIA ELEGIR LA FECHA LIMITE EN UN UNICO
-    // PARAMETRO PARA QUE LO BUSQUE
-    // POR UN DIA Y NO POR UN RANGO DE DIAS
     // Busca todas las ordenes por los siguientes parametros (PARA SECRETARIOS Y
     // ADMINISTRADORES)
 
@@ -125,13 +122,13 @@ public interface DeliveryOrderRepository
 
     @Query("""
                 SELECT COUNT(do) FROM DeliveryOrder do
-                WHERE do.orderStatus = 'ORDER_PENDING'
+                WHERE do.orderStatus IN ('ORDER_PENDING', 'ORDER_READY')
             """)
     long countByOrderStatusPending();
 
     @Query("""
                 SELECT COUNT(do) FROM DeliveryOrder do
-                WHERE do.orderStatus = 'ORDER_PENDING'
+                WHERE do.orderStatus IN ('ORDER_PENDING', 'ORDER_READY')
                 AND do.userClient.id = :id
             """)
     long countByOrderStatusPendingAndUser(Long id);
@@ -216,14 +213,15 @@ public interface DeliveryOrderRepository
 
     @Query("""
             SELECT do FROM DeliveryOrder do
-            WHERE do.orderStatus = 'ORDER_PENDING'
+            WHERE do.orderStatus IN ('ORDER_PENDING', 'ORDER_READY')
             """)
     List<DeliveryOrder> summaryDeliveryOrderPending(Pageable pageable);
 
     @Query("""
             SELECT do FROM DeliveryOrder do
             JOIN FETCH do.userClient uc
-            WHERE do.orderStatus = 'ORDER_PENDING' AND uc.id = :userId
+            WHERE do.orderStatus IN ('ORDER_PENDING', 'ORDER_READY')
+            AND uc.id = :userId
             """)
     List<DeliveryOrder> summaryDeliveryOrderPendingByUser(Pageable pageable, Long userId);
 

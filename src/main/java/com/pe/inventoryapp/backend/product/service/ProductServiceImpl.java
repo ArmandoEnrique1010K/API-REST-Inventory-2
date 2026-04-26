@@ -109,6 +109,7 @@ public class ProductServiceImpl implements ProductService {
     model.setTotalQuantityTaken(0);
     model.setTotalQuantityDelivered(0);
     model.setStatus(true);
+    modelDomainService.applyMinimumAvailableQuantity(model, productCreateRequest.getModelMinimumAvailableQuantity());
     model.setProduct(product);
 
     modelRepository.save(model);

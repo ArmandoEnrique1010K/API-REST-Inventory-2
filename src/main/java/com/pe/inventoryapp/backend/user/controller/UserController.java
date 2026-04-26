@@ -89,7 +89,7 @@ public class UserController {
   }
 
   @GetMapping("/{id}/roles")
-  public ResponseEntity<?> getUserRoles(@PathVariable Long id) {
+  public ResponseEntity<?> getUserRole(@PathVariable Long id) {
     RolesByUserResponse user = userService.getRolesByUser(id);
 
     DataResponse<RolesByUserResponse> response = responseService.generateDataResponse(ResponseStatus.SUCCESS, user);
@@ -97,7 +97,7 @@ public class UserController {
   }
 
   @PutMapping("/{id}/roles")
-  public ResponseEntity<CommonResponse> updateUserRoles(@PathVariable Long id,
+  public ResponseEntity<CommonResponse> updateUserRole(@PathVariable Long id,
       @Valid @RequestBody RolesRequest rolesRequest, BindingResult result) {
     validationService.validateFieldsAndThrowResponse(result);
     userService.updateUserRolesById(id, rolesRequest);
