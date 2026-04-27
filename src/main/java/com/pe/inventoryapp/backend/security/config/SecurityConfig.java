@@ -1,5 +1,6 @@
 package com.pe.inventoryapp.backend.security.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -57,6 +58,8 @@ public class SecurityConfig {
 		return new CsrfTokenRequestAttributeHandler();
 	}
 
+	@Value("${frontend.url}")
+	private String frontendUrl;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
@@ -384,7 +387,10 @@ public class SecurityConfig {
 		// config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
 		// config.setAllowedHeaders(List.of("*"));
 
-		config.setAllowedOrigins(List.of("http://localhost:5173"));
+		// config.setAllowedOrigins(List.of("http://localhost:5173"));
+
+		//* EN UN ENTORNO DE PRODUCCIÓN, ESTO DEBE SER UNA VARIABLE DE ENTORNO
+		config.setAllowedOrigins(List.of(frontendUrl));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH"));
 		config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
 		config.setExposedHeaders(List.of("Set-Cookie"));
