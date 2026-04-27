@@ -2,24 +2,29 @@ package com.pe.inventoryapp.backend.product.service;
 
 import java.time.LocalDate;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.exception.FieldValidation;
 import com.pe.inventoryapp.backend.product.model.entity.Model;
 import com.pe.inventoryapp.backend.product.repository.ModelRepository;
 
-import io.github.cdimascio.dotenv.Dotenv;
+// import io.github.cdimascio.dotenv.Dotenv;
 
 @Service
 public class ModelDomainService {
   private final ModelRepository modelRepository;
-  private final String defaultImageUrl;
+  // private final String defaultImageUrl;
   private static final int DEFAULT_MINIMUM_STOCK = 1000;
 
   public ModelDomainService(ModelRepository modelRepository) {
     this.modelRepository = modelRepository;
-    this.defaultImageUrl = Dotenv.load().get("DEFAULT_IMAGE_URL");
+    // this.defaultImageUrl = Dotenv.load().get("DEFAULT_IMAGE_URL"
+    // );
   }
+
+  @Value("${default.image.url}")
+  private String defaultImageUrl;
 
   public LocalDate resolveAnyLocalDate(LocalDate localDate) {
     return localDate == null ? LocalDate.now() : localDate;

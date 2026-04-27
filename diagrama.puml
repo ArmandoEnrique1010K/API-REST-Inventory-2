@@ -25,16 +25,16 @@ entity User #ffc862 {
     String lastname
     Integer dni
     boolean active
-    List<Role> roles
+    RoleName role
     List<Movement> movements
     List<DeliveryOrder> deliveryOrders
     List<DeliveryLine> deliveryLines
 }
 
-entity Role #ffc862 {
-    Long id
-    String name
-    String label
+enum RoleName #ffc862 {
+    ROLE_USER
+    ROLE_OPERATOR
+    ROLE_ADMIN
 }
 
 entity Company #ffaaaa {
@@ -70,11 +70,13 @@ entity Model #d0ffb0{
     LocalDate caducityDate
     Integer totalQuantityAvailable
     Integer totalQuantityReceived
-    Integer totalQuantityDelivered
     Integer totalQuantityTaken
+    Integer totalQuantityDelivered
     LocalDateTime createdAt
     LocalDateTime updatedAt
     boolean status
+    Integer minimunAvailableQuantity
+    boolean lowStock
 
     Product product
     List<Model_DeliveryOrder> modelDeliveryOrders
@@ -91,6 +93,7 @@ entity Product #d0ffb0 {
     BigDecimal height
     Integer quantityModels
     boolean status
+    LocalDateTime updatedAt
     Category category
     Type type
     List<Model> models
@@ -99,12 +102,14 @@ entity Product #d0ffb0 {
 entity Type #d0ffb0 {
     Long id
     String name
+    boolean status
     List<Product> products
 }
 
 entity Category #d0ffb0 {
     Long id
     String name
+    boolean status
     List<Product> products
 }
 
@@ -135,6 +140,7 @@ enum MovementType #fff891 {
     MOVEMENT_STOCK_DECREASE
     MOVEMENT_STOCK_RECOVERY
     MOVEMENT_STOCK_TRANSFER
+    MOVEMENT_STOCK_REFUND
     MOVEMENT_LINE_ALLOCATE
     MOVEMENT_LINE_ALTER
     MOVEMENT_LINE_RETURN
@@ -194,14 +200,13 @@ entity Subregion #bebebe{
     Long id
     String name
     List<Location> locations
-    List<Model_DeliveryOrder_Subregion> model_DeliveryOrder_Subregions
+    Region region
 }
 
 entity Region #bebebe{
     Long id
     String name
     List<Subregion> subregions
-    List<Model_DeliveryOrder_Region> model_DeliveryOrder_Regions
 }
 
 entity Model_DeliveryOrder #89c6ff{
@@ -211,8 +216,6 @@ entity Model_DeliveryOrder #89c6ff{
     DeliveryOrder deliveryOrder
     Model model
     List<DeliveryLine> deliveryLines
-    List<Model_DeliveryOrder_Region> model_DeliveryOrder_Regions
-    List<Model_DeliveryOrder_Subregion> model_DeliveryOrder_Subregions
 }
 
 entity DeliveryOrder #89c6ff{
@@ -223,6 +226,9 @@ entity DeliveryOrder #89c6ff{
     LocalDateTime createdAt
     LocalDateTime updatedAt
     OrderStatus orderStatus
+    Double percentage
+    LocalDateTime deliveredAt
+    OnTimeStatus onTimeStatus
     User userCreator
     User userUpdater
     User userClient
@@ -235,31 +241,24 @@ enum OrderStatus #89c6ff {
     ORDER_PENDING
     ORDER_DELIVERED
     ORDER_CANCELED
+    ORDER_PARTIALLY_DELIVERED
 }
 
-entity Model_DeliveryOrder_Region #91fff9{
-    Long id
-    Integer requiredTotalQuantity
-    LocalDateTime updatedAt
-    Region region
-    Model_DeliveryOrder model_DeliveryOrder
+enum OnTimeStatus #89c6ff {
+    UNKNOWN
+    ON_TIME
+    LATE
 }
 
-entity Model_DeliveryOrder_Subregion #91fff9{
-  Long id
-  Integer requiredTotalQuantity
-  LocalDateTime updatedAt
-  Subregion subregion
-  Model_DeliveryOrder model_DeliveryOrder
-}
-
-Role *.* User : requires
+RoleName ... User : requires
 UserPasswordOtp *.. User : can have
 PasswordResetToken *.. User : can have
 Movement *... User : has
 DeliveryOrder *.. User : assign
 DeliveryOrder *.. User : creates
 DeliveryOrder *.. User : update
+DeliveryOrder ... OnTimeStatus : has delivered
+
 DeliveryLine *... User : creates
 DeliveryLine *... User : update
 
@@ -293,12 +292,6 @@ DeliveryLine *.. Location : assigned
 Location *.. Subregion : has
 Subregion *.. Region : has
 
-Region ..* Model_DeliveryOrder_Region : group
-Model_DeliveryOrder_Region *.. Model_DeliveryOrder : performs
-
-Subregion ...* Model_DeliveryOrder_Subregion : group
-
-Model_DeliveryOrder_Subregion *.. Model_DeliveryOrder : performs
 
 Model_DeliveryOrder *.. DeliveryOrder : has many
 DeliveryOrder .. OrderStatus : type of

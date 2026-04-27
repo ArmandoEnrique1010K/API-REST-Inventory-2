@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.auth.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.mailersend.sdk.MailerSend;
@@ -11,23 +12,31 @@ import com.mailersend.sdk.exceptions.MailerSendException;
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
 import com.pe.inventoryapp.backend.common.exception.BusinessException;
 
-import io.github.cdimascio.dotenv.Dotenv;
+// import io.github.cdimascio.dotenv.Dotenv;
 
 @Service
 public class MailerSendDomainService  {
 
   private static final Logger log = LoggerFactory.getLogger(MailerSendDomainService.class);
-  // TODO: ALTERNATIVAMENTE SE PODRIA DESINSTALAR DOTENV Y REEMPLAZARLO POR EL SISTEMA CLASICO DE SPRING BOOT
+  //* ADVERTENCIA: DOTENV NO SIRVE PARA ENTORNOS DE PRODUCCIÓN, SE DEBE REEMPLAZAR POR EL SISTEMA CLASICO DE SPRING BOOT
   // PARA CARGAR VARIABLES DE ENTORNO
+
+  @Value("${mailersend.api.token}")
+  private String mailersendApiToken;
+  @Value("${mailersend.test.domain}")
+  private String mailersendTestDomain;
 
   public void sendResetPasswordToken(String toEmail, String token) {
     // Configuración de MailerSend
     MailerSend ms = new MailerSend();
 
-    Dotenv dotenv = Dotenv.load();
+    // Dotenv dotenv = Dotenv.load();
 
-    String apiKey = dotenv.get("MAILERSEND_API_TOKEN");
-    String testDomain = dotenv.get("MAILERSEND_TEST_DOMAIN");
+    // String apiKey = dotenv.get("MAILERSEND_API_TOKEN");
+    // String testDomain = dotenv.get("MAILERSEND_TEST_DOMAIN");
+    String apiKey = mailersendApiToken;
+    String testDomain = mailersendTestDomain;
+
 
     // Comprueba el contenido de las variables de entorno
     // System.out.println(apiKey);

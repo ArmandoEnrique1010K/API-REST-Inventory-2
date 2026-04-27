@@ -2,6 +2,7 @@ package com.pe.inventoryapp.backend.start.controller;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pe.inventoryapp.backend.user.model.response.DetailUserResponse;
 import com.pe.inventoryapp.backend.user.service.ProfileService;
 
-import io.github.cdimascio.dotenv.Dotenv;
+// import io.github.cdimascio.dotenv.Dotenv;
 
 @RestController
 @RequestMapping("/api")
@@ -21,6 +22,8 @@ public class WelcomeController {
   public WelcomeController(ProfileService profileService) {
     this.profileService = profileService;
   }
+  @Value("${test.env.var}")
+  private String testEnvVar;
 
   @GetMapping
   public String welcome() {
@@ -29,8 +32,10 @@ public class WelcomeController {
 
   @GetMapping("/dotenv")
   public String getEnv() {
-    Dotenv dotenv = Dotenv.load();
-    String valor = dotenv.get("MY_TEST_ENV_VAR"); // Guardas el valor
+    // IMPLEMENTACION DE DOTENV
+    // Dotenv dotenv = Dotenv.load();
+    // String valor = dotenv.get("MY_TEST_ENV_VAR"); // Guardas el valor
+    String valor = testEnvVar;
     return "El valor de la variable de entorno es: " + valor;
   }
 

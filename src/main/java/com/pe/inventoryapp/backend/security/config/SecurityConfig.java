@@ -332,7 +332,7 @@ public class SecurityConfig {
 
 						// ENDPOINTS DE PRUEBA 
 						.requestMatchers(HttpMethod.GET, "/api").permitAll()
-						// .requestMatchers(HttpMethod.GET, "/api/dotenv").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/dotenv").permitAll()
 						// .requestMatchers(HttpMethod.GET, "/api/database").permitAll()
 						// .requestMatchers(HttpMethod.GET, "/api/csrf").permitAll()
 						.anyRequest().denyAll())

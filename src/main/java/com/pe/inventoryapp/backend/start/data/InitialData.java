@@ -1,6 +1,7 @@
 package com.pe.inventoryapp.backend.start.data;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -20,7 +21,7 @@ import com.pe.inventoryapp.backend.user.model.data.RoleName;
 import com.pe.inventoryapp.backend.user.model.entity.User;
 import com.pe.inventoryapp.backend.user.repository.UserRepository;
 
-import io.github.cdimascio.dotenv.Dotenv;
+// import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.annotation.PostConstruct;
 
 @Configuration
@@ -52,6 +53,11 @@ public class InitialData {
     this.companyRepository = companyRepository;
     this.typeRepository = typeRepository;
   }
+
+  @Value("${first.user.email}")
+  private String firstUserEmail;
+  @Value("${first.user.password}")
+  private String firstUserPassword;
 
   // Metodo que se ejecuta cada vez que se inicia la API REST
   @PostConstruct
@@ -108,7 +114,8 @@ public class InitialData {
       return locationRepository.save(location);
     });
 
-    Dotenv dotenv = Dotenv.load();
+    // Dotenv dotenv = Dotenv.load();
+
 
     // El usuario por defecto (primer usuario de la app)
     if (userRepository.findById(1L).isEmpty()) {
@@ -127,9 +134,13 @@ public class InitialData {
       user.setFirstname("Primer usuario");
       user.setLastname("del sistema");
       user.setDni(12345678);
-      user.setEmail(dotenv.get("FIRST_USER_EMAIL"));
       user.setActive(true);
-      user.setPassword(passwordEncoder.encode(dotenv.get("FIRST_USER_PASSWORD")));
+
+      // user.setEmail(dotenv.get("FIRST_USER_EMAIL"));
+      // user.setPassword(passwordEncoder.encode(dotenv.get("FIRST_USER_PASSWORD")));
+
+      user.setEmail(firstUserEmail);
+      user.setPassword(passwordEncoder.encode(firstUserPassword));
       // user.setRoles(allRoles);
       user.setRole(RoleName.ROLE_ADMIN);
 
