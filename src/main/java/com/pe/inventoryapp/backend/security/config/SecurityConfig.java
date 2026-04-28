@@ -336,6 +336,9 @@ public class SecurityConfig {
 						// ENDPOINTS DE PRUEBA 
 						.requestMatchers(HttpMethod.GET, "/api").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/dotenv").permitAll()
+
+						// EN UN ENTORNO DE PRODUCCIÓN:
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						// .requestMatchers(HttpMethod.GET, "/api/database").permitAll()
 						// .requestMatchers(HttpMethod.GET, "/api/csrf").permitAll()
 						.anyRequest().denyAll())
@@ -391,8 +394,15 @@ public class SecurityConfig {
 
 		//* EN UN ENTORNO DE PRODUCCIÓN, ESTO DEBE SER UNA VARIABLE DE ENTORNO
 		config.setAllowedOrigins(List.of(frontendUrl));
-		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH"));
-		config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+		// Coloca OPTIONS 
+		// Cuando el navegador hace login con JSON + Authorization/Credentials, primero
+		// suele mandar OPTIONS /api/auth/login
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "OPTIONS"));
+		
+		// config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-XSRF-TOKEN"));
+		// CONFIGURACION EN UN ENTORNO DE PRODUCCION
+		config.setAllowedHeaders(List.of("*"));
+
 		config.setExposedHeaders(List.of("Set-Cookie"));
 	
 		config.setAllowCredentials(true);
