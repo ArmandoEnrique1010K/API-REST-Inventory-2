@@ -29,13 +29,21 @@ public class CloudinaryConfig {
     // String apiKey = dotenv.get("CLOUDINARY_API_KEY");
     // String apiSecret = dotenv.get("CLOUDINARY_API_SECRET");
 
-    Map<String, String> config = new HashMap<>();
+    // Map<String, String> config = new HashMap<>();
 
-    config.put("cloud_name", cloudName);
-    config.put("api_key", apiKey);
-    config.put("api_secret", apiSecret);
+    // config.put("cloud_name", cloudName);
+    // config.put("api_key", apiKey);
+    // config.put("api_secret", apiSecret);
 
-    return new Cloudinary(config);
+    // return new Cloudinary(config);
+
+    return new Cloudinary(ObjectUtils.asMap(
+        "cloud_name", cloudName,
+        "api_key", apiKey,
+        "api_secret", apiSecret
+    ));
+
+
   }
 
 }
