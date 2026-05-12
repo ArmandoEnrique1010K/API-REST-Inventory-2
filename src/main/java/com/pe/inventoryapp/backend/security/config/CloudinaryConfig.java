@@ -1,13 +1,12 @@
 package com.pe.inventoryapp.backend.security.config;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
 // import io.github.cdimascio.dotenv.Dotenv;
 
