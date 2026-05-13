@@ -58,6 +58,8 @@ public class InitialData {
   private String firstUserEmail;
   @Value("${first.user.password}")
   private String firstUserPassword;
+  @Value("${demo.mode}")
+  private String demoMode;
 
   // Metodo que se ejecuta cada vez que se inicia la API REST
   @PostConstruct
@@ -168,5 +170,49 @@ public class InitialData {
       type.setStatus(true);
       typeRepository.save(type);
     }
+
+    // Si esta en modo demo, debe crear 3 usuarios con distintos roles para pruebas
+    if (Boolean.parseBoolean(demoMode) == true){
+      String testPassword = "12345";
+
+      if (userRepository.findByEmailWithRoles("admin@gmail.com").isEmpty()){
+        User userAdmin = new User();
+        userAdmin.setFirstname("Administrador");
+        userAdmin.setLastname("de prueba");
+        userAdmin.setDni(12345678);
+        userAdmin.setActive(true);
+        userAdmin.setEmail("admin@gmail.com");
+        userAdmin.setPassword(passwordEncoder.encode(testPassword));
+        userAdmin.setRole(RoleName.ROLE_ADMIN);
+        userRepository.save(userAdmin);
+      }
+
+      if (userRepository.findByEmailWithRoles("operator@gmail.com").isEmpty()) {
+        User userAdmin = new User();
+        userAdmin.setFirstname("Operador");
+        userAdmin.setLastname("de prueba");
+        userAdmin.setDni(12345678);
+        userAdmin.setActive(true);
+        userAdmin.setEmail("operator@gmail.com");
+        userAdmin.setPassword(passwordEncoder.encode(testPassword));
+        userAdmin.setRole(RoleName.ROLE_ADMIN);
+        userRepository.save(userAdmin);
+      }
+
+      if (userRepository.findByEmailWithRoles("user@gmail.com").isEmpty()) {
+        User userAdmin = new User();
+        userAdmin.setFirstname("Usuario");
+        userAdmin.setLastname("de prueba");
+        userAdmin.setDni(12345678);
+        userAdmin.setActive(true);
+        userAdmin.setEmail("user@gmail.com");
+        userAdmin.setPassword(passwordEncoder.encode(testPassword));
+        userAdmin.setRole(RoleName.ROLE_ADMIN);
+        userRepository.save(userAdmin);
+      }
+
+    }
+
+    
   }
 }

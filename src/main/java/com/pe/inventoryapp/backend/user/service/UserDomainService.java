@@ -1,5 +1,8 @@
 package com.pe.inventoryapp.backend.user.service;
 
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
 import com.pe.inventoryapp.backend.common.data.ResponseStatus;
@@ -18,31 +21,34 @@ public class UserDomainService {
 
   // MÉTODOS AUXILIARES
   // Agregar los roles al usuario
-  // public List<Role> getRoles(boolean isUser, boolean isAdmin, boolean isSecretary, boolean isOperator) {
+  // public List<Role> getRoles(boolean isUser, boolean isAdmin, boolean
+  // isSecretary, boolean isOperator) {
 
-  //   List<String> roleNames = new ArrayList<>();
-  //   if (isUser)
-  //     roleNames.add("ROLE_USER");
-  //   if (isOperator)
-  //     roleNames.add("ROLE_OPERATOR");
-  //   if (isSecretary)
-  //     roleNames.add("ROLE_SECRETARY");
-  //   if (isAdmin)
-  //     roleNames.add("ROLE_ADMIN");
+  // List<String> roleNames = new ArrayList<>();
+  // if (isUser)
+  // roleNames.add("ROLE_USER");
+  // if (isOperator)
+  // roleNames.add("ROLE_OPERATOR");
+  // if (isSecretary)
+  // roleNames.add("ROLE_SECRETARY");
+  // if (isAdmin)
+  // roleNames.add("ROLE_ADMIN");
 
-  //   List<Role> roles = roleRepository.findByNameIn(roleNames);
+  // List<Role> roles = roleRepository.findByNameIn(roleNames);
 
-  //   if (roles.size() != roleNames.size()) {
-  //     throw new BusinessException(ResponseStatus.BAD_REQUEST, "Uno o más roles no existen");
-  //   }
+  // if (roles.size() != roleNames.size()) {
+  // throw new BusinessException(ResponseStatus.BAD_REQUEST, "Uno o más roles no
+  // existen");
+  // }
 
-  //   return roles;
+  // return roles;
   // }
 
   // Busca un rol por su nombre, de lo contrario lanza una excepcion
   // public Role getRoleOrThrow(String roleName, String message) {
-  //   return roleRepository.findByName(roleName)
-  //       .orElseThrow(() -> new BusinessException(ResponseStatus.BAD_REQUEST, message));
+  // return roleRepository.findByName(roleName)
+  // .orElseThrow(() -> new BusinessException(ResponseStatus.BAD_REQUEST,
+  // message));
   // }
 
   // Verifica si el email del usuario ya existe, de lo contrario lanza una
@@ -65,10 +71,26 @@ public class UserDomainService {
     boolean existsAnotherAdmin = userRepository.existsByRoleAndIdNot(RoleName.ROLE_ADMIN, id);
 
     // if (!existsAnotherAdmin && !admin) {
-if(!existsAnotherAdmin){
-    throw new BusinessException(
+    if (!existsAnotherAdmin) {
+      throw new BusinessException(
           ResponseStatus.CONFLICT,
           "Debe existir al menos un administrador distinto a este usuario");
+    }
+  }
+
+  private static final Set<String> BANNED_EMAILS = Set.of(
+      "admin@gmail.com",
+      "operator@gmail.com",
+      "user@gmail.com");
+
+  public void validateBannedUserEmail(String email, String message) {
+
+    boolean isBanned = BANNED_EMAILS.contains(email.trim().toLowerCase());
+
+    if (isBanned) {
+      throw new BusinessException(
+          ResponseStatus.CONFLICT,
+          message);
     }
   }
 }

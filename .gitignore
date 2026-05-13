@@ -36,3 +36,6 @@ build/
 ### Variables de entorno ###
 .env
 /src/main/resources/application-secrets.properties
+
+## SCRIPTS DE BASE DE DATOS ##
+SCRIPT_PARA_PRUEBAS.sql

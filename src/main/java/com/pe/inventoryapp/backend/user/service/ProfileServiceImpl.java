@@ -53,6 +53,8 @@ public class ProfileServiceImpl implements ProfileService {
             ResponseStatus.NOT_FOUND,
             "El usuario no existe"));
 
+    userDomainService.validateBannedUserEmail(user.getEmail(), "No puedes editar los datos de este usuario");
+
     // Obtener el correo del usuario actual y el nuevo
     String currentEmail = user.getEmail();
     String newEmail = profileRequest.getEmail().trim();

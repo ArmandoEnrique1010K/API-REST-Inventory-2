@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
   public void registerUser(RegisterRequest registerRequest) {
 
     userDomainService.verifyUserEmailExists(registerRequest.getEmail());
+    userDomainService.validateBannedUserEmail(registerRequest.getEmail(), "El correo electronico es invalido");
 
     User user = new User();
     user.setFirstname(registerRequest.getFirstname().trim());
@@ -195,6 +196,8 @@ public class UserServiceImpl implements UserService {
             ResponseStatus.NOT_FOUND,
             "El usuario no existe"));
 
+    userDomainService.validateBannedUserEmail(user.getEmail(), "No puedes alterar los roles de este usuario");
+    
     // Verifica que el usuario este activo para que pueda cambiar los roles
     if (user.isActive() == false) {
       throw new BusinessException(ResponseStatus.CONFLICT, "El usuario debe estar activo para cambiar sus roles");
@@ -234,6 +237,9 @@ public class UserServiceImpl implements UserService {
             () -> new BusinessException(
                 ResponseStatus.NOT_FOUND,
                 "El usuario no existe"));
+
+    userDomainService.validateBannedUserEmail(user.getEmail(), "Este usuario no se puede bloquear del sistema");
+
 
     User userLogged = userRepository.findById(
         id_authenticated_user).orElseThrow(

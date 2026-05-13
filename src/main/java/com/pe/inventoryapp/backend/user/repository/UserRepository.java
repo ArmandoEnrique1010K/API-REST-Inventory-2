@@ -142,6 +142,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
         boolean existsByEmail(String email);
 
+
+
         // * NO HAY SOLUCION AL PROBLEMA DE LAS 2 QUERIES AL UTILIZAR EL METODO FINDALL
         // SOBREESCRITO DE ESTE REPOSITORIO, SIEMPRE SE HARAN 2 QUERIES, 1 PARA OBTENER
         // LOS DATOS Y EL OTRO PARA CONTAR LA CANTIDAD DE LOS DATOS*/
